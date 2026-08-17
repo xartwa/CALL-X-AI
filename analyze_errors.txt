@@ -1,0 +1,106 @@
+Analyzing call_center_admin...
+
+  error - lib/core/utils/utils.dart:64:16 - The named parameter 'child' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/core/utils/utils.dart:68:26 - The argument type 'Color' can't be assigned to the parameter type 'ColorScheme?'. - argument_type_not_assignable
+  error - lib/core/utils/utils.dart:69:21 - The named parameter 'onPrimary' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'onPrimary'. - undefined_named_parameter
+  error - lib/core/utils/utils.dart:70:21 - The named parameter 'surface' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'surface'. - undefined_named_parameter
+  error - lib/core/utils/utils.dart:71:21 - The named parameter 'onSurface' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'onSurface'. - undefined_named_parameter
+  error - lib/core/utils/utils.dart:73:17 - Expected to find ')'. - expected_token
+  error - lib/core/utils/utils.dart:124:11 - Expected to find ';'. - expected_token
+  error - lib/core/utils/utils.dart:124:12 - Expected an identifier. - missing_identifier
+  error - lib/core/utils/utils.dart:124:12 - Unexpected text ';'. Try removing the text. - unexpected_token
+  error - lib/core/utils/utils.dart:125:23 - Expected to find ';'. - expected_token
+  error - lib/core/utils/utils.dart:125:24 - Expected an identifier. - missing_identifier
+  error - lib/core/utils/utils.dart:125:24 - Unexpected text ';'. Try removing the text. - unexpected_token
+  error - lib/core/utils/utils.dart:126:9 - Expected to find '}'. - expected_token
+  error - lib/core/utils/utils.dart:127:8 - Expected a class member. Try placing this code inside a class member. - expected_class_member
+  error - lib/core/utils/utils.dart:128:5 - Expected a class member. Try placing this code inside a class member. - expected_class_member
+  error - lib/core/utils/utils.dart:128:6 - Expected a class member. Try placing this code inside a class member. - expected_class_member
+  error - lib/core/utils/utils.dart:131:3 - Can't have modifier 'static' here. Try removing 'static'. - extraneous_modifier
+  error - lib/core/utils/utils.dart:143:16 - The named parameter 'child' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/core/utils/utils.dart:147:26 - The argument type 'Color' can't be assigned to the parameter type 'ColorScheme?'. - argument_type_not_assignable
+  error - lib/core/utils/utils.dart:148:21 - The named parameter 'onPrimary' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'onPrimary'. - undefined_named_parameter
+  error - lib/core/utils/utils.dart:149:21 - The named parameter 'surface' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'surface'. - undefined_named_parameter
+  error - lib/core/utils/utils.dart:150:21 - The named parameter 'onSurface' isn't defined. Try correcting the name to an existing named parameter's name, or defining a named parameter with the name 'onSurface'. - undefined_named_parameter
+  error - lib/core/utils/utils.dart:152:17 - Expected to find ')'. - expected_token
+  error - lib/core/utils/utils.dart:200:11 - Expected to find ';'. - expected_token
+  error - lib/core/utils/utils.dart:200:12 - Expected an identifier. - missing_identifier
+  error - lib/core/utils/utils.dart:200:12 - Unexpected text ';'. Try removing the text. - unexpected_token
+  error - lib/core/utils/utils.dart:201:23 - Expected to find ';'. - expected_token
+  error - lib/core/utils/utils.dart:201:24 - Expected an identifier. - missing_identifier
+  error - lib/core/utils/utils.dart:201:24 - Expected to find ';'. - expected_token
+  error - lib/core/utils/utils.dart:201:24 - Unexpected text ';'. Try removing the text. - unexpected_token
+  error - lib/core/utils/utils.dart:202:9 - Expected an identifier. - missing_identifier
+  error - lib/core/utils/utils.dart:202:9 - Unexpected text ';'. Try removing the text. - unexpected_token
+  error - lib/core/utils/utils.dart:206:1 - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it. - expected_executable
+  error - lib/core/widgets/app_text_field_widget.dart:20:24 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/core/widgets/confirmation_dialog.dart:25:22 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/core/widgets/confirmation_dialog.dart:27:31 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/core/widgets/confirmation_dialog.dart:41:23 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/core/widgets/confirmation_dialog.dart:43:32 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/auth/login_page.dart:115:31 - Invalid constant value. - invalid_constant
+  error - lib/features/auth/login_page.dart:219:44 - Invalid constant value. - invalid_constant
+  error - lib/features/calls/widgets/call_action_dialog.dart:245:24 - Invalid constant value. - invalid_constant
+  error - lib/features/calls/widgets/call_action_dialog.dart:592:53 - The method 'showCustomTimePicker' isn't defined for the type 'AppUtils'. Try correcting the name to the name of an existing method, or defining a method named 'showCustomTimePicker'. - undefined_method
+  error - lib/features/calls/widgets/call_details_panel.dart:188:34 - Invalid constant value. - invalid_constant
+  error - lib/features/calls/widgets/call_details_panel.dart:228:26 - Invalid constant value. - invalid_constant
+  error - lib/features/calls/widgets/call_details_panel.dart:358:37 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/calls/widgets/call_details_panel.dart:365:20 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/customers/widgets/customer_detail_user_summary.dart:120:34 - Invalid constant value. - invalid_constant
+  error - lib/features/customers/widgets/customer_detail_user_summary.dart:183:24 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/dashboard/dashboard_page.dart:187:22 - Undefined name 'context'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:413:90 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:453:90 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:499:90 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:520:90 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:654:86 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:675:86 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:696:86 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:839:86 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:940:90 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:1148:63 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:1217:32 - Invalid constant value. - invalid_constant
+  error - lib/features/email_follow_ups/email_follow_ups_page.dart:1273:64 - Invalid constant value. - invalid_constant
+warning - analysis_options.yaml:10:10 - Warning in the included options file /Users/arta/.pub-cache/hosted/pub.dev/lints-5.1.1/lib/core.yaml(1163..1192): 'unintended_html_in_doc_comment' is not a recognized lint rule. - included_file_warning
+warning - analysis_options.yaml:10:10 - Warning in the included options file /Users/arta/.pub-cache/hosted/pub.dev/lints-5.1.1/lib/recommended.yaml(1943..1966): 'unnecessary_library_name' is not a recognized lint rule. - included_file_warning
+warning - analysis_options.yaml:10:10 - Warning in the included options file /Users/arta/.pub-cache/hosted/pub.dev/lints-5.1.1/lib/recommended.yaml(940..982): 'invalid_runtime_check_with_js_interop_types' is not a recognized lint rule. - included_file_warning
+warning - lib/core/utils/utils.dart:55:11 - The value of the local variable 'primaryColor' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/core/utils/utils.dart:56:11 - The value of the local variable 'backgroundColor' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/core/utils/utils.dart:124:12 - Dead code. Try removing the code, or fixing the code before it so that it can be reached. - dead_code
+warning - lib/core/utils/utils.dart:125:11 - The label 'child' isn't used. Try removing the label, or using it in either a 'break' or 'continue' statement. - unused_label
+warning - lib/core/utils/utils.dart:136:11 - The value of the local variable 'primaryColor' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/core/utils/utils.dart:137:11 - The value of the local variable 'backgroundColor' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/core/utils/utils.dart:200:12 - Dead code. Try removing the code, or fixing the code before it so that it can be reached. - dead_code
+warning - lib/core/utils/utils.dart:201:11 - The label 'child' isn't used. Try removing the label, or using it in either a 'break' or 'continue' statement. - unused_label
+warning - lib/features/auth/login_page.dart:9:8 - Duplicate import. Try removing all but one import of the library. - duplicate_import
+   info - lib/core/utils/utils.dart:202:10 - Unnecessary empty statement. Try removing the empty statement or restructuring the code. - empty_statements
+   info - lib/core/widgets/app_menu.dart:178:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/core/widgets/app_pagination_widget.dart:51:24 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/core/widgets/app_pagination_widget.dart:52:24 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/core/widgets/app_pagination_widget.dart:101:44 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/core/widgets/chip_tag_widget.dart:12:26 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/core/widgets/confirmation_dialog.dart:71:63 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/auth/login_page.dart:98:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/auth/login_page.dart:132:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/auth/login_page.dart:144:55 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/auth/login_page.dart:158:59 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/auth/login_page.dart:204:42 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/customers/customer_detail_page.dart:128:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/customers/customer_detail_page.dart:140:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/customers/widgets/add_customer_dialog.dart:16:34 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/customers/widgets/add_customer_dialog.dart:291:34 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/question_bank/question_bank_page.dart:274:39 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/question_bank/question_bank_page.dart:312:48 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/question_bank/question_bank_page.dart:313:47 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/question_bank/question_bank_page.dart:331:31 - 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:93:45 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:123:29 - 'activeColor' is deprecated and shouldn't be used. Use activeTrackColor instead. This feature was deprecated after v3.24.0-0.2.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:179:45 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:218:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:223:54 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:224:33 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:304:50 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:309:52 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/settings/settings_page.dart:310:31 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+
+102 issues found.

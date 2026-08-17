@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>CallX AI - مستندات فنی و معماری بک‌اند</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 15mm 20mm 15mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'Vazirmatn', sans-serif;
+        font-size: 9pt;
+        color: #64748b;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #1e293b;
+      background-color: #ffffff;
+      line-height: 1.7;
+      font-size: 10.5pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    .cover-page {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #ffffff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      page-break-after: avoid;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 9pt;
+      font-weight: 600;
+      margin-bottom: 15px;
+      direction: ltr;
+    }
+
+    .cover-title {
+      font-size: 24pt;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    .cover-subtitle {
+      font-size: 13pt;
+      color: #94a3b8;
+      margin: 0 0 25px 0;
+      font-weight: 400;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+      font-size: 9.5pt;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #38bdf8;
+      font-size: 8.5pt;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, h4 {
+      color: #0f172a;
+      font-weight: 700;
+      page-break-after: avoid;
+    }
+
+    h1 {
+      font-size: 16pt;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 .badge {
+      background: #2563eb;
+      color: white;
+      font-size: 9pt;
+      padding: 2px 10px;
+      border-radius: 6px;
+    }
+
+    h2 {
+      font-size: 13pt;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      color: #1e3a8a;
+    }
+
+    h3 {
+      font-size: 11pt;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: #334155;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      color: #334155;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: right;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .code-block, code {
+      font-family: 'Fira Code', monospace;
+      font-size: 9pt;
+      direction: ltr;
+      text-align: left;
+    }
+
+    code {
+      background: #f1f5f9;
+      color: #d97706;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 8.5pt;
+    }
+
+    .endpoint-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #fafafa;
+      page-break-inside: avoid;
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      direction: ltr;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      font-size: 10pt;
+      margin-bottom: 6px;
+    }
+
+    .method {
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: white;
+      font-size: 8pt;
+      font-weight: 700;
+    }
+
+    .get { background-color: #0284c7; }
+    .post { background-color: #16a34a; }
+    .put { background-color: #d97706; }
+    .delete { background-color: #dc2626; }
+
+    .endpoint-desc {
+      font-size: 9.5pt;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .info-box {
+      background-color: #eff6ff;
+      border-right: 4px solid #3b82f6;
+      padding: 12px 14px;
+      border-radius: 4px;
+      margin: 15px 0;
+      font-size: 9.5pt;
+      color: #1e40af;
+      page-break-inside: avoid;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 8pt;
+      font-weight: 600;
+      color: white;
+    }
+
+    .tag-blue { background-color: #3b82f6; }
+    .tag-green { background-color: #10b981; }
+    .tag-amber { background-color: #f59e0b; }
+    .tag-red { background-color: #ef4444; }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cover Page -->
+  <div class="cover-page">
+    <div class="cover-badge">CallX AI • System Architecture Specification</div>
+    <div class="cover-title">مستندات معماری، دیتابیس و APIهای بک‌اند</div>
+    <div class="cover-subtitle">راهنمای جامع پیاده‌سازی سیستم مدیریت ارتباط با مشتریان (CRM) و مرکز تماس هوشمند CallX AI</div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>نسخه سند</strong>
+        Version 1.0 (Release Ready)
+      </div>
+      <div class="meta-item">
+        <strong>نوع سیستم</strong>
+        AI-Powered CRM & Voice Engine
+      </div>
+      <div class="meta-item">
+        <strong>تاریخ تدوین</strong>
+        آگوست ۲۰۲۶
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1 -->
+  <h1><span class="badge">۱</span> معرفی و چشم‌انداز کلی سیستم (Overview)</h1>
+  <p>
+    سامانه <strong>CallX AI</strong> یک پلتفرم جامع جهت برقراری ارتباطات هوشمند، مدیریت فرآیند فروش و تماس‌های خودکار است. سیستم از بخش‌های زیر تشکیل شده است:
+  </p>
+  <ul>
+    <li><strong>CRM & Lead Management:</strong> مدیریت متمرکز اطلاعات مخاطبان، سازمان‌ها، وضعیت‌های فروش، نوت‌ها و مدارک پیوست.</li>
+    <li><strong>Voice Call Center:</strong> ثبت تماس‌های ورودی و خروجی، زمان‌بندی تماس‌های خودکار ایجنت هوش مصنوعی، فایل صوتی و پیاده‌سازی متنی (Transcript).</li>
+    <li><strong>Email Follow-Ups:</strong> ارسال خودکار و زمان‌بندی‌شده ایمیل‌های پس از مکالمه با قالب‌های پویا.</li>
+    <li><strong>AI Scenarios & Prompt Engine:</strong> پیکربندی سناریوهای صوتی، پرسش‌های ارزیابی کیفی (Qualifying Questions) و تنظیمات لحن/صدا.</li>
+  </ul>
+
+  <!-- Section 2 -->
+  <h1><span class="badge">۲</span> مدل داده‌ای و ساختار جداول دیتابیس (Database ERD)</h1>
+  <p>طراحی جداول بر پایه استاندارد ارتباطی (Relational / PostgreSQL) به شرح زیر است:</p>
+
+  <h2>۲.۱. جدول مشتریان و لیدها (<code>customers</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>نام فیلد (Column)</th>
+        <th>نوع داده (Type)</th>
+        <th>توضیحات و مقادیر مجاز</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>BIGINT / UUID (PK)</td><td>شناسه یکتا</td></tr>
+      <tr><td><code>full_name</code></td><td>VARCHAR(150)</td><td>نام و نام خانوادگی مخاطب</td></tr>
+      <tr><td><code>company_name</code></td><td>VARCHAR(150)</td><td>نام سازمان / شرکت</td></tr>
+      <tr><td><code>job_title</code></td><td>VARCHAR(100)</td><td>سمت سازمانی (مانند CEO, Manager)</td></tr>
+      <tr><td><code>email</code></td><td>VARCHAR(255)</td><td>ایمیل مخاطب</td></tr>
+      <tr><td><code>phone</code></td><td>VARCHAR(30)</td><td>شماره تماس</td></tr>
+      <tr><td><code>website</code></td><td>VARCHAR(255)</td><td>آدرس وب‌سایت</td></tr>
+      <tr><td><code>address</code>, <code>city</code>, <code>state</code>, <code>country</code></td><td>VARCHAR / TEXT</td><td>اطلاعات موقعیت مکانی</td></tr>
+      <tr><td><code>company_type</code></td><td>VARCHAR(50)</td><td>General, GC, Developer, Trade, Startup, Agency</td></tr>
+      <tr><td><code>lead_status</code></td><td>VARCHAR(50)</td><td>New, Contacted, Qualified, Won, Lost</td></tr>
+      <tr><td><code>lead_priority</code></td><td>VARCHAR(50)</td><td>Hot, Warm, Cold</td></tr>
+      <tr><td><code>lead_quality</code></td><td>VARCHAR(50)</td><td>Excellent, Good, Average, Poor</td></tr>
+      <tr><td><code>last_contact_result</code></td><td>VARCHAR(100)</td><td>Interested, Call back, Meeting booked, No answer</td></tr>
+      <tr><td><code>next_follow_up_date</code></td><td>TIMESTAMP (Nullable)</td><td>تاریخ و ساعت پیگیری بعدی</td></tr>
+      <tr><td><code>status</code></td><td>ENUM('Active', 'Deactive')</td><td>وضعیت فعال/غیرفعال بودن مشتری</td></tr>
+      <tr><td><code>reason_for_contact</code></td><td>TEXT</td><td>علت نیاز یا موضوع آغاز مکالمه</td></tr>
+      <tr><td><code>created_at</code>, <code>updated_at</code></td><td>TIMESTAMP</td><td>زمان ایجاد و آخرین تغییرات</td></tr>
+    </tbody>
+  </table>
+
+  <h2>۲.۲. جدول یادداشت‌های مشتری (<code>customer_notes</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>نام فیلد</th>
+        <th>نوع داده</th>
+        <th>توضیحات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / BIGINT (PK)</td><td>شناسه یادداشت</td></tr>
+      <tr><td><code>customer_id</code></td><td>BIGINT (FK -> customers.id)</td><td>کلید خارجی به مشتری</td></tr>
+      <tr><td><code>content</code></td><td>TEXT</td><td>متن یادداشت ثبت شده</td></tr>
+      <tr><td><code>author</code></td><td>VARCHAR(100)</td><td>نویسنده (نام ایجنت یا سیستم AI)</td></tr>
+      <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td>تاریخ ثبت</td></tr>
+    </tbody>
+  </table>
+
+  <h2>۲.۳. جدول اسناد پیوست (<code>customer_documents</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>نام فیلد</th>
+        <th>نوع داده</th>
+        <th>توضیحات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / BIGINT (PK)</td><td>شناسه سند</td></tr>
+      <tr><td><code>customer_id</code></td><td>BIGINT (FK -> customers.id)</td><td>کلید خارجی به مشتری</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(255)</td><td>نام فایل (مثال: Project_Brief.pdf)</td></tr>
+      <tr><td><code>file_url</code></td><td>TEXT</td><td>آدرس فایل روی Storage (S3 / MinIO)</td></tr>
+      <tr><td><code>size</code></td><td>VARCHAR(50)</td><td>حجم فایل (مثال: 2.4 MB)</td></tr>
+      <tr><td><code>type</code></td><td>VARCHAR(50)</td><td>Quote, Drawing, Proposal, Brief, Invoice</td></tr>
+      <tr><td><code>upload_date</code></td><td>TIMESTAMP</td><td>زمان بارگذاری</td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>۲.۴. جدول تاریخچه تماس‌ها (<code>call_logs</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>نام فیلد</th>
+        <th>نوع داده</th>
+        <th>توضیحات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / BIGINT (PK)</td><td>شناسه تماس</td></tr>
+      <tr><td><code>customer_id</code></td><td>BIGINT (FK, Nullable)</td><td>مشتری مرتبط</td></tr>
+      <tr><td><code>phone</code></td><td>VARCHAR(30)</td><td>شماره مقصد یا مبدأ</td></tr>
+      <tr><td><code>status</code></td><td>VARCHAR(50)</td><td>Completed, Failed, Queued, Upcoming</td></tr>
+      <tr><td><code>duration</code></td><td>INT (Seconds) / VARCHAR</td><td>مدت مکالمه (ثانیه یا 02:45)</td></tr>
+      <tr><td><code>assignee</code></td><td>VARCHAR(100)</td><td>پاسخ‌دهنده (AI Agent یا نام کارشناس)</td></tr>
+      <tr><td><code>call_date</code>, <code>call_time</code></td><td>DATE / TIME</td><td>زمان دقیق انجام تماس</td></tr>
+      <tr><td><code>recording_url</code></td><td>TEXT (Nullable)</td><td>آدرس فایل صوتی ضبط شده</td></tr>
+      <tr><td><code>transcript</code></td><td>JSONB / TEXT</td><td>متن کامل مکالمه پیاده شده توسط هوش مصنوعی</td></tr>
+      <tr><td><code>notes</code></td><td>TEXT</td><td>خلاصه تماس</td></tr>
+    </tbody>
+  </table>
+
+  <h2>۲.۵. جدول قالب‌های ایمیل (<code>email_templates</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>نام فیلد</th>
+        <th>نوع داده</th>
+        <th>توضیحات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / INT (PK)</td><td>شناسه قالب</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(150)</td><td>نام قالب (مثال: Welcome Onboarding)</td></tr>
+      <tr><td><code>category</code></td><td>VARCHAR(100)</td><td>Sales & Outreach, Billing & Contracts, Follow-Up</td></tr>
+      <tr><td><code>subject</code></td><td>VARCHAR(255)</td><td>موضوع با پشتیبانی از متغیرها (<code>{name}</code>, <code>{company}</code>)</td></tr>
+      <tr><td><code>body_html</code></td><td>TEXT</td><td>محتوای ایمیل در قالب HTML</td></tr>
+    </tbody>
+  </table>
+
+  <h2>۲.۶. جدول سناریوهای هوش مصنوعی (<code>ai_scenarios</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>نام فیلد</th>
+        <th>نوع داده</th>
+        <th>توضیحات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / INT (PK)</td><td>شناسه سناریو</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(150)</td><td>عنوان سناریو (مثال: Inbound Sales Outreach)</td></tr>
+      <tr><td><code>category</code></td><td>VARCHAR(100)</td><td>دسته‌بندی (Sales, Support, Follow-Up)</td></tr>
+      <tr><td><code>opening_greeting</code></td><td>TEXT</td><td>جمله افتتاحیه هوش مصنوعی هنگام شروع مکالمه</td></tr>
+      <tr><td><code>pitch_summary</code></td><td>TEXT</td><td>خلاصه معرفی محصول/خدمت جهت پاسخگویی به سوالات</td></tr>
+      <tr><td><code>qualifying_questions</code></td><td>JSONB (Array)</td><td>آرایه‌ای از سوالات ارزیابی مشتری</td></tr>
+      <tr><td><code>action_on_interest</code></td><td>VARCHAR(255)</td><td>اقدام خودکار در صورت تمایل لید (مثلاً ارسال ایمیل و تگ Hot)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Section 3 -->
+  <h1><span class="badge">۳</span> مستندات کامل APIها (RESTful Endpoints)</h1>
+
+  <h2>۳.۱. احراز هویت (Auth)</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/auth/login</div>
+    <div class="endpoint-desc">ورود به سیستم و دریافت JWT Token</div>
+    <div class="code-block">
+      Request: { "email": "admin@callx.ai", "password": "secure_password" }<br>
+      Response (200): { "token": "jwt_token_here", "user": { "id": 1, "name": "Admin", "role": "admin" } }
+    </div>
+  </div>
+
+  <h2>۳.۲. مدیریت مشتریان (Customers)</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/customers</div>
+    <div class="endpoint-desc">دریافت لیست مشتریان با فیلتر وضعیت، اولویت، جستجو و صفحه‌بندی (Pagination)</div>
+    <div class="code-block">
+      Query Params: ?search=john&leadStatus=Qualified&leadPriority=Hot&page=1&limit=20
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/customers</div>
+    <div class="endpoint-desc">ثبت مشتری یا لید جدید</div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/customers/:id</div>
+    <div class="endpoint-desc">دریافت جزئیات پرونده یک مشتری به همراه نوت‌ها و لیست اسناد پیوست</div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/customers/:id/notes</div>
+    <div class="endpoint-desc">ثبت یادداشت جدید برای مشتری</div>
+    <div class="code-block">
+      Request: { "content": "مشتری خواستار تخفیف برای پلن سازمانی شد.", "author": "Sara Agent" }
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/customers/:id/documents</div>
+    <div class="endpoint-desc">آپلود سند یا پیش‌فاکتور (ارسال به‌صورت multipart/form-data)</div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <h2>۳.۳. مدیریت تماس‌ها و هوش مصنوعی صوتی (Calls & Voice Engine)</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/calls</div>
+    <div class="endpoint-desc">دریافت گزارش تماس‌ها با قابلیت فیلتر تاریخ و وضعیت</div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/calls/trigger-ai-call</div>
+    <div class="endpoint-desc">درخواست ایجاد تماس خودکار توسط بات صوتی با سناریوی مشخص</div>
+    <div class="code-block">
+      Request: { "phone": "+1234567890", "customerId": 105, "scenarioId": "1" }<br>
+      Response (202): { "status": "Queued", "callId": "c_99812", "message": "تماس در صف ارسال قرار گرفت." }
+    </div>
+  </div>
+
+  <h2>۳.۴. ایمیل‌های پیگیری و قالب‌ها (Emails)</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/email-templates</div>
+    <div class="endpoint-desc">دریافت لیست تمام قالب‌های آماده ایمیل</div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/emails/send</div>
+    <div class="endpoint-desc">ارسال ایمیل پیگیری به مشتری با جایگذاری خودکار متغیرها</div>
+  </div>
+
+  <h2>۳.۵. داشبورد و شاخص‌های کلیدی (Dashboard KPIs)</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/dashboard/stats</div>
+    <div class="endpoint-desc">دریافت آمار کلی (تعداد لیدها، تماس‌های موفق، نرخ تبدیل و پیگیری‌های امروز)</div>
+  </div>
+
+  <!-- Section 4 -->
+  <h1><span class="badge">۴</span> معماری فنی پیشنهادی بک‌اند (Recommended Stack)</h1>
+  <div class="info-box">
+    <strong>💡 ساختار پیشنهادی:</strong>
+    <ul>
+      <li><strong>فریم‌ورک بک‌اند:</strong> Node.js (NestJS / Express + TypeScript) یا Python (FastAPI).</li>
+      <li><strong>پایگاه داده:</strong> PostgreSQL به همراه Prisma ORM یا TypeORM / SQLAlchemy.</li>
+      <li><strong>مدیریت صف و کش:</strong> Redis + BullMQ (برای صف‌بندی تماس‌ها و ایمیل‌های زمان‌بندی‌شده).</li>
+      <li><strong>ارتباط تماس صوتی:</strong> Twilio Voice API / LiveKit به همراه OpenAI Realtime API / Deepgram STT.</li>
+    </ul>
+  </div>
+
+</body>
+</html>
