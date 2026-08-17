@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <title>CallX AI - مستندات فنی و معماری بک‌اند</title>
+  <title>CallX AI - Backend Architecture & Cartesia Voice Agent Specification</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     @page {
       size: A4;
       margin: 18mm 15mm 20mm 15mm;
       @bottom-right {
         content: counter(page);
-        font-family: 'Vazirmatn', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 9pt;
         color: #64748b;
       }
@@ -25,35 +25,39 @@
     }
 
     body {
-      font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       color: #1e293b;
       background-color: #ffffff;
-      line-height: 1.7;
-      font-size: 10.5pt;
+      line-height: 1.65;
+      font-size: 10pt;
       margin: 0;
       padding: 0;
     }
 
     .cover-page {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
       color: #ffffff;
-      padding: 40px 30px;
+      padding: 45px 35px;
       border-radius: 12px;
       margin-bottom: 30px;
       page-break-after: avoid;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
     }
 
     .cover-badge {
-      display: inline-block;
-      background: rgba(59, 130, 246, 0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.18);
       border: 1px solid #3b82f6;
       color: #93c5fd;
       padding: 4px 14px;
       border-radius: 20px;
-      font-size: 9pt;
+      font-size: 8.5pt;
       font-weight: 600;
       margin-bottom: 15px;
-      direction: ltr;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .cover-title {
@@ -62,29 +66,33 @@
       margin: 0 0 10px 0;
       letter-spacing: -0.5px;
       color: #ffffff;
+      line-height: 1.2;
     }
 
     .cover-subtitle {
-      font-size: 13pt;
+      font-size: 11.5pt;
       color: #94a3b8;
       margin: 0 0 25px 0;
       font-weight: 400;
+      line-height: 1.5;
     }
 
     .meta-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 15px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
       padding-top: 20px;
-      font-size: 9.5pt;
+      font-size: 9pt;
     }
 
     .meta-item strong {
       display: block;
       color: #38bdf8;
-      font-size: 8.5pt;
+      font-size: 8pt;
       text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
     }
 
     h1, h2, h3, h4 {
@@ -94,11 +102,11 @@
     }
 
     h1 {
-      font-size: 16pt;
+      font-size: 15pt;
       border-bottom: 2px solid #e2e8f0;
       padding-bottom: 8px;
-      margin-top: 30px;
-      margin-bottom: 15px;
+      margin-top: 32px;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -107,22 +115,23 @@
     h1 .badge {
       background: #2563eb;
       color: white;
-      font-size: 9pt;
-      padding: 2px 10px;
+      font-size: 8.5pt;
+      padding: 2px 8px;
       border-radius: 6px;
+      font-weight: 700;
     }
 
     h2 {
-      font-size: 13pt;
-      margin-top: 22px;
+      font-size: 12pt;
+      margin-top: 20px;
       margin-bottom: 10px;
       color: #1e3a8a;
     }
 
     h3 {
-      font-size: 11pt;
-      margin-top: 16px;
-      margin-bottom: 8px;
+      font-size: 10.5pt;
+      margin-top: 14px;
+      margin-bottom: 6px;
       color: #334155;
     }
 
@@ -131,24 +140,37 @@
       color: #334155;
     }
 
+    ul, ol {
+      margin: 0 0 14px 0;
+      padding-left: 20px;
+      color: #334155;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin: 14px 0;
-      font-size: 9.5pt;
+      font-size: 9pt;
       page-break-inside: avoid;
     }
 
     th, td {
       border: 1px solid #cbd5e1;
-      padding: 8px 10px;
-      text-align: right;
+      padding: 7px 10px;
+      text-align: left;
     }
 
     th {
       background-color: #f1f5f9;
       color: #0f172a;
       font-weight: 700;
+      font-size: 8.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     tr:nth-child(even) {
@@ -157,23 +179,21 @@
 
     .code-block, code {
       font-family: 'Fira Code', monospace;
-      font-size: 9pt;
-      direction: ltr;
-      text-align: left;
+      font-size: 8.5pt;
     }
 
     code {
       background: #f1f5f9;
-      color: #d97706;
+      color: #b45309;
       padding: 2px 5px;
       border-radius: 4px;
-      font-size: 8.5pt;
+      font-size: 8pt;
     }
 
     .endpoint-card {
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 12px;
+      padding: 12px 14px;
       margin-bottom: 12px;
       background: #fafafa;
       page-break-inside: avoid;
@@ -183,10 +203,9 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      direction: ltr;
       font-family: 'Fira Code', monospace;
       font-weight: 600;
-      font-size: 10pt;
+      font-size: 9.5pt;
       margin-bottom: 6px;
     }
 
@@ -194,45 +213,46 @@
       padding: 3px 8px;
       border-radius: 4px;
       color: white;
-      font-size: 8pt;
+      font-size: 7.5pt;
       font-weight: 700;
+      text-transform: uppercase;
     }
 
     .get { background-color: #0284c7; }
     .post { background-color: #16a34a; }
     .put { background-color: #d97706; }
     .delete { background-color: #dc2626; }
+    .ws { background-color: #7c3aed; }
 
     .endpoint-desc {
-      font-size: 9.5pt;
+      font-size: 9pt;
       color: #475569;
       margin-bottom: 6px;
     }
 
     .info-box {
       background-color: #eff6ff;
-      border-right: 4px solid #3b82f6;
+      border-left: 4px solid #3b82f6;
       padding: 12px 14px;
       border-radius: 4px;
-      margin: 15px 0;
-      font-size: 9.5pt;
+      margin: 14px 0;
+      font-size: 9pt;
       color: #1e40af;
       page-break-inside: avoid;
     }
 
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
+    .diagram-box {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Fira Code', monospace;
       font-size: 8pt;
-      font-weight: 600;
-      color: white;
+      line-height: 1.45;
+      margin: 14px 0;
+      overflow-x: auto;
+      page-break-inside: avoid;
     }
-
-    .tag-blue { background-color: #3b82f6; }
-    .tag-green { background-color: #10b981; }
-    .tag-amber { background-color: #f59e0b; }
-    .tag-red { background-color: #ef4444; }
 
     .page-break {
       page-break-before: always;
@@ -243,261 +263,376 @@
 
   <!-- Cover Page -->
   <div class="cover-page">
-    <div class="cover-badge">CallX AI • System Architecture Specification</div>
-    <div class="cover-title">مستندات معماری، دیتابیس و APIهای بک‌اند</div>
-    <div class="cover-subtitle">راهنمای جامع پیاده‌سازی سیستم مدیریت ارتباط با مشتریان (CRM) و مرکز تماس هوشمند CallX AI</div>
+    <div class="cover-badge">CallX AI • System Architecture & Technical Specs</div>
+    <div class="cover-title">Backend Architecture & Cartesia AI Voice Engine Specification</div>
+    <div class="cover-subtitle">Complete engineering blueprint for Inbound/Outbound AI Cold Calling, Cartesia Sonic Realtime Voice Agent, CRM Database Schemas, and REST/WebSocket API Endpoints.</div>
     <div class="meta-grid">
       <div class="meta-item">
-        <strong>نسخه سند</strong>
-        Version 1.0 (Release Ready)
+        <strong>Document Version</strong>
+        2.0 (Cartesia Engine)
       </div>
       <div class="meta-item">
-        <strong>نوع سیستم</strong>
-        AI-Powered CRM & Voice Engine
+        <strong>Voice Pipeline</strong>
+        Cartesia Sonic (~90ms)
       </div>
       <div class="meta-item">
-        <strong>تاریخ تدوین</strong>
-        آگوست ۲۰۲۶
+        <strong>Telephony Engine</strong>
+        Twilio / SIP / WebRTC
+      </div>
+      <div class="meta-item">
+        <strong>Published Date</strong>
+        August 2026
       </div>
     </div>
   </div>
 
-  <!-- Section 1 -->
-  <h1><span class="badge">۱</span> معرفی و چشم‌انداز کلی سیستم (Overview)</h1>
+  <!-- Section 1: System Overview -->
+  <h1><span class="badge">1</span> System Architecture & Core Modules Overview</h1>
   <p>
-    سامانه <strong>CallX AI</strong> یک پلتفرم جامع جهت برقراری ارتباطات هوشمند، مدیریت فرآیند فروش و تماس‌های خودکار است. سیستم از بخش‌های زیر تشکیل شده است:
+    <strong>CallX AI</strong> is an enterprise-grade AI-powered Cold Calling and CRM Platform built for automated, human-like voice communication across inbound customer reception and outbound sales campaigns.
   </p>
+
+  <h3>Key Production Modules:</h3>
   <ul>
-    <li><strong>CRM & Lead Management:</strong> مدیریت متمرکز اطلاعات مخاطبان، سازمان‌ها، وضعیت‌های فروش، نوت‌ها و مدارک پیوست.</li>
-    <li><strong>Voice Call Center:</strong> ثبت تماس‌های ورودی و خروجی، زمان‌بندی تماس‌های خودکار ایجنت هوش مصنوعی، فایل صوتی و پیاده‌سازی متنی (Transcript).</li>
-    <li><strong>Email Follow-Ups:</strong> ارسال خودکار و زمان‌بندی‌شده ایمیل‌های پس از مکالمه با قالب‌های پویا.</li>
-    <li><strong>AI Scenarios & Prompt Engine:</strong> پیکربندی سناریوهای صوتی، پرسش‌های ارزیابی کیفی (Qualifying Questions) و تنظیمات لحن/صدا.</li>
+    <li><strong>Dashboard & Realtime Analytics:</strong> Real-time KPI cards (Total Calls, Daily Volumes, Conversion Success Rates, Pending Follow-ups), task to-do lists, call outcome visual reports, and workspace customization.</li>
+    <li><strong>CRM & Master Leads Directory:</strong> Full contact management, qualification scores, geolocation filtering, internal multi-author notes, document attachments (Quotes, Drawings, Proposals), and custom color-coded tags.</li>
+    <li><strong>Voice Agent & Realtime Telephony:</strong> Ultra-low latency voice calling powered by <strong>Cartesia Sonic TTS</strong> and streaming speech recognition, supporting both single direct calls and multi-line batch campaigns (1 to 10 concurrent lines).</li>
+    <li><strong>Email Follow-Up Automation:</strong> Post-call dynamic templating with rich HTML variable injection (<code>{name}</code>, <code>{company}</code>, <code>{agent}</code>, <code>{date}</code>), automated sending, and delivery tracking.</li>
+    <li><strong>AI Agent Configuration:</strong> Voice persona builder with Cartesia Voice IDs, tone adjustments (Professional, Friendly, Direct, Casual), speech rate controls, outbound cold calling script builder, and 24/7 inbound reception with live human handoffs.</li>
   </ul>
 
-  <!-- Section 2 -->
-  <h1><span class="badge">۲</span> مدل داده‌ای و ساختار جداول دیتابیس (Database ERD)</h1>
-  <p>طراحی جداول بر پایه استاندارد ارتباطی (Relational / PostgreSQL) به شرح زیر است:</p>
+  <!-- Section 2: Cartesia Voice Agent Realtime Pipeline -->
+  <h1><span class="badge">2</span> Cartesia AI Voice Engine & Realtime Pipeline</h1>
+  <p>
+    The voice pipeline delivers a sub-400ms end-to-end conversational roundtrip (Voice Activity Detection &rarr; Speech-to-Text &rarr; LLM Token Stream &rarr; Cartesia Sonic Voice Synthesis &rarr; Telephony Output).
+  </p>
 
-  <h2>۲.۱. جدول مشتریان و لیدها (<code>customers</code>)</h2>
+  <div class="diagram-box">
++---------------------------------------------------------------------------------------------------+
+|                            REALTIME CONVERSATIONAL VOICE PIPELINE                                  |
++---------------------------------------------------------------------------------------------------+
+  [ Caller: Phone / Twilio ] 
+           | (Bidirectional Audio Stream - µ-law 8kHz / PCM 16kHz)
+           v
+  [ Twilio Media Streams / SIP WebSocket Gateway ]
+           |
+           +---> [ VAD & Deepgram Nova-2 Streaming STT ] (Realtime Transcription)
+           |             |
+           |             v
+           |     [ LLM Orchestrator (GPT-4o / Claude 3.5) ] (Inbound/Outbound Scenario Prompt)
+           |             | (Streams Tokens as they are generated)
+           |             v
+           |     [ Cartesia Sonic WebSocket API (wss://api.cartesia.ai/tts/websocket) ]
+           |             | (Ultra-low latency audio chunks generation < 90ms)
+           |             v
+  [ Audio Player & Streamer ] ---> [ Caller hears natural voice ]
+           |
+   (Interruption / Barge-in Detection: Immediately cuts Cartesia playback if user speaks)
++---------------------------------------------------------------------------------------------------+
+  </div>
+
+  <h2>2.1. Inbound & Outbound Calling Logic</h2>
   <table>
     <thead>
       <tr>
-        <th>نام فیلد (Column)</th>
-        <th>نوع داده (Type)</th>
-        <th>توضیحات و مقادیر مجاز</th>
+        <th>Feature</th>
+        <th>Outbound Cold Calling Engine</th>
+        <th>Inbound Reception & Support Engine</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><code>id</code></td><td>BIGINT / UUID (PK)</td><td>شناسه یکتا</td></tr>
-      <tr><td><code>full_name</code></td><td>VARCHAR(150)</td><td>نام و نام خانوادگی مخاطب</td></tr>
-      <tr><td><code>company_name</code></td><td>VARCHAR(150)</td><td>نام سازمان / شرکت</td></tr>
-      <tr><td><code>job_title</code></td><td>VARCHAR(100)</td><td>سمت سازمانی (مانند CEO, Manager)</td></tr>
-      <tr><td><code>email</code></td><td>VARCHAR(255)</td><td>ایمیل مخاطب</td></tr>
-      <tr><td><code>phone</code></td><td>VARCHAR(30)</td><td>شماره تماس</td></tr>
-      <tr><td><code>website</code></td><td>VARCHAR(255)</td><td>آدرس وب‌سایت</td></tr>
-      <tr><td><code>address</code>, <code>city</code>, <code>state</code>, <code>country</code></td><td>VARCHAR / TEXT</td><td>اطلاعات موقعیت مکانی</td></tr>
-      <tr><td><code>company_type</code></td><td>VARCHAR(50)</td><td>General, GC, Developer, Trade, Startup, Agency</td></tr>
-      <tr><td><code>lead_status</code></td><td>VARCHAR(50)</td><td>New, Contacted, Qualified, Won, Lost</td></tr>
-      <tr><td><code>lead_priority</code></td><td>VARCHAR(50)</td><td>Hot, Warm, Cold</td></tr>
-      <tr><td><code>lead_quality</code></td><td>VARCHAR(50)</td><td>Excellent, Good, Average, Poor</td></tr>
-      <tr><td><code>last_contact_result</code></td><td>VARCHAR(100)</td><td>Interested, Call back, Meeting booked, No answer</td></tr>
-      <tr><td><code>next_follow_up_date</code></td><td>TIMESTAMP (Nullable)</td><td>تاریخ و ساعت پیگیری بعدی</td></tr>
-      <tr><td><code>status</code></td><td>ENUM('Active', 'Deactive')</td><td>وضعیت فعال/غیرفعال بودن مشتری</td></tr>
-      <tr><td><code>reason_for_contact</code></td><td>TEXT</td><td>علت نیاز یا موضوع آغاز مکالمه</td></tr>
-      <tr><td><code>created_at</code>, <code>updated_at</code></td><td>TIMESTAMP</td><td>زمان ایجاد و آخرین تغییرات</td></tr>
-    </tbody>
-  </table>
-
-  <h2>۲.۲. جدول یادداشت‌های مشتری (<code>customer_notes</code>)</h2>
-  <table>
-    <thead>
       <tr>
-        <th>نام فیلد</th>
-        <th>نوع داده</th>
-        <th>توضیحات</th>
+        <td><strong>Trigger</strong></td>
+        <td>Manual click, scheduled time, or batch campaign runner.</td>
+        <td>Incoming customer phone call to Twilio dedicated number.</td>
       </tr>
-    </thead>
-    <tbody>
-      <tr><td><code>id</code></td><td>UUID / BIGINT (PK)</td><td>شناسه یادداشت</td></tr>
-      <tr><td><code>customer_id</code></td><td>BIGINT (FK -> customers.id)</td><td>کلید خارجی به مشتری</td></tr>
-      <tr><td><code>content</code></td><td>TEXT</td><td>متن یادداشت ثبت شده</td></tr>
-      <tr><td><code>author</code></td><td>VARCHAR(100)</td><td>نویسنده (نام ایجنت یا سیستم AI)</td></tr>
-      <tr><td><code>created_at</code></td><td>TIMESTAMP</td><td>تاریخ ثبت</td></tr>
-    </tbody>
-  </table>
-
-  <h2>۲.۳. جدول اسناد پیوست (<code>customer_documents</code>)</h2>
-  <table>
-    <thead>
       <tr>
-        <th>نام فیلد</th>
-        <th>نوع داده</th>
-        <th>توضیحات</th>
+        <td><strong>Opening Flow</strong></td>
+        <td>AI speaks first with configured <code>openingGreeting</code> and value pitch.</td>
+        <td>AI answers with company greeting, business hours check, and intent triage.</td>
       </tr>
-    </thead>
-    <tbody>
-      <tr><td><code>id</code></td><td>UUID / BIGINT (PK)</td><td>شناسه سند</td></tr>
-      <tr><td><code>customer_id</code></td><td>BIGINT (FK -> customers.id)</td><td>کلید خارجی به مشتری</td></tr>
-      <tr><td><code>name</code></td><td>VARCHAR(255)</td><td>نام فایل (مثال: Project_Brief.pdf)</td></tr>
-      <tr><td><code>file_url</code></td><td>TEXT</td><td>آدرس فایل روی Storage (S3 / MinIO)</td></tr>
-      <tr><td><code>size</code></td><td>VARCHAR(50)</td><td>حجم فایل (مثال: 2.4 MB)</td></tr>
-      <tr><td><code>type</code></td><td>VARCHAR(50)</td><td>Quote, Drawing, Proposal, Brief, Invoice</td></tr>
-      <tr><td><code>upload_date</code></td><td>TIMESTAMP</td><td>زمان بارگذاری</td></tr>
+      <tr>
+        <td><strong>Qualification</strong></td>
+        <td>Asks defined <code>qualifyingQuestions</code> to score lead (Hot/Warm/Cold).</td>
+        <td>Extracts customer problem/inquiry and searches knowledge base / FAQ.</td>
+      </tr>
+      <tr>
+        <td><strong>Action on Interest</strong></td>
+        <td>Sends customized follow-up email, creates calendar event, tags lead as Won/Qualified.</td>
+        <td>Resolves query, books callback, or executes live SIP warm transfer to human agent.</td>
+      </tr>
     </tbody>
   </table>
 
   <div class="page-break"></div>
 
-  <h2>۲.۴. جدول تاریخچه تماس‌ها (<code>call_logs</code>)</h2>
+  <!-- Section 3: Database ERD & Schemas -->
+  <h1><span class="badge">3</span> Database Architecture & Schemas (PostgreSQL)</h1>
+  <p>The relational database schema is designed for PostgreSQL with optimized indexing and foreign key constraints.</p>
+
+  <h2>3.1. Master Customers & Leads Table (<code>customers</code>)</h2>
   <table>
     <thead>
       <tr>
-        <th>نام فیلد</th>
-        <th>نوع داده</th>
-        <th>توضیحات</th>
+        <th>Column Name</th>
+        <th>Data Type</th>
+        <th>Constraints / Values</th>
+        <th>Description</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><code>id</code></td><td>UUID / BIGINT (PK)</td><td>شناسه تماس</td></tr>
-      <tr><td><code>customer_id</code></td><td>BIGINT (FK, Nullable)</td><td>مشتری مرتبط</td></tr>
-      <tr><td><code>phone</code></td><td>VARCHAR(30)</td><td>شماره مقصد یا مبدأ</td></tr>
-      <tr><td><code>status</code></td><td>VARCHAR(50)</td><td>Completed, Failed, Queued, Upcoming</td></tr>
-      <tr><td><code>duration</code></td><td>INT (Seconds) / VARCHAR</td><td>مدت مکالمه (ثانیه یا 02:45)</td></tr>
-      <tr><td><code>assignee</code></td><td>VARCHAR(100)</td><td>پاسخ‌دهنده (AI Agent یا نام کارشناس)</td></tr>
-      <tr><td><code>call_date</code>, <code>call_time</code></td><td>DATE / TIME</td><td>زمان دقیق انجام تماس</td></tr>
-      <tr><td><code>recording_url</code></td><td>TEXT (Nullable)</td><td>آدرس فایل صوتی ضبط شده</td></tr>
-      <tr><td><code>transcript</code></td><td>JSONB / TEXT</td><td>متن کامل مکالمه پیاده شده توسط هوش مصنوعی</td></tr>
-      <tr><td><code>notes</code></td><td>TEXT</td><td>خلاصه تماس</td></tr>
+      <tr><td><code>id</code></td><td>BIGSERIAL</td><td>PRIMARY KEY</td><td>Unique customer ID</td></tr>
+      <tr><td><code>full_name</code></td><td>VARCHAR(150)</td><td>NOT NULL</td><td>Contact Full Name</td></tr>
+      <tr><td><code>company_name</code></td><td>VARCHAR(150)</td><td>DEFAULT ''</td><td>Company / Organization Name</td></tr>
+      <tr><td><code>job_title</code></td><td>VARCHAR(100)</td><td>DEFAULT ''</td><td>Position / Title (CEO, PM, GC)</td></tr>
+      <tr><td><code>email</code></td><td>VARCHAR(255)</td><td>INDEX</td><td>Email address</td></tr>
+      <tr><td><code>phone</code></td><td>VARCHAR(30)</td><td>NOT NULL, INDEX</td><td>Primary phone number in E.164 format</td></tr>
+      <tr><td><code>website</code></td><td>VARCHAR(255)</td><td>DEFAULT ''</td><td>Company website URL</td></tr>
+      <tr><td><code>address</code>, <code>city</code>, <code>state</code>, <code>country</code></td><td>VARCHAR</td><td>NULLABLE</td><td>Geolocation and physical address</td></tr>
+      <tr><td><code>company_type</code></td><td>VARCHAR(50)</td><td>DEFAULT 'General'</td><td>GC, Developer, Trade, Startup, Agency</td></tr>
+      <tr><td><code>lead_status</code></td><td>VARCHAR(50)</td><td>DEFAULT 'New'</td><td>New, Contacted, Qualified, Won, Lost</td></tr>
+      <tr><td><code>lead_priority</code></td><td>VARCHAR(50)</td><td>DEFAULT 'Warm'</td><td>Hot, Warm, Cold</td></tr>
+      <tr><td><code>lead_quality</code></td><td>VARCHAR(50)</td><td>DEFAULT 'Good'</td><td>Excellent, Good, Average, Poor</td></tr>
+      <tr><td><code>last_contact_result</code></td><td>VARCHAR(100)</td><td>DEFAULT 'Interested'</td><td>Interested, Call back, Meeting booked, No answer</td></tr>
+      <tr><td><code>next_follow_up_date</code></td><td>TIMESTAMPTZ</td><td>NULLABLE</td><td>Scheduled date for next follow-up</td></tr>
+      <tr><td><code>status</code></td><td>VARCHAR(20)</td><td>DEFAULT 'Active'</td><td>Active / Deactive</td></tr>
+      <tr><td><code>reason_for_contact</code></td><td>TEXT</td><td>DEFAULT ''</td><td>Context and sales intent</td></tr>
+      <tr><td><code>tags</code></td><td>VARCHAR[]</td><td>DEFAULT '{}'</td><td>Array of assigned tag labels</td></tr>
+      <tr><td><code>created_at</code>, <code>updated_at</code></td><td>TIMESTAMPTZ</td><td>DEFAULT NOW()</td><td>Creation and modification timestamps</td></tr>
     </tbody>
   </table>
 
-  <h2>۲.۵. جدول قالب‌های ایمیل (<code>email_templates</code>)</h2>
+  <h2>3.2. Customer Notes Table (<code>customer_notes</code>)</h2>
   <table>
     <thead>
       <tr>
-        <th>نام فیلد</th>
-        <th>نوع داده</th>
-        <th>توضیحات</th>
+        <th>Column Name</th>
+        <th>Data Type</th>
+        <th>Description</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><code>id</code></td><td>UUID / INT (PK)</td><td>شناسه قالب</td></tr>
-      <tr><td><code>name</code></td><td>VARCHAR(150)</td><td>نام قالب (مثال: Welcome Onboarding)</td></tr>
-      <tr><td><code>category</code></td><td>VARCHAR(100)</td><td>Sales & Outreach, Billing & Contracts, Follow-Up</td></tr>
-      <tr><td><code>subject</code></td><td>VARCHAR(255)</td><td>موضوع با پشتیبانی از متغیرها (<code>{name}</code>, <code>{company}</code>)</td></tr>
-      <tr><td><code>body_html</code></td><td>TEXT</td><td>محتوای ایمیل در قالب HTML</td></tr>
+      <tr><td><code>id</code></td><td>UUID / BIGSERIAL (PK)</td><td>Unique note identifier</td></tr>
+      <tr><td><code>customer_id</code></td><td>BIGINT (FK -> customers.id)</td><td>References customer record (ON DELETE CASCADE)</td></tr>
+      <tr><td><code>content</code></td><td>TEXT (NOT NULL)</td><td>Note body text</td></tr>
+      <tr><td><code>author</code></td><td>VARCHAR(100)</td><td>Author identifier (e.g. 'Admin', 'AI Voice Agent')</td></tr>
+      <tr><td><code>created_at</code></td><td>TIMESTAMPTZ</td><td>Creation timestamp</td></tr>
     </tbody>
   </table>
 
-  <h2>۲.۶. جدول سناریوهای هوش مصنوعی (<code>ai_scenarios</code>)</h2>
+  <h2>3.3. Customer Documents Table (<code>customer_documents</code>)</h2>
   <table>
     <thead>
       <tr>
-        <th>نام فیلد</th>
-        <th>نوع داده</th>
-        <th>توضیحات</th>
+        <th>Column Name</th>
+        <th>Data Type</th>
+        <th>Description</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><code>id</code></td><td>UUID / INT (PK)</td><td>شناسه سناریو</td></tr>
-      <tr><td><code>name</code></td><td>VARCHAR(150)</td><td>عنوان سناریو (مثال: Inbound Sales Outreach)</td></tr>
-      <tr><td><code>category</code></td><td>VARCHAR(100)</td><td>دسته‌بندی (Sales, Support, Follow-Up)</td></tr>
-      <tr><td><code>opening_greeting</code></td><td>TEXT</td><td>جمله افتتاحیه هوش مصنوعی هنگام شروع مکالمه</td></tr>
-      <tr><td><code>pitch_summary</code></td><td>TEXT</td><td>خلاصه معرفی محصول/خدمت جهت پاسخگویی به سوالات</td></tr>
-      <tr><td><code>qualifying_questions</code></td><td>JSONB (Array)</td><td>آرایه‌ای از سوالات ارزیابی مشتری</td></tr>
-      <tr><td><code>action_on_interest</code></td><td>VARCHAR(255)</td><td>اقدام خودکار در صورت تمایل لید (مثلاً ارسال ایمیل و تگ Hot)</td></tr>
+      <tr><td><code>id</code></td><td>UUID / BIGSERIAL (PK)</td><td>Unique document identifier</td></tr>
+      <tr><td><code>customer_id</code></td><td>BIGINT (FK -> customers.id)</td><td>References customer record (ON DELETE CASCADE)</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(255)</td><td>Original file name (e.g. Proposal_v2.pdf)</td></tr>
+      <tr><td><code>size</code></td><td>VARCHAR(50)</td><td>File size display string (e.g. 3.2 MB)</td></tr>
+      <tr><td><code>type</code></td><td>VARCHAR(50)</td><td>Quote, Drawing, Proposal, Brief, Invoice</td></tr>
+      <tr><td><code>file_url</code></td><td>TEXT (NOT NULL)</td><td>S3 / Cloudflare R2 bucket download URL</td></tr>
+      <tr><td><code>upload_date</code></td><td>TIMESTAMPTZ</td><td>Upload timestamp</td></tr>
     </tbody>
   </table>
 
-  <!-- Section 3 -->
-  <h1><span class="badge">۳</span> مستندات کامل APIها (RESTful Endpoints)</h1>
+  <div class="page-break"></div>
 
-  <h2>۳.۱. احراز هویت (Auth)</h2>
+  <h2>3.4. Call Logs & Transcripts Table (<code>call_logs</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Column Name</th>
+        <th>Data Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / BIGSERIAL (PK)</td><td>Unique call log ID</td></tr>
+      <tr><td><code>customer_id</code></td><td>BIGINT (FK, Nullable)</td><td>Associated customer reference</td></tr>
+      <tr><td><code>direction</code></td><td>VARCHAR(20)</td><td>'inbound' or 'outbound'</td></tr>
+      <tr><td><code>phone</code></td><td>VARCHAR(30)</td><td>Destination or caller phone number</td></tr>
+      <tr><td><code>status</code></td><td>VARCHAR(50)</td><td>Completed, Failed, Queued, Upcoming, Callback Requested</td></tr>
+      <tr><td><code>duration_seconds</code></td><td>INTEGER</td><td>Call duration in seconds</td></tr>
+      <tr><td><code>assignee</code></td><td>VARCHAR(100)</td><td>AI Agent Voice Persona Name (e.g. 'Emma (Cartesia Sonic)')</td></tr>
+      <tr><td><code>call_date</code>, <code>call_time</code></td><td>DATE / TIME</td><td>Date and start time of call</td></tr>
+      <tr><td><code>recording_url</code></td><td>TEXT (Nullable)</td><td>Audio recording URL (S3)</td></tr>
+      <tr><td><code>transcript</code></td><td>JSONB (Nullable)</td><td>Turn-by-turn conversational transcript array with timestamps</td></tr>
+      <tr><td><code>call_summary</code></td><td>TEXT</td><td>AI-generated call summary and action items</td></tr>
+      <tr><td><code>outcome_status</code></td><td>VARCHAR(50)</td><td>Closed/Won, Qualified, Callback Requested, No Answer, Lost</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.5. AI Scenarios & Voice Settings Table (<code>ai_scenarios</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Column Name</th>
+        <th>Data Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / VARCHAR(50) (PK)</td><td>Unique scenario ID</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(150)</td><td>Scenario title (e.g. Outbound General Contractor Pitch)</td></tr>
+      <tr><td><code>category</code></td><td>VARCHAR(100)</td><td>Sales & Outreach, Support, Follow-Up</td></tr>
+      <tr><td><code>opening_greeting</code></td><td>TEXT</td><td>First spoken phrase when call connects</td></tr>
+      <tr><td><code>pitch_summary</code></td><td>TEXT</td><td>Core value proposition and product guidelines for LLM</td></tr>
+      <tr><td><code>qualifying_questions</code></td><td>JSONB (Array of Strings)</td><td>Array of questions AI must ask during call</td></tr>
+      <tr><td><code>action_on_interest</code></td><td>VARCHAR(255)</td><td>Automated workflow trigger (e.g. 'Send Proposal & Tag Hot')</td></tr>
+      <tr><td><code>cartesia_voice_id</code></td><td>VARCHAR(100)</td><td>Cartesia Voice Model ID (e.g. 'a0e99841-438c-4a64-b679-ae501e7d6091')</td></tr>
+      <tr><td><code>voice_speed</code></td><td>FLOAT</td><td>Voice playback speed multiplier (0.8x to 1.5x)</td></tr>
+      <tr><td><code>voice_tone</code></td><td>VARCHAR(50)</td><td>Professional, Friendly, Direct, Casual</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3.6. Email Follow-up Templates Table (<code>email_templates</code>)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Column Name</th>
+        <th>Data Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>UUID / BIGSERIAL (PK)</td><td>Unique template ID</td></tr>
+      <tr><td><code>name</code></td><td>VARCHAR(150)</td><td>Template name (e.g. Proposal & Scope of Work)</td></tr>
+      <tr><td><code>category</code></td><td>VARCHAR(100)</td><td>Billing & Contracts, Follow-Up & Closing, Sales</td></tr>
+      <tr><td><code>subject</code></td><td>VARCHAR(255)</td><td>Email subject with placeholders (e.g. 'Proposal for {name}')</td></tr>
+      <tr><td><code>body_html</code></td><td>TEXT</td><td>HTML body supporting variables <code>{name}</code>, <code>{company}</code>, <code>{agent}</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- Section 4: REST & WebSocket API Specs -->
+  <h1><span class="badge">4</span> RESTful & WebSocket API Specification</h1>
+
+  <h2>4.1. Authentication & Session</h2>
   <div class="endpoint-card">
     <div class="endpoint-header"><span class="method post">POST</span> /api/v1/auth/login</div>
-    <div class="endpoint-desc">ورود به سیستم و دریافت JWT Token</div>
+    <div class="endpoint-desc">Authenticate administrator or agent and return JWT bearer token.</div>
     <div class="code-block">
-      Request: { "email": "admin@callx.ai", "password": "secure_password" }<br>
-      Response (200): { "token": "jwt_token_here", "user": { "id": 1, "name": "Admin", "role": "admin" } }
+      Request: { "email": "admin@callx.ai", "password": "your_secure_password" }<br>
+      Response (200): { "token": "eyJhbGciOi...", "user": { "id": 1, "name": "Admin User", "role": "admin" } }
     </div>
   </div>
 
-  <h2>۳.۲. مدیریت مشتریان (Customers)</h2>
+  <h2>4.2. Leads & Customer Management (CRM)</h2>
   <div class="endpoint-card">
     <div class="endpoint-header"><span class="method get">GET</span> /api/v1/customers</div>
-    <div class="endpoint-desc">دریافت لیست مشتریان با فیلتر وضعیت، اولویت، جستجو و صفحه‌بندی (Pagination)</div>
+    <div class="endpoint-desc">Retrieve filtered, sorted, paginated leads directory.</div>
     <div class="code-block">
-      Query Params: ?search=john&leadStatus=Qualified&leadPriority=Hot&page=1&limit=20
+      Query: ?search=john&leadStatus=Qualified&leadPriority=Hot&city=Vancouver&page=1&limit=25
     </div>
   </div>
 
   <div class="endpoint-card">
     <div class="endpoint-header"><span class="method post">POST</span> /api/v1/customers</div>
-    <div class="endpoint-desc">ثبت مشتری یا لید جدید</div>
+    <div class="endpoint-desc">Create a new customer lead record with qualification scores and tags.</div>
   </div>
 
   <div class="endpoint-card">
     <div class="endpoint-header"><span class="method get">GET</span> /api/v1/customers/:id</div>
-    <div class="endpoint-desc">دریافت جزئیات پرونده یک مشتری به همراه نوت‌ها و لیست اسناد پیوست</div>
+    <div class="endpoint-desc">Fetch full customer profile including notes, documents, and call history.</div>
   </div>
 
   <div class="endpoint-card">
     <div class="endpoint-header"><span class="method post">POST</span> /api/v1/customers/:id/notes</div>
-    <div class="endpoint-desc">ثبت یادداشت جدید برای مشتری</div>
-    <div class="code-block">
-      Request: { "content": "مشتری خواستار تخفیف برای پلن سازمانی شد.", "author": "Sara Agent" }
-    </div>
+    <div class="endpoint-desc">Append a new internal or AI note to customer timeline.</div>
   </div>
 
   <div class="endpoint-card">
     <div class="endpoint-header"><span class="method post">POST</span> /api/v1/customers/:id/documents</div>
-    <div class="endpoint-desc">آپلود سند یا پیش‌فاکتور (ارسال به‌صورت multipart/form-data)</div>
+    <div class="endpoint-desc">Upload attachment file (Multipart form-data: <code>file</code>, <code>type</code>, <code>name</code>).</div>
+  </div>
+
+  <h2>4.3. Voice Calls & Batch AI Campaigns (Cartesia Engine)</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/calls/dispatch-single</div>
+    <div class="endpoint-desc">Initiate an immediate or scheduled outbound AI cold call to a specific contact.</div>
+    <div class="code-block">
+      Request: { "customerId": 42, "scenarioId": "sc_01", "cartesiaVoiceId": "sonic-english-emma" }<br>
+      Response (202): { "status": "Queued", "callSessionId": "cs_99412", "phone": "+16045550199" }
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/calls/launch-batch-campaign</div>
+    <div class="endpoint-desc">Launch high-volume cold calling campaign across 1 to 10 concurrent lines.</div>
+    <div class="code-block">
+      Request: { "customerIds": [10, 11, 12, 13], "scenarioId": "sc_01", "concurrentLines": 5 }
+    </div>
+  </div>
+
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method ws">WS</span> /ws/media-stream/:callSessionId</div>
+    <div class="endpoint-desc">Bidirectional Telephony & Cartesia Audio Stream Gateway (Twilio Media Stream &harr; Backend &harr; Cartesia Sonic).</div>
+  </div>
+
+  <h2>4.4. Inbound Call Handling Webhook</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/telephony/inbound-webhook</div>
+    <div class="endpoint-desc">Twilio Inbound Voice Webhook: Returns TwiML WebSocket Stream configuration.</div>
+    <div class="code-block">
+      Response (TwiML): &lt;Response&gt;&lt;Connect&gt;&lt;Stream url="wss://api.callx.ai/ws/media-stream/in_123"/&gt;&lt;/Connect&gt;&lt;/Response&gt;
+    </div>
+  </div>
+
+  <h2>4.5. Automated Email Follow-ups</h2>
+  <div class="endpoint-card">
+    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/emails/send</div>
+    <div class="endpoint-desc">Dispatch single or bulk follow-up email rendered with customer variables.</div>
   </div>
 
   <div class="page-break"></div>
 
-  <h2>۳.۳. مدیریت تماس‌ها و هوش مصنوعی صوتی (Calls & Voice Engine)</h2>
-  <div class="endpoint-card">
-    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/calls</div>
-    <div class="endpoint-desc">دریافت گزارش تماس‌ها با قابلیت فیلتر تاریخ و وضعیت</div>
-  </div>
+  <!-- Section 5: Recommended Backend Architecture -->
+  <h1><span class="badge">5</span> Production Architecture & Recommended Tech Stack</h1>
 
-  <div class="endpoint-card">
-    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/calls/trigger-ai-call</div>
-    <div class="endpoint-desc">درخواست ایجاد تماس خودکار توسط بات صوتی با سناریوی مشخص</div>
-    <div class="code-block">
-      Request: { "phone": "+1234567890", "customerId": 105, "scenarioId": "1" }<br>
-      Response (202): { "status": "Queued", "callId": "c_99812", "message": "تماس در صف ارسال قرار گرفت." }
-    </div>
-  </div>
-
-  <h2>۳.۴. ایمیل‌های پیگیری و قالب‌ها (Emails)</h2>
-  <div class="endpoint-card">
-    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/email-templates</div>
-    <div class="endpoint-desc">دریافت لیست تمام قالب‌های آماده ایمیل</div>
-  </div>
-
-  <div class="endpoint-card">
-    <div class="endpoint-header"><span class="method post">POST</span> /api/v1/emails/send</div>
-    <div class="endpoint-desc">ارسال ایمیل پیگیری به مشتری با جایگذاری خودکار متغیرها</div>
-  </div>
-
-  <h2>۳.۵. داشبورد و شاخص‌های کلیدی (Dashboard KPIs)</h2>
-  <div class="endpoint-card">
-    <div class="endpoint-header"><span class="method get">GET</span> /api/v1/dashboard/stats</div>
-    <div class="endpoint-desc">دریافت آمار کلی (تعداد لیدها، تماس‌های موفق، نرخ تبدیل و پیگیری‌های امروز)</div>
-  </div>
-
-  <!-- Section 4 -->
-  <h1><span class="badge">۴</span> معماری فنی پیشنهادی بک‌اند (Recommended Stack)</h1>
   <div class="info-box">
-    <strong>💡 ساختار پیشنهادی:</strong>
+    <strong>Production Stack Specifications:</strong>
     <ul>
-      <li><strong>فریم‌ورک بک‌اند:</strong> Node.js (NestJS / Express + TypeScript) یا Python (FastAPI).</li>
-      <li><strong>پایگاه داده:</strong> PostgreSQL به همراه Prisma ORM یا TypeORM / SQLAlchemy.</li>
-      <li><strong>مدیریت صف و کش:</strong> Redis + BullMQ (برای صف‌بندی تماس‌ها و ایمیل‌های زمان‌بندی‌شده).</li>
-      <li><strong>ارتباط تماس صوتی:</strong> Twilio Voice API / LiveKit به همراه OpenAI Realtime API / Deepgram STT.</li>
+      <li><strong>Backend Framework:</strong> Node.js (NestJS / TypeScript) or Python (FastAPI / AsyncIO).</li>
+      <li><strong>Database & ORM:</strong> PostgreSQL 16+ with Prisma ORM / SQLAlchemy.</li>
+      <li><strong>Job & Call Queue Management:</strong> Redis + BullMQ (Handles concurrent outbound dialing 1-10 lines and retry queues).</li>
+      <li><strong>Voice Synthesis (TTS):</strong> <strong>Cartesia Sonic WebSocket API</strong> (Low-latency streaming &lt; 90ms).</li>
+      <li><strong>Speech-to-Text (STT):</strong> Deepgram Nova-2 Streaming WebSocket (Ultra-fast speech transcription &amp; VAD).</li>
+      <li><strong>LLM Intelligence:</strong> OpenAI GPT-4o / Anthropic Claude 3.5 Sonnet (Function calling for CRM updates and email actions).</li>
+      <li><strong>Object Storage:</strong> AWS S3 / Cloudflare R2 (Audio recordings &amp; customer PDF documents).</li>
     </ul>
+  </div>
+
+  <h2>5.1. Cartesia WebSocket Streaming Implementation (Node.js Example)</h2>
+  <div class="diagram-box">
+import Cartesia from "@cartesia/cartesia-js";
+
+const cartesia = new Cartesia({ apiKey: process.env.CARTESIA_API_KEY });
+const ws = cartesia.tts.websocket({ container: "raw", encoding: "pcm_mulaw", sampleRate: 8000 });
+
+// Stream LLM tokens to Cartesia and send audio directly to Twilio Media Stream
+async function streamResponseToTwilio(llmTokenStream, twilioStreamWs, streamSid) {
+  const response = await ws.send({
+    model_id: "sonic-english",
+    voice: { mode: "id", id: "a0e99841-438c-4a64-b679-ae501e7d6091" }, // Emma Voice ID
+    transcript: llmTokenStream,
+    language: "en"
+  });
+
+  for await (const chunk of response.events("media")) {
+    // Send 8kHz mulaw audio packet to caller with zero buffer delay
+    twilioStreamWs.send(JSON.stringify({
+      event: "media",
+      streamSid: streamSid,
+      media: { payload: Buffer.from(chunk.data).toString("base64") }
+    }));
+  }
+}
   </div>
 
 </body>
