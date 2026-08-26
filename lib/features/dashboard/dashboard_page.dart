@@ -99,12 +99,15 @@ class _DashboardPageState extends State<DashboardPage>
     if (mounted) {
       AppUtils.showSnackBar(
         context: context,
-        title: _aiEnabled ? 'AI Calling Engine Resumed' : 'AI Calling Engine Paused',
+        title: _aiEnabled
+            ? 'AI Calling Engine Resumed'
+            : 'AI Calling Engine Paused',
         extraMessage: _aiEnabled
             ? 'The AI agent is now actively handling live calls.'
             : 'Outbound and inbound AI lines are currently paused.',
-        toastificationType:
-            _aiEnabled ? ToastificationType.success : ToastificationType.warning,
+        toastificationType: _aiEnabled
+            ? ToastificationType.success
+            : ToastificationType.warning,
       );
     }
   }
@@ -542,7 +545,8 @@ class _DashboardPageState extends State<DashboardPage>
                                             'Search scheduled calls by name or company...',
                                         hintStyle: TextStyle(
                                             fontSize: 12,
-                                            color: context.colors.darkGreyColor),
+                                            color:
+                                                context.colors.darkGreyColor),
                                         border: InputBorder.none,
                                       ),
                                     ),
@@ -562,35 +566,6 @@ class _DashboardPageState extends State<DashboardPage>
                                     ),
                                 ],
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-
-                          // Filter Segment: All / Priority / Regular
-                          Container(
-                            height: 38,
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white.withValues(alpha: 0.03)
-                                  : context.colors.mediumGreyColor
-                                      .withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white12
-                                    : context.colors.mediumGreyColor
-                                        .withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                _buildUpcomingFilterChip('All'),
-                                _buildUpcomingFilterChip('Hot Leads'),
-                                _buildUpcomingFilterChip('Standard'),
-                              ],
                             ),
                           ),
                         ],
@@ -614,8 +589,7 @@ class _DashboardPageState extends State<DashboardPage>
                             if (!matchesSearch) return false;
 
                             if (_upcomingFilter == 'Hot Leads') {
-                              return user.leadPriority.toLowerCase() ==
-                                      'hot' ||
+                              return user.leadPriority.toLowerCase() == 'hot' ||
                                   user.tags.contains('Hot Lead');
                             }
                             if (_upcomingFilter == 'Standard') {
@@ -692,8 +666,8 @@ class _DashboardPageState extends State<DashboardPage>
                                       : context.colors.successColor;
 
                                   return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 6),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 6),
                                     child: Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
@@ -708,8 +682,8 @@ class _DashboardPageState extends State<DashboardPage>
                                               Text(
                                                 time,
                                                 style: TextStyle(
-                                                  color: context
-                                                      .colors.blackColor,
+                                                  color:
+                                                      context.colors.blackColor,
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -732,8 +706,8 @@ class _DashboardPageState extends State<DashboardPage>
                                                         : 'Standard',
                                                     style: TextStyle(
                                                       fontSize: 10,
-                                                      color: context.colors
-                                                          .darkGreyColor,
+                                                      color: context
+                                                          .colors.darkGreyColor,
                                                     ),
                                                   ),
                                                 ],
@@ -760,8 +734,8 @@ class _DashboardPageState extends State<DashboardPage>
                                                       .toUpperCase()
                                                   : '?',
                                               style: TextStyle(
-                                                color: context.colors
-                                                    .primaryLightColor,
+                                                color: context
+                                                    .colors.primaryLightColor,
                                                 fontWeight: FontWeight.w800,
                                                 fontSize: 16,
                                               ),
@@ -779,21 +753,18 @@ class _DashboardPageState extends State<DashboardPage>
                                               Text(
                                                 user.fullName,
                                                 style: TextStyle(
-                                                  color: context
-                                                      .colors.blackColor,
+                                                  color:
+                                                      context.colors.blackColor,
                                                   fontSize: 13.5,
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                                 maxLines: 1,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                               const SizedBox(height: 3),
                                               Row(
                                                 children: [
-                                                  Icon(
-                                                      CupertinoIcons
-                                                          .briefcase,
+                                                  Icon(CupertinoIcons.briefcase,
                                                       size: 11,
                                                       color: context.colors
                                                           .darkGreyColor),
@@ -804,8 +775,7 @@ class _DashboardPageState extends State<DashboardPage>
                                                           ? user.jobTitle
                                                           : (user.companyName
                                                                   .isNotEmpty
-                                                              ? user
-                                                                  .companyName
+                                                              ? user.companyName
                                                               : "Client"),
                                                       style: TextStyle(
                                                         color: context.colors
@@ -814,8 +784,7 @@ class _DashboardPageState extends State<DashboardPage>
                                                       ),
                                                       maxLines: 1,
                                                       overflow:
-                                                          TextOverflow
-                                                              .ellipsis,
+                                                          TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
@@ -827,8 +796,8 @@ class _DashboardPageState extends State<DashboardPage>
                                                   Text(
                                                     user.phone,
                                                     style: TextStyle(
-                                                      color: context.colors
-                                                          .darkGreyColor,
+                                                      color: context
+                                                          .colors.darkGreyColor,
                                                       fontSize: 11.5,
                                                     ),
                                                   ),
@@ -842,8 +811,7 @@ class _DashboardPageState extends State<DashboardPage>
                                         Row(
                                           children: [
                                             Tooltip(
-                                              message:
-                                                  'Call ${user.fullName}',
+                                              message: 'Call ${user.fullName}',
                                               child: _buildActionBtn(
                                                 CupertinoIcons.phone_fill,
                                                 context.colors.successColor,
@@ -853,12 +821,11 @@ class _DashboardPageState extends State<DashboardPage>
                                             ),
                                             const SizedBox(width: 8),
                                             Tooltip(
-                                              message:
-                                                  'Email ${user.fullName}',
+                                              message: 'Email ${user.fullName}',
                                               child: _buildActionBtn(
                                                 CupertinoIcons.mail_solid,
-                                                context.colors
-                                                    .primaryLightColor,
+                                                context
+                                                    .colors.primaryLightColor,
                                                 onTap: () =>
                                                     _openEmailForUser(user),
                                               ),
@@ -1128,8 +1095,7 @@ class _DashboardPageState extends State<DashboardPage>
                                   child: TextField(
                                     controller: _todoController,
                                     style: const TextStyle(fontSize: 12.5),
-                                    textAlignVertical:
-                                        TextAlignVertical.bottom,
+                                    textAlignVertical: TextAlignVertical.bottom,
                                     decoration: InputDecoration(
                                       isDense: true,
                                       hintText: "Add a new task...",
