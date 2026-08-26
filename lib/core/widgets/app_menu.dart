@@ -259,7 +259,7 @@ class AppMenu extends StatelessWidget {
                               context.read<PreferencesService>();
                           final router = GoRouter.of(context);
                           Navigator.pop(dialogContext);
-                          await preferences.setLoggedIn(false);
+                          await preferences.clearAuthSession();
                           router.go(AppRoutesPath.login);
                         },
                         style: ElevatedButton.styleFrom(

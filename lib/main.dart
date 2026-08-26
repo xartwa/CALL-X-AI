@@ -7,6 +7,7 @@ import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:callx_ai/core/constants/app_constants.dart';
 import 'package:callx_ai/core/routes/routes.dart';
+import 'package:callx_ai/features/auth/repository/auth_repository.dart';
 import 'package:callx_ai/services/api_provider.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 
@@ -15,7 +16,11 @@ Future<void> main() async {
 
   final sharedPreferences = await SharedPreferences.getInstance();
   final preferencesService = PreferencesService(sharedPreferences);
-  final dioClient = DioClient(baseUrl: AppConstants.apiBaseUrl);
+  final dioClient = DioClient(
+    baseUrl: AppConstants.apiBaseUrl,
+    accessTokenProvider: preferencesService.getAccessToken,
+  );
+  final authRepository = AuthRepository(dioClient);
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -23,6 +28,7 @@ Future<void> main() async {
       providers: [
         RepositoryProvider.value(value: preferencesService),
         RepositoryProvider.value(value: dioClient),
+        RepositoryProvider.value(value: authRepository),
       ],
       child: MultiBlocProvider(
         providers: [

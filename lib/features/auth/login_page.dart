@@ -9,7 +9,7 @@ import '../../core/routes/app_routes_path.dart';
 import '../../core/utils/utils.dart';
 import '../../core/constants/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../services/preferences_service.dart';
+import 'cubit/login_cubit.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
   bool _rememberMe = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -37,37 +36,13 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin() async {
+  void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate a premium network request delay
-      await Future.delayed(const Duration(milliseconds: 1200));
-
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-
-        // Show a premium toast notification using localized strings
-        AppUtils.showSnackBar(
-          context: context,
-          title: AppStrings.current.loginSuccessfulTitle,
-          extraMessage: AppStrings.current.loginSuccessfulMessage,
-          toastificationType: ToastificationType.success,
-        );
-
-        final preferences = context.read<PreferencesService>();
-        // Save login state if remember me is checked
-        await preferences.setLoggedIn(_rememberMe);
-
-        if (mounted) {
-          // Redirect to dashboard page
-          context.go(AppRoutesPath.dashboard);
-        }
-      }
+      context.read<LoginCubit>().login(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            rememberMe: _rememberMe,
+          );
     }
   }
 
@@ -78,8 +53,9 @@ class _LoginPageState extends State<LoginPage> {
     final size = MediaQuery.sizeOf(context);
     final isWideScreen = size.width > 800;
     final strings = AppStrings.current;
+    final isLoading = context.watch<LoginCubit>().state is LoginLoading;
 
-    return Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: context.colors.scaffoldBackgroundColor,
       body: Center(
         child: SingleChildScrollView(
@@ -166,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   SizedBox(height: 30),
                                   Text(
-                                    strings.appName,
+                                    strings.appName.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 28,
@@ -215,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                               SizedBox(height: 16),
                               Center(
                                 child: Text(
-                                  strings.appName,
+                                  strings.appName.toUpperCase(),
                                   style: TextStyle(
                                     color: context.colors.primaryLightColor,
                                     fontSize: 22,
@@ -227,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                               SizedBox(height: 30),
                             ],
                             SpacedText(
-                              text: strings.loginHeaderTitle,
+                              text: strings.loginHeaderTitle.toUpperCase(),
                               letterSpacing: 1.5,
                               style: TextStyle(
                                 color: isDark ? Colors.white : Colors.black87,
@@ -295,7 +271,7 @@ class _LoginPageState extends State<LoginPage> {
                               obscureText: _obscurePassword,
                               textInputAction: TextInputAction.done,
                               onFieldSubmitted: (_) =>
-                                  _isLoading ? null : _handleLogin(),
+                                  isLoading ? null : _handleLogin(),
                               style: TextStyle(
                                   color:
                                       isDark ? Colors.white : Colors.black87),
@@ -423,7 +399,7 @@ class _LoginPageState extends State<LoginPage> {
                               width: double.infinity,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
+                                onPressed: isLoading ? null : _handleLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
                                       context.colors.primaryLightColor,
@@ -433,7 +409,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   elevation: 0,
                                 ),
-                                child: _isLoading
+                                child: isLoading
                                     ? SizedBox(
                                         height: 20,
                                         width: 20,
@@ -463,6 +439,28 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
+    );
+
+    return BlocListener<LoginCubit, LoginState>(
+      listener: (context, state) {
+        if (state is LoginSuccess) {
+          AppUtils.showSnackBar(
+            context: context,
+            title: strings.loginSuccessfulTitle,
+            extraMessage: strings.loginSuccessfulMessage,
+            toastificationType: ToastificationType.success,
+          );
+          context.go(AppRoutesPath.dashboard);
+        } else if (state is LoginFailure) {
+          AppUtils.showSnackBar(
+            context: context,
+            title: strings.loginErrorTitle,
+            extraMessage: state.message,
+            toastificationType: ToastificationType.error,
+          );
+        }
+      },
+      child: scaffold,
     );
   }
 }

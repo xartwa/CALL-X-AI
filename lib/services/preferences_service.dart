@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:callx_ai/core/models/auth_user_model.dart';
 import 'package:callx_ai/core/models/tag_model.dart';
 
 class PreferencesService {
@@ -30,6 +31,53 @@ class PreferencesService {
 
   Future<void> setLoggedIn(bool value) async {
     await _preferences.setBool(_isLoggedInKey, value);
+  }
+
+  static const _accessTokenKey = 'auth_access_token';
+  static const _refreshTokenKey = 'auth_refresh_token';
+  static const _authUserKey = 'auth_user';
+
+  /// In-memory token for sessions without "remember me".
+  /// It survives navigation but not an app restart.
+  String? _runtimeAccessToken;
+
+  String? getAccessToken() {
+    return _runtimeAccessToken ?? _preferences.getString(_accessTokenKey);
+  }
+
+  AuthUser? getAuthUser() {
+    final raw = _preferences.getString(_authUserKey);
+    if (raw == null) return null;
+    try {
+      return AuthUser.fromJson(Map<String, dynamic>.from(jsonDecode(raw)));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Persists the auth session. When [persist] is false (remember me
+  /// unchecked), tokens are kept in memory only.
+  Future<void> saveAuthSession({
+    required AuthSession session,
+    required bool persist,
+  }) async {
+    _runtimeAccessToken = session.accessToken;
+    if (persist) {
+      await _preferences.setString(_accessTokenKey, session.accessToken);
+      await _preferences.setString(_refreshTokenKey, session.refreshToken);
+      await _preferences.setString(
+          _authUserKey, jsonEncode(session.user.toJson()));
+    }
+    await setLoggedIn(true);
+  }
+
+  /// Clears every piece of auth state (logout).
+  Future<void> clearAuthSession() async {
+    _runtimeAccessToken = null;
+    await _preferences.remove(_accessTokenKey);
+    await _preferences.remove(_refreshTokenKey);
+    await _preferences.remove(_authUserKey);
+    await setLoggedIn(false);
   }
 
   static const _aiEnabledKey = 'ai_enabled';

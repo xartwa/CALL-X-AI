@@ -1,4 +1,7 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/auth/cubit/login_cubit.dart';
+import '../../features/auth/repository/auth_repository.dart';
 import '../../services/preferences_service.dart';
 import '../../features/calls/calls_page.dart';
 import '../../features/customers/customers_page.dart';
@@ -17,15 +20,21 @@ class AppRouter {
   final PreferencesService _preferencesService;
 
   late final GoRouter router = GoRouter(
-    initialLocation: _preferencesService.isLoggedIn()
+    initialLocation: _preferencesService.getAccessToken() != null
         ? AppRoutesPath.dashboard
         : AppRoutesPath.login,
     routes: [
       GoRoute(
         path: AppRoutesPath.login,
         name: AppRoutesPath.loginName,
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: LoginPage(),
+        pageBuilder: (context, state) => NoTransitionPage(
+          child: BlocProvider(
+            create: (context) => LoginCubit(
+              authRepository: context.read<AuthRepository>(),
+              preferencesService: context.read<PreferencesService>(),
+            ),
+            child: const LoginPage(),
+          ),
         ),
       ),
       ShellRoute(

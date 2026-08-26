@@ -159,6 +159,11 @@ class AppStringsBundle {
     required this.loginRecoverPasswordTitle,
     required this.loginRecoverPasswordMessage,
     required this.loginButtonLabel,
+    required this.loginErrorTitle,
+    required this.loginErrorInvalidCredentials,
+    required this.loginErrorServerUnreachable,
+    required this.loginErrorTimeout,
+    required this.loginErrorGeneric,
     required this.logoutLabel,
     required this.logoutConfirmTitle,
     required this.logoutConfirmMessage,
@@ -382,6 +387,11 @@ class AppStringsBundle {
   final String loginRecoverPasswordTitle;
   final String loginRecoverPasswordMessage;
   final String loginButtonLabel;
+  final String loginErrorTitle;
+  final String loginErrorInvalidCredentials;
+  final String loginErrorServerUnreachable;
+  final String loginErrorTimeout;
+  final String loginErrorGeneric;
   final String logoutLabel;
   final String logoutConfirmTitle;
   final String logoutConfirmMessage;
@@ -623,6 +633,13 @@ class AppStrings {
       loginRecoverPasswordMessage:
           'This feature is not active in this version.',
       loginButtonLabel: 'Sign In',
+      loginErrorTitle: 'Login failed',
+      loginErrorInvalidCredentials:
+          'Invalid email or password. Please try again.',
+      loginErrorServerUnreachable:
+          'Cannot reach the server. Please check your connection.',
+      loginErrorTimeout: 'The request timed out. Please try again.',
+      loginErrorGeneric: 'Something went wrong. Please try again.',
       logoutLabel: 'Logout',
       logoutConfirmTitle: 'Confirm Logout',
       logoutConfirmMessage:
