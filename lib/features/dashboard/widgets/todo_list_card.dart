@@ -96,14 +96,14 @@ class _TodoListCardState extends State<TodoListCard> {
               );
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Add Todo Input Row
           Row(
             children: [
               Expanded(
                 child: Container(
-                  height: 42,
+                  height: 45,
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.04)
@@ -116,6 +116,9 @@ class _TodoListCardState extends State<TodoListCard> {
                   ),
                   child: TextField(
                     controller: _todoController,
+                    expands: true,
+                    maxLines: null,
+                    minLines: null,
                     style: TextStyle(
                       fontSize: 12.5,
                       color: context.colors.blackColor,
@@ -129,8 +132,8 @@ class _TodoListCardState extends State<TodoListCard> {
                         fontSize: 12.5,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
+                        vertical: 5,
                         horizontal: 14,
-                        vertical: 12,
                       ),
                       border: InputBorder.none,
                     ),
@@ -158,62 +161,39 @@ class _TodoListCardState extends State<TodoListCard> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
 
           // Reactive Task List
-          SizedBox(
-            height: 220,
-            child: BlocBuilder<TodoCubit, TodoState>(
-              builder: (context, state) {
-                if (state.todos.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.checkmark_seal,
-                          size: 32,
-                          color: context.colors.darkGreyColor
-                              .withValues(alpha: 0.4),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "All caught up!",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.darkGreyColor,
-                          ),
-                        ),
-                      ],
+          BlocBuilder<TodoCubit, TodoState>(
+            builder: (context, state) {
+              if (state.todos.isEmpty) {
+                  return const SizedBox(
+                    height: 92,
+                    child: Center(
+                      child: Text('All caught up!'),
                     ),
                   );
-                }
+              }
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: state.todos.map((todo) {
-                            return _TodoItemTile(
-                              todo: todo,
-                              onToggle: () =>
-                                  context.read<TodoCubit>().toggleTodo(todo.id),
-                              onDelete: () =>
-                                  context.read<TodoCubit>().deleteTodo(todo.id),
-                            );
-                          }).toList(growable: false),
-                        ),
-                      ),
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: state.todos.length,
+                  itemBuilder: (context, index) {
+                    final todo = state.todos[index];
+                    return _TodoItemTile(
+                      todo: todo,
+                      onToggle: () =>
+                          context.read<TodoCubit>().toggleTodo(todo.id),
+                      onDelete: () =>
+                          context.read<TodoCubit>().deleteTodo(todo.id),
                     );
                   },
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -238,7 +218,7 @@ class _TodoItemTile extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      constraints: const BoxConstraints(minHeight: 72),
+      constraints: const BoxConstraints(minHeight: 64),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: isDark
