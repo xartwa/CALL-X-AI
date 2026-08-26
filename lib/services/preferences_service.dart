@@ -309,4 +309,52 @@ class PreferencesService {
     await _preferences.setStringList(
         _callStatusesKey, tags.map((t) => jsonEncode(t.toJson())).toList());
   }
+
+  static const _todosKey = 'dashboard_todos_list';
+
+  List<Map<String, dynamic>> loadTodos() {
+    final list = _preferences.getStringList(_todosKey);
+    if (list == null) {
+      return [
+        {
+          'id': '1',
+          'text': 'Review weekly cold call metrics',
+          'isCompleted': false,
+          'createdAt': '2026-08-26T09:00:00.000Z'
+        },
+        {
+          'id': '2',
+          'text': 'Follow up with VIP qualified leads',
+          'isCompleted': true,
+          'createdAt': '2026-08-26T08:30:00.000Z'
+        },
+        {
+          'id': '3',
+          'text': 'Update outbound sales campaign script',
+          'isCompleted': false,
+          'createdAt': '2026-08-26T08:00:00.000Z'
+        },
+        {
+          'id': '4',
+          'text': 'Check telephony carrier logs',
+          'isCompleted': false,
+          'createdAt': '2026-08-26T07:30:00.000Z'
+        },
+        {
+          'id': '5',
+          'text': 'Schedule pipeline review meeting',
+          'isCompleted': false,
+          'createdAt': '2026-08-26T07:00:00.000Z'
+        },
+      ];
+    }
+    return list
+        .map((item) => Map<String, dynamic>.from(jsonDecode(item)))
+        .toList();
+  }
+
+  Future<void> saveTodos(List<Map<String, dynamic>> todos) async {
+    final list = todos.map((item) => jsonEncode(item)).toList();
+    await _preferences.setStringList(_todosKey, list);
+  }
 }
