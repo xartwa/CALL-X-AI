@@ -6,6 +6,7 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
@@ -80,9 +81,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   @override
   void initState() {
     super.initState();
-    _mode = widget.startInGroupMode
-        ? _EmailSendMode.group
-        : _EmailSendMode.single;
+    _mode =
+        widget.startInGroupMode ? _EmailSendMode.group : _EmailSendMode.single;
     _selectedSender = _senderPresets.first;
 
     final customers = context.read<CustomersCubit>().state.users;
@@ -304,8 +304,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       AppUtils.showSnackBar(
         context: context,
         title: 'Batch Email Campaign Dispatched',
-        extraMessage:
-            'Sent to $count recipients from $_resolvedSender',
+        extraMessage: 'Sent to $count recipients from $_resolvedSender',
         toastificationType: ToastificationType.success,
       );
     }
@@ -410,8 +409,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                   ),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () =>
-                          setState(() => _mode = _EmailSendMode.group),
+                      onTap: () => setState(() => _mode = _EmailSendMode.group),
                       child: Container(
                         decoration: BoxDecoration(
                           color: _mode == _EmailSendMode.group
@@ -687,7 +685,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            if (_batchTargetMode == _BatchTargetMode.segment) ...[
+                            if (_batchTargetMode ==
+                                _BatchTargetMode.segment) ...[
                               AppDropdownWidget<String>(
                                 value: _selectedBatchSegment,
                                 items: _batchSegments,
@@ -748,9 +747,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                               controller: _searchCustomerCtrl,
                                               textAlignVertical:
                                                   TextAlignVertical.center,
-                                              onChanged: (val) => setState(
-                                                  () => _customerSearchQuery =
-                                                      val),
+                                              onChanged: (val) => setState(() =>
+                                                  _customerSearchQuery = val),
                                               style: TextStyle(
                                                 fontSize: 12.5,
                                                 color: isDark
@@ -857,9 +855,11 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                         itemCount: customers
                                             .where((u) =>
                                                 _customerSearchQuery.isEmpty ||
-                                                u.fullName.toLowerCase().contains(
-                                                    _customerSearchQuery
-                                                        .toLowerCase()) ||
+                                                u.fullName
+                                                    .toLowerCase()
+                                                    .contains(
+                                                        _customerSearchQuery
+                                                            .toLowerCase()) ||
                                                 u.companyName
                                                     .toLowerCase()
                                                     .contains(
@@ -914,15 +914,15 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                                   const EdgeInsets.symmetric(
                                                       vertical: 6,
                                                       horizontal: 8),
-                                              margin: const EdgeInsets.symmetric(
-                                                  vertical: 2),
+                                              margin:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 2),
                                               decoration: BoxDecoration(
                                                 color: isSelected
                                                     ? Theme.of(context)
                                                         .colorScheme
                                                         .primary
-                                                        .withValues(
-                                                            alpha: 0.08)
+                                                        .withValues(alpha: 0.08)
                                                     : Colors.transparent,
                                                 borderRadius:
                                                     BorderRadius.circular(6),
@@ -939,8 +939,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                                         ? Theme.of(context)
                                                             .colorScheme
                                                             .primary
-                                                        : context
-                                                            .colors.darkGreyColor,
+                                                        : context.colors
+                                                            .darkGreyColor,
                                                   ),
                                                   const SizedBox(width: 10),
                                                   Expanded(
@@ -995,9 +995,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[700],
+                              color:
+                                  isDark ? Colors.grey[400] : Colors.grey[700],
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -1045,9 +1044,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[700],
+                              color:
+                                  isDark ? Colors.grey[400] : Colors.grey[700],
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -1056,8 +1054,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                           TextField(
                             controller: _bodyCtrl,
                             maxLines: 7,
-                            style: const TextStyle(
-                                fontSize: 13, height: 1.5),
+                            style: const TextStyle(fontSize: 13, height: 1.5),
                             decoration: InputDecoration(
                               isDense: true,
                               hintText:
@@ -1086,8 +1083,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                 borderRadius: BorderRadius.circular(
                                     ThemeConstants.buttonRadius),
                                 borderSide: BorderSide(
-                                    color:
-                                        context.colors.primaryLightColor),
+                                    color: context.colors.primaryLightColor),
                               ),
                               filled: true,
                               fillColor: isDark
@@ -1190,8 +1186,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                       const SizedBox(width: 6),
                                       GestureDetector(
                                         onTap: () {
-                                          setState(() =>
-                                              _attachments.remove(file));
+                                          setState(
+                                              () => _attachments.remove(file));
                                         },
                                         child: const Icon(
                                             CupertinoIcons.clear_circled_solid,
@@ -1399,11 +1395,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                   ),
                 ),
                 child: _isSending
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2.5),
+                    ? const AppLoadingIndicator(
+                        size: 20,
+                        color: Colors.white,
                       )
                     : Text(
                         _mode == _EmailSendMode.single

@@ -2,6 +2,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 
 class AiSettingsHeaders extends StatelessWidget {
   final bool hasUnsavedChanges;
@@ -102,11 +103,9 @@ class AiSettingsHeaders extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: hasUnsavedChanges && !isSaving ? onSave : null,
                   icon: isSaving
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
+                      ? const AppLoadingIndicator(
+                          size: 16,
+                          color: Colors.white,
                         )
                       : const Icon(CupertinoIcons.floppy_disk,
                           size: 14, color: Colors.white),

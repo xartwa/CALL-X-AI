@@ -73,7 +73,8 @@ class _TodoListCardState extends State<TodoListCard> {
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: done == total && total > 0
-                            ? context.colors.successColor.withValues(alpha: 0.12)
+                            ? context.colors.successColor
+                                .withValues(alpha: 0.12)
                             : context.colors.primaryLightColor
                                 .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -109,7 +110,8 @@ class _TodoListCardState extends State<TodoListCard> {
                         : context.colors.mediumGreyColor.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                      color:
+                          context.colors.mediumGreyColor.withValues(alpha: 0.4),
                     ),
                   ),
                   child: TextField(
@@ -188,17 +190,25 @@ class _TodoListCardState extends State<TodoListCard> {
                   );
                 }
 
-                return ListView.builder(
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: state.todos.length,
-                  itemBuilder: (context, index) {
-                    final todo = state.todos[index];
-                    return _TodoItemTile(
-                      todo: todo,
-                      onToggle: () =>
-                          context.read<TodoCubit>().toggleTodo(todo.id),
-                      onDelete: () =>
-                          context.read<TodoCubit>().deleteTodo(todo.id),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: state.todos.map((todo) {
+                            return _TodoItemTile(
+                              todo: todo,
+                              onToggle: () =>
+                                  context.read<TodoCubit>().toggleTodo(todo.id),
+                              onDelete: () =>
+                                  context.read<TodoCubit>().deleteTodo(todo.id),
+                            );
+                          }).toList(growable: false),
+                        ),
+                      ),
                     );
                   },
                 );
@@ -228,6 +238,7 @@ class _TodoItemTile extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
+      constraints: const BoxConstraints(minHeight: 72),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: isDark
@@ -239,6 +250,8 @@ class _TodoItemTile extends StatelessWidget {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           InkWell(
             onTap: onToggle,

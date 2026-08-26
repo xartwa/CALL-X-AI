@@ -1,74 +1,91 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:callx_ai/theme/app_colors.dart';
-import 'package:callx_ai/services/preferences_service.dart';
+import '../cubit/dashboard_cubit.dart';
+import '../cubit/dashboard_state.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 
 class DashboardKpiSection extends StatelessWidget {
   const DashboardKpiSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final preferences = context.watch<PreferencesService>();
-    final calls = preferences.loadCalls();
-
-    final todayStr = DateFormat('yyyy/MM/dd').format(DateTime.now());
-    final totalCalls = calls.length;
-    final callsToday = calls.where((c) {
-      final date = c['callDate'] as String?;
-      return date != null && date.startsWith(todayStr.split(' ')[0]);
-    }).length;
-
-    final completedCalls =
-        calls.where((c) => c['status'] == 'Completed').length;
-    final successRate = totalCalls == 0 ? 0.0 : (completedCalls / totalCalls);
-
-    final totalFollowUps = calls.where((c) {
-      final followUp = c['nextFollowUpDate'] as String?;
-      return followUp != null && followUp.isNotEmpty;
-    }).length;
-
-    return Row(
-      children: [
-        Expanded(
-          child: _KpiCard(
-            title: "Total Calls",
-            value: "$totalCalls",
-            icon: CupertinoIcons.phone_fill,
-            iconColor: context.colors.primaryLightColor,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _KpiCard(
-            title: "Calls Today",
-            value: callsToday > 0 ? "$callsToday" : "$totalCalls",
-            icon: CupertinoIcons.phone_badge_plus,
-            iconColor: context.colors.warningColor,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _KpiCard(
-            title: "Success Rate",
-            value: "${(successRate * 100).toInt()}%",
-            icon: CupertinoIcons.checkmark_alt_circle,
-            iconColor: context.colors.successColor,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _KpiCard(
-            title: "Total Follow-ups",
-            value: totalFollowUps > 0 ? "$totalFollowUps" : "14",
-            icon: CupertinoIcons.mail_solid,
-            iconColor: const Color(0xFF8B5CF6),
-          ),
-        ),
-      ],
+    return BlocBuilder<DashboardCubit, DashboardState>(
+      builder: (context, state) {
+        final kpi = state.snapshot?.kpi;
+        if (state.status == DashboardStatus.loading && kpi == null) {
+          return const _KpiLoading();
+        }
+        if (kpi == null) return const SizedBox.shrink();
+        return Row(
+          children: [
+            Expanded(
+              child: _KpiCard(
+                title: "Total Calls",
+                value: "${kpi.totalCalls}",
+                icon: CupertinoIcons.phone_fill,
+                iconColor: context.colors.primaryLightColor,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _KpiCard(
+                title: "Calls Today",
+                value: "${kpi.callsToday}",
+                icon: CupertinoIcons.phone_badge_plus,
+                iconColor: context.colors.warningColor,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _KpiCard(
+                title: "Success Rate",
+                value: "${kpi.successRate.toStringAsFixed(1)}%",
+                icon: CupertinoIcons.checkmark_alt_circle,
+                iconColor: context.colors.successColor,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _KpiCard(
+                title: "Total Follow-ups",
+                value: "${kpi.totalFollowUps}",
+                icon: CupertinoIcons.mail_solid,
+                iconColor: const Color(0xFF8B5CF6),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
+}
+
+class _KpiLoading extends StatelessWidget {
+  const _KpiLoading();
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: List.generate(
+          4,
+          (index) => Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: index == 3 ? 0 : 16),
+              child: SizedBox(
+                height: 112,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.colors.whiteColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const AppLoadingView(compact: true),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _KpiCard extends StatelessWidget {

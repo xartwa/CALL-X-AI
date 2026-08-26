@@ -10,6 +10,9 @@ import 'package:callx_ai/core/routes/routes.dart';
 import 'package:callx_ai/features/auth/repository/auth_repository.dart';
 import 'package:callx_ai/services/api_provider.dart';
 import 'package:callx_ai/services/preferences_service.dart';
+import 'package:callx_ai/features/dashboard/data/datasources/dashboard_remote_data_source.dart';
+import 'package:callx_ai/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:callx_ai/features/dashboard/domain/repositories/dashboard_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +24,9 @@ Future<void> main() async {
     accessTokenProvider: preferencesService.getAccessToken,
   );
   final authRepository = AuthRepository(dioClient);
+  final dashboardRepository = DashboardRepositoryImpl(
+    DashboardRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -29,6 +35,8 @@ Future<void> main() async {
         RepositoryProvider.value(value: preferencesService),
         RepositoryProvider.value(value: dioClient),
         RepositoryProvider.value(value: authRepository),
+        RepositoryProvider<DashboardRepository>.value(
+            value: dashboardRepository),
       ],
       child: MultiBlocProvider(
         providers: [

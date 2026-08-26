@@ -62,7 +62,7 @@ class StatCardWidget extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
-                            const SizedBox(height: 4  ),
+                            const SizedBox(height: 4),
                             Text(
                               label.toUpperCase(),
                               style: TextStyle(

@@ -7,6 +7,7 @@ import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 import 'package:flutter/material.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -86,7 +87,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
       id: 'sales_qualification',
       title: 'General Sales & Qualification',
       category: 'B2B Sales',
-      description: 'Qualifies lead budget, timeline, and decision-maker status.',
+      description:
+          'Qualifies lead budget, timeline, and decision-maker status.',
     ),
     ConversationScenario(
       id: 'contractor_estimation',
@@ -104,7 +106,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
       id: 'saas_demo_booking',
       title: 'SaaS & Tech Demo Booking',
       category: 'Technology',
-      description: 'Pitches product capabilities and books calendar live demos.',
+      description:
+          'Pitches product capabilities and books calendar live demos.',
     ),
     ConversationScenario(
       id: 'follow_up_care',
@@ -137,8 +140,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
   @override
   void initState() {
     super.initState();
-    _callType =
-        widget.startInGroupMode ? _CallType.group : _CallType.single;
+    _callType = widget.startInGroupMode ? _CallType.group : _CallType.single;
     _timingMode = widget.initialTab == 'schedule'
         ? _TimingMode.schedule
         : _TimingMode.callNow;
@@ -313,8 +315,10 @@ class _CallActionDialogState extends State<CallActionDialog> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color:
-                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -348,14 +352,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            SizedBox(
-              width: 32,
-              height: 32,
-              child: CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.primary,
-                strokeWidth: 3,
-              ),
-            ),
+            const AppLoadingIndicator(size: 30),
           ],
         ),
       ),
@@ -368,7 +365,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+            color:
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
@@ -469,16 +467,17 @@ class _CallActionDialogState extends State<CallActionDialog> {
                                       : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(6),
-                              boxShadow: _callType == _CallType.single && !isDark
-                                  ? [
-                                      BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.06),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ]
-                                  : null,
+                              boxShadow:
+                                  _callType == _CallType.single && !isDark
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.06),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          ),
+                                        ]
+                                      : null,
                             ),
                             alignment: Alignment.center,
                             child: Text(
@@ -810,8 +809,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       child: SizedBox(
                         height: 40,
                         child: OutlinedButton.icon(
-                          onPressed: () => setState(() => _groupTargetMode =
-                              _GroupTargetMode.segment),
+                          onPressed: () => setState(() =>
+                              _groupTargetMode = _GroupTargetMode.segment),
                           icon: Icon(
                             CupertinoIcons.layers_fill,
                             size: 14,
@@ -824,12 +823,10 @@ class _CallActionDialogState extends State<CallActionDialog> {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
-                              color:
-                                  _groupTargetMode == _GroupTargetMode.segment
-                                      ? Theme.of(context).colorScheme.primary
-                                      : (isDark
-                                          ? Colors.white60
-                                          : Colors.black54),
+                              color: _groupTargetMode ==
+                                      _GroupTargetMode.segment
+                                  ? Theme.of(context).colorScheme.primary
+                                  : (isDark ? Colors.white60 : Colors.black54),
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
@@ -861,8 +858,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       child: SizedBox(
                         height: 40,
                         child: OutlinedButton.icon(
-                          onPressed: () => setState(() =>
-                              _groupTargetMode = _GroupTargetMode.manual),
+                          onPressed: () => setState(
+                              () => _groupTargetMode = _GroupTargetMode.manual),
                           icon: Icon(
                             CupertinoIcons.person_crop_circle_badge_checkmark,
                             size: 14,
@@ -941,9 +938,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
                           height: 40,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF1E293B)
-                                : Colors.white,
+                            color:
+                                isDark ? const Color(0xFF1E293B) : Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isDark
@@ -1023,8 +1019,8 @@ class _CallActionDialogState extends State<CallActionDialog> {
                                       customers.length) {
                                     _manualSelectedUserIds.clear();
                                   } else {
-                                    _manualSelectedUserIds.addAll(
-                                        customers.map((u) => u.id));
+                                    _manualSelectedUserIds
+                                        .addAll(customers.map((u) => u.id));
                                   }
                                 });
                               },
@@ -1069,11 +1065,9 @@ class _CallActionDialogState extends State<CallActionDialog> {
                                   .where((u) =>
                                       _customerSearchQuery.isEmpty ||
                                       u.fullName.toLowerCase().contains(
-                                          _customerSearchQuery
-                                              .toLowerCase()) ||
+                                          _customerSearchQuery.toLowerCase()) ||
                                       u.companyName.toLowerCase().contains(
-                                          _customerSearchQuery
-                                              .toLowerCase()))
+                                          _customerSearchQuery.toLowerCase()))
                                   .toList();
                               final user = filtered[idx];
                               final isSelected =

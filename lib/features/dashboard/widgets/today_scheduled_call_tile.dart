@@ -5,23 +5,21 @@ import 'package:go_router/go_router.dart';
 import 'package:toastification/toastification.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
-import 'package:callx_ai/features/customers/models/customer_model.dart';
+import '../domain/entities/dashboard_snapshot.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 
 class TodayScheduledCallTile extends StatefulWidget {
-  final User user;
-  final String scheduledTime;
+  final DashboardTodayCall call;
   final bool isPriority;
   final bool isNext;
   final bool isDone;
 
   const TodayScheduledCallTile({
     super.key,
-    required this.user,
-    required this.scheduledTime,
+    required this.call,
     this.isPriority = false,
     this.isNext = false,
     this.isDone = false,
@@ -39,8 +37,8 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
       context: context,
       barrierDismissible: false,
       builder: (_) => CallActionDialog(
-        fullName: widget.user.fullName,
-        phone: widget.user.phone,
+        fullName: widget.call.fullName,
+        phone: widget.call.phone,
         initialTab: 'callNow',
       ),
     );
@@ -62,7 +60,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
             context: context,
             title: 'Email Sent',
             extraMessage:
-                'Follow-up email dispatched to ${widget.user.fullName}.',
+                'Follow-up email dispatched to ${widget.call.fullName}.',
             toastificationType: ToastificationType.success,
           );
         },
@@ -78,10 +76,14 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
     if (l.contains('warm') || l.contains('pending') || l.contains('queued')) {
       return const Color(0xFFF59E0B);
     }
-    if (l.contains('qualified') || l.contains('won') || l.contains('completed')) {
+    if (l.contains('qualified') ||
+        l.contains('won') ||
+        l.contains('completed')) {
       return const Color(0xFF10B981);
     }
-    if (l.contains('developer') || l.contains('agency') || l.contains('startup')) {
+    if (l.contains('developer') ||
+        l.contains('agency') ||
+        l.contains('startup')) {
       return const Color(0xFF8B5CF6);
     }
     return const Color(0xFF3B82F6);
@@ -90,39 +92,45 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final canCall =
+        widget.call.availableActions.contains(DashboardCallAction.call) ||
+            widget.call.availableActions.contains(DashboardCallAction.callNow);
+    final canEmail =
+        widget.call.availableActions.contains(DashboardCallAction.email);
+    final canView =
+        widget.call.availableActions.contains(DashboardCallAction.view);
 
     // — Computed values —
-    final initials = widget.user.fullName.trim().split(' ')
+    final initials = widget.call.fullName
+        .trim()
+        .split(' ')
         .where((e) => e.isNotEmpty)
         .map((e) => e[0])
         .take(2)
         .join()
         .toUpperCase();
 
-    final timeParts = widget.scheduledTime.split(' ');
-    final timeHour = timeParts.isNotEmpty ? timeParts[0] : widget.scheduledTime;
-    final timePeriod = timeParts.length > 1 ? timeParts[1] : '';
+    final timeHour = widget.call.timeLabel;
+    final timePeriod = widget.call.meridiem;
 
     // Tag logic
     String? displayTag;
     Color? tagColor;
-    if (widget.isPriority || widget.user.leadPriority.toLowerCase() == 'hot') {
+    if (widget.isPriority || widget.call.leadPriority.toLowerCase() == 'hot') {
       displayTag = 'Hot';
       tagColor = const Color(0xFFEF4444);
-    } else if (widget.user.leadPriority.toLowerCase() == 'warm') {
+    } else if (widget.call.leadPriority.toLowerCase() == 'warm') {
       displayTag = 'Warm';
       tagColor = const Color(0xFFF59E0B);
-    } else if (widget.user.companyType.isNotEmpty && widget.user.companyType != 'General') {
-      displayTag = widget.user.companyType;
+    } else if (widget.call.companyName.isNotEmpty) {
+      displayTag = widget.call.companyName;
       tagColor = _tagColor(displayTag);
     }
 
     // Call objective
-    final objective = widget.user.reasonForContact.isNotEmpty
-        ? widget.user.reasonForContact
-        : widget.user.jobTitle.isNotEmpty
-            ? '${widget.user.jobTitle} follow-up'
-            : 'Pipeline consultation';
+    final objective = widget.call.purpose.isNotEmpty
+        ? widget.call.purpose
+        : 'Pipeline consultation';
 
     // — Colors & States —
     final accentColor = widget.isNext
@@ -134,7 +142,8 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
     Color cardBg;
     Color cardBorder;
     if (widget.isNext) {
-      cardBg = context.colors.primaryLightColor.withValues(alpha: isDark ? 0.06 : 0.04);
+      cardBg = context.colors.primaryLightColor
+          .withValues(alpha: isDark ? 0.06 : 0.04);
       cardBorder = context.colors.primaryLightColor.withValues(alpha: 0.35);
     } else if (widget.isDone) {
       cardBg = Colors.transparent;
@@ -293,7 +302,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                       children: [
                         Flexible(
                           child: Text(
-                            widget.user.fullName,
+                            widget.call.fullName,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -301,8 +310,8 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                               decoration: widget.isDone
                                   ? TextDecoration.lineThrough
                                   : null,
-                              decorationColor:
-                                  context.colors.darkGreyColor.withValues(alpha: 0.6),
+                              decorationColor: context.colors.darkGreyColor
+                                  .withValues(alpha: 0.6),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -338,7 +347,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                     // Company + objective (subtitle)
                     Row(
                       children: [
-                        if (widget.user.companyName.isNotEmpty) ...[
+                        if (widget.call.companyName.isNotEmpty) ...[
                           Icon(
                             CupertinoIcons.building_2_fill,
                             size: 10,
@@ -348,7 +357,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              widget.user.companyName,
+                              widget.call.companyName,
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
@@ -359,8 +368,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                             ),
                           ),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
                             child: Text(
                               '·',
                               style: TextStyle(
@@ -391,84 +399,84 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
               const SizedBox(width: 12),
 
               // ── 4. Actions ───────────────────────────────────────
-              if (!widget.isDone)
+              if (!widget.isDone && (canCall || canEmail))
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Call button — same green style for both next & upcoming
-                    InkWell(
-                      onTap: () => _openCall(context),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: context.colors.successColor
-                              .withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: context.colors.successColor
-                                .withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.phone_fill,
-                              size: 12,
-                              color: context.colors.successColor,
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              widget.isNext ? "Call Now" : "Call",
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: context.colors.successColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 7),
-                    // Email icon button
-                    Tooltip(
-                      message: 'Send Email',
-                      child: InkWell(
-                        onTap: () => _openEmail(context),
+                    if (canCall)
+                      InkWell(
+                        onTap: () => _openCall(context),
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          width: 32,
-                          height: 32,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 7),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF8B5CF6).withValues(alpha: 0.08),
+                            color: context.colors.successColor
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                              color: context.colors.successColor
+                                  .withValues(alpha: 0.25),
                             ),
                           ),
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            CupertinoIcons.mail_solid,
-                            size: 13.5,
-                            color: Color(0xFF8B5CF6),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.phone_fill,
+                                size: 12,
+                                color: context.colors.successColor,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                widget.isNext ? "Call Now" : "Call",
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.colors.successColor,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ),
+                    if (canCall && canEmail) const SizedBox(width: 7),
+                    // Email icon button
+                    if (canEmail)
+                      Tooltip(
+                        message: 'Send Email',
+                        child: InkWell(
+                          onTap: () => _openEmail(context),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF8B5CF6)
+                                  .withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFF8B5CF6)
+                                    .withValues(alpha: 0.2),
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              CupertinoIcons.mail_solid,
+                              size: 13.5,
+                              color: Color(0xFF8B5CF6),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 )
-              else
-                // Done state — View customer profile
+              else if (canView)
                 Tooltip(
-                  message: 'View profile',
+                  message: 'View calls',
                   child: InkWell(
-                    onTap: () => context.go(
-                      AppRoutesPath.customerDetailPath(
-                          widget.user.id.toString()),
-                    ),
+                    onTap: () => context.go(AppRoutesPath.calls),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
                       padding: const EdgeInsets.symmetric(

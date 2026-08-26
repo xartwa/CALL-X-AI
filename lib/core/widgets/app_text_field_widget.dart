@@ -58,7 +58,6 @@ class AppTextFieldWidget extends StatelessWidget {
         validator: validator ?? (value) => null,
         obscureText: isObscure ?? false,
         decoration: InputDecoration(
-          
           hintText: hintText,
           hintStyle: TextStyle(
               fontSize: 13.0,

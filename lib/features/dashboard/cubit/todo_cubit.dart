@@ -17,7 +17,8 @@ class TodoCubit extends Cubit<TodoState> {
     try {
       emit(state.copyWith(status: TodoStatus.loading));
       final rawList = _preferencesService.loadTodos();
-      final todos = rawList.map((item) => TodoItemModel.fromJson(item)).toList();
+      final todos =
+          rawList.map((item) => TodoItemModel.fromJson(item)).toList();
       emit(state.copyWith(
         todos: todos,
         status: TodoStatus.loaded,
@@ -65,7 +66,8 @@ class TodoCubit extends Cubit<TodoState> {
   }
 
   Future<void> clearCompleted() async {
-    final updatedTodos = state.todos.where((todo) => !todo.isCompleted).toList();
+    final updatedTodos =
+        state.todos.where((todo) => !todo.isCompleted).toList();
     emit(state.copyWith(todos: updatedTodos));
     await _saveToStorage(updatedTodos);
   }

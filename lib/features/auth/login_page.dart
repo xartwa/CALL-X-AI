@@ -10,6 +10,7 @@ import '../../core/utils/utils.dart';
 import '../../core/constants/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/login_cubit.dart';
+import '../../core/widgets/app_feedback.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -410,13 +411,9 @@ class _LoginPageState extends State<LoginPage> {
                                   elevation: 0,
                                 ),
                                 child: isLoading
-                                    ? SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
+                                    ? const AppLoadingIndicator(
+                                        size: 20,
+                                        color: Colors.white,
                                       )
                                     : Text(
                                         strings.loginButtonLabel,

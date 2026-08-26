@@ -36,14 +36,20 @@ class AppUtils {
       String? extraMessage,
       required ToastificationType toastificationType}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final toastBgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final toastTextColor = isDark ? Colors.white : Colors.black87;
-    final toastDescColor = isDark ? Colors.white70 : Colors.black54;
+    final toastBgColor = isDark ? const Color(0xFF172033) : Colors.white;
+    final toastTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final toastDescColor = isDark ? Colors.white70 : const Color(0xFF64748B);
+    final accent = switch (toastificationType) {
+      ToastificationType.success => context.colors.successColor,
+      ToastificationType.warning => context.colors.warningColor,
+      ToastificationType.error => context.colors.errorColor,
+      _ => context.colors.infoColor,
+    };
 
     toastification.show(
       context: context,
       type: toastificationType,
-      style: ToastificationStyle.flat,
+      style: ToastificationStyle.minimal,
       title: title != null && title.isNotEmpty
           ? Text(
               fixRtlPunctuation(title),
@@ -64,10 +70,16 @@ class AppUtils {
             )
           : null,
       backgroundColor: toastBgColor,
-      borderRadius: BorderRadius.circular(12),
-      alignment: Alignment.topRight, // Top right alignment is premium and clean
-      autoCloseDuration: const Duration(seconds: 4),
-      showProgressBar: true,
+      primaryColor: accent,
+      foregroundColor: toastTextColor,
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: accent.withValues(alpha: .22)),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      margin: const EdgeInsets.all(16),
+      alignment: Alignment.topRight,
+      autoCloseDuration: const Duration(seconds: 3),
+      showProgressBar: false,
+      showIcon: true,
       direction: getDirection(extraMessage ?? title),
       dragToClose: true,
     );

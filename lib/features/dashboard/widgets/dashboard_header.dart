@@ -87,7 +87,8 @@ class _DashboardHeaderState extends State<DashboardHeader>
               borderRadius: BorderRadius.circular(30),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
                 decoration: BoxDecoration(
                   color: _aiEnabled
                       ? context.colors.successColor.withValues(alpha: 0.1)
@@ -163,7 +164,8 @@ class _DashboardHeaderState extends State<DashboardHeader>
                   color: context.colors.whiteColor,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+                    color:
+                        context.colors.mediumGreyColor.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Icon(
@@ -193,7 +195,8 @@ class _DashboardHeaderState extends State<DashboardHeader>
                   color: context.colors.whiteColor,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+                    color:
+                        context.colors.mediumGreyColor.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Icon(

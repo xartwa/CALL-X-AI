@@ -4,6 +4,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/models/auth_user_model.dart';
 import '../../../services/preferences_service.dart';
 import '../repository/auth_repository.dart';
+import '../../../core/errors/app_exception.dart';
 
 /// Immutable UI states of the login flow.
 sealed class LoginState {
@@ -63,12 +64,16 @@ class LoginCubit extends Cubit<LoginState> {
         persist: rememberMe,
       );
       emit(LoginSuccess(session));
-    } on InvalidCredentialsException {
-      emit(LoginFailure(AppStrings.current.loginErrorInvalidCredentials));
-    } on ServerUnreachableException {
-      emit(LoginFailure(AppStrings.current.loginErrorServerUnreachable));
-    } on AuthTimeoutException {
-      emit(LoginFailure(AppStrings.current.loginErrorTimeout));
+    } on AppException catch (error) {
+      final message = switch (error.type) {
+        AppErrorType.validation ||
+        AppErrorType.unauthorized =>
+          AppStrings.current.loginErrorInvalidCredentials,
+        AppErrorType.network => AppStrings.current.loginErrorServerUnreachable,
+        AppErrorType.timeout => AppStrings.current.loginErrorTimeout,
+        _ => AppStrings.current.loginErrorGeneric,
+      };
+      emit(LoginFailure(message));
     } catch (_) {
       emit(LoginFailure(AppStrings.current.loginErrorGeneric));
     }
