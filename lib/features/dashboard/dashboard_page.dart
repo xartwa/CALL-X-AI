@@ -404,7 +404,7 @@ class _DashboardPageState extends State<DashboardPage>
               const SizedBox(width: 16),
               Expanded(
                 child: _buildCleanKpi(
-                  title: "Pending Follow-ups",
+                  title: "Total Follow-ups",
                   value: "14",
                   trend: "-3%",
                   icon: CupertinoIcons.mail_solid,
@@ -1394,31 +1394,30 @@ class _DashboardPageState extends State<DashboardPage>
                         letterSpacing: -1.0,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          isPositive
-                              ? CupertinoIcons.arrow_up
-                              : CupertinoIcons.arrow_down,
-                          color: isPositive
-                              ? context.colors.successColor
-                              : context.colors.errorColor,
-                          size: 12,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "$trend Since last month",
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: isPositive
-                                ? context.colors.successColor
-                                : context.colors.errorColor,
-                          ),
-                        ),
-                      ],
-                    )
+                    // Row(
+                    //   children: [
+                    //     Icon(
+                    //       isPositive
+                    //           ? CupertinoIcons.arrow_up
+                    //           : CupertinoIcons.arrow_down,
+                    //       color: isPositive
+                    //           ? context.colors.successColor
+                    //           : context.colors.errorColor,
+                    //       size: 12,
+                    //     ),
+                    //     const SizedBox(width: 4),
+                    //     Text(
+                    //       "$trend Since last month",
+                    //       style: TextStyle(
+                    //         fontSize: 10,
+                    //         fontWeight: FontWeight.w600,
+                    //         color: isPositive
+                    //             ? context.colors.successColor
+                    //             : context.colors.errorColor,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // )
                   ],
                 ),
               ),
