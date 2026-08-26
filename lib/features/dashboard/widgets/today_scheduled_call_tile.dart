@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:toastification/toastification.dart';
 import 'package:callx_ai/theme/app_colors.dart';
+import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
@@ -393,70 +395,42 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Call button (prominent for next, subtle for others)
+                    // Call button — same green style for both next & upcoming
                     InkWell(
                       onTap: () => _openCall(context),
                       borderRadius: BorderRadius.circular(8),
-                      child: widget.isNext
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: context.colors.primaryLightColor,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    CupertinoIcons.phone_fill,
-                                    size: 12,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  const Text(
-                                    "Call Now",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: context.colors.successColor
-                                    .withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: context.colors.successColor
-                                      .withValues(alpha: 0.2),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.phone_fill,
-                                    size: 12,
-                                    color: context.colors.successColor,
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    "Call",
-                                    style: TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: context.colors.successColor,
-                                    ),
-                                  ),
-                                ],
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: context.colors.successColor
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: context.colors.successColor
+                                .withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.phone_fill,
+                              size: 12,
+                              color: context.colors.successColor,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              widget.isNext ? "Call Now" : "Call",
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: context.colors.successColor,
                               ),
                             ),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 7),
                     // Email icon button
@@ -487,24 +461,45 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                   ],
                 )
               else
-                // Done state — subtle re-call option
+                // Done state — View customer profile
                 Tooltip(
-                  message: 'Call again',
+                  message: 'View profile',
                   child: InkWell(
-                    onTap: () => _openCall(context),
+                    onTap: () => context.go(
+                      AppRoutesPath.customerDetailPath(
+                          widget.user.id.toString()),
+                    ),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 7),
                       decoration: BoxDecoration(
-                        color: context.colors.successColor.withValues(alpha: 0.08),
+                        color: context.colors.primaryLightColor
+                            .withValues(alpha: 0.07),
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: context.colors.primaryLightColor
+                              .withValues(alpha: 0.18),
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        CupertinoIcons.arrow_clockwise,
-                        size: 13.5,
-                        color: context.colors.successColor,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.person_fill,
+                            size: 12,
+                            color: context.colors.primaryLightColor,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            "View",
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.primaryLightColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
