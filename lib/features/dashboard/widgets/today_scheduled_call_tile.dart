@@ -13,12 +13,16 @@ class TodayScheduledCallTile extends StatefulWidget {
   final User user;
   final String scheduledTime;
   final bool isPriority;
+  final bool isNext;
+  final bool isDone;
 
   const TodayScheduledCallTile({
     super.key,
     required this.user,
     required this.scheduledTime,
     this.isPriority = false,
+    this.isNext = false,
+    this.isDone = false,
   });
 
   @override
@@ -64,18 +68,18 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
     );
   }
 
-  Color _getTagColor(String tagLabel) {
-    final lower = tagLabel.toLowerCase();
-    if (lower.contains('hot') || lower.contains('lost') || lower.contains('failed')) {
+  Color _tagColor(String label) {
+    final l = label.toLowerCase();
+    if (l.contains('hot') || l.contains('lost') || l.contains('failed')) {
       return const Color(0xFFEF4444);
     }
-    if (lower.contains('warm') || lower.contains('queued') || lower.contains('pending')) {
+    if (l.contains('warm') || l.contains('pending') || l.contains('queued')) {
       return const Color(0xFFF59E0B);
     }
-    if (lower.contains('qualified') || lower.contains('won') || lower.contains('completed') || lower.contains('excellent')) {
+    if (l.contains('qualified') || l.contains('won') || l.contains('completed')) {
       return const Color(0xFF10B981);
     }
-    if (lower.contains('developer') || lower.contains('agency')) {
+    if (l.contains('developer') || l.contains('agency') || l.contains('startup')) {
       return const Color(0xFF8B5CF6);
     }
     return const Color(0xFF3B82F6);
@@ -84,260 +88,428 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isHot = widget.user.leadPriority.toLowerCase() == 'hot' || widget.isPriority;
 
-    final initials = widget.user.fullName.isNotEmpty
-        ? widget.user.fullName
-            .trim()
-            .split(' ')
-            .where((e) => e.isNotEmpty)
-            .map((e) => e[0])
-            .take(2)
-            .join()
-            .toUpperCase()
-        : '?';
+    // — Computed values —
+    final initials = widget.user.fullName.trim().split(' ')
+        .where((e) => e.isNotEmpty)
+        .map((e) => e[0])
+        .take(2)
+        .join()
+        .toUpperCase();
 
-    // Determine relevant tag for display
+    final timeParts = widget.scheduledTime.split(' ');
+    final timeHour = timeParts.isNotEmpty ? timeParts[0] : widget.scheduledTime;
+    final timePeriod = timeParts.length > 1 ? timeParts[1] : '';
+
+    // Tag logic
     String? displayTag;
     Color? tagColor;
-
-    if (isHot) {
-      displayTag = 'Hot Lead';
+    if (widget.isPriority || widget.user.leadPriority.toLowerCase() == 'hot') {
+      displayTag = 'Hot';
       tagColor = const Color(0xFFEF4444);
-    } else if (widget.user.leadPriority.isNotEmpty && widget.user.leadPriority.toLowerCase() != 'warm') {
-      displayTag = widget.user.leadPriority;
-      tagColor = _getTagColor(displayTag);
-    } else if (widget.user.tags.isNotEmpty) {
-      displayTag = widget.user.tags.first;
-      tagColor = _getTagColor(displayTag);
-    } else if (widget.user.leadStatus.isNotEmpty) {
-      displayTag = widget.user.leadStatus;
-      tagColor = _getTagColor(displayTag);
+    } else if (widget.user.leadPriority.toLowerCase() == 'warm') {
+      displayTag = 'Warm';
+      tagColor = const Color(0xFFF59E0B);
+    } else if (widget.user.companyType.isNotEmpty && widget.user.companyType != 'General') {
+      displayTag = widget.user.companyType;
+      tagColor = _tagColor(displayTag);
+    }
+
+    // Call objective
+    final objective = widget.user.reasonForContact.isNotEmpty
+        ? widget.user.reasonForContact
+        : widget.user.jobTitle.isNotEmpty
+            ? '${widget.user.jobTitle} follow-up'
+            : 'Pipeline consultation';
+
+    // — Colors & States —
+    final accentColor = widget.isNext
+        ? context.colors.primaryLightColor
+        : widget.isDone
+            ? context.colors.successColor
+            : context.colors.blackColor;
+
+    Color cardBg;
+    Color cardBorder;
+    if (widget.isNext) {
+      cardBg = context.colors.primaryLightColor.withValues(alpha: isDark ? 0.06 : 0.04);
+      cardBorder = context.colors.primaryLightColor.withValues(alpha: 0.35);
+    } else if (widget.isDone) {
+      cardBg = Colors.transparent;
+      cardBorder = Colors.transparent;
+    } else if (_isHovered) {
+      cardBg = isDark
+          ? Colors.white.withValues(alpha: 0.04)
+          : context.colors.milkyColor;
+      cardBorder = isDark
+          ? Colors.white.withValues(alpha: 0.08)
+          : context.colors.mediumGreyColor.withValues(alpha: 0.7);
+    } else {
+      cardBg = isDark
+          ? Colors.white.withValues(alpha: 0.02)
+          : context.colors.milkyColor.withValues(alpha: 0.4);
+      cardBorder = isDark
+          ? Colors.white.withValues(alpha: 0.04)
+          : context.colors.mediumGreyColor.withValues(alpha: 0.35);
     }
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: _isHovered
-              ? (isDark
-                  ? Colors.white.withValues(alpha: 0.04)
-                  : context.colors.milkyColor)
-              : Colors.transparent,
+          color: cardBg,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: _isHovered
-                ? (isDark
-                    ? Colors.white12
-                    : context.colors.mediumGreyColor.withValues(alpha: 0.5))
-                : Colors.transparent,
-          ),
+          border: Border.all(color: cardBorder),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Minimalist Time Tag
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : context.colors.mediumGreyColor.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                widget.scheduledTime,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.blackColor,
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Unified, Consistent Avatar (Neutral / Theme Blue)
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: context.colors.primaryLightColor.withValues(alpha: 0.1),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                initials,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.primaryLightColor,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Customer Name & Subtitle
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          widget.user.fullName,
+        child: Opacity(
+          opacity: widget.isDone ? 0.55 : 1.0,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ── 1. Time ──────────────────────────────────────
+              SizedBox(
+                width: 56,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      timeHour,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        color: accentColor,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          timePeriod,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w600,
-                            color: context.colors.blackColor,
+                            color: context.colors.darkGreyColor,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (widget.isNext) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: context.colors.primaryLightColor,
+                            ),
+                          ),
+                        ],
+                        if (widget.isDone) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            CupertinoIcons.checkmark_circle_fill,
+                            size: 10,
+                            color: context.colors.successColor,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Vertical separator
+              Container(
+                width: 1,
+                height: 40,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                color: widget.isNext
+                    ? context.colors.primaryLightColor.withValues(alpha: 0.3)
+                    : context.colors.mediumGreyColor.withValues(alpha: 0.5),
+              ),
+
+              // ── 2. Avatar ─────────────────────────────────────
+              Stack(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: context.colors.primaryLightColor
+                          .withValues(alpha: 0.1),
+                      border: widget.isNext
+                          ? Border.all(
+                              color: context.colors.primaryLightColor
+                                  .withValues(alpha: 0.35),
+                              width: 1.5,
+                            )
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: context.colors.primaryLightColor,
+                      ),
+                    ),
+                  ),
+                  // Hot lead indicator dot
+                  if (widget.isPriority)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFFEF4444),
+                          border: Border.all(
+                            color: context.colors.whiteColor,
+                            width: 1.5,
+                          ),
                         ),
                       ),
-                      if (displayTag != null && tagColor != null) ...[
-                        const SizedBox(width: 6),
-                        _MicroTagBadge(
-                          label: displayTag,
-                          color: tagColor,
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      if (widget.user.companyName.isNotEmpty) ...[
+                    ),
+                ],
+              ),
+              const SizedBox(width: 13),
+
+              // ── 3. Contact Info ──────────────────────────────────
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Name + tag
+                    Row(
+                      children: [
                         Flexible(
                           child: Text(
-                            widget.user.companyName,
+                            widget.user.fullName,
                             style: TextStyle(
-                              fontSize: 11.5,
-                              color: context.colors.darkGreyColor,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.blackColor,
+                              decoration: widget.isDone
+                                  ? TextDecoration.lineThrough
+                                  : null,
+                              decorationColor:
+                                  context.colors.darkGreyColor.withValues(alpha: 0.6),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Text(
-                          " • ",
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: context.colors.darkGreyColor,
+                        if (displayTag != null && tagColor != null) ...[
+                          const SizedBox(width: 7),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: tagColor.withValues(alpha: 0.09),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: tagColor.withValues(alpha: 0.22),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              displayTag,
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: tagColor,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 3.5),
+                    // Company + objective (subtitle)
+                    Row(
+                      children: [
+                        if (widget.user.companyName.isNotEmpty) ...[
+                          Icon(
+                            CupertinoIcons.building_2_fill,
+                            size: 10,
+                            color: context.colors.darkGreyColor
+                                .withValues(alpha: 0.7),
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              widget.user.companyName,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: context.colors.darkGreyColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 6),
+                            child: Text(
+                              '·',
+                              style: TextStyle(
+                                color: context.colors.darkGreyColor
+                                    .withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ),
+                        ],
+                        Expanded(
+                          child: Text(
+                            objective,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.colors.darkGreyColor
+                                  .withValues(alpha: 0.8),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
-                      Text(
-                        widget.user.phone,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: context.colors.darkGreyColor,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // ── 4. Actions ───────────────────────────────────────
+              if (!widget.isDone)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Call button (prominent for next, subtle for others)
+                    InkWell(
+                      onTap: () => _openCall(context),
+                      borderRadius: BorderRadius.circular(8),
+                      child: widget.isNext
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: context.colors.primaryLightColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    CupertinoIcons.phone_fill,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    "Call Now",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 7),
+                              decoration: BoxDecoration(
+                                color: context.colors.successColor
+                                    .withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: context.colors.successColor
+                                      .withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.phone_fill,
+                                    size: 12,
+                                    color: context.colors.successColor,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    "Call",
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.colors.successColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    ),
+                    const SizedBox(width: 7),
+                    // Email icon button
+                    Tooltip(
+                      message: 'Send Email',
+                      child: InkWell(
+                        onTap: () => _openEmail(context),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF8B5CF6).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            CupertinoIcons.mail_solid,
+                            size: 13.5,
+                            color: Color(0xFF8B5CF6),
+                          ),
                         ),
                       ),
-                    ],
+                    ),
+                  ],
+                )
+              else
+                // Done state — subtle re-call option
+                Tooltip(
+                  message: 'Call again',
+                  child: InkWell(
+                    onTap: () => _openCall(context),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: context.colors.successColor.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        CupertinoIcons.arrow_clockwise,
+                        size: 13.5,
+                        color: context.colors.successColor,
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // Minimalist Action Icons
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _MinimalActionBtn(
-                  icon: CupertinoIcons.phone_fill,
-                  color: context.colors.successColor,
-                  tooltip: 'Call Now',
-                  onTap: () => _openCall(context),
                 ),
-                const SizedBox(width: 6),
-                _MinimalActionBtn(
-                  icon: CupertinoIcons.mail_solid,
-                  color: const Color(0xFF8B5CF6),
-                  tooltip: 'Send Email',
-                  onTap: () => _openEmail(context),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MicroTagBadge extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _MicroTagBadge({
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: color.withValues(alpha: 0.25),
-          width: 0.8,
-        ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 9.5,
-          fontWeight: FontWeight.w600,
-          color: color,
-          letterSpacing: 0.2,
-        ),
-      ),
-    );
-  }
-}
-
-class _MinimalActionBtn extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  const _MinimalActionBtn({
-    required this.icon,
-    required this.color,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
-        child: Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            icon,
-            size: 13.5,
-            color: color,
+            ],
           ),
         ),
       ),
