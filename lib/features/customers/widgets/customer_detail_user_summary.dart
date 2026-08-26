@@ -186,18 +186,20 @@ class CustomerDetailUserSummary extends StatelessWidget {
               isPriority: true),
           _buildInfoRow(context,
               label: 'Lead Quality', value: user.leadQuality),
-          if (user.nextFollowUpDate.isNotEmpty)
+          if (user.nextFollowUpDate != null)
             _buildInfoRow(
               context,
               label: 'Next Follow-up',
-              value: user.nextFollowUpDate,
+              value: user.nextFollowUpDate?.toString() ?? '-',
               isHighlight: true,
             ),
           _buildInfoRow(context,
               label: 'Last Contact Result', value: user.lastContactResult),
-          _buildInfoRow(context, label: text.createdAt, value: user.createdAt),
           _buildInfoRow(context,
-              label: text.lastContact, value: user.lastContact),
+              label: text.createdAt, value: user.createdAt?.toString() ?? '-'),
+          _buildInfoRow(context,
+              label: text.lastContact,
+              value: user.lastContact?.toString() ?? '-'),
 
           const Divider(height: 20),
 
@@ -339,6 +341,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
                         context,
                         fullName: user.fullName,
                         phone: user.phone,
+                        customerId: user.id,
                         initialTab: 'callNow',
                       );
                     },
@@ -372,6 +375,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
                         context,
                         fullName: user.fullName,
                         phone: user.phone,
+                        customerId: user.id,
                         initialTab: 'schedule',
                       );
                     },

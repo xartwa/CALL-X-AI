@@ -20,6 +20,10 @@ class CustomersHeaders extends StatefulWidget {
   final VoidCallback onAddPressed;
   final VoidCallback onImportPressed;
   final VoidCallback onExportPressed;
+  final List<String>? countries;
+  final List<String>? provinces;
+  final List<String>? cities;
+  final List<String>? priorities;
 
   const CustomersHeaders({
     super.key,
@@ -36,6 +40,10 @@ class CustomersHeaders extends StatefulWidget {
     required this.onAddPressed,
     required this.onImportPressed,
     required this.onExportPressed,
+    this.countries,
+    this.provinces,
+    this.cities,
+    this.priorities,
   });
 
   @override
@@ -123,7 +131,7 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                 SizedBox(
                   height: 36,
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: widget.onImportPressed,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                           color: isDark
@@ -147,7 +155,7 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                 SizedBox(
                   height: 36,
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: widget.onExportPressed,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                           color: isDark
@@ -462,6 +470,10 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                         final result = await AdvancedFilterDialog.show(
                           context,
                           initialState: widget.filterState,
+                          countries: widget.countries,
+                          provinces: widget.provinces,
+                          cities: widget.cities,
+                          priorities: widget.priorities,
                         );
                         if (result != null && widget.onFilterApplied != null) {
                           widget.onFilterApplied!(result);

@@ -17,7 +17,7 @@ import 'package:callx_ai/core/utils/utils.dart';
 
 class CustomerDetailPage extends StatefulWidget {
   const CustomerDetailPage({super.key, required this.customerId});
-  final int customerId;
+  final String customerId;
 
   @override
   State<CustomerDetailPage> createState() => _CustomerDetailPageState();
@@ -48,7 +48,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   void initState() {
     super.initState();
     final user = context.read<CustomersCubit>().state.users.firstWhere(
-          (u) => u.id == widget.customerId,
+          (u) => u.id.toString() == widget.customerId,
           orElse: () => User(
             id: -1,
             fullName: '',
@@ -76,7 +76,8 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     _stateCtrl = TextEditingController(text: user.state);
     _countryCtrl = TextEditingController(text: user.country);
     _reasonCtrl = TextEditingController(text: user.reasonForContact);
-    _nextFollowUpDateCtrl = TextEditingController(text: user.nextFollowUpDate);
+    _nextFollowUpDateCtrl =
+        TextEditingController(text: user.nextFollowUpDate?.toString() ?? '');
 
     _companyTypeNotifier = ValueNotifier<String>(
         user.companyType.isNotEmpty ? user.companyType : 'GC');
@@ -91,6 +92,40 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
             ? user.lastContactResult
             : 'Interested');
     _isActiveNotifier = ValueNotifier<bool>(user.status == 'Active');
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final loaded = await context
+          .read<CustomersCubit>()
+          .loadCustomerDetail(widget.customerId);
+      if (mounted && loaded != null) _syncControllers(loaded);
+    });
+  }
+
+  void _syncControllers(User user) {
+    final names = user.fullName.split(' ');
+    _firstNameCtrl.text = names.isNotEmpty ? names.first : '';
+    _lastNameCtrl.text = names.length > 1 ? names.sublist(1).join(' ') : '';
+    _companyNameCtrl.text = user.companyName;
+    _emailCtrl.text = user.email;
+    _phoneCtrl.text = user.phone;
+    _jobTitleCtrl.text = user.jobTitle;
+    _websiteCtrl.text = user.website;
+    _addressCtrl.text = user.address;
+    _cityCtrl.text = user.city;
+    _stateCtrl.text = user.state;
+    _countryCtrl.text = user.country;
+    _reasonCtrl.text = user.reasonForContact;
+    _nextFollowUpDateCtrl.text = user.nextFollowUpDate?.toString() ?? '';
+    _companyTypeNotifier.value =
+        user.companyType.isEmpty ? 'GC' : user.companyType;
+    _leadStatusNotifier.value =
+        user.leadStatus.isEmpty ? 'New' : user.leadStatus;
+    _leadPriorityNotifier.value =
+        user.leadPriority.isEmpty ? 'Warm' : user.leadPriority;
+    _leadQualityNotifier.value =
+        user.leadQuality.isEmpty ? 'Good' : user.leadQuality;
+    _lastContactResultNotifier.value =
+        user.lastContactResult.isEmpty ? 'Interested' : user.lastContactResult;
+    _isActiveNotifier.value = user.status == 'Active';
   }
 
   @override
@@ -155,7 +190,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     final text = AppStrings.current;
 
     final user = context.watch<CustomersCubit>().state.users.firstWhere(
-          (u) => u.id == widget.customerId,
+          (u) => u.id.toString() == widget.customerId,
           orElse: () => User(
             id: -1,
             fullName: '',
@@ -167,7 +202,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           ),
         );
 
-    if (user.id == -1) {
+    if (user.id.toString() == '-1') {
       final isDark = Theme.of(context).brightness == Brightness.dark;
       return Scaffold(
         backgroundColor: Colors.transparent,

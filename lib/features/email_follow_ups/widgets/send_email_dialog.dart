@@ -55,7 +55,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   final TextEditingController _customRecipientCtrl = TextEditingController();
 
   // Batch Selection
-  final Set<int> _manualSelectedUserIds = {};
+  final Set<String> _manualSelectedUserIds = {};
   final TextEditingController _searchCustomerCtrl = TextEditingController();
   String _customerSearchQuery = '';
   String _selectedBatchSegment = 'All Hot Leads';

@@ -64,6 +64,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
   String _status = 'Active';
   final List<String> _tags = ['Hot Lead'];
 
+  // Kept available for future tag color previews.
   Color _getTagColor(BuildContext context, String text) {
     final state = context.read<WorkspaceSettingsCubit>().state;
     final lower = text.toLowerCase();

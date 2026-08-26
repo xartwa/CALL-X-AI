@@ -25,15 +25,15 @@ class CustomerDetailActivityAndNotesTab extends StatelessWidget {
       _TimelineEvent(
         title: text.customerProfileCreated,
         description: text.customerProfileCreatedDesc,
-        date: user.createdAt,
+        date: user.createdAt?.toString() ?? '-',
         icon: CupertinoIcons.person_add_solid,
         color: context.colors.primaryLightColor,
       ),
-      if (user.lastContact != 'Never')
+      if (user.lastContact != null)
         _TimelineEvent(
           title: text.lastCustomerContactTitle,
           description: text.lastCustomerContactDesc,
-          date: user.lastContact,
+          date: user.lastContact?.toString() ?? '-',
           icon: CupertinoIcons.phone_fill,
           color: context.colors.successColor,
         ),
@@ -41,7 +41,7 @@ class CustomerDetailActivityAndNotesTab extends StatelessWidget {
         _TimelineEvent(
           title: text.reasonLogged,
           description: user.reasonForContact,
-          date: user.createdAt,
+          date: user.createdAt?.toString() ?? '-',
           icon: CupertinoIcons.doc_text_fill,
           color: context.colors.warningColor,
         ),

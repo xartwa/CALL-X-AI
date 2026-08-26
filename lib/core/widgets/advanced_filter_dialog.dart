@@ -35,17 +35,36 @@ class AdvancedFilterState {
 
 class AdvancedFilterDialog extends StatefulWidget {
   final AdvancedFilterState? initialState;
+  final List<String>? countries;
+  final List<String>? provinces;
+  final List<String>? cities;
+  final List<String>? priorities;
 
-  const AdvancedFilterDialog({super.key, this.initialState});
+  const AdvancedFilterDialog(
+      {super.key,
+      this.initialState,
+      this.countries,
+      this.provinces,
+      this.cities,
+      this.priorities});
 
   static Future<AdvancedFilterState?> show(
     BuildContext context, {
     AdvancedFilterState? initialState,
+    List<String>? countries,
+    List<String>? provinces,
+    List<String>? cities,
+    List<String>? priorities,
   }) {
     return showDialog<AdvancedFilterState>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AdvancedFilterDialog(initialState: initialState),
+      builder: (context) => AdvancedFilterDialog(
+          initialState: initialState,
+          countries: countries,
+          provinces: provinces,
+          cities: cities,
+          priorities: priorities),
     );
   }
 
@@ -205,7 +224,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
                   child: _buildDropdownField(
                     label: 'Country',
                     value: _selectedCountry,
-                    items: _countries,
+                    items: widget.countries ?? _countries,
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedCountry = val);
                     },
@@ -216,7 +235,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
                   child: _buildDropdownField(
                     label: 'Province / State',
                     value: _selectedProvince,
-                    items: _provinces,
+                    items: widget.provinces ?? _provinces,
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedProvince = val);
                     },
@@ -231,7 +250,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
                   child: _buildDropdownField(
                     label: 'City',
                     value: _selectedCity,
-                    items: _cities,
+                    items: widget.cities ?? _cities,
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedCity = val);
                     },
@@ -242,7 +261,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
                   child: _buildDropdownField(
                     label: 'Lead Priority',
                     value: _selectedPriority,
-                    items: _priorities,
+                    items: widget.priorities ?? _priorities,
                     onChanged: (val) {
                       if (val != null) setState(() => _selectedPriority = val);
                     },

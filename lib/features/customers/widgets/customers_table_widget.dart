@@ -100,7 +100,8 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             result = tagA.compareTo(tagB);
             break;
           case 8:
-            result = a.nextFollowUpDate.compareTo(b.nextFollowUpDate);
+            result = (a.nextFollowUpDate ?? DateTime(1900))
+                .compareTo(b.nextFollowUpDate ?? DateTime(1900));
             break;
         }
         return ascending ? result : -result;
@@ -309,13 +310,13 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             ),
 
             DataCell(Text(
-              user.nextFollowUpDate.isNotEmpty ? user.nextFollowUpDate : '-',
+              user.nextFollowUpDate?.toString() ?? '-',
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: user.nextFollowUpDate.isNotEmpty
+                fontWeight: user.nextFollowUpDate != null
                     ? FontWeight.w600
                     : FontWeight.normal,
-                color: user.nextFollowUpDate.isNotEmpty
+                color: user.nextFollowUpDate != null
                     ? context.colors.primaryLightColor
                     : context.colors.darkGreyColor,
               ),
@@ -328,7 +329,9 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
               AppActionButton(
                   type: AppActionType.call,
                   onTap: () => CallActionDialog.show(context,
-                      fullName: user.fullName, phone: user.phone)),
+                      fullName: user.fullName,
+                      phone: user.phone,
+                      customerId: user.id)),
               const SizedBox(width: 8),
               AppActionButton(
                   type: AppActionType.view,

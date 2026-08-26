@@ -36,6 +36,7 @@ class ConversationScenario {
 class CallActionDialog extends StatefulWidget {
   final String? fullName;
   final String? phone;
+  final String? customerId;
   final String initialTab;
   final bool startInGroupMode;
 
@@ -43,6 +44,7 @@ class CallActionDialog extends StatefulWidget {
     super.key,
     this.fullName,
     this.phone,
+    this.customerId,
     this.initialTab = 'callNow',
     this.startInGroupMode = false,
   });
@@ -51,6 +53,7 @@ class CallActionDialog extends StatefulWidget {
     BuildContext context, {
     String? fullName,
     String? phone,
+    String? customerId,
     String initialTab = 'callNow',
     bool startInGroupMode = false,
   }) {
@@ -60,6 +63,7 @@ class CallActionDialog extends StatefulWidget {
       builder: (context) => CallActionDialog(
         fullName: fullName,
         phone: phone,
+        customerId: customerId,
         initialTab: initialTab,
         startInGroupMode: startInGroupMode,
       ),
@@ -77,12 +81,12 @@ class _CallActionDialogState extends State<CallActionDialog> {
   User? _selectedUser;
 
   // Manual Customer Selection
-  final Set<int> _manualSelectedUserIds = {};
+  final Set<String> _manualSelectedUserIds = {};
   final TextEditingController _searchCustomerCtrl = TextEditingController();
   String _customerSearchQuery = '';
 
   // Conversation Scenarios
-  final List<ConversationScenario> _scenarios = const [
+  List<ConversationScenario> _scenarios = const [
     ConversationScenario(
       id: 'sales_qualification',
       title: 'General Sales & Qualification',
@@ -148,7 +152,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
 
     if (widget.fullName != null && widget.phone != null) {
       _selectedUser = User(
-        id: -1,
+        id: widget.customerId ?? '-1',
         fullName: widget.fullName!,
         phone: widget.phone!,
         email: '',
@@ -157,6 +161,39 @@ class _CallActionDialogState extends State<CallActionDialog> {
         status: '',
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final raw = await context.read<CustomersCubit>().getScenarios();
+      if (!mounted || raw.isEmpty) return;
+      final scenarios = raw
+          .map((item) => ConversationScenario(
+                id: '${item['id']}',
+                title: '${item['name'] ?? 'Scenario'}',
+                category: '${item['category'] ?? ''}',
+                description: '${item['pitchSummary'] ?? ''}',
+              ))
+          .toList();
+      setState(() {
+        _scenarios = scenarios;
+        _selectedScenario = scenarios.first;
+      });
+    });
+  }
+
+  DateTime? _scheduledFor() {
+    if (_timingMode != _TimingMode.schedule) return null;
+    final now = DateTime.now();
+    DateTime date;
+    if (_selectedDatePreset == 'Tomorrow') {
+      date = now.add(const Duration(days: 1));
+    } else if (_selectedDatePreset == 'Next Monday') {
+      final days = (DateTime.monday - now.weekday + 7) % 7;
+      date = now.add(Duration(days: days == 0 ? 7 : days));
+    } else if (_selectedDatePreset == 'Custom') {
+      date = _customDate ?? now;
+    } else {
+      date = now;
+    }
+    return DateTime(date.year, date.month, date.day, 14, 30);
   }
 
   @override
@@ -207,6 +244,16 @@ class _CallActionDialogState extends State<CallActionDialog> {
     if (_callType == _CallType.single) {
       if (_selectedUser == null) {
         setState(() => _isCalling = false);
+        return;
+      }
+
+      final dispatched = await buildContext.read<CustomersCubit>().dispatchCall(
+            _selectedUser!.id.toString(),
+            _selectedScenario.id,
+            scheduledFor: _scheduledFor(),
+          );
+      if (!dispatched) {
+        if (mounted) setState(() => _isCalling = false);
         return;
       }
 

@@ -13,6 +13,9 @@ import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import 'package:callx_ai/features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import 'package:callx_ai/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:callx_ai/features/customers/data/datasources/customer_remote_data_source.dart';
+import 'package:callx_ai/features/customers/data/repositories/customer_repository_impl.dart';
+import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +30,9 @@ Future<void> main() async {
   final dashboardRepository = DashboardRepositoryImpl(
     DashboardRemoteDataSource(dioClient),
   );
+  final customerRepository = CustomerRepositoryImpl(
+    CustomerRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -37,11 +43,16 @@ Future<void> main() async {
         RepositoryProvider.value(value: authRepository),
         RepositoryProvider<DashboardRepository>.value(
             value: dashboardRepository),
+        RepositoryProvider<CustomerRepository>.value(value: customerRepository),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => ThemeCubit(preferencesService)),
-          BlocProvider(create: (_) => CustomersCubit(preferencesService)),
+          BlocProvider(
+            create: (context) => CustomersCubit(
+              context.read<CustomerRepository>(),
+            )..loadInitial(),
+          ),
           BlocProvider(
               create: (_) => WorkspaceSettingsCubit(
                   preferencesService: preferencesService)),

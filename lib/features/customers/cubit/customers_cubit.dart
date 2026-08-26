@@ -1,298 +1,269 @@
+import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../services/preferences_service.dart';
-import '../models/customer_model.dart';
+import '../../../core/errors/app_exception.dart';
+import '../domain/entities/customer.dart';
+import '../domain/repositories/customer_repository.dart';
 
 export '../models/customer_model.dart';
 
 class CustomersState {
-  final List<User> users;
-
-  CustomersState({required this.users});
+  const CustomersState(
+      {this.users = const [],
+      this.kpi,
+      this.options,
+      this.filters = const CustomerFilters(),
+      this.pagination = const PaginationMeta(),
+      this.isInitialLoading = false,
+      this.isRefreshing = false,
+      this.isSubmitting = false,
+      this.isImporting = false,
+      this.isExporting = false,
+      this.listError,
+      this.actionError});
+  final List<Customer> users;
+  final CustomerKpi? kpi;
+  final CustomerFilterOptions? options;
+  final CustomerFilters filters;
+  final PaginationMeta pagination;
+  final bool isInitialLoading;
+  final bool isRefreshing;
+  final bool isSubmitting;
+  final bool isImporting;
+  final bool isExporting;
+  final String? listError;
+  final String? actionError;
+  CustomersState copyWith(
+          {List<Customer>? users,
+          CustomerKpi? kpi,
+          CustomerFilterOptions? options,
+          CustomerFilters? filters,
+          PaginationMeta? pagination,
+          bool? isInitialLoading,
+          bool? isRefreshing,
+          bool? isSubmitting,
+          bool? isImporting,
+          bool? isExporting,
+          String? listError,
+          String? actionError,
+          bool clearListError = false,
+          bool clearActionError = false}) =>
+      CustomersState(
+          users: users ?? this.users,
+          kpi: kpi ?? this.kpi,
+          options: options ?? this.options,
+          filters: filters ?? this.filters,
+          pagination: pagination ?? this.pagination,
+          isInitialLoading: isInitialLoading ?? this.isInitialLoading,
+          isRefreshing: isRefreshing ?? this.isRefreshing,
+          isSubmitting: isSubmitting ?? this.isSubmitting,
+          isImporting: isImporting ?? this.isImporting,
+          isExporting: isExporting ?? this.isExporting,
+          listError: clearListError ? null : listError ?? this.listError,
+          actionError:
+              clearActionError ? null : actionError ?? this.actionError);
 }
 
 class CustomersCubit extends Cubit<CustomersState> {
-  final PreferencesService _preferencesService;
+  CustomersCubit(this.repository) : super(const CustomersState());
+  final CustomerRepository repository;
+  Timer? _debounce;
+  CancelToken? _cancelToken;
 
-  CustomersCubit(this._preferencesService) : super(CustomersState(users: [])) {
-    _init();
+  Future<void> loadInitial() async {
+    emit(state.copyWith(isInitialLoading: true, clearListError: true));
+    await Future.wait([loadPage(), loadKpi(), loadOptions()]);
+    emit(state.copyWith(isInitialLoading: false));
   }
 
-  void _init() {
-    final loaded = _preferencesService.loadCustomers();
-    if (loaded.isEmpty) {
-      final defaultUsers = [
-        User(
-          id: 0,
-          fullName: "John Smith",
-          companyName: "ABC Construction",
-          jobTitle: "Estimator & Partner",
-          email: "john.smith@abcconstruction.ca",
-          phone: "0912 345 6789",
-          website: "https://abcconstruction.ca",
-          address: "1050 W Pender St, Suite 1200",
-          city: "Vancouver",
-          state: "BC",
-          country: "Canada",
-          companyType: "GC",
-          leadStatus: "Contacted",
-          leadPriority: "Hot",
-          leadQuality: "Excellent",
-          lastContactResult: "Interested",
-          nextFollowUpDate: "2026/08/20",
-          createdAt: "2026/06/15",
-          lastContact: "2026/08/10",
-          status: "Active",
-          reasonForContact:
-              "Request for tender estimation and commercial quote",
-          tags: ["GC", "Hot Lead", "Vancouver", "Commercial"],
-          notesList: [
-            CustomerNote(
-              id: 'n1',
-              content:
-                  'حتما تماس مشتری پیگیری شود و جهت ارسال پیش‌فاکتور پکیج اختصاصی تماس گرفته شود.',
-              date: '2026/08/10 14:30',
-              author: 'آرتا رجبان',
-            ),
-            CustomerNote(
-              id: 'n2',
-              content:
-                  'مشتری تمایل زیادی به عقد قرارداد سالانه دارد. درخواست تخفیف ۵ درصدی داشت.',
-              date: '2026/08/08 11:15',
-              author: 'Admin',
-            ),
-          ],
-          documents: [
-            CustomerDocument(
-              id: 'd1',
-              name: 'Commercial_Quote_v2.pdf',
-              size: '2.4 MB',
-              type: 'Quote',
-              uploadDate: '2026/08/09',
-            ),
-            CustomerDocument(
-              id: 'd2',
-              name: 'Architectural_Drawings.dwg',
-              size: '14.8 MB',
-              type: 'Drawings',
-              uploadDate: '2026/08/05',
-            ),
-          ],
-        ),
-        User(
-          id: 1,
-          fullName: "Sarah Connor",
-          companyName: "Apex Real Estate Development",
-          jobTitle: "Project Director",
-          email: "sconnor@apexdevelopments.com",
-          phone: "0935 111 2233",
-          website: "https://apexdevelopments.com",
-          address: "450 8th Ave SW",
-          city: "Calgary",
-          state: "AB",
-          country: "Canada",
-          companyType: "Developer",
-          leadStatus: "Qualified",
-          leadPriority: "Warm",
-          leadQuality: "Good",
-          lastContactResult: "Meeting booked",
-          nextFollowUpDate: "2026/08/22",
-          createdAt: "2026/07/01",
-          lastContact: "2026/08/12",
-          status: "Active",
-          reasonForContact: "New multi-family residential towers project",
-          tags: ["Developer", "Branding", "Calgary"],
-          notesList: [
-            CustomerNote(
-              id: 'n3',
-              content:
-                  'جلسه آنلاین برای روز دوشنبه تنظیم شد. پروپوزال فنی ارسال شد.',
-              date: '2026/08/12 16:45',
-              author: 'آرتا رجبان',
-            ),
-          ],
-          documents: [
-            CustomerDocument(
-              id: 'd3',
-              name: 'Project_Brief_Towers.pdf',
-              size: '5.1 MB',
-              type: 'Brief',
-              uploadDate: '2026/08/11',
-            ),
-          ],
-        ),
-        User(
-          id: 2,
-          fullName: "Michael Chang",
-          companyName: "Nexus Digital Agency",
-          jobTitle: "Founder & CEO",
-          email: "michael@nexusagency.io",
-          phone: "0930 777 8899",
-          website: "https://nexusagency.io",
-          address: "200 Bay St, Suite 3000",
-          city: "Toronto",
-          state: "ON",
-          country: "Canada",
-          companyType: "Agency",
-          leadStatus: "New",
-          leadPriority: "Hot",
-          leadQuality: "Excellent",
-          lastContactResult: "Call back",
-          nextFollowUpDate: "2026/08/18",
-          createdAt: "2026/08/01",
-          lastContact: "2026/08/13",
-          status: "Active",
-          reasonForContact: "Agency white-label partnership inquiry",
-          tags: ["Agency", "Startup", "Hot Lead", "Toronto"],
-          notesList: [
-            CustomerNote(
-              id: 'n4',
-              content:
-                  'علاقه‌مند به یکپارچه‌سازی هوش مصنوعی صوتی برای بیش از ۵۰ اکانت مشتریان خود.',
-              date: '2026/08/13 10:20',
-              author: 'Admin',
-            ),
-          ],
-          documents: [
-            CustomerDocument(
-              id: 'd4',
-              name: 'Agency_Partnership_Proposal.pdf',
-              size: '3.2 MB',
-              type: 'Proposal',
-              uploadDate: '2026/08/13',
-            ),
-          ],
-        ),
-      ];
-      _saveToPrefs(defaultUsers);
-      emit(CustomersState(users: defaultUsers));
-    } else {
-      final users = loaded.map((json) => User.fromJson(json)).toList();
-      emit(CustomersState(users: users));
+  Future<void> loadPage({int page = 1}) async {
+    try {
+      final result = await repository.getCustomers(state.filters,
+          page: page,
+          pageSize: state.pagination.pageSize,
+          cancelToken: _cancelToken);
+      emit(state.copyWith(
+          users: result.items,
+          pagination: result.pagination,
+          clearListError: true));
+    } catch (e) {
+      if (e is! AppException || e.type != AppErrorType.cancelled)
+        emit(state.copyWith(listError: 'Unable to load customers.'));
     }
   }
 
-  void _saveToPrefs(List<User> users) {
-    final list = users.map((u) => u.toJson()).toList();
-    _preferencesService.saveCustomers(list);
+  Future<void> loadKpi() async {
+    try {
+      emit(state.copyWith(kpi: await repository.getKpi()));
+    } catch (_) {}
   }
 
-  void addCustomer(User user) {
-    final nextId = state.users.isEmpty
-        ? 0
-        : state.users.map((u) => u.id).reduce((a, b) => a > b ? a : b) + 1;
-    final userWithId = user.copyWith(id: nextId);
-
-    final updated = List<User>.from(state.users)..add(userWithId);
-    _saveToPrefs(updated);
-    emit(CustomersState(users: updated));
+  Future<void> loadOptions({String? country, String? stateValue}) async {
+    try {
+      emit(state.copyWith(
+          options: await repository.getOptions(
+              country: country, state: stateValue)));
+    } catch (_) {}
   }
 
-  void updateCustomer(User updatedUser) {
-    final updatedList = state.users.map((user) {
-      return user.id == updatedUser.id ? updatedUser : user;
-    }).toList();
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+  void search(String value) {
+    _debounce?.cancel();
+    _cancelToken?.cancel();
+    _cancelToken = CancelToken();
+    _debounce = Timer(
+        const Duration(milliseconds: 400),
+        () => _applyFilters(CustomerFilters(
+            search: value,
+            country: state.filters.country,
+            state: state.filters.state,
+            city: state.filters.city,
+            status: state.filters.status,
+            leadStatus: state.filters.leadStatus,
+            leadPriority: state.filters.leadPriority,
+            leadQuality: state.filters.leadQuality,
+            sort: state.filters.sort)));
   }
 
-  void deleteCustomer(int id) {
-    final updatedList = state.users.where((user) => user.id != id).toList();
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+  Future<void> setFilters(CustomerFilters filters) => _applyFilters(filters);
+  Future<void> _applyFilters(CustomerFilters filters) async {
+    emit(state.copyWith(filters: filters, isRefreshing: true));
+    await loadPage();
+    emit(state.copyWith(isRefreshing: false));
   }
 
-  void addNote(int customerId, String noteText, {String author = 'Admin'}) {
-    if (noteText.trim().isEmpty) return;
+  Future<void> setSort(String sort) => _applyFilters(CustomerFilters(
+      search: state.filters.search,
+      country: state.filters.country,
+      state: state.filters.state,
+      city: state.filters.city,
+      status: state.filters.status,
+      leadStatus: state.filters.leadStatus,
+      leadPriority: state.filters.leadPriority,
+      leadQuality: state.filters.leadQuality,
+      sort: sort));
+  Future<void> addCustomer(Customer customer) async {
+    await _action(() async {
+      await repository.createCustomer(customer);
+      await Future.wait([loadPage(), loadKpi()]);
+    });
+  }
 
-    final now = DateTime.now();
-    final formattedDate =
-        "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+  Future<void> updateCustomer(Customer customer) async {
+    await _action(() async {
+      await repository.updateCustomer(customer);
+      await loadPage(page: state.pagination.currentPage);
+    });
+  }
 
-    final note = CustomerNote(
-      id: 'note_${DateTime.now().millisecondsSinceEpoch}',
-      content: noteText.trim(),
-      date: formattedDate,
-      author: author,
-    );
+  Future<void> deleteCustomer(Object id) async {
+    await _action(() async {
+      await repository.deleteCustomer('$id');
+      await Future.wait(
+          [loadPage(page: state.pagination.currentPage), loadKpi()]);
+    });
+  }
 
-    final updatedList = state.users.map((user) {
-      if (user.id == customerId) {
-        final updatedNotes = List<CustomerNote>.from(user.notesList)
-          ..insert(0, note);
-        return user.copyWith(
-          notesList: updatedNotes,
-          notes: noteText.trim(),
-          lastContact:
-              "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}",
-        );
+  Future<void> addNote(Object id, String text,
+          {String author = 'Admin'}) async =>
+      _action(() async {
+        await repository.addNote('$id', text, author: author);
+        await loadCustomerDetail('$id');
+      });
+  Future<void> updateNote(Object id, String noteId, String text) async =>
+      _action(() async {
+        await repository.updateNote('$id', noteId, text);
+        await loadCustomerDetail('$id');
+      });
+  Future<void> deleteNote(Object id, String noteId) async => _action(() async {
+        await repository.deleteNote('$id', noteId);
+        await loadCustomerDetail('$id');
+      });
+  Future<void> addTag(Object id, String tag) async => _action(() async {
+        await repository.addTag('$id', tag);
+        await loadCustomerDetail('$id');
+      });
+  Future<void> removeTag(Object id, String tag) async => _action(() async {
+        await repository.removeTag('$id', tag);
+        await loadCustomerDetail('$id');
+      });
+  Future<Customer> fetchCustomer(String id) => repository.getCustomer(id);
+  Future<Customer?> loadCustomerDetail(String id) async {
+    try {
+      final customer = await repository.getCustomer(id);
+      final users = [...state.users];
+      final index = users.indexWhere((item) => item.id == id);
+      if (index == -1) {
+        users.add(customer);
+      } else {
+        users[index] = customer;
       }
-      return user;
-    }).toList();
-
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+      emit(state.copyWith(users: users, clearActionError: true));
+      return customer;
+    } catch (_) {
+      emit(
+          state.copyWith(actionError: 'Customer details could not be loaded.'));
+      return null;
+    }
   }
 
-  void deleteNote(int customerId, String noteId) {
-    final updatedList = state.users.map((user) {
-      if (user.id == customerId) {
-        final updatedNotes =
-            user.notesList.where((n) => n.id != noteId).toList();
-        return user.copyWith(notesList: updatedNotes);
-      }
-      return user;
-    }).toList();
-
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+  Future<CustomerImportResult?> importCustomers(String path) async {
+    emit(state.copyWith(isImporting: true, clearActionError: true));
+    try {
+      final result = await repository.importCustomers(path);
+      await Future.wait([loadPage(), loadKpi(), loadOptions()]);
+      return result;
+    } catch (_) {
+      emit(
+          state.copyWith(actionError: 'The Excel file could not be imported.'));
+      return null;
+    } finally {
+      emit(state.copyWith(isImporting: false));
+    }
   }
 
-  void updateNote(int customerId, String noteId, String newText) {
-    final updatedList = state.users.map((user) {
-      if (user.id == customerId) {
-        final updatedNotes = user.notesList.map((n) {
-          if (n.id == noteId) {
-            return n.copyWith(content: newText.trim());
-          }
-          return n;
-        }).toList();
-        return user.copyWith(notesList: updatedNotes);
-      }
-      return user;
-    }).toList();
-
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+  Future<List<int>?> exportCustomers() async {
+    emit(state.copyWith(isExporting: true, clearActionError: true));
+    try {
+      return await repository.exportCustomers(state.filters);
+    } catch (_) {
+      emit(state.copyWith(
+          actionError: 'The customer export could not be created.'));
+      return null;
+    } finally {
+      emit(state.copyWith(isExporting: false));
+    }
   }
 
-  void addTag(int customerId, String tag) {
-    final cleanTag = tag.trim();
-    if (cleanTag.isEmpty) return;
-
-    final updatedList = state.users.map((user) {
-      if (user.id == customerId) {
-        if (!user.tags.contains(cleanTag)) {
-          final updatedTags = List<String>.from(user.tags)..add(cleanTag);
-          return user.copyWith(tags: updatedTags);
-        }
-      }
-      return user;
-    }).toList();
-
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+  Future<bool> dispatchCall(String customerId, String scenarioId,
+      {DateTime? scheduledFor}) async {
+    try {
+      await repository.dispatchCall(customerId, scenarioId,
+          scheduledFor: scheduledFor);
+      return true;
+    } catch (_) {
+      emit(state.copyWith(actionError: 'The call could not be dispatched.'));
+      return false;
+    }
   }
 
-  void removeTag(int customerId, String tag) {
-    final updatedList = state.users.map((user) {
-      if (user.id == customerId) {
-        final updatedTags = user.tags.where((t) => t != tag).toList();
-        return user.copyWith(tags: updatedTags);
-      }
-      return user;
-    }).toList();
+  Future<List<Map<String, dynamic>>> getScenarios() =>
+      repository.getScenarios();
 
-    _saveToPrefs(updatedList);
-    emit(CustomersState(users: updatedList));
+  Future<void> _action(Future<void> Function() action) async {
+    emit(state.copyWith(isSubmitting: true, clearActionError: true));
+    try {
+      await action();
+    } catch (_) {
+      emit(state.copyWith(actionError: 'Action could not be completed.'));
+    } finally {
+      emit(state.copyWith(isSubmitting: false));
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _debounce?.cancel();
+    _cancelToken?.cancel();
+    return super.close();
   }
 }

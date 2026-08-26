@@ -62,10 +62,8 @@ class AppRouter {
                 name: AppRoutesPath.customerDetailName,
                 pageBuilder: (context, state) {
                   final idStr = state.pathParameters['id'] ?? '0';
-                  final id = int.tryParse(idStr) ?? 0;
-
                   return NoTransitionPage(
-                    child: CustomerDetailPage(customerId: id),
+                    child: CustomerDetailPage(customerId: idStr),
                   );
                 },
               ),
