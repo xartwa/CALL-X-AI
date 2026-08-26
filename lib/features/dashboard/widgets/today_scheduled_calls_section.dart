@@ -18,7 +18,6 @@ class TodayScheduledCallsSection extends StatelessWidget {
     final customersState = context.watch<CustomersCubit>().state;
     final allUsers = customersState.users;
 
-    // Fixed schedule times for today's calls queue
     const scheduleTimes = [
       "09:30 AM",
       "10:15 AM",
@@ -42,7 +41,7 @@ class TodayScheduledCallsSection extends StatelessWidget {
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+          color: context.colors.mediumGreyColor.withValues(alpha: 0.25),
         ),
         boxShadow: [
           BoxShadow(
@@ -58,6 +57,7 @@ class TodayScheduledCallsSection extends StatelessWidget {
           // Header Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Row(
                 children: [
@@ -67,110 +67,99 @@ class TodayScheduledCallsSection extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                   ),
-                  const SizedBox(width: 15),
+                  const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 3),
+                        horizontal: 9, vertical: 3),
                     decoration: BoxDecoration(
                       color: context.colors.primaryLightColor
-                          .withValues(alpha: 0.1),
+                          .withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: context.colors.primaryLightColor
-                            .withValues(alpha: 0.25),
-                      ),
                     ),
                     child: Text(
-                      '$count in Queue Today',
+                      '$count today',
                       style: TextStyle(
                         fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         color: context.colors.primaryLightColor,
                       ),
                     ),
                   ),
                 ],
               ),
-              TextButton(
-                onPressed: () => context.go(AppRoutesPath.calls),
-                style: TextButton.styleFrom(
+              InkWell(
+                onTap: () => context.go(AppRoutesPath.calls),
+                borderRadius: BorderRadius.circular(6),
+                child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "VIEW ALL CALLS",
-                      style: TextStyle(
-                        color: context.colors.primaryLightColor,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                        letterSpacing: 0.5,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "View all",
+                        style: TextStyle(
+                          color: context.colors.primaryLightColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      CupertinoIcons.arrow_right,
-                      size: 12,
-                      color: context.colors.primaryLightColor,
-                    ),
-                  ],
+                      const SizedBox(width: 3),
+                      Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 11,
+                        color: context.colors.primaryLightColor,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           Text(
             todayDateFormatted,
             style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w400,
               color: context.colors.darkGreyColor,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 22),
 
+          // Scrollable Calls List
           SizedBox(
-            height: 640,
+            height: 600,
             child: todayCalls.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: context.colors.primaryLightColor
-                                .withValues(alpha: 0.08),
-                          ),
-                          child: Icon(
-                            CupertinoIcons.phone_badge_plus,
-                            size: 36,
-                            color: context.colors.primaryLightColor,
-                          ),
+                        Icon(
+                          CupertinoIcons.calendar_badge_minus,
+                          size: 36,
+                          color: context.colors.darkGreyColor
+                              .withValues(alpha: 0.4),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
                         Text(
                           "No scheduled calls for today",
                           style: TextStyle(
                             color: context.colors.blackColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
-                          "All pending appointments for today have been completed.",
+                          "All appointments for today are caught up.",
                           style: TextStyle(
                             color: context.colors.darkGreyColor,
-                            fontSize: 12,
+                            fontSize: 11.5,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
+                        const SizedBox(height: 14),
+                        OutlinedButton.icon(
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -180,14 +169,18 @@ class TodayScheduledCallsSection extends StatelessWidget {
                               ),
                             );
                           },
-                          icon: const Icon(CupertinoIcons.add, size: 14),
+                          icon: const Icon(CupertinoIcons.plus, size: 13),
                           label: const Text(
                             "Schedule Call",
-                            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.colors.primaryLightColor,
-                            foregroundColor: Colors.white,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.colors.primaryLightColor,
+                            side: BorderSide(
+                              color: context.colors.primaryLightColor
+                                  .withValues(alpha: 0.4),
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -201,19 +194,24 @@ class TodayScheduledCallsSection extends StatelessWidget {
                       scrollbarTheme: ScrollbarThemeData(
                         thumbColor: WidgetStateProperty.all(
                           context.colors.mediumGreyColor
-                              .withValues(alpha: 0.4),
+                              .withValues(alpha: 0.35),
                         ),
                         radius: const Radius.circular(8),
-                        thickness: WidgetStateProperty.all(6),
+                        thickness: WidgetStateProperty.all(5),
                       ),
                     ),
                     child: Scrollbar(
                       thumbVisibility: true,
                       child: ListView.separated(
-                        padding: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.only(right: 6),
                         itemCount: todayCalls.length,
                         physics: const AlwaysScrollableScrollPhysics(),
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => Divider(
+                          color: context.colors.mediumGreyColor
+                              .withValues(alpha: 0.15),
+                          height: 1,
+                          thickness: 1,
+                        ),
                         itemBuilder: (context, index) {
                           final user = todayCalls[index];
                           final time =

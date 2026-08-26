@@ -39,7 +39,7 @@ class _TodoListCardState extends State<TodoListCard> {
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+          color: context.colors.mediumGreyColor.withValues(alpha: 0.25),
         ),
         boxShadow: [
           BoxShadow(
@@ -95,7 +95,7 @@ class _TodoListCardState extends State<TodoListCard> {
               );
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
           // Add Todo Input Row
           Row(
@@ -156,7 +156,7 @@ class _TodoListCardState extends State<TodoListCard> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
           // Reactive Task List
           SizedBox(

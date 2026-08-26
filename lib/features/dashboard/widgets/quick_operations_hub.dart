@@ -68,12 +68,12 @@ class QuickOperationsHub extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+          color: context.colors.mediumGreyColor.withValues(alpha: 0.25),
         ),
         boxShadow: [
           BoxShadow(
@@ -86,84 +86,55 @@ class QuickOperationsHub extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SpacedText(
+            text: "Quick Actions",
+            color: context.colors.blackColor,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+          const SizedBox(height: 20),
+
+          // 2x2 Minimal Action Buttons
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SpacedText(
-                text: "Quick Operations",
-                color: context.colors.blackColor,
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color:
-                      context.colors.primaryLightColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
+              Expanded(
+                child: _MinimalActionCard(
+                  title: 'Batch Call',
+                  icon: CupertinoIcons.phone_badge_plus,
+                  accentColor: context.colors.primaryLightColor,
+                  onTap: () => _openLaunchBatchCall(context),
                 ),
-                child: Text(
-                  'ACTIONS',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: context.colors.primaryLightColor,
-                  ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MinimalActionCard(
+                  title: 'Bulk Email',
+                  icon: CupertinoIcons.mail_solid,
+                  accentColor: const Color(0xFF8B5CF6),
+                  onTap: () => _openSendMassEmail(context),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // 2x2 Grid of Operations
-          Column(
+          const SizedBox(height: 12),
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _QuickOpTile(
-                      title: 'Launch Batch Call',
-                      subtitle: 'Outbound AI Queue',
-                      icon: CupertinoIcons.phone_badge_plus,
-                      accentColor: context.colors.primaryLightColor,
-                      onTap: () => _openLaunchBatchCall(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _QuickOpTile(
-                      title: 'Send Bulk Email',
-                      subtitle: 'Mass Follow-up',
-                      icon: CupertinoIcons.mail_solid,
-                      accentColor: const Color(0xFF8B5CF6),
-                      onTap: () => _openSendMassEmail(context),
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: _MinimalActionCard(
+                  title: 'Add Lead',
+                  icon: CupertinoIcons.person_badge_plus,
+                  accentColor: const Color(0xFF10B981),
+                  onTap: () => _openAddNewCustomer(context),
+                ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _QuickOpTile(
-                      title: 'Add New Lead',
-                      subtitle: 'Instant Prospect',
-                      icon: CupertinoIcons.person_crop_circle_badge_plus,
-                      accentColor: const Color(0xFF10B981),
-                      onTap: () => _openAddNewCustomer(context),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _QuickOpTile(
-                      title: 'AI Voice Settings',
-                      subtitle: 'Prompts & Voices',
-                      icon: CupertinoIcons.sparkles,
-                      accentColor: const Color(0xFFF59E0B),
-                      onTap: () => context.go(AppRoutesPath.aiSettings),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: _MinimalActionCard(
+                  title: 'AI Setup',
+                  icon: CupertinoIcons.sparkles,
+                  accentColor: const Color(0xFFF59E0B),
+                  onTap: () => context.go(AppRoutesPath.aiSettings),
+                ),
               ),
             ],
           ),
@@ -173,77 +144,92 @@ class QuickOperationsHub extends StatelessWidget {
   }
 }
 
-class _QuickOpTile extends StatelessWidget {
+class _MinimalActionCard extends StatefulWidget {
   final String title;
-  final String subtitle;
   final IconData icon;
   final Color accentColor;
   final VoidCallback onTap;
 
-  const _QuickOpTile({
+  const _MinimalActionCard({
     required this.title,
-    required this.subtitle,
     required this.icon,
     required this.accentColor,
     required this.onTap,
   });
 
   @override
+  State<_MinimalActionCard> createState() => _MinimalActionCardState();
+}
+
+class _MinimalActionCardState extends State<_MinimalActionCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        hoverColor: accentColor.withValues(alpha: 0.05),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white10
-                  : context.colors.mediumGreyColor.withValues(alpha: 0.25),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(9),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: _isHovered
+                    ? widget.accentColor.withValues(alpha: 0.4)
+                    : (isDark
+                        ? Colors.white10
+                        : context.colors.mediumGreyColor.withValues(alpha: 0.35)),
+              ),
+              color: _isHovered
+                  ? widget.accentColor.withValues(alpha: 0.05)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.02)
+                      : context.colors.milkyColor.withValues(alpha: 0.6)),
             ),
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.02)
-                : context.colors.mediumGreyColor.withValues(alpha: 0.05),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: widget.accentColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    widget.icon,
+                    color: widget.accentColor,
+                    size: 15,
+                  ),
                 ),
-                child: Icon(icon, color: accentColor, size: 17),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.blackColor,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.blackColor,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: context.colors.darkGreyColor,
+                Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 11,
+                  color: _isHovered
+                      ? widget.accentColor
+                      : context.colors.darkGreyColor.withValues(alpha: 0.5),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -33,11 +33,11 @@ class _DashboardView extends StatelessWidget {
         children: [
           // 1. Header (Overview + AI Engine Pill + Workspace Settings + Theme Mode)
           DashboardHeader(),
-          SizedBox(height: 24),
+          SizedBox(height: 28),
 
           // 2. KPI Metrics Summary Cards
           DashboardKpiSection(),
-          SizedBox(height: 24),
+          SizedBox(height: 28),
 
           // 3. Workspace Layout
           Row(

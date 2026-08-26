@@ -14,7 +14,7 @@ class CallReportsCard extends StatelessWidget {
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+          color: context.colors.mediumGreyColor.withValues(alpha: 0.25),
         ),
         boxShadow: [
           BoxShadow(
