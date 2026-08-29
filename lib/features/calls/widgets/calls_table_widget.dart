@@ -168,7 +168,7 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: Colors.white,
         fontWeight: FontWeight.w500,
       ),
       columns: [
@@ -261,7 +261,7 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      call.fullName.isNotEmpty ? call.fullName : 'No Name',
+                      call.fullName.orDash,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
@@ -276,10 +276,9 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
 
             // Company
             DataCell(Text(
-              call.companyName.isNotEmpty ? call.companyName : '-',
-              style: TextStyle(
+              call.companyName.orDash,
+              style: const TextStyle(
                 fontSize: 12,
-                color: context.colors.primaryLightColor,
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
@@ -296,47 +295,23 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
                   toastificationType: ToastificationType.success,
                 );
               },
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(CupertinoIcons.phone_fill,
-                    size: 11, color: context.colors.darkGreyColor),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    call.phone,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.colors.blackColor.withValues(alpha: 0.8),
-                    ),
-                  ),
+              child: Text(
+                call.phone.orDash,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
                 ),
-              ]),
+              ),
             )),
 
             // Duration
-            DataCell(Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  CupertinoIcons.stopwatch,
-                  size: 12,
-                  color: context.colors.darkGreyColor,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  call.duration.isNotEmpty ? call.duration : '0:00',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: call.duration != '0:00'
-                        ? (Theme.of(context).brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black87)
-                        : context.colors.darkGreyColor,
-                  ),
-                ),
-              ],
+            DataCell(Text(
+              call.duration.orDash,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             )),
 
             // Date - Time
@@ -364,54 +339,27 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
             ),
 
             // Assignee
-            DataCell(Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  call.assignee.toLowerCase() == 'ai'
-                      ? CupertinoIcons.bolt_badge_a
-                      : CupertinoIcons.person_fill,
-                  size: 12,
-                  color: call.assignee.toLowerCase() == 'ai'
-                      ? Theme.of(context).colorScheme.primary
-                      : context.colors.darkGreyColor,
-                ),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    call.assignee,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: call.assignee.toLowerCase() == 'ai'
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      color: call.assignee.toLowerCase() == 'ai'
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+            DataCell(Text(
+              call.assignee.orDash,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: call.assignee.toLowerCase() == 'ai'
+                    ? FontWeight.w700
+                    : FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             )),
 
             // Follow-Up
             DataCell(Text(
-              (call.nextFollowUpDate != null &&
-                      call.nextFollowUpDate!.isNotEmpty)
-                  ? AppDateTime.displayDateOrDateTime(call.nextFollowUpDate)
-                  : '-',
+              AppDateTime.displayDateOrDateTime(call.nextFollowUpDate),
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: (call.nextFollowUpDate != null &&
-                        call.nextFollowUpDate!.isNotEmpty)
+                fontWeight: call.nextFollowUpDate != null &&
+                        call.nextFollowUpDate!.isNotEmpty
                     ? FontWeight.w600
                     : FontWeight.normal,
-                color: (call.nextFollowUpDate != null &&
-                        call.nextFollowUpDate!.isNotEmpty)
-                    ? context.colors.primaryLightColor
-                    : context.colors.darkGreyColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

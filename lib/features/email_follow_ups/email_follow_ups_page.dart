@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/utils/utils.dart';
 
 class EmailFollowUpsPage extends StatefulWidget {
   const EmailFollowUpsPage({super.key});
@@ -485,7 +486,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: Colors.white,
         fontWeight: FontWeight.w500,
       ),
       columns: const [
@@ -501,7 +502,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       rows: emails.map((email) {
         final status = (email['status'] ?? 'Delivered').toString();
         final statusColor = _getStatusColor(status);
-        final attachments = email['attachments'] as List?;
 
         return DataRow2(
           color: WidgetStateProperty.resolveWith<Color?>((s) {
@@ -520,7 +520,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    email['recipientName'] ?? 'Lead',
+                    (email['recipientName'] as Object?).orDash,
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
@@ -528,10 +528,9 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    email['recipientEmail'] ?? '',
-                    style: TextStyle(
+                    (email['recipientEmail'] as Object?).orDash,
+                    style: const TextStyle(
                       fontSize: 11.5,
-                      color: context.colors.darkGreyColor,
                     ),
                   ),
                 ],
@@ -541,33 +540,21 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
             // Sender Account
             DataCell(
               Text(
-                email['senderEmail'] ?? 'support@callx.ai',
-                style: TextStyle(
+                (email['senderEmail'] as Object?).orDash,
+                style: const TextStyle(
                   fontSize: 12,
-                  color: isDark ? Colors.white70 : Colors.black87,
                 ),
               ),
             ),
 
-            // Subject Line with Attachment badge
+            // Subject Line
             DataCell(
-              Row(
-                children: [
-                  if (attachments != null && attachments.isNotEmpty) ...[
-                    Icon(CupertinoIcons.paperclip,
-                        size: 13, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(width: 4),
-                  ],
-                  Expanded(
-                    child: Text(
-                      email['subject'] ?? '(No Subject)',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 12.5, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
+              Text(
+                (email['subject'] as Object?).orDash,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 12.5, fontWeight: FontWeight.w600),
               ),
             ),
 

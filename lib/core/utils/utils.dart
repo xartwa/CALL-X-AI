@@ -2,6 +2,17 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
+/// Fallback used by table cells when a value is missing.
+const String tableDash = '-';
+
+/// Single shared fallback so every table renders empty data the same way.
+extension TableCellText on Object? {
+  String get orDash {
+    final value = this?.toString().trim() ?? '';
+    return value.isEmpty ? tableDash : value;
+  }
+}
+
 class AppUtils {
   static TextDirection getDirection(String? text) {
     if (text == null || text.trim().isEmpty) return TextDirection.ltr;

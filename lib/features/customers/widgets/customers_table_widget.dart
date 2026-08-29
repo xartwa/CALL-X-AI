@@ -10,7 +10,6 @@ import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -179,7 +178,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: Colors.white,
         fontWeight: FontWeight.w500,
       ),
       columns: [
@@ -207,10 +206,6 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
       ],
       rows: _sortedUsers.map((user) {
-        final initials = user.fullName.trim().isEmpty
-            ? '?'
-            : user.fullName.trim()[0].toUpperCase();
-
         return DataRow2(
           color: WidgetStateProperty.resolveWith<Color?>((s) {
             if (s.contains(WidgetState.hovered)) {
@@ -226,7 +221,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
                   pathParameters: {'id': user.id.toString()}),
               child: Flexible(
                 child: Text(
-                  user.fullName.isNotEmpty ? user.fullName : 'No Name',
+                  user.fullName.orDash,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -238,10 +233,9 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             )),
 
             DataCell(Text(
-              user.companyName.isNotEmpty ? user.companyName : '-',
-              style: TextStyle(
+              user.companyName.orDash,
+              style: const TextStyle(
                 fontSize: 12,
-                color: context.colors.primaryLightColor,
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
@@ -257,17 +251,12 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
                   toastificationType: ToastificationType.success,
                 );
               },
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(CupertinoIcons.phone_fill,
-                    size: 11, color: context.colors.darkGreyColor),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(user.phone,
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-                ),
-              ]),
+              child: Text(
+                user.phone.orDash,
+                style: const TextStyle(fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             )),
 
             DataCell(InkWell(
@@ -279,24 +268,18 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
                   toastificationType: ToastificationType.success,
                 );
               },
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(CupertinoIcons.mail_solid,
-                    size: 11, color: context.colors.darkGreyColor),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(user.email,
-                      style: TextStyle(
-                          fontSize: 11, color: context.colors.darkGreyColor),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-                ),
-              ]),
+              child: Text(
+                user.email.orDash,
+                style: const TextStyle(fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             )),
 
             DataCell(Text(
               user.city.isNotEmpty
                   ? '${user.city}${user.state.isNotEmpty ? ', ${user.state}' : ''}'
-                  : (user.country.isNotEmpty ? user.country : 'Canada'),
+                  : user.country.orDash,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             )),
@@ -317,8 +300,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
 
             DataCell(
               user.tags.isEmpty
-                  ? Text('-',
-                      style: TextStyle(color: context.colors.darkGreyColor))
+                  ? const Text(tableDash)
                   : CustomTagWidget(
                       label: user.tags.first,
                       color: _getSemanticColor(context, user.tags.first),
@@ -332,9 +314,6 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
                 fontWeight: user.nextFollowUpDate != null
                     ? FontWeight.w600
                     : FontWeight.normal,
-                color: user.nextFollowUpDate != null
-                    ? context.colors.primaryLightColor
-                    : context.colors.darkGreyColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
