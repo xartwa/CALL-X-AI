@@ -131,18 +131,27 @@ class CallsRepositoryImpl implements CallsRepository {
         final data = await remote.list(query, cancelToken: cancelToken);
         return _guard(() {
           if (data is List) {
-            final results = data
+            final allResults = data
                 .whereType<Map>()
                 .map((m) =>
                     CallHistoryModel.fromJson(Map<String, dynamic>.from(m)))
                 .toList(growable: false);
+            final count = allResults.length;
+            final computedTotalPages = (count / (pageSize > 0 ? pageSize : 10)).ceil().clamp(1, 9999);
+            final startIndex = ((page - 1) * pageSize).clamp(0, count);
+            final endIndex = (startIndex + pageSize).clamp(0, count);
+            final pagedSlice = allResults.sublist(startIndex, endIndex);
+
             return PaginatedCallsDto(
-              count: results.length,
-              results: results,
+              count: count,
+              totalPages: computedTotalPages,
+              currentPage: page,
+              pageSize: pageSize,
+              results: pagedSlice,
             );
           }
           final json = Map<String, dynamic>.from(data as Map);
-          return PaginatedCallsDto.fromJson(json);
+          return PaginatedCallsDto.fromJson(json, page: page, requestedPageSize: pageSize);
         });
       });
 

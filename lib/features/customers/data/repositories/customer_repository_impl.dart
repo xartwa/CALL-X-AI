@@ -42,35 +42,70 @@ class CustomerRepositoryImpl implements CustomerRepository {
             cancelToken: cancelToken as CancelToken?);
         return _guard(() {
           if (data is List) {
-            final results = data
+            final allResults = data
                 .whereType<Map>()
-                .map((item) => CustomerDto(Map<String, dynamic>.from(item)).toEntity())
+                .map((item) =>
+                    CustomerDto(Map<String, dynamic>.from(item)).toEntity())
                 .toList(growable: false);
+            final count = allResults.length;
+            final validPageSize = pageSize > 0 ? pageSize : 10;
+            final computedTotalPages = (count / validPageSize).ceil().clamp(1, 9999);
+            final startIndex = ((page - 1) * validPageSize).clamp(0, count);
+            final endIndex = (startIndex + validPageSize).clamp(0, count);
+            final pagedSlice = allResults.sublist(startIndex, endIndex);
+
             return CustomerPage(
-                results,
+                pagedSlice,
                 PaginationMeta(
-                    count: results.length,
-                    totalPages: 1,
-                    currentPage: 1,
-                    pageSize: pageSize,
-                    hasNext: false,
-                    hasPrevious: false));
+                    count: count,
+                    totalPages: computedTotalPages,
+                    currentPage: page,
+                    pageSize: validPageSize,
+                    hasNext: page < computedTotalPages,
+                    hasPrevious: page > 1));
           }
           final json = Map<String, dynamic>.from(data as Map);
-          final results = PaginatedCustomersDto(json).customers;
-          final count = _int(json['count'] ?? json['total'] ?? json['total_count'], results.length);
-          final totalPages = _int(json['totalPages'] ?? json['total_pages'], 1);
-          final currentPage = _int(json['currentPage'] ?? json['current_page'] ?? json['page'], page);
+          final rawResults = PaginatedCustomersDto(json).customers;
+          final count = _int(
+              json['count'] ?? json['total'] ?? json['total_count'],
+              rawResults.length);
           final pSize = _int(json['pageSize'] ?? json['page_size'], pageSize);
+          final validPageSize = pSize > 0 ? pSize : 10;
+          final computedTotalPages =
+              (count / validPageSize).ceil().clamp(1, 9999);
+          final totalPages =
+              _int(json['totalPages'] ?? json['total_pages'], computedTotalPages);
+          final currentPage = _int(
+              json['currentPage'] ?? json['current_page'] ?? json['page'],
+              page);
+
+          List<Customer> finalResults = rawResults;
+          if (rawResults.length > validPageSize && rawResults.length >= count) {
+            final startIndex =
+                ((currentPage - 1) * validPageSize).clamp(0, rawResults.length);
+            final endIndex =
+                (startIndex + validPageSize).clamp(0, rawResults.length);
+            finalResults = rawResults.sublist(startIndex, endIndex);
+          }
+
+          final hasNext = json['next'] != null ||
+              json['hasNext'] == true ||
+              json['has_next'] == true ||
+              currentPage < totalPages;
+          final hasPrev = json['previous'] != null ||
+              json['hasPrevious'] == true ||
+              json['has_previous'] == true ||
+              currentPage > 1;
+
           return CustomerPage(
-              results,
+              finalResults,
               PaginationMeta(
                   count: count,
                   totalPages: totalPages,
                   currentPage: currentPage,
-                  pageSize: pSize,
-                  hasNext: json['hasNext'] == true || json['has_next'] == true,
-                  hasPrevious: json['hasPrevious'] == true || json['has_previous'] == true));
+                  pageSize: validPageSize,
+                  hasNext: hasNext,
+                  hasPrevious: hasPrev));
         });
       });
 

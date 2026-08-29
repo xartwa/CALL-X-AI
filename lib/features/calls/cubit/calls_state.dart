@@ -27,7 +27,7 @@ class CallsState {
     this.kpi,
     this.totalCount = 0,
     this.currentPage = 1,
-    this.pageSize = 5,
+    this.pageSize = 10,
     this.isInitialLoading = false,
     this.isRefreshing = false,
     this.isLoadingDetail = false,

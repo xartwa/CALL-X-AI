@@ -258,5 +258,35 @@ void main() {
       expect(page.results.first.direction, 'Inbound');
       expect(page.results.first.leadPriority, 'Hot');
     });
+
+    test('PaginatedCallsDto handles in-memory slicing when full list returned', () {
+      final json = {
+        'count': 15,
+        'results': List.generate(
+          15,
+          (i) => {
+            'id': i + 1,
+            'full_name': 'Person $i',
+            'phone': '+1 555-00$i',
+            'status': 'Completed',
+            'duration': '01:00',
+            'call_date': '2026/08/29',
+            'call_time': '10:00',
+          },
+        ),
+      };
+
+      final page1 = PaginatedCallsDto.fromJson(json, page: 1, requestedPageSize: 10);
+      expect(page1.count, 15);
+      expect(page1.totalPages, 2);
+      expect(page1.results.length, 10);
+      expect(page1.results.first.fullName, 'Person 0');
+
+      final page2 = PaginatedCallsDto.fromJson(json, page: 2, requestedPageSize: 10);
+      expect(page2.count, 15);
+      expect(page2.totalPages, 2);
+      expect(page2.results.length, 5);
+      expect(page2.results.first.fullName, 'Person 10');
+    });
   });
 }
