@@ -1,7 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
+import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
+import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/calls/widgets/details/call_audio_player_widget.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
 import 'package:callx_ai/theme/app_colors.dart';
@@ -207,6 +211,61 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     }).toList();
   }
 
+  bool _isUnanswered(CustomerCallHistory call) {
+    final status = call.status.toLowerCase();
+    return status == 'no answer' ||
+        status == 'failed' ||
+        status == 'missed' ||
+        status == 'unanswered';
+  }
+
+  void _onCallSelected(CustomerCallHistory call) {
+    if (_isUnanswered(call)) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage:
+            'This call was unanswered and has no recording or transcript details.',
+        toastificationType: ToastificationType.info,
+      );
+      return;
+    }
+    setState(() => _selectedCallId = call.id);
+  }
+
+  void _copyToClipboard(String text, String label) {
+    Clipboard.setData(ClipboardData(text: text));
+    AppUtils.showSnackBar(
+      context: context,
+      extraMessage: '$label copied to clipboard',
+      toastificationType: ToastificationType.success,
+    );
+  }
+
+  void _copyTranscript(CustomerCallHistory call) {
+    final transcript = call.transcript.isNotEmpty
+        ? call.transcript
+        : const [
+            TranscriptTurn(
+              speaker: 'ai',
+              speakerName: 'Agent',
+              timestamp: '',
+              text: 'Hi, this is Arta from CallX. How can I help you today?',
+            ),
+          ];
+
+    final buffer = StringBuffer();
+    buffer.writeln(
+        '=== Call Transcript: ${widget.user.fullName} (${call.callDate} • ${call.callTime}) ===');
+    for (final t in transcript) {
+      final isAi = t.speaker.toLowerCase() == 'ai' ||
+          t.speaker.toLowerCase() == 'agent';
+      final speakerName = isAi ? 'Agent' : (t.speakerName ?? 'Customer');
+      buffer.writeln('[$speakerName]: ${t.text}');
+    }
+
+    _copyToClipboard(buffer.toString(), 'Call transcript');
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -217,10 +276,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         width: double.infinity,
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: context.colors.whiteColor,
+          color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
           border: Border.all(
-            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
           ),
         ),
         child: Center(
@@ -247,32 +306,35 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       );
     }
 
-    final activeCallId = _selectedCallId ?? calls.first.id;
-    final selectedCall = calls.firstWhere(
-      (c) => c.id == activeCallId,
-      orElse: () => calls.first,
-    );
+    CustomerCallHistory? selectedCall;
+    if (_selectedCallId != null) {
+      selectedCall = calls.firstWhere(
+        (c) => c.id == _selectedCallId,
+        orElse: () => calls.first,
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 650;
 
-        if (!isWide) {
-          return _buildCallsList(calls, activeCallId, isDark, false);
+        // If no call is selected or screen is narrow, show single list view
+        if (!isWide || selectedCall == null) {
+          return _buildCallsList(calls, _selectedCallId ?? '', isDark, false);
         }
 
-        // 2-Column Master-Detail Mode (Clean & Minimal)
+        // 2-Column Master-Detail Mode (Clean & Minimal matching mockup)
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left Column: Calls List
+            // Left Column: Calls List (flex: 4)
             Expanded(
               flex: 4,
-              child: _buildCallsList(calls, activeCallId, isDark, true),
+              child: _buildCallsList(calls, _selectedCallId!, isDark, true),
             ),
             const SizedBox(width: 14),
 
-            // Right Column: Call Detail Card
+            // Right Column: Call Detail Card (flex: 5)
             Expanded(
               flex: 5,
               child: _buildCallDetailCard(selectedCall, isDark),
@@ -298,7 +360,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
             ),
           ),
           child: Row(
@@ -368,7 +430,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             children: [
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -385,7 +447,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ),
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -407,9 +469,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         '${call.callDate.isNotEmpty ? call.callDate : 'Aug 29, 2026'} • ${call.callTime.isNotEmpty ? call.callTime : '19:44'}';
 
     return InkWell(
-      onTap: () {
-        setState(() => _selectedCallId = call.id);
-      },
+      onTap: () => _onCallSelected(call),
       borderRadius: BorderRadius.circular(10),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -422,7 +482,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
           border: Border.all(
             color: isSelected
                 ? context.colors.primaryLightColor
-                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -519,17 +579,17 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: context.colors.whiteColor,
+        color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
           width: 1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header: Direction Icon + Title + Subtitle + Status + Duration
+          // 1. Header: Direction Icon + Title + Subtitle + Status + Duration + Schedule + Close (✕)
           Row(
             children: [
               _buildDirectionIcon(call, size: 36, iconSize: 18),
@@ -577,6 +637,45 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   ),
                 ],
               ),
+              const SizedBox(width: 6),
+
+              // Schedule Button
+              IconButton(
+                tooltip: 'Schedule Follow-up',
+                onPressed: () async {
+                  await CallActionDialog.show(
+                    context,
+                    fullName: widget.user.fullName,
+                    phone: widget.user.phone,
+                    initialTab: 'schedule',
+                  );
+                },
+                icon: Icon(
+                  CupertinoIcons.calendar,
+                  size: 17,
+                  color: context.colors.primaryLightColor,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                splashRadius: 16,
+              ),
+              const SizedBox(width: 2),
+
+              // Close Details Tab Button
+              IconButton(
+                tooltip: 'Close call details',
+                onPressed: () {
+                  setState(() => _selectedCallId = null);
+                },
+                icon: Icon(
+                  CupertinoIcons.clear,
+                  size: 16,
+                  color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                splashRadius: 16,
+              ),
             ],
           ),
           const SizedBox(height: 18),
@@ -588,7 +687,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 2. Call Summary
+                  // 2. Call Summary Card
                   Text(
                     'Call Summary',
                     style: TextStyle(
@@ -603,12 +702,12 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF0F172A)
+                          ? const Color(0xFF131D31)
                           : const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: isDark
-                            ? const Color(0xFF334155)
+                            ? const Color(0xFF1E293B)
                             : const Color(0xFFE2E8F0),
                       ),
                     ),
@@ -625,14 +724,41 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   ),
                   const SizedBox(height: 18),
 
-                  // 3. Call Transcript
-                  Text(
-                    'Call Transcript',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  // 3. Call Transcript Card (with Copy All)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Call Transcript',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => _copyTranscript(call),
+                        borderRadius: BorderRadius.circular(4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              CupertinoIcons.doc_on_doc,
+                              size: 12,
+                              color: context.colors.primaryLightColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Copy All',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: context.colors.primaryLightColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   _buildTranscriptList(call, isDark),
@@ -705,55 +831,53 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             isAgent ? context.colors.primaryLightColor : const Color(0xFF0284C7);
 
         return Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(8),
+            color: isDark ? const Color(0xFF131D31) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
             ),
           ),
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 12,
-                backgroundColor: avatarColor,
-                child: Text(
-                  initial,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundColor: avatarColor,
+                    child: Text(
+                      initial,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Text(
+                    speakerName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      speakerName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.text,
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.4,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.88),
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 6),
+              Text(
+                item.text,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.88),
                 ),
               ),
             ],
