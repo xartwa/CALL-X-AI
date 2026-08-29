@@ -1,3 +1,5 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 
 /// A consistent, unobtrusive pull-to-refresh affordance for application pages.
@@ -21,29 +23,42 @@ class AppPullToRefresh extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      notificationPredicate: (_) => true,
-      color: colorScheme.primary,
-      backgroundColor: colorScheme.surface,
-      displacement: 32,
-      edgeOffset: 2,
-      elevation: 1,
-      strokeWidth: 2,
-      child: scrollableChild
-          ? child
-          : LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight,
-                  child: child,
+    return ScrollConfiguration(
+      behavior: const _AppPullToRefreshScrollBehavior(),
+      child: RefreshIndicator(
+        onRefresh: onRefresh,
+        notificationPredicate: (_) => true,
+        color: colorScheme.primary,
+        backgroundColor: colorScheme.surface,
+        displacement: 32,
+        edgeOffset: 2,
+        elevation: 1,
+        strokeWidth: 2,
+        child: scrollableChild
+            ? child
+            : LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: child,
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
+}
+
+class _AppPullToRefreshScrollBehavior extends MaterialScrollBehavior {
+  const _AppPullToRefreshScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        ...super.dragDevices,
+        PointerDeviceKind.mouse,
+      };
 }
 
 extension AppPullToRefreshExtension on Widget {

@@ -171,7 +171,7 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: context.colors.blackColor.withOpacity(0.87),
+        color: context.colors.blackColor.withValues(alpha: 0.87),
       ),
       columns: [
         DataColumn2(
@@ -205,10 +205,10 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
               context.read<SelectedCallCubit>().selectCall(call),
           color: WidgetStateProperty.resolveWith<Color?>((s) {
             if (s.contains(WidgetState.selected)) {
-              return context.colors.skyBlueColor.withOpacity(0.4);
+              return context.colors.skyBlueColor.withValues(alpha: 0.4);
             }
             if (s.contains(WidgetState.hovered)) {
-              return context.colors.skyBlueColor.withOpacity(0.25);
+              return context.colors.skyBlueColor.withValues(alpha: 0.25);
             }
             return null;
           }),
@@ -260,7 +260,7 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      color: context.colors.blackColor.withOpacity(0.8),
+                      color: context.colors.blackColor.withValues(alpha: 0.8),
                     ),
                   ),
                 ),

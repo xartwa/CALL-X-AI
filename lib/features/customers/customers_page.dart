@@ -36,19 +36,22 @@ class _CustomersPageState extends State<CustomersPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CustomersCubit>().loadInitial();
+    context.read<CustomersCubit>().loadInitial(resetFilters: true);
   }
 
   void _showAddCustomerDialog(BuildContext context) async {
     final text = AppStrings.current;
     final newUser = await AddCustomerDialog.show(context);
-    if (newUser != null) {
+    if (newUser != null && context.mounted) {
+      await context.read<CustomersCubit>().addCustomer(newUser);
       if (context.mounted) {
-        context.read<CustomersCubit>().addCustomer(newUser);
+        final error = context.read<CustomersCubit>().state.actionError;
         AppUtils.showSnackBar(
           context: context,
-          extraMessage: text.addCustomerSuccess,
-          toastificationType: ToastificationType.success,
+          extraMessage: error ?? text.addCustomerSuccess,
+          toastificationType: error == null
+              ? ToastificationType.success
+              : ToastificationType.error,
         );
       }
     }
@@ -278,13 +281,22 @@ class _CustomersPageState extends State<CustomersPage> {
                                 ),
                                 const SizedBox(height: 20),
                                 if (_searchQuery.isNotEmpty ||
-                                    _statusFilter != 'All')
+                                    _statusFilter != 'All' ||
+                                    _filterState.isActive ||
+                                    _sortField != 'Default')
                                   OutlinedButton.icon(
                                     onPressed: () {
                                       setState(() {
                                         _searchQuery = '';
                                         _statusFilter = 'All';
+                                        _filterState =
+                                            const AdvancedFilterState();
+                                        _sortField = 'Default';
+                                        _selectedDateRange = null;
                                       });
+                                      context
+                                          .read<CustomersCubit>()
+                                          .setFilters(const CustomerFilters());
                                     },
                                     icon: const Icon(
                                         CupertinoIcons.refresh_circled,

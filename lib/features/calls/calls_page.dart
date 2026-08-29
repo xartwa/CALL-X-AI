@@ -178,24 +178,23 @@ class _CallsPageState extends State<CallsPage> {
     });
   }
 
+  void _updateCall(CallHistoryModel updatedCall) {
+    setState(() {
+      final index = _allCalls.indexWhere((c) => c.id == updatedCall.id);
+      if (index != -1) {
+        _allCalls[index] = updatedCall;
+        final preferences = context.read<PreferencesService>();
+        preferences.saveCalls(_allCalls.map((c) => c.toJson()).toList());
+      }
+    });
+  }
+
   void _removeCall(CallHistoryModel call) {
     setState(() {
       _allCalls.removeWhere((c) => c.id == call.id);
       final preferences = context.read<PreferencesService>();
       preferences.saveCalls(_allCalls.map((c) => c.toJson()).toList());
-      if (context.read<SelectedCallCubit>().state?.id == call.id) {
-        context.read<SelectedCallCubit>().selectCall(CallHistoryModel(
-          id: '',
-          fullName: '',
-          companyName: '',
-          phone: '',
-          status: '',
-          assignee: '',
-          duration: '',
-          callTime: '',
-          callDate: '',
-        ));
-      }
+      context.read<SelectedCallCubit>().clearSelection();
     });
   }
 
@@ -451,6 +450,13 @@ class _CallsPageState extends State<CallsPage> {
                           CallDetailsPanel(
                             call: selectedCall,
                             onCallAdded: _reloadCalls,
+                            onCallUpdated: (updated) {
+                              _updateCall(updated);
+                              context
+                                  .read<SelectedCallCubit>()
+                                  .updateCall(updated);
+                            },
+                            onDelete: () => _removeCall(selectedCall),
                           ),
                         ],
                       )

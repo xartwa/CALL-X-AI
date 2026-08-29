@@ -69,37 +69,59 @@ class CustomersCubit extends Cubit<CustomersState> {
   final CustomerRepository repository;
   Timer? _debounce;
   CancelToken? _cancelToken;
+  int _listRequestId = 0;
 
-  Future<void> loadInitial() async {
-    emit(state.copyWith(isInitialLoading: true, clearListError: true));
+  Future<void> loadInitial({bool resetFilters = false}) async {
+    emit(state.copyWith(
+      filters: resetFilters ? const CustomerFilters() : state.filters,
+      isInitialLoading: true,
+      clearListError: true,
+    ));
     await Future.wait([loadPage(), loadKpi(), loadOptions()]);
     emit(state.copyWith(isInitialLoading: false));
   }
 
   Future<void> refresh() async {
     if (state.isRefreshing) return;
-    emit(state.copyWith(isRefreshing: true, clearListError: true));
     await Future.wait([
       loadPage(page: state.pagination.currentPage),
       loadKpi(),
       loadOptions(),
     ]);
-    emit(state.copyWith(isRefreshing: false));
   }
 
   Future<void> loadPage({int page = 1}) async {
+    if (!isClosed) {
+      emit(state.copyWith(isRefreshing: true, clearListError: true));
+    }
+    final applied = await _requestPage(page: page);
+    if (applied && !isClosed) {
+      emit(state.copyWith(isRefreshing: false));
+    }
+  }
+
+  Future<bool> _requestPage({required int page}) async {
+    final requestId = ++_listRequestId;
+    final filters = state.filters;
+    final pageSize = state.pagination.pageSize;
+
     try {
-      final result = await repository.getCustomers(state.filters,
-          page: page,
-          pageSize: state.pagination.pageSize,
-          cancelToken: _cancelToken);
+      final result = await repository.getCustomers(filters,
+          page: page, pageSize: pageSize, cancelToken: _cancelToken);
+
+      if (isClosed || requestId != _listRequestId) return false;
+
       final users = result.items.map(_preserveLoadedDetails).toList();
       emit(state.copyWith(
           users: users, pagination: result.pagination, clearListError: true));
+      return true;
     } catch (e) {
+      if (isClosed || requestId != _listRequestId) return false;
+
       if (e is! AppException || e.type != AppErrorType.cancelled) {
         emit(state.copyWith(listError: 'Unable to load customers.'));
       }
+      return true;
     }
   }
 
@@ -137,9 +159,8 @@ class CustomersCubit extends Cubit<CustomersState> {
 
   Future<void> setFilters(CustomerFilters filters) => _applyFilters(filters);
   Future<void> _applyFilters(CustomerFilters filters) async {
-    emit(state.copyWith(filters: filters, isRefreshing: true));
+    emit(state.copyWith(filters: filters));
     await loadPage();
-    emit(state.copyWith(isRefreshing: false));
   }
 
   Future<void> setSort(String sort) => _applyFilters(CustomerFilters(

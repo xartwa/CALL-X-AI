@@ -54,13 +54,18 @@ class QuickOperationsHub extends StatelessWidget {
   void _openAddNewCustomer(BuildContext context) async {
     final newUser = await AddCustomerDialog.show(context);
     if (newUser != null && context.mounted) {
-      context.read<CustomersCubit>().addCustomer(newUser);
+      await context.read<CustomersCubit>().addCustomer(newUser);
+      if (!context.mounted) return;
+
+      final error = context.read<CustomersCubit>().state.actionError;
       AppUtils.showSnackBar(
         context: context,
-        title: 'Lead Added Successfully',
-        extraMessage:
+        title: error == null ? 'Lead Added Successfully' : 'Unable to Add Lead',
+        extraMessage: error ??
             '${newUser.fullName} has been added to your CRM directory.',
-        toastificationType: ToastificationType.success,
+        toastificationType: error == null
+            ? ToastificationType.success
+            : ToastificationType.error,
       );
     }
   }

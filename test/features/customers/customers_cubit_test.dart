@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
@@ -55,14 +57,70 @@ void main() {
     expect(cubit.state.users.single.notesCount, 1);
     await cubit.close();
   });
+
+  test('an older list response cannot replace a newer filtered result',
+      () async {
+    final repository = _FakeCustomerRepository(controlListResponses: true);
+    final cubit = CustomersCubit(repository);
+
+    final initialRequest = cubit.loadPage();
+    final filteredRequest = cubit.setFilters(
+      const CustomerFilters(status: 'Active'),
+    );
+
+    repository.completeListRequest(
+      1,
+      CustomerPage(
+        [Customer(id: '42', fullName: 'Current Customer')],
+        const PaginationMeta(count: 1),
+      ),
+    );
+    await filteredRequest;
+
+    repository.completeListRequest(
+      0,
+      const CustomerPage([], PaginationMeta()),
+    );
+    await initialRequest;
+
+    expect(cubit.state.users.single.id, '42');
+    expect(cubit.state.filters.status, 'Active');
+    await cubit.close();
+  });
+
+  test('initial page load can reset filters that are no longer visible',
+      () async {
+    final repository = _FakeCustomerRepository();
+    final cubit = CustomersCubit(repository);
+
+    await cubit.setFilters(
+      const CustomerFilters(city: 'Hidden stale city', status: 'Deactive'),
+    );
+    repository.pageItems = [Customer(id: '42', fullName: 'Visible Customer')];
+
+    await cubit.loadInitial(resetFilters: true);
+
+    expect(repository.lastFilters.city, isNull);
+    expect(repository.lastFilters.status, isNull);
+    expect(cubit.state.users.single.id, '42');
+    await cubit.close();
+  });
 }
 
 class _FakeCustomerRepository implements CustomerRepository {
+  _FakeCustomerRepository({this.controlListResponses = false});
+
+  final bool controlListResponses;
   int listCalls = 0;
   int lastPage = 0;
   CustomerFilters lastFilters = const CustomerFilters();
   List<Customer> pageItems = const [];
   Customer? detailCustomer;
+  final List<Completer<CustomerPage>> _pendingListRequests = [];
+
+  void completeListRequest(int index, CustomerPage response) {
+    _pendingListRequests[index].complete(response);
+  }
 
   @override
   Future<CustomerPage> getCustomers(CustomerFilters filters,
@@ -70,6 +128,11 @@ class _FakeCustomerRepository implements CustomerRepository {
     listCalls++;
     lastPage = page;
     lastFilters = filters;
+    if (controlListResponses) {
+      final completer = Completer<CustomerPage>();
+      _pendingListRequests.add(completer);
+      return completer.future;
+    }
     return CustomerPage(
         pageItems, PaginationMeta(currentPage: page, pageSize: pageSize));
   }
