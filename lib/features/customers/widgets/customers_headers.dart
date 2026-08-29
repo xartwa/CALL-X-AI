@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 class CustomersHeaders extends StatefulWidget {
   final String selectedStatus;
   final String selectedSort;
+  final String searchQuery;
   final DateTimeRange? selectedDateRange;
   final AdvancedFilterState? filterState;
   final Map<String, int> statusCounts;
@@ -29,6 +30,7 @@ class CustomersHeaders extends StatefulWidget {
     super.key,
     required this.selectedStatus,
     this.selectedSort = 'Default',
+    this.searchQuery = '',
     this.selectedDateRange,
     this.filterState,
     required this.statusCounts,
@@ -58,7 +60,8 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
   @override
   void initState() {
     super.initState();
-    _searchCtrl = TextEditingController();
+    _searchCtrl = TextEditingController(text: widget.searchQuery);
+    _isSearchExpanded = widget.searchQuery.isNotEmpty;
     _searchCtrl.addListener(_onSearchChanged);
     _searchFocusNode.addListener(() {
       if (!_searchFocusNode.hasFocus && _searchCtrl.text.isEmpty) {
@@ -67,6 +70,21 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
         });
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomersHeaders oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchQuery != widget.searchQuery &&
+        _searchCtrl.text != widget.searchQuery) {
+      _searchCtrl.removeListener(_onSearchChanged);
+      _searchCtrl.value = TextEditingValue(
+        text: widget.searchQuery,
+        selection: TextSelection.collapsed(offset: widget.searchQuery.length),
+      );
+      _searchCtrl.addListener(_onSearchChanged);
+      _isSearchExpanded = widget.searchQuery.isNotEmpty;
+    }
   }
 
   void _onSearchChanged() {

@@ -173,6 +173,7 @@ class _CustomersPageState extends State<CustomersPage> {
             CustomersHeaders(
                 selectedStatus: _statusFilter,
                 selectedSort: _sortField,
+                searchQuery: _searchQuery,
                 selectedDateRange: _selectedDateRange,
                 filterState: _filterState,
                 countries: state.options == null

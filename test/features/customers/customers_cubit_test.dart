@@ -90,15 +90,27 @@ void main() {
 
   test('initial page load can reset filters that are no longer visible',
       () async {
-    final repository = _FakeCustomerRepository();
+    final repository = _FakeCustomerRepository(controlListResponses: true);
     final cubit = CustomersCubit(repository);
 
-    await cubit.setFilters(
+    final staleFilterRequest = cubit.setFilters(
       const CustomerFilters(city: 'Hidden stale city', status: 'Deactive'),
     );
-    repository.pageItems = [Customer(id: '42', fullName: 'Visible Customer')];
+    repository.completeListRequest(
+      0,
+      const CustomerPage([], PaginationMeta()),
+    );
+    await staleFilterRequest;
 
-    await cubit.loadInitial(resetFilters: true);
+    final initialLoad = cubit.loadInitial(resetFilters: true);
+    repository.completeListRequest(
+      1,
+      CustomerPage(
+        [Customer(id: '42', fullName: 'Visible Customer')],
+        const PaginationMeta(count: 1),
+      ),
+    );
+    await initialLoad;
 
     expect(repository.lastFilters.city, isNull);
     expect(repository.lastFilters.status, isNull);
