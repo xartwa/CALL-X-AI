@@ -353,7 +353,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         Row(
           children: [
             Icon(
-              CupertinoIcons.phone_fill,
+              CupertinoIcons.phone,
               size: 19,
               color: context.colors.primaryLightColor,
             ),
@@ -390,53 +390,53 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         Row(
           children: [
             SizedBox(
-                width: 220,
-                height: 38,
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: (val) {
-                    setState(() {
-                      _searchQuery = val;
-                    });
-                  },
-                  style: const TextStyle(fontSize: 12),
-                  decoration: InputDecoration(
-                    hintText: 'Search calls...',
-                    hintStyle: TextStyle(
-                      fontSize: 11,
-                      color: context.colors.darkGreyColor.withOpacity(0.7),
-                    ),
-                    prefixIcon: Icon(
-                      CupertinoIcons.search,
-                      size: 15,
-                      color: context.colors.darkGreyColor,
-                    ),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(CupertinoIcons.clear_thick,
-                                size: 14),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              setState(() {
-                                _searchQuery = '';
-                              });
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: isDark
-                        ? const Color(0xFF1E293B)
-                        : const Color(0xFFF1F5F9),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
-                      borderSide: BorderSide.none,
-                    ),
+              width: 220,
+              height: 38,
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: (val) {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                },
+                style: const TextStyle(fontSize: 12),
+                decoration: InputDecoration(
+                  hintText: 'Search calls...',
+                  hintStyle: TextStyle(
+                    fontSize: 11,
+                    color: context.colors.darkGreyColor.withOpacity(0.7),
+                  ),
+                  prefixIcon: Icon(
+                    CupertinoIcons.search,
+                    size: 15,
+                    color: context.colors.darkGreyColor,
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon:
+                              const Icon(CupertinoIcons.clear_thick, size: 14),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF1F5F9),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
+            ),
             if (selectedCall != null) ...[
               const SizedBox(width: 8),
               IconButton(
@@ -563,7 +563,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ? (isDark
                   ? context.colors.primaryLightColor.withValues(alpha: 0.16)
                   : const Color(0xFFEEF2FF))
-              : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
+              : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -805,27 +805,6 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     ),
                   ],
                 ),
-              ),
-
-              // Action: Schedule Button
-              IconButton(
-                tooltip: 'Schedule Follow-up',
-                onPressed: () async {
-                  await CallActionDialog.show(
-                    context,
-                    fullName: widget.user.fullName,
-                    phone: widget.user.phone,
-                    initialTab: 'schedule',
-                  );
-                },
-                icon: Icon(
-                  CupertinoIcons.calendar,
-                  size: 16,
-                  color: context.colors.primaryLightColor,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                splashRadius: 14,
               ),
             ],
           ),

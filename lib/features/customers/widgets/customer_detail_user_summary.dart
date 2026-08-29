@@ -308,8 +308,8 @@ class CustomerDetailUserSummary extends StatelessWidget {
                             height: 24,
                             padding: const EdgeInsets.only(left: 10, right: 6),
                             decoration: BoxDecoration(
-                              color: color.withValues(
-                                  alpha: isDark ? 0.15 : 0.08),
+                              color:
+                                  color.withValues(alpha: isDark ? 0.15 : 0.08),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color: color.withValues(alpha: 0.4),
@@ -334,8 +334,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
                                     final settingsState = context
                                         .read<WorkspaceSettingsCubit>()
                                         .state;
-                                    final matchingTag = settingsState
-                                        .customTags
+                                    final matchingTag = settingsState.customTags
                                         .cast<TagModel?>()
                                         .firstWhere(
                                           (t) =>
@@ -369,78 +368,72 @@ class CustomerDetailUserSummary extends StatelessWidget {
             ),
           ),
           Spacer(),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 42,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      CallActionDialog.show(
-                        context,
-                        fullName: user.fullName,
-                        phone: user.phone,
-                        customerId: user.id,
-                        initialTab: 'callNow',
-                      );
-                    },
-                    icon: const Icon(CupertinoIcons.phone_fill,
-                        size: 15, color: Colors.white),
-                    label: Text(
-                      text.callActionCall,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.colors.primaryLightColor,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(ThemeConstants.buttonRadius),
-                      ),
-                    ),
-                  ),
+          SizedBox(
+            height: 42,
+            width: MediaQuery.sizeOf(context).width,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                CallActionDialog.show(
+                  context,
+                  fullName: user.fullName,
+                  phone: user.phone,
+                  customerId: user.id,
+                  initialTab: 'callNow',
+                );
+              },
+              icon: const Icon(CupertinoIcons.phone_fill,
+                  size: 15, color: Colors.white),
+              label: Text(
+                text.callActionCall,
+                style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.colors.primaryLightColor,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: SizedBox(
-                  height: 42,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      CallActionDialog.show(
-                        context,
-                        fullName: user.fullName,
-                        phone: user.phone,
-                        customerId: user.id,
-                        initialTab: 'schedule',
-                      );
-                    },
-                    icon: Icon(CupertinoIcons.calendar,
-                        size: 14, color: context.colors.primaryLightColor),
-                    label: Text(
-                      'SCHEDULE',
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: context.colors.primaryLightColor),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                          color: context.colors.primaryLightColor, width: 1.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(ThemeConstants.buttonRadius),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(
+            height: 42,
+            width: MediaQuery.sizeOf(context).width,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                CallActionDialog.show(
+                  context,
+                  fullName: user.fullName,
+                  phone: user.phone,
+                  customerId: user.id,
+                  initialTab: 'schedule',
+                );
+              },
+              icon: Icon(CupertinoIcons.calendar,
+                  size: 14, color: context.colors.primaryLightColor),
+              label: Text(
+                'SCHEDULE',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: context.colors.primaryLightColor),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                    color: context.colors.primaryLightColor, width: 1.2),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
 
           ValueListenableBuilder<bool>(
             valueListenable: isActiveNotifier,

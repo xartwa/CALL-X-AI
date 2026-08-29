@@ -84,7 +84,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         children: [
           // Section Title
           Text(
-            'Customer Information',
+            'Customer Information'.toUpperCase(),
             style: TextStyle(
               fontSize: 13.5,
               fontWeight: FontWeight.w700,
@@ -206,7 +206,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
       children: [
         // Section Title
         Text(
-          'Lead & Status',
+          'Lead & Status'.toUpperCase(),
           style: TextStyle(
             fontSize: 13.5,
             fontWeight: FontWeight.w700,
@@ -403,9 +403,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-            ),
           ),
           child: Row(
             children: [
@@ -483,11 +480,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                 color:
                     isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFE2E8F0),
-                ),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
@@ -564,10 +556,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color:
-                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              ),
             ),
             child: Row(
               children: [
