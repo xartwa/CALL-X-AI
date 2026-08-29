@@ -31,8 +31,16 @@ void main() {
       );
 
       expect(result2.isAlreadyDownloaded, isTrue);
-      expect(result2.message, contains('Already downloaded'));
+      expect(result2.message, contains('Downloaded:'));
+      expect(result2.fileName, contains('Alex_Morgan'));
       expect(result2.path, equals(result1.path));
+
+      // Test opening downloaded file
+      final opened = await service.openDownloadedFile(
+        callId: callId,
+        fullName: fullName,
+      );
+      expect(opened, isNotNull);
     });
   });
 }

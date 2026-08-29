@@ -220,29 +220,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             DataCell(InkWell(
               onTap: () => context.goNamed(AppRoutesPath.customerDetailName,
                   pathParameters: {'id': user.id.toString()}),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: context.colors.primaryLightColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        initials,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.primaryLightColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Flexible(
+              child:  Flexible(
                     child: Text(
                       user.fullName.isNotEmpty ? user.fullName : 'No Name',
                       style: const TextStyle(
@@ -253,8 +231,6 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ],
-              ),
             )),
 
             DataCell(Text(

@@ -202,11 +202,37 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
 
   Future<void> _handleDownload() async {
     if (_isDownloading) return;
+
+    final isAlready = AudioDownloadService.instance.isDownloaded(widget.call.id);
+    if (isAlready) {
+      final opened = await AudioDownloadService.instance.openDownloadedFile(
+        callId: widget.call.id,
+        fullName: widget.call.fullName,
+        callDate: widget.call.callDate,
+      );
+
+      final fileName = AudioDownloadService.instance.formatFileName(
+        widget.call.fullName,
+        widget.call.callDate,
+      );
+
+      if (!mounted) return;
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: opened
+            ? 'Opening file location for: $fileName'
+            : 'Downloaded: $fileName',
+        toastificationType: ToastificationType.info,
+      );
+      return;
+    }
+
     setState(() => _isDownloading = true);
 
     final result = await AudioDownloadService.instance.downloadCallAudio(
       callId: widget.call.id,
       fullName: widget.call.fullName,
+      callDate: widget.call.callDate,
       recordingUrl: widget.call.recordingUrl,
     );
 
@@ -216,11 +242,9 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     AppUtils.showSnackBar(
       context: context,
       extraMessage: result.message,
-      toastificationType: result.isAlreadyDownloaded
-          ? ToastificationType.info
-          : (result.isSuccess
-              ? ToastificationType.success
-              : ToastificationType.error),
+      toastificationType: result.isSuccess
+          ? ToastificationType.success
+          : ToastificationType.error,
     );
   }
 
