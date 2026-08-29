@@ -22,10 +22,12 @@ class CallTranscriptMessage {
 
   factory CallTranscriptMessage.fromJson(Map<String, dynamic> json) =>
       CallTranscriptMessage(
-        speaker: json['speaker'] as String? ?? 'ai',
-        speakerName: json['speakerName'] as String? ?? 'AI Assistant',
-        text: json['text'] as String? ?? '',
-        timestamp: json['timestamp'] as String? ?? '00:00',
+        speaker: (json['speaker'] as String? ?? 'ai').toLowerCase(),
+        speakerName: json['speakerName'] as String? ??
+            (json['speaker_name'] as String? ?? 'AI Assistant'),
+        text: json['text'] as String? ?? (json['content'] as String? ?? ''),
+        timestamp: json['timestamp'] as String? ??
+            (json['time'] as String? ?? '00:00'),
       );
 }
 
@@ -49,6 +51,7 @@ class CallHistoryModel {
   final String? recordingUrl;
   final List<CallTranscriptMessage> transcript;
   final String direction; // 'Inbound' or 'Outbound'
+  final String? customerId;
 
   CallHistoryModel({
     required this.id,
@@ -70,6 +73,7 @@ class CallHistoryModel {
     this.recordingUrl,
     this.transcript = const [],
     this.direction = 'Outbound',
+    this.customerId,
   });
 
   CallHistoryModel copyWith({
@@ -92,6 +96,7 @@ class CallHistoryModel {
     String? recordingUrl,
     List<CallTranscriptMessage>? transcript,
     String? direction,
+    String? customerId,
   }) {
     return CallHistoryModel(
       id: id ?? this.id,
@@ -113,6 +118,7 @@ class CallHistoryModel {
       recordingUrl: recordingUrl ?? this.recordingUrl,
       transcript: transcript ?? this.transcript,
       direction: direction ?? this.direction,
+      customerId: customerId ?? this.customerId,
     );
   }
 
@@ -136,6 +142,7 @@ class CallHistoryModel {
         'recordingUrl': recordingUrl,
         'transcript': transcript.map((t) => t.toJson()).toList(),
         'direction': direction,
+        'customerId': customerId,
       };
 
   factory CallHistoryModel.fromJson(
@@ -143,8 +150,14 @@ class CallHistoryModel {
     Color? defaultStatusColor,
   }) {
     List<String> parsedTags = [];
-    if (json['tags'] != null) {
-      parsedTags = List<String>.from(json['tags'] as List);
+    if (json['tags'] != null && json['tags'] is List) {
+      for (final t in json['tags'] as List) {
+        if (t is String) {
+          parsedTags.add(t);
+        } else if (t is Map && t['label'] != null) {
+          parsedTags.add(t['label'].toString());
+        }
+      }
     }
 
     Color? color;
@@ -155,43 +168,54 @@ class CallHistoryModel {
     }
 
     List<CallTranscriptMessage> parsedTranscript = [];
-    if (json['transcript'] != null && (json['transcript'] as List).isNotEmpty) {
-      parsedTranscript = (json['transcript'] as List)
+    final rawTranscript = json['transcript'] ?? json['transcript_messages'];
+    if (rawTranscript is List && rawTranscript.isNotEmpty) {
+      parsedTranscript = rawTranscript
+          .whereType<Map>()
           .map((item) =>
               CallTranscriptMessage.fromJson(Map<String, dynamic>.from(item)))
           .toList();
     }
 
-    final fullName = json['fullName'] as String? ?? 'Contact';
-    final status = json['status'] as String? ?? 'Completed';
-    final assignee = json['assignee'] as String? ?? 'AI Assistant';
-    final direction = json['direction'] as String? ??
-        (json['callDirection'] as String? ?? 'Outbound');
+    final fullName = (json['fullName'] ?? json['full_name'] ?? json['name'] ?? 'Contact').toString();
+    final status = (json['status'] ?? 'Completed').toString();
+    final assignee = (json['assignee'] ?? 'AI Assistant').toString();
+    final direction = (json['direction'] ??
+            json['call_direction'] ??
+            json['callDirection'] ??
+            'Outbound')
+        .toString();
 
-    if (parsedTranscript.isEmpty && status == 'Completed') {
+    final customerIdRaw = json['customerId'] ??
+        json['customer_id'] ??
+        (json['customer'] is Map ? json['customer']['id'] : null) ??
+        (json['customer'] is num ? json['customer'].toString() : null);
+
+    if (parsedTranscript.isEmpty && status.toLowerCase() == 'completed') {
       parsedTranscript = _generateDefaultTranscript(fullName, assignee);
     }
 
     return CallHistoryModel(
       id: json['id']?.toString() ?? '',
       fullName: fullName,
-      companyName: json['companyName'] as String? ?? '',
-      phone: json['phone'] as String? ?? '',
+      companyName: (json['companyName'] ?? json['company_name'] ?? json['company'] ?? '').toString(),
+      phone: (json['phone'] ?? json['phone_number'] ?? json['phoneNumber'] ?? '').toString(),
       status: status,
       assignee: assignee,
-      duration: json['duration'] as String? ?? '0:00',
-      callTime: json['callTime'] as String? ?? '',
-      callDate: json['callDate'] as String? ?? '',
+      duration: (json['duration'] ?? '0:00').toString(),
+      callTime: (json['callTime'] ?? json['call_time'] ?? '').toString(),
+      callDate: (json['callDate'] ?? json['call_date'] ?? '').toString(),
       notes: json['notes'] as String?,
       email: json['email'] as String?,
-      leadPriority: json['leadPriority'] as String? ?? 'Warm',
-      lastContactResult: json['lastContactResult'] as String? ?? 'Interested',
-      nextFollowUpDate: json['nextFollowUpDate'] as String? ?? '',
+      leadPriority: (json['leadPriority'] ?? json['lead_priority'] ?? 'Warm').toString(),
+      lastContactResult: (json['lastContactResult'] ?? json['last_contact_result'] ?? 'Interested').toString(),
+      nextFollowUpDate: (json['nextFollowUpDate'] ?? json['next_follow_up_date'] ?? json['follow_up_date'] ?? '').toString(),
       tags: parsedTags,
       statusColor: color,
-      recordingUrl: json['recordingUrl'] as String?,
+      recordingUrl: (json['recordingUrl'] ?? json['recording_url'] ?? json['audio_url']) as String?,
       transcript: parsedTranscript,
       direction: direction,
+      customerId: customerIdRaw?.toString(),
     );
   }
 
@@ -227,4 +251,5 @@ class CallHistoryModel {
     ];
   }
 }
+
 

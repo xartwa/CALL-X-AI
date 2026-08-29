@@ -1,9 +1,15 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:callx_ai/core/widgets/advanced_filter_dialog.dart';
+import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
+import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
+import 'package:callx_ai/features/calls/data/dto/calls_kpi_dto.dart';
+import 'package:callx_ai/features/calls/data/dto/paginated_calls_dto.dart';
+import 'package:callx_ai/features/calls/domain/repositories/calls_repository.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_details_panel.dart';
-import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 import 'package:callx_ai/theme/app_colors.dart';
@@ -48,12 +54,15 @@ void main() {
 
     final repo = _FakeCustomerRepository();
     final customersCubit = CustomersCubit(repo);
+    final callsRepo = _FakeCallsRepository();
+    final callsCubit = CallsCubit(callsRepo);
     final selectedCallCubit = SelectedCallCubit();
 
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: [
           BlocProvider.value(value: customersCubit),
+          BlocProvider.value(value: callsCubit),
           BlocProvider.value(value: selectedCallCubit),
         ],
         child: MaterialApp(
@@ -99,8 +108,78 @@ void main() {
     expect(find.text('Next Follow-up Date'), findsOneWidget);
 
     await customersCubit.close();
+    await callsCubit.close();
     await selectedCallCubit.close();
   });
+}
+
+class _FakeCallsRepository implements CallsRepository {
+  @override
+  Future<PaginatedCallsDto> getCalls({
+    required int page,
+    int pageSize = 10,
+    String? search,
+    String? status,
+    String? leadPriority,
+    String? sortField,
+    DateTimeRange? dateRange,
+    AdvancedFilterState? filterState,
+    CancelToken? cancelToken,
+  }) async =>
+      const PaginatedCallsDto(count: 0, results: []);
+
+  @override
+  Future<CallsKpiDto> getStats({CancelToken? cancelToken}) async =>
+      const CallsKpiDto();
+
+  @override
+  Future<CallHistoryModel> getCallDetail(String id) async =>
+      CallHistoryModel(
+        id: id,
+        fullName: 'John Smith',
+        phone: '0912 345 6789',
+        status: 'Completed',
+        assignee: 'AI',
+        duration: '5:32',
+        callTime: '10:30',
+        callDate: '2026/08/29',
+      );
+
+  @override
+  Future<CallHistoryModel> scheduleFollowUp(String id, String followUpDate) async =>
+      CallHistoryModel(
+        id: id,
+        fullName: 'John Smith',
+        phone: '0912 345 6789',
+        status: 'Completed',
+        assignee: 'AI',
+        duration: '5:32',
+        callTime: '10:30',
+        callDate: '2026/08/29',
+        nextFollowUpDate: followUpDate,
+      );
+
+  @override
+  Future<CallHistoryModel> clearFollowUp(String id) async =>
+      CallHistoryModel(
+        id: id,
+        fullName: 'John Smith',
+        phone: '0912 345 6789',
+        status: 'Completed',
+        assignee: 'AI',
+        duration: '5:32',
+        callTime: '10:30',
+        callDate: '2026/08/29',
+      );
+
+  @override
+  Future<void> callAgain(String id) async {}
+
+  @override
+  Future<Map<String, dynamic>> getCustomerInfo(String id) async => {};
+
+  @override
+  Future<void> deleteCall(String id) async {}
 }
 
 class _FakeCustomerRepository implements CustomerRepository {
@@ -162,3 +241,4 @@ class _FakeCustomerRepository implements CustomerRepository {
   @override
   Future<void> deleteDocument(String customerId, String documentId) async {}
 }
+

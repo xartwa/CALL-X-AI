@@ -20,6 +20,11 @@ import 'package:callx_ai/features/customers/domain/repositories/customer_reposit
 import 'package:callx_ai/core/datasources/workspace_remote_data_source.dart';
 import 'package:callx_ai/core/repositories/workspace_repository.dart';
 import 'package:callx_ai/core/repositories/workspace_repository_impl.dart';
+import 'package:callx_ai/features/calls/data/datasources/calls_remote_data_source.dart';
+import 'package:callx_ai/features/calls/data/repositories/calls_repository_impl.dart';
+import 'package:callx_ai/features/calls/domain/repositories/calls_repository.dart';
+import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
+import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +45,9 @@ Future<void> main() async {
   final workspaceRepository = WorkspaceRepositoryImpl(
     WorkspaceRemoteDataSource(dioClient),
   );
+  final callsRepository = CallsRepositoryImpl(
+    CallsRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -53,6 +61,7 @@ Future<void> main() async {
         RepositoryProvider<CustomerRepository>.value(value: customerRepository),
         RepositoryProvider<WorkspaceRepository>.value(
             value: workspaceRepository),
+        RepositoryProvider<CallsRepository>.value(value: callsRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -62,6 +71,12 @@ Future<void> main() async {
               context.read<CustomerRepository>(),
             ),
           ),
+          BlocProvider(
+            create: (context) => CallsCubit(
+              context.read<CallsRepository>(),
+            )..loadInitial(),
+          ),
+          BlocProvider(create: (_) => SelectedCallCubit()),
           BlocProvider(
             create: (_) => WorkspaceSettingsCubit(
               workspaceRepository: workspaceRepository,
@@ -74,3 +89,4 @@ Future<void> main() async {
     ),
   );
 }
+

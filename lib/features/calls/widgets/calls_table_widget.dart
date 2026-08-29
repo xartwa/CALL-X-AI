@@ -5,6 +5,7 @@ import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/widgets/custom_tag_widget.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
+import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
@@ -192,12 +193,15 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
       ],
       rows: _sortedCalls.map((call) {
         final isSelected =
+            context.watch<CallsCubit>().state.selectedCall?.id == call.id ||
             context.watch<SelectedCallCubit>().state?.id == call.id;
 
         return DataRow2(
           selected: isSelected,
-          onSelectChanged: (_) =>
-              context.read<SelectedCallCubit>().selectCall(call),
+          onSelectChanged: (_) {
+            context.read<CallsCubit>().selectCall(call);
+            context.read<SelectedCallCubit>().selectCall(call);
+          },
           color: WidgetStateProperty.resolveWith<Color?>((s) {
             if (s.contains(WidgetState.selected)) {
               return isDark
@@ -214,7 +218,10 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
           cells: [
             // Contact Name (Clickable) with Call Direction Icon
             DataCell(InkWell(
-              onTap: () => context.read<SelectedCallCubit>().selectCall(call),
+              onTap: () {
+                context.read<CallsCubit>().selectCall(call);
+                context.read<SelectedCallCubit>().selectCall(call);
+              },
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -414,8 +421,10 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
               const SizedBox(width: 8),
               AppActionButton(
                 type: AppActionType.view,
-                onTap: () =>
-                    context.read<SelectedCallCubit>().selectCall(call),
+                onTap: () {
+                  context.read<CallsCubit>().selectCall(call);
+                  context.read<SelectedCallCubit>().selectCall(call);
+                },
               ),
               const SizedBox(width: 8),
               AppActionButton(

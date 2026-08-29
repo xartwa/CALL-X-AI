@@ -8,6 +8,7 @@ import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
@@ -106,10 +107,22 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     );
   }
 
-  void _saveFollowUpDate(String? newDate) {
+  void _saveFollowUpDate(String? newDate) async {
     setState(() {
       _followUpDate = newDate;
     });
+
+    final formatted = (newDate != null && newDate.isNotEmpty)
+        ? newDate.replaceAll('/', '-')
+        : '';
+
+    if (formatted.isNotEmpty) {
+      await context.read<CallsCubit>().scheduleFollowUp(widget.call.id, formatted);
+    } else {
+      await context.read<CallsCubit>().clearFollowUp(widget.call.id);
+    }
+
+    if (!mounted) return;
 
     final updated = widget.call.copyWith(
       nextFollowUpDate: newDate ?? '',
@@ -132,7 +145,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     DateTime initial = now.add(const Duration(days: 1));
     if (_followUpDate != null && _followUpDate!.isNotEmpty) {
       try {
-        final parts = _followUpDate!.split('/');
+        final parts = _followUpDate!.replaceAll('-', '/').split('/');
         if (parts.length == 3) {
           initial = DateTime(
               int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
@@ -154,6 +167,14 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
   }
 
   void _navigateToCustomerProfile() {
+    if (widget.call.customerId != null && widget.call.customerId!.isNotEmpty) {
+      context.goNamed(
+        AppRoutesPath.customerDetailName,
+        pathParameters: {'id': widget.call.customerId!},
+      );
+      return;
+    }
+
     final customers = context.read<CustomersCubit>().state.users;
     final customer = customers.firstWhere(
       (u) =>
@@ -249,7 +270,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                             Color(0xFF4F46E5),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF6366F1)
