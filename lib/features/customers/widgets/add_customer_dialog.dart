@@ -4,7 +4,7 @@ import 'package:callx_ai/core/constants/app_strings.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/widgets/app_text_field_widget.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
-import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/theme/app_colors.dart';
@@ -383,7 +383,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
 
                         // 2. Next Follow-Up
                         Text(
-                          'NEXT FOLLOW-UP DATE',
+                          'NEXT FOLLOW-UP',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -393,19 +393,21 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                         const SizedBox(height: 8),
                         InkWell(
                           onTap: () async {
-                            final picked = await AppUtils.showCustomDatePicker(
-                              context: context,
-                              initialDate:
-                                  DateTime.now().add(const Duration(days: 2)),
-                              firstDate: DateTime.now(),
-                              lastDate:
-                                  DateTime.now().add(const Duration(days: 365)),
+                            final picked =
+                                await AppDateTimePicker.pickDateTime(
+                              context,
+                              initial: _nextFollowUp ??
+                                  DateTime.now()
+                                      .add(const Duration(days: 2)),
+                              first: DateTime.now(),
+                              last: DateTime.now()
+                                  .add(const Duration(days: 365)),
                             );
                             if (picked != null) {
                               setState(() {
                                 _nextFollowUp = picked;
                                 _nextFollowUpCtrl.text =
-                                    AppDateTime.displayDate(picked);
+                                    AppDateTime.displayDateTime(picked);
                               });
                             }
                           },
@@ -428,7 +430,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                                 Expanded(
                                   child: Text(
                                     _nextFollowUpCtrl.text.isEmpty
-                                        ? 'Select Date...'
+                                        ? 'Select Date & Time...'
                                         : _nextFollowUpCtrl.text,
                                     style: TextStyle(
                                       fontSize: 14,

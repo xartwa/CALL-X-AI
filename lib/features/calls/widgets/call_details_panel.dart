@@ -8,6 +8,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
@@ -137,7 +138,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     AppUtils.showSnackBar(
       context: context,
       extraMessage: (newDate != null && newDate.isNotEmpty)
-          ? 'Follow-up scheduled for ${AppDateTime.displayDate(newDate)}'
+          ? 'Follow-up scheduled for ${AppDateTime.displayDateTime(newDate)}'
           : 'Follow-up date cleared',
       toastificationType: ToastificationType.success,
     );
@@ -150,18 +151,15 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
       initial = AppDateTime.tryParse(_followUpDate) ?? initial;
     }
 
-    final picked = await AppUtils.showCustomDatePicker(
-      context: context,
-      initialDate: initial.isBefore(now) ? now : initial,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
+    final picked = await AppDateTimePicker.pickDateTime(
+      context,
+      initial: initial.isBefore(now) ? now : initial,
+      first: now,
+      last: now.add(const Duration(days: 365)),
     );
 
     if (picked != null) {
-      final formatted = AppDateTime.apiDateTime(
-        DateTime(picked.year, picked.month, picked.day),
-      );
-      _saveFollowUpDate(formatted);
+      _saveFollowUpDate(AppDateTime.apiDateTime(picked));
     }
   }
 
@@ -993,7 +991,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                                 _followUpDate!.isNotEmpty)
                                             ? AppDateTime.displayDateOrDateTime(
                                                 _followUpDate)
-                                            : 'Click to select follow-up date',
+                                            : 'Click to select follow-up date & time',
                                         style: TextStyle(
                                           fontSize: 12.5,
                                           fontWeight: (_followUpDate != null &&

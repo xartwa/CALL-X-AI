@@ -1,5 +1,5 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
-import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -257,11 +257,11 @@ class _CleanDateRangePickerState extends State<CleanDateRangePicker> {
                           label: 'FROM',
                           date: startDate,
                           onTap: () async {
-                            final picked = await AppUtils.showCustomDatePicker(
-                              context: context,
-                              initialDate: startDate ?? DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: endDate ??
+                            final picked = await AppDateTimePicker.pickDate(
+                              context,
+                              initial: startDate,
+                              first: DateTime(2020),
+                              last: endDate ??
                                   DateTime.now().add(const Duration(days: 365)),
                             );
                             if (picked != null) {
@@ -276,12 +276,12 @@ class _CleanDateRangePickerState extends State<CleanDateRangePicker> {
                           label: 'TO',
                           date: endDate,
                           onTap: () async {
-                            final picked = await AppUtils.showCustomDatePicker(
-                              context: context,
-                              initialDate: endDate ?? DateTime.now(),
-                              firstDate: startDate ?? DateTime(2020),
-                              lastDate:
-                                  DateTime.now().add(const Duration(days: 365)),
+                            final picked = await AppDateTimePicker.pickDate(
+                              context,
+                              initial: endDate,
+                              first: startDate ?? DateTime(2020),
+                              last: DateTime.now()
+                                  .add(const Duration(days: 365)),
                             );
                             if (picked != null) {
                               setState(() {

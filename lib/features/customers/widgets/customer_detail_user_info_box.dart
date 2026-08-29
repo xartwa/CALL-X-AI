@@ -4,6 +4,7 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 
 class CustomerDetailUserInfoBox extends StatefulWidget {
   final TextEditingController companyNameCtrl;
@@ -306,7 +307,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             Expanded(
               flex: 1,
               child: _buildDatePickerField(
-                label: 'Next Follow-up Date',
+                label: 'Next Follow-up',
                 controller: widget.nextFollowUpDateCtrl,
                 isDark: isDark,
               ),
@@ -537,15 +538,14 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         const SizedBox(height: 6),
         InkWell(
           onTap: () async {
-            final now = DateTime.now();
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: now,
-              firstDate: DateTime(2020),
-              lastDate: DateTime(2035),
+            final picked = await AppDateTimePicker.pickDateTime(
+              context,
+              initial: AppDateTime.tryParse(controller.text),
+              first: DateTime(2020),
+              last: DateTime(2035),
             );
             if (picked != null) {
-              controller.text = AppDateTime.displayDate(picked);
+              controller.text = AppDateTime.displayDateTime(picked);
               setState(() {});
             }
           },
@@ -569,7 +569,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   child: Text(
                     controller.text.isNotEmpty
                         ? controller.text
-                        : 'Select Date...',
+                        : 'Select Date & Time...',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

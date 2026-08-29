@@ -3,6 +3,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/widgets/preset_chip_widget.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
+import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/services/preferences_service.dart';
@@ -189,7 +190,9 @@ class _CallActionDialogState extends State<CallActionDialog> {
       final days = (DateTime.monday - now.weekday + 7) % 7;
       date = now.add(Duration(days: days == 0 ? 7 : days));
     } else if (_selectedDatePreset == 'Custom') {
-      date = _customDate ?? now;
+      final custom = _customDate;
+      if (custom != null) return custom; // Custom includes picked time.
+      date = now;
     } else {
       date = now;
     }
@@ -812,16 +815,16 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       ),
                       PresetChipWidget(
                         label: _customDate != null
-                            ? AppDateTime.displayDate(_customDate!)
-                            : 'Custom Date',
+                            ? AppDateTime.displayDateTime(_customDate!)
+                            : 'Custom Date & Time',
                         isSelected: _selectedDatePreset == 'Custom',
                         onTap: () async {
-                          final picked = await AppUtils.showCustomDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate:
-                                DateTime.now().add(const Duration(days: 365)),
+                          final picked = await AppDateTimePicker.pickDateTime(
+                            context,
+                            initial: _customDate,
+                            first: DateTime.now(),
+                            last: DateTime.now()
+                                .add(const Duration(days: 365)),
                           );
                           if (picked != null) {
                             setState(() {
@@ -1405,16 +1408,16 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       ),
                       PresetChipWidget(
                         label: _customDate != null
-                            ? AppDateTime.displayDate(_customDate!)
-                            : 'Custom Date',
+                            ? AppDateTime.displayDateTime(_customDate!)
+                            : 'Custom Date & Time',
                         isSelected: _selectedDatePreset == 'Custom',
                         onTap: () async {
-                          final picked = await AppUtils.showCustomDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate:
-                                DateTime.now().add(const Duration(days: 365)),
+                          final picked = await AppDateTimePicker.pickDateTime(
+                            context,
+                            initial: _customDate,
+                            first: DateTime.now(),
+                            last: DateTime.now()
+                                .add(const Duration(days: 365)),
                           );
                           if (picked != null) {
                             setState(() {
