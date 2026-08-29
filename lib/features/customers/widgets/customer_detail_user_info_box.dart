@@ -262,8 +262,8 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   notifier: widget.lastContactResultNotifier,
                   items: const [
                     'Interested',
-                    'Callback Requested',
-                    'Meeting Scheduled',
+                    'Needs follow-up',
+                    'Appointment booked',
                     'Not Interested',
                     'No Answer',
                   ],

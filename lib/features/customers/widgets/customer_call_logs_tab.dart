@@ -76,13 +76,15 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             speaker: 'customer',
             speakerName: 'Customer',
             timestamp: '',
-            text: 'I\'m looking for more information about your enterprise plan.',
+            text:
+                'I\'m looking for more information about your enterprise plan.',
           ),
           TranscriptTurn(
             speaker: 'ai',
             speakerName: 'AI',
             timestamp: '',
-            text: 'Sure! Our enterprise plan includes unlimited seats and priority support.',
+            text:
+                'Sure! Our enterprise plan includes unlimited seats and priority support.',
           ),
         ],
       ),
@@ -210,7 +212,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     return calls.where((c) {
       final directionMatch = c.direction.toLowerCase().contains(query);
       final statusMatch = c.status.toLowerCase().contains(query);
-      final dateMatch = '${c.callDate} ${c.callTime}'.toLowerCase().contains(query);
+      final dateMatch =
+          '${c.callDate} ${c.callTime}'.toLowerCase().contains(query);
       final summaryMatch = (c.summary ?? '').toLowerCase().contains(query);
       return directionMatch || statusMatch || dateMatch || summaryMatch;
     }).toList();
@@ -262,8 +265,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     buffer.writeln(
         '=== Call Transcript: ${widget.user.fullName} (${call.callDate} • ${call.callTime}) ===');
     for (final t in transcript) {
-      final isAi = t.speaker.toLowerCase() == 'ai' ||
-          t.speaker.toLowerCase() == 'agent';
+      final isAi =
+          t.speaker.toLowerCase() == 'ai' || t.speaker.toLowerCase() == 'agent';
       final speakerName = isAi ? 'AI' : (t.speakerName ?? 'Customer');
       buffer.writeln('[$speakerName]: ${t.text}');
     }
@@ -357,7 +360,6 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   ) {
     return Column(
       children: [
-        // Search Input
         Container(
           height: 40,
           decoration: BoxDecoration(
@@ -404,7 +406,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     _searchCtrl.clear();
                     setState(() => _searchQuery = '');
                   },
-                  icon: const Icon(CupertinoIcons.clear_circled_solid, size: 14),
+                  icon:
+                      const Icon(CupertinoIcons.clear_circled_solid, size: 14),
                   color: context.colors.darkGreyColor,
                 ),
               ],
@@ -434,7 +437,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             children: [
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -451,7 +456,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ),
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -483,20 +490,12 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
               : context.colors.whiteColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? context.colors.primaryLightColor
-                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-            width: isSelected ? 1.5 : 1,
-          ),
         ),
         child: Row(
           children: [
-            // Rounded Square Icon Matching Mockup
             _buildCallIconBox(call),
             const SizedBox(width: 10),
 
-            // Title & Date/Time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,6 +576,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     );
 
     return Container(
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -584,7 +584,26 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Metadata 3-Column Card in App Theme Colors
+          Row(
+            children: [
+              Spacer(),
+              IconButton(
+                tooltip: 'Close details',
+                onPressed: () {
+                  setState(() => _selectedCallId = null);
+                },
+                icon: Icon(
+                  CupertinoIcons.clear,
+                  size: 20,
+                  color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                splashRadius: 14,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -592,7 +611,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color:
+                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               ),
             ),
             child: Row(
@@ -638,7 +658,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                 Container(
                   width: 1,
                   height: 28,
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                 ),
                 const SizedBox(width: 10),
 
@@ -685,7 +707,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                 Container(
                   width: 1,
                   height: 28,
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                 ),
                 const SizedBox(width: 10),
 
@@ -731,43 +755,6 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     ],
                   ),
                 ),
-
-                // Action: Schedule Button
-                IconButton(
-                  tooltip: 'Schedule Follow-up',
-                  onPressed: () async {
-                    await CallActionDialog.show(
-                      context,
-                      fullName: widget.user.fullName,
-                      phone: widget.user.phone,
-                      initialTab: 'schedule',
-                    );
-                  },
-                  icon: Icon(
-                    CupertinoIcons.calendar,
-                    size: 16,
-                    color: context.colors.primaryLightColor,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                  splashRadius: 14,
-                ),
-
-                // Action: Close Button (✕)
-                IconButton(
-                  tooltip: 'Close details',
-                  onPressed: () {
-                    setState(() => _selectedCallId = null);
-                  },
-                  icon: Icon(
-                    CupertinoIcons.clear,
-                    size: 15,
-                    color: isDark ? Colors.white60 : context.colors.darkGreyColor,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                  splashRadius: 14,
-                ),
               ],
             ),
           ),
@@ -795,7 +782,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                       color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Column(
@@ -817,7 +806,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -856,7 +846,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                           style: TextStyle(
                             fontSize: 12.5,
                             height: 1.45,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.88),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.88),
                           ),
                         ),
                       ],
@@ -872,7 +865,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                       color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Column(
@@ -894,7 +889,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -993,7 +989,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     height: 24,
                     decoration: BoxDecoration(
                       color: isAi
-                          ? context.colors.primaryLightColor.withValues(alpha: 0.2)
+                          ? context.colors.primaryLightColor
+                              .withValues(alpha: 0.2)
                           : context.colors.successColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
                     ),
