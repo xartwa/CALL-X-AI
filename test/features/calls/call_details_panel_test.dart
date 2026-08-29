@@ -138,11 +138,12 @@ class _FakeCustomerRepository implements CustomerRepository {
   @override
   Future<void> deleteNote(String customerId, String noteId) async {}
   @override
-  Future<List<String>> addTag(String customerId, String label,
-          {String color = '#6366F1'}) async =>
-      [label];
+  Future<List<String>> addTag(String customerId,
+          {String? label, int? tagId, String color = '#6366F1'}) async =>
+      [label ?? 'Tag-$tagId'];
   @override
-  Future<List<String>> removeTag(String customerId, String label) async =>
+  Future<List<String>> removeTag(String customerId,
+          {String? label, int? tagId}) async =>
       const [];
   @override
   Future<CustomerImportResult> importCustomers(String path) async =>

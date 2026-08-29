@@ -72,22 +72,44 @@ class CustomersCubit extends Cubit<CustomersState> {
   int _listRequestId = 0;
 
   Future<void> loadInitial({bool resetFilters = false}) async {
+    _debounce?.cancel();
+    _cancelToken?.cancel();
+    _cancelToken = CancelToken();
+
+    final nextFilters =
+        resetFilters ? const CustomerFilters() : state.filters;
     emit(state.copyWith(
-      filters: resetFilters ? const CustomerFilters() : state.filters,
+      filters: nextFilters,
       isInitialLoading: true,
       clearListError: true,
     ));
-    await Future.wait([loadPage(), loadKpi(), loadOptions()]);
-    emit(state.copyWith(isInitialLoading: false));
+
+    await Future.wait([
+      _requestPage(page: 1),
+      loadKpi(),
+      loadOptions(),
+    ]);
+
+    if (!isClosed) {
+      emit(state.copyWith(isInitialLoading: false, isRefreshing: false));
+    }
   }
 
   Future<void> refresh() async {
     if (state.isRefreshing) return;
+    _debounce?.cancel();
+    _cancelToken?.cancel();
+    _cancelToken = CancelToken();
+
+    emit(state.copyWith(isRefreshing: true, clearListError: true));
     await Future.wait([
-      loadPage(page: state.pagination.currentPage),
+      _requestPage(page: state.pagination.currentPage),
       loadKpi(),
       loadOptions(),
     ]);
+    if (!isClosed) {
+      emit(state.copyWith(isRefreshing: false));
+    }
   }
 
   Future<void> loadPage({int page = 1}) async {
@@ -127,15 +149,20 @@ class CustomersCubit extends Cubit<CustomersState> {
 
   Future<void> loadKpi() async {
     try {
-      emit(state.copyWith(kpi: await repository.getKpi()));
+      final kpi = await repository.getKpi();
+      if (!isClosed) {
+        emit(state.copyWith(kpi: kpi));
+      }
     } catch (_) {}
   }
 
   Future<void> loadOptions({String? country, String? stateValue}) async {
     try {
-      emit(state.copyWith(
-          options: await repository.getOptions(
-              country: country, state: stateValue)));
+      final options = await repository.getOptions(
+          country: country, state: stateValue);
+      if (!isClosed) {
+        emit(state.copyWith(options: options));
+      }
     } catch (_) {}
   }
 
@@ -210,12 +237,16 @@ class CustomersCubit extends Cubit<CustomersState> {
         await repository.deleteNote('$id', noteId);
         await loadCustomerDetail('$id');
       });
-  Future<void> addTag(Object id, String tag) async => _action(() async {
-        await repository.addTag('$id', tag);
+  Future<void> addTag(Object id,
+          {String? label, int? tagId, String color = '#6366F1'}) async =>
+      _action(() async {
+        await repository.addTag('$id',
+            label: label, tagId: tagId, color: color);
         await loadCustomerDetail('$id');
       });
-  Future<void> removeTag(Object id, String tag) async => _action(() async {
-        await repository.removeTag('$id', tag);
+  Future<void> removeTag(Object id, {String? label, int? tagId}) async =>
+      _action(() async {
+        await repository.removeTag('$id', label: label, tagId: tagId);
         await loadCustomerDetail('$id');
       });
   Future<Customer> fetchCustomer(String id) => repository.getCustomer(id);

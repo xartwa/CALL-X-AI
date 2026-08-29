@@ -9,6 +9,7 @@ import '../../core/routes/app_routes_path.dart';
 import '../../core/utils/utils.dart';
 import '../../core/constants/app_strings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/cubit/workspace_settings_cubit.dart';
 import 'cubit/login_cubit.dart';
 import '../../core/widgets/app_feedback.dart';
 
@@ -441,6 +442,7 @@ class _LoginPageState extends State<LoginPage> {
     return BlocListener<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state is LoginSuccess) {
+          context.read<WorkspaceSettingsCubit>().loadConfiguration();
           AppUtils.showSnackBar(
             context: context,
             title: strings.loginSuccessfulTitle,

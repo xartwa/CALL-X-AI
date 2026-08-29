@@ -54,6 +54,7 @@ class AppRouter {
             path: AppRoutesPath.customers,
             name: AppRoutesPath.customersName,
             pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
               child: const CustomersPage(),
             ),
             routes: [

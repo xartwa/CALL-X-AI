@@ -220,6 +220,15 @@ class PreferencesService {
   static const _leadQualitiesKey = 'lead_qualities_list';
   static const _customTagsKey = 'custom_tags_list';
   static const _callStatusesKey = 'call_statuses_list';
+  static const _workspaceTagsMigratedV1Key = 'workspace_tags_migrated_v1';
+
+  bool isWorkspaceTagsMigratedV1() {
+    return _preferences.getBool(_workspaceTagsMigratedV1Key) ?? false;
+  }
+
+  Future<void> setWorkspaceTagsMigratedV1(bool value) async {
+    await _preferences.setBool(_workspaceTagsMigratedV1Key, value);
+  }
 
   List<TagModel> loadLeadStatuses() {
     final list = _preferences.getStringList(_leadStatusesKey);

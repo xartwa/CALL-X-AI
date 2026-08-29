@@ -110,7 +110,8 @@ class _CustomersPageState extends State<CustomersPage> {
         if (state.listError != null && state.users.isEmpty) {
           return AppErrorView(
             message: state.listError!,
-            onRetry: () => context.read<CustomersCubit>().loadPage(),
+            onRetry: () =>
+                context.read<CustomersCubit>().loadInitial(resetFilters: false),
           );
         }
         final totalUsers = state.kpi?.totalCustomers ?? state.pagination.count;

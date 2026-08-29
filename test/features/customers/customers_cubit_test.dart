@@ -117,6 +117,25 @@ void main() {
     expect(cubit.state.users.single.id, '42');
     await cubit.close();
   });
+
+  test('loadInitial fetches customers list, KPI metrics, and filter options on page entry',
+      () async {
+    final repository = _FakeCustomerRepository();
+    repository.pageItems = [
+      Customer(id: '1', fullName: 'Alice'),
+      Customer(id: '2', fullName: 'Bob'),
+    ];
+    final cubit = CustomersCubit(repository);
+
+    await cubit.loadInitial(resetFilters: true);
+
+    expect(repository.listCalls, 1);
+    expect(cubit.state.users.length, 2);
+    expect(cubit.state.isInitialLoading, false);
+    expect(cubit.state.kpi, isNotNull);
+    expect(cubit.state.options, isNotNull);
+    await cubit.close();
+  });
 }
 
 class _FakeCustomerRepository implements CustomerRepository {
@@ -178,11 +197,12 @@ class _FakeCustomerRepository implements CustomerRepository {
   @override
   Future<void> deleteNote(String customerId, String noteId) async {}
   @override
-  Future<List<String>> addTag(String customerId, String label,
-          {String color = '#6366F1'}) async =>
-      [label];
+  Future<List<String>> addTag(String customerId,
+          {String? label, int? tagId, String color = '#6366F1'}) async =>
+      [label ?? 'Tag-$tagId'];
   @override
-  Future<List<String>> removeTag(String customerId, String label) async =>
+  Future<List<String>> removeTag(String customerId,
+          {String? label, int? tagId}) async =>
       const [];
   @override
   Future<CustomerImportResult> importCustomers(String path) async =>

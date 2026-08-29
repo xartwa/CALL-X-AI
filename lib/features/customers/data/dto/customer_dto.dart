@@ -11,8 +11,15 @@ class PaginatedCustomersDto {
   const PaginatedCustomersDto(this.json);
   final Map<String, dynamic> json;
 
-  List<Customer> get customers => (json['results'] as List? ?? const [])
-      .whereType<Map>()
-      .map((item) => CustomerDto(Map<String, dynamic>.from(item)).toEntity())
-      .toList(growable: false);
+  List<Customer> get customers {
+    final rawList = json['results'] ??
+        json['customers'] ??
+        json['items'] ??
+        json['data'];
+    final list = rawList is List ? rawList : const [];
+    return list
+        .whereType<Map>()
+        .map((item) => CustomerDto(Map<String, dynamic>.from(item)).toEntity())
+        .toList(growable: false);
+  }
 }

@@ -27,14 +27,18 @@ class CustomerFilters {
   Map<String, dynamic> toQuery(int page, int pageSize) => {
         'page': page,
         'pageSize': pageSize,
+        'page_size': pageSize,
         if (search.trim().isNotEmpty) 'search': search.trim(),
-        if (country != null) 'country': country,
-        if (state != null) 'state': state,
-        if (city != null) 'city': city,
-        if (status != null) 'status': status,
-        if (leadStatus != null) 'leadStatus': leadStatus,
-        if (leadPriority != null) 'leadPriority': leadPriority,
-        if (leadQuality != null) 'leadQuality': leadQuality,
+        if (country != null && !country!.startsWith('All')) 'country': country,
+        if (state != null && !state!.startsWith('All')) 'state': state,
+        if (city != null && !city!.startsWith('All')) 'city': city,
+        if (status != null && status != 'All') 'status': status,
+        if (leadStatus != null && !leadStatus!.startsWith('All'))
+          'leadStatus': leadStatus,
+        if (leadPriority != null && !leadPriority!.startsWith('All'))
+          'leadPriority': leadPriority,
+        if (leadQuality != null && !leadQuality!.startsWith('All'))
+          'leadQuality': leadQuality,
         if (contactedToday) 'contactedToday': true,
         'sort': sort,
       };
@@ -118,9 +122,10 @@ abstract interface class CustomerRepository {
   Future<CustomerNote> updateNote(
       String customerId, String noteId, String content);
   Future<void> deleteNote(String customerId, String noteId);
-  Future<List<String>> addTag(String customerId, String label,
-      {String color = '#6366F1'});
-  Future<List<String>> removeTag(String customerId, String label);
+  Future<List<String>> addTag(String customerId,
+      {String? label, int? tagId, String color = '#6366F1'});
+  Future<List<String>> removeTag(String customerId,
+      {String? label, int? tagId});
   Future<CustomerImportResult> importCustomers(String path);
   Future<List<int>> exportCustomers(CustomerFilters filters);
   Future<void> dispatchCall(String customerId, String scenarioId,

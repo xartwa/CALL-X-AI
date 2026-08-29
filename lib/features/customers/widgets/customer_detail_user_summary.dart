@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:callx_ai/core/models/tag_model.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:toastification/toastification.dart';
 
@@ -75,7 +76,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
               CircleAvatar(
                 radius: 38,
                 backgroundColor:
-                    context.colors.primaryLightColor.withOpacity(0.12),
+                    context.colors.primaryLightColor.withValues(alpha: 0.12),
                 child: Text(
                   user.fullName.isNotEmpty
                       ? user.fullName.characters.first.toUpperCase()
@@ -239,14 +240,24 @@ class CustomerDetailUserSummary extends StatelessWidget {
                     ),
                     InkWell(
                       onTap: () async {
-                        final newTag = await AddTagDialog.show(
+                        final tagModel = await AddTagDialog.show(
                           context,
                           existingTags: user.tags,
                         );
-                        if (newTag != null && context.mounted) {
-                          context
-                              .read<CustomersCubit>()
-                              .addTag(user.id, newTag);
+                        if (tagModel != null && context.mounted) {
+                          final numericId = int.tryParse(tagModel.id);
+                          if (numericId != null && numericId > 0) {
+                            context.read<CustomersCubit>().addTag(
+                                  user.id,
+                                  tagId: numericId,
+                                );
+                          } else {
+                            context.read<CustomersCubit>().addTag(
+                                  user.id,
+                                  label: tagModel.label,
+                                  color: tagModel.colorHex,
+                                );
+                          }
                         }
                       },
                       borderRadius: BorderRadius.circular(6),
@@ -291,10 +302,11 @@ class CustomerDetailUserSummary extends StatelessWidget {
                             height: 24,
                             padding: const EdgeInsets.only(left: 10, right: 6),
                             decoration: BoxDecoration(
-                              color: color.withOpacity(isDark ? 0.15 : 0.08),
+                              color: color.withValues(
+                                  alpha: isDark ? 0.15 : 0.08),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: color.withOpacity(0.4),
+                                color: color.withValues(alpha: 0.4),
                                 width: 1,
                               ),
                             ),
@@ -313,9 +325,30 @@ class CustomerDetailUserSummary extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 InkWell(
                                   onTap: () {
-                                    context
-                                        .read<CustomersCubit>()
-                                        .removeTag(user.id, tag);
+                                    final settingsState = context
+                                        .read<WorkspaceSettingsCubit>()
+                                        .state;
+                                    final matchingTag = settingsState
+                                        .customTags
+                                        .cast<TagModel?>()
+                                        .firstWhere(
+                                          (t) =>
+                                              t?.label.toLowerCase() ==
+                                              tag.toLowerCase(),
+                                          orElse: () => null,
+                                        );
+                                    final numericId = matchingTag != null
+                                        ? int.tryParse(matchingTag.id)
+                                        : null;
+                                    if (numericId != null && numericId > 0) {
+                                      context
+                                          .read<CustomersCubit>()
+                                          .removeTag(user.id, tagId: numericId);
+                                    } else {
+                                      context
+                                          .read<CustomersCubit>()
+                                          .removeTag(user.id, label: tag);
+                                    }
                                   },
                                   borderRadius: BorderRadius.circular(10),
                                   child: Icon(CupertinoIcons.clear_thick,
@@ -470,9 +503,9 @@ class CustomerDetailUserSummary extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: priorityColor.withOpacity(0.12),
+                color: priorityColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: priorityColor.withOpacity(0.4)),
+                border: Border.all(color: priorityColor.withValues(alpha: 0.4)),
               ),
               child: Text(
                 value,

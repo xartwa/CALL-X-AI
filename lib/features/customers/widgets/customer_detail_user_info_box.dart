@@ -242,9 +242,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox>
 
   Widget _buildLeadBusinessTab(BuildContext context, bool isDark) {
     final settingsState = context.watch<WorkspaceSettingsCubit>().state;
-    final leadStatuses =
-        settingsState.leadStatuses.map((e) => e.label).toList();
-    if (leadStatuses.isEmpty) leadStatuses.add('New');
+    const leadStatuses = ['New', 'Contacted', 'Qualified', 'Won', 'Lost'];
 
     final leadQualities =
         settingsState.leadQualities.map((e) => e.label).toList();

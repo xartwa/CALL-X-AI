@@ -1,142 +1,191 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:callx_ai/core/errors/app_exception.dart';
 import 'package:callx_ai/core/models/tag_model.dart';
+import 'package:callx_ai/core/models/workspace_configuration_model.dart';
+import 'package:callx_ai/core/repositories/workspace_repository.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 
+enum WorkspaceSettingsStatus {
+  initial,
+  loading,
+  loaded,
+  saving,
+  failure,
+}
+
 class WorkspaceSettingsState {
-  final List<TagModel> leadStatuses;
+  final WorkspaceSettingsStatus status;
+  final List<TagModel> pipelineStages;
+  final List<TagModel> customTags;
+  final List<Color> tagColors;
+  final List<String> tagColorHexes;
   final List<TagModel> leadPriorities;
   final List<TagModel> leadQualities;
-  final List<TagModel> customTags;
   final List<TagModel> callStatuses;
+  final String? errorMessage;
 
-  WorkspaceSettingsState({
-    this.leadStatuses = const [],
+  const WorkspaceSettingsState({
+    this.status = WorkspaceSettingsStatus.initial,
+    this.pipelineStages = const [],
+    this.customTags = const [],
+    this.tagColors = const [],
+    this.tagColorHexes = const [],
     this.leadPriorities = const [],
     this.leadQualities = const [],
-    this.customTags = const [],
     this.callStatuses = const [],
+    this.errorMessage,
   });
 
+  List<TagModel> get leadStatuses => pipelineStages;
+
   WorkspaceSettingsState copyWith({
-    List<TagModel>? leadStatuses,
+    WorkspaceSettingsStatus? status,
+    List<TagModel>? pipelineStages,
+    List<TagModel>? customTags,
+    List<Color>? tagColors,
+    List<String>? tagColorHexes,
     List<TagModel>? leadPriorities,
     List<TagModel>? leadQualities,
-    List<TagModel>? customTags,
     List<TagModel>? callStatuses,
+    String? errorMessage,
+    bool clearError = false,
   }) {
     return WorkspaceSettingsState(
-      leadStatuses: leadStatuses ?? this.leadStatuses,
+      status: status ?? this.status,
+      pipelineStages: pipelineStages ?? this.pipelineStages,
+      customTags: customTags ?? this.customTags,
+      tagColors: tagColors ?? this.tagColors,
+      tagColorHexes: tagColorHexes ?? this.tagColorHexes,
       leadPriorities: leadPriorities ?? this.leadPriorities,
       leadQualities: leadQualities ?? this.leadQualities,
-      customTags: customTags ?? this.customTags,
       callStatuses: callStatuses ?? this.callStatuses,
+      errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 }
 
 class WorkspaceSettingsCubit extends Cubit<WorkspaceSettingsState> {
+  final WorkspaceRepository workspaceRepository;
   final PreferencesService preferencesService;
 
-  WorkspaceSettingsCubit({required this.preferencesService})
-      : super(WorkspaceSettingsState()) {
-    loadSettings();
-  }
+  WorkspaceSettingsCubit({
+    required this.workspaceRepository,
+    required this.preferencesService,
+  }) : super(WorkspaceSettingsState(
+          leadPriorities: preferencesService.loadLeadPriorities(),
+          leadQualities: preferencesService.loadLeadQualities(),
+          callStatuses: preferencesService.loadCallStatuses(),
+        ));
 
-  void loadSettings() {
-    final state = WorkspaceSettingsState(
-      leadStatuses: preferencesService.loadLeadStatuses(),
-      leadPriorities: preferencesService.loadLeadPriorities(),
-      leadQualities: preferencesService.loadLeadQualities(),
-      customTags: preferencesService.loadCustomTags(),
-      callStatuses: preferencesService.loadCallStatuses(),
-    );
-    emit(state);
-  }
-
-  void addLeadStatus(TagModel tag) {
-    final list = List<TagModel>.from(state.leadStatuses)..add(tag);
-    preferencesService.saveLeadStatuses(list);
-    emit(state.copyWith(leadStatuses: list));
-  }
-
-  void removeLeadStatus(TagModel tag) {
-    final list = List<TagModel>.from(state.leadStatuses)
-      ..removeWhere((t) => t.id == tag.id);
-    preferencesService.saveLeadStatuses(list);
-    emit(state.copyWith(leadStatuses: list));
-  }
-
-  void addLeadPriority(TagModel tag) {
-    final list = List<TagModel>.from(state.leadPriorities)..add(tag);
-    preferencesService.saveLeadPriorities(list);
-    emit(state.copyWith(leadPriorities: list));
-  }
-
-  void removeLeadPriority(TagModel tag) {
-    final list = List<TagModel>.from(state.leadPriorities)
-      ..removeWhere((t) => t.id == tag.id);
-    preferencesService.saveLeadPriorities(list);
-    emit(state.copyWith(leadPriorities: list));
-  }
-
-  void addLeadQuality(TagModel tag) {
-    final list = List<TagModel>.from(state.leadQualities)..add(tag);
-    preferencesService.saveLeadQualities(list);
-    emit(state.copyWith(leadQualities: list));
-  }
-
-  void removeLeadQuality(TagModel tag) {
-    final list = List<TagModel>.from(state.leadQualities)
-      ..removeWhere((t) => t.id == tag.id);
-    preferencesService.saveLeadQualities(list);
-    emit(state.copyWith(leadQualities: list));
-  }
-
-  void addCustomTag(TagModel tag) {
-    final list = List<TagModel>.from(state.customTags)..add(tag);
-    preferencesService.saveCustomTags(list);
-    emit(state.copyWith(customTags: list));
-  }
-
-  void removeCustomTag(TagModel tag) {
-    final list = List<TagModel>.from(state.customTags)
-      ..removeWhere((t) => t.id == tag.id);
-    preferencesService.saveCustomTags(list);
-    emit(state.copyWith(customTags: list));
-  }
-
-  void addCallStatus(TagModel tag) {
-    final list = List<TagModel>.from(state.callStatuses)..add(tag);
-    preferencesService.saveCallStatuses(list);
-    emit(state.copyWith(callStatuses: list));
-  }
-
-  void removeCallStatus(TagModel tag) {
-    final list = List<TagModel>.from(state.callStatuses)
-      ..removeWhere((t) => t.id == tag.id);
-    preferencesService.saveCallStatuses(list);
-    emit(state.copyWith(callStatuses: list));
-  }
-
-  void setAllSettings({
-    required List<TagModel> leadStatuses,
-    required List<TagModel> leadPriorities,
-    required List<TagModel> leadQualities,
-    required List<TagModel> customTags,
-    required List<TagModel> callStatuses,
-  }) {
-    preferencesService.saveLeadStatuses(leadStatuses);
-    preferencesService.saveLeadPriorities(leadPriorities);
-    preferencesService.saveLeadQualities(leadQualities);
-    preferencesService.saveCustomTags(customTags);
-    preferencesService.saveCallStatuses(callStatuses);
-
+  Future<void> loadConfiguration() async {
     emit(state.copyWith(
-      leadStatuses: leadStatuses,
-      leadPriorities: leadPriorities,
-      leadQualities: leadQualities,
-      customTags: customTags,
-      callStatuses: callStatuses,
+      status: WorkspaceSettingsStatus.loading,
+      clearError: true,
     ));
+
+    try {
+      var config = await workspaceRepository.getWorkspaceConfiguration();
+
+      // One-time migration for legacy local tags
+      if (!preferencesService.isWorkspaceTagsMigratedV1()) {
+        final localTags = preferencesService.loadCustomTags();
+        final serverLabels = config.customTags
+            .map((t) => t.label.trim().toLowerCase())
+            .toSet();
+
+        final tagsToMigrate = <TagModel>[];
+        for (final local in localTags) {
+          final cleanLabel = local.label.trim();
+          if (cleanLabel.isNotEmpty &&
+              !serverLabels.contains(cleanLabel.toLowerCase())) {
+            serverLabels.add(cleanLabel.toLowerCase());
+            tagsToMigrate.add(TagModel(
+              id: '',
+              label: cleanLabel,
+              color: local.color,
+            ));
+          }
+        }
+
+        if (tagsToMigrate.isNotEmpty) {
+          final merged = [...config.customTags, ...tagsToMigrate];
+          config =
+              await workspaceRepository.updateWorkspaceConfiguration(merged);
+        }
+
+        await preferencesService.setWorkspaceTagsMigratedV1(true);
+      }
+
+      emit(state.copyWith(
+        status: WorkspaceSettingsStatus.loaded,
+        pipelineStages: config.pipelineStages,
+        customTags: config.customTags,
+        tagColors: config.tagColors,
+        tagColorHexes: config.tagColorHexes,
+        clearError: true,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: WorkspaceSettingsStatus.failure,
+        errorMessage: 'Unable to load workspace configuration.',
+      ));
+    }
+  }
+
+  Future<bool> saveCustomTags(List<TagModel> tags) async {
+    emit(state.copyWith(
+      status: WorkspaceSettingsStatus.saving,
+      clearError: true,
+    ));
+
+    try {
+      final config =
+          await workspaceRepository.updateWorkspaceConfiguration(tags);
+      emit(state.copyWith(
+        status: WorkspaceSettingsStatus.loaded,
+        customTags: config.customTags,
+        pipelineStages: config.pipelineStages,
+        tagColors: config.tagColors,
+        tagColorHexes: config.tagColorHexes,
+        clearError: true,
+      ));
+      return true;
+    } on AppException catch (e) {
+      String msg = 'Unable to save workspace configuration.';
+      if (e.fieldErrors.isNotEmpty) {
+        msg = e.fieldErrors.values.expand((x) => x).join(' ');
+      } else if (e.details != null && e.details!.trim().isNotEmpty) {
+        msg = e.details!;
+      }
+      emit(state.copyWith(
+        status: WorkspaceSettingsStatus.failure,
+        errorMessage: msg,
+      ));
+      return false;
+    } catch (e) {
+      emit(state.copyWith(
+        status: WorkspaceSettingsStatus.failure,
+        errorMessage: 'Unable to save workspace configuration.',
+      ));
+      return false;
+    }
+  }
+
+  // Fallback helper methods for secondary metadata
+  void setLeadPriorities(List<TagModel> list) {
+    preferencesService.saveLeadPriorities(list);
+    emit(state.copyWith(leadPriorities: list));
+  }
+
+  void setLeadQualities(List<TagModel> list) {
+    preferencesService.saveLeadQualities(list);
+    emit(state.copyWith(leadQualities: list));
+  }
+
+  void setCallStatuses(List<TagModel> list) {
+    preferencesService.saveCallStatuses(list);
+    emit(state.copyWith(callStatuses: list));
   }
 }
+

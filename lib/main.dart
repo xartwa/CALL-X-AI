@@ -17,6 +17,10 @@ import 'package:callx_ai/features/customers/data/datasources/customer_remote_dat
 import 'package:callx_ai/features/customers/data/repositories/customer_repository_impl.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 
+import 'package:callx_ai/core/datasources/workspace_remote_data_source.dart';
+import 'package:callx_ai/core/repositories/workspace_repository.dart';
+import 'package:callx_ai/core/repositories/workspace_repository_impl.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -33,6 +37,9 @@ Future<void> main() async {
   final customerRepository = CustomerRepositoryImpl(
     CustomerRemoteDataSource(dioClient),
   );
+  final workspaceRepository = WorkspaceRepositoryImpl(
+    WorkspaceRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -44,6 +51,8 @@ Future<void> main() async {
         RepositoryProvider<DashboardRepository>.value(
             value: dashboardRepository),
         RepositoryProvider<CustomerRepository>.value(value: customerRepository),
+        RepositoryProvider<WorkspaceRepository>.value(
+            value: workspaceRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -54,8 +63,11 @@ Future<void> main() async {
             ),
           ),
           BlocProvider(
-              create: (_) => WorkspaceSettingsCubit(
-                  preferencesService: preferencesService)),
+            create: (_) => WorkspaceSettingsCubit(
+              workspaceRepository: workspaceRepository,
+              preferencesService: preferencesService,
+            )..loadConfiguration(),
+          ),
         ],
         child: CallCenterApp(router: appRouter.router),
       ),

@@ -41,17 +41,36 @@ class CustomerRepositoryImpl implements CustomerRepository {
         final data = await remote.list(filters.toQuery(page, pageSize),
             cancelToken: cancelToken as CancelToken?);
         return _guard(() {
+          if (data is List) {
+            final results = data
+                .whereType<Map>()
+                .map((item) => CustomerDto(Map<String, dynamic>.from(item)).toEntity())
+                .toList(growable: false);
+            return CustomerPage(
+                results,
+                PaginationMeta(
+                    count: results.length,
+                    totalPages: 1,
+                    currentPage: 1,
+                    pageSize: pageSize,
+                    hasNext: false,
+                    hasPrevious: false));
+          }
           final json = Map<String, dynamic>.from(data as Map);
           final results = PaginatedCustomersDto(json).customers;
+          final count = _int(json['count'] ?? json['total'] ?? json['total_count'], results.length);
+          final totalPages = _int(json['totalPages'] ?? json['total_pages'], 1);
+          final currentPage = _int(json['currentPage'] ?? json['current_page'] ?? json['page'], page);
+          final pSize = _int(json['pageSize'] ?? json['page_size'], pageSize);
           return CustomerPage(
               results,
               PaginationMeta(
-                  count: _int(json['count']),
-                  totalPages: _int(json['totalPages'], 1),
-                  currentPage: _int(json['currentPage'], 1),
-                  pageSize: _int(json['pageSize'], pageSize),
-                  hasNext: json['hasNext'] == true,
-                  hasPrevious: json['hasPrevious'] == true));
+                  count: count,
+                  totalPages: totalPages,
+                  currentPage: currentPage,
+                  pageSize: pSize,
+                  hasNext: json['hasNext'] == true || json['has_next'] == true,
+                  hasPrevious: json['hasPrevious'] == true || json['has_previous'] == true));
         });
       });
 
@@ -66,16 +85,17 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<CustomerFilterOptions> getOptions({String? country, String? state}) =>
       _request(() async {
-        final j = await remote.options(country: country, state: state);
+        final raw = await remote.options(country: country, state: state);
+        final j = raw['data'] is Map ? Map<String, dynamic>.from(raw['data'] as Map) : raw;
         return CustomerFilterOptions(
-            country: _list(j['country']),
-            state: _list(j['state']),
-            city: _list(j['city']),
-            companyType: _list(j['company_type']),
-            leadStatus: _list(j['lead_status']),
-            leadQuality: _list(j['lead_quality']),
-            leadPriority: _list(j['lead_priority']),
-            status: _list(j['status']));
+            country: _list(j['country'] ?? j['countries']),
+            state: _list(j['state'] ?? j['states'] ?? j['provinces']),
+            city: _list(j['city'] ?? j['cities']),
+            companyType: _list(j['company_type'] ?? j['companyType']),
+            leadStatus: _list(j['lead_status'] ?? j['leadStatus']),
+            leadQuality: _list(j['lead_quality'] ?? j['leadQuality']),
+            leadPriority: _list(j['lead_priority'] ?? j['leadPriority']),
+            status: _list(j['status'] ?? j['statuses']));
       });
   @override
   Future<Customer> createCustomer(Customer customer) => _request(() async =>
@@ -103,12 +123,15 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<void> deleteNote(String customerId, String noteId) =>
       _request(() => remote.noteDelete(customerId, noteId));
   @override
-  Future<List<String>> addTag(String customerId, String label,
-          {String color = '#6366F1'}) =>
-      _request(() => remote.tag(customerId, label, color: color));
+  Future<List<String>> addTag(String customerId,
+          {String? label, int? tagId, String color = '#6366F1'}) =>
+      _request(() => remote.tag(customerId,
+          label: label, tagId: tagId, color: color));
   @override
-  Future<List<String>> removeTag(String customerId, String label) =>
-      _request(() => remote.tag(customerId, label, remove: true));
+  Future<List<String>> removeTag(String customerId,
+          {String? label, int? tagId}) =>
+      _request(() => remote.tag(customerId,
+          label: label, tagId: tagId, remove: true));
   @override
   Future<CustomerImportResult> importCustomers(String path) =>
       _request(() async {

@@ -48,13 +48,36 @@ class CustomerRemoteDataSource {
     await client.http.delete('/customers/$id/notes/$noteId/');
   }
 
-  Future<List<String>> tag(String id, String label,
-          {bool remove = false, String color = '#6366F1'}) async =>
-      List<String>.from(Map<String, dynamic>.from((await client.http.request(
-              '/customers/$id/tags/',
-              options: Options(method: remove ? 'DELETE' : 'POST'),
-              data: {'label': label, 'color': color}))
-          .data as Map)['tags'] as List);
+  Future<List<String>> tag(
+    String id, {
+    String? label,
+    int? tagId,
+    String color = '#6366F1',
+    bool remove = false,
+  }) async {
+    final Map<String, dynamic> body = {};
+    if (tagId != null && tagId > 0) {
+      body['tagId'] = tagId;
+    } else if (label != null && label.trim().isNotEmpty) {
+      body['label'] = label.trim();
+      body['color'] = color;
+    }
+
+    final response = await client.http.request(
+      '/customers/$id/tags/',
+      options: Options(method: remove ? 'DELETE' : 'POST'),
+      data: body,
+    );
+    final data = response.data;
+    if (data is Map && data['tags'] is List) {
+      return List<String>.from(
+          (data['tags'] as List).map((e) => e.toString()));
+    }
+    if (data is List) {
+      return List<String>.from(data.map((e) => e.toString()));
+    }
+    return <String>[];
+  }
   Future<Map<String, dynamic>> importFile(String path) async =>
       Map<String, dynamic>.from((await client.http.post('/customers/import/',
               data: FormData.fromMap(
