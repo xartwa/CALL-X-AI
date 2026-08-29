@@ -265,8 +265,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     buffer.writeln(
         '=== Call Transcript: ${widget.user.fullName} (${call.callDate} • ${call.callTime}) ===');
     for (final t in transcript) {
-      final isAi =
-          t.speaker.toLowerCase() == 'ai' || t.speaker.toLowerCase() == 'agent';
+      final isAi = t.speaker.toLowerCase() == 'ai' ||
+          t.speaker.toLowerCase() == 'agent';
       final speakerName = isAi ? 'AI' : (t.speakerName ?? 'Customer');
       buffer.writeln('[$speakerName]: ${t.text}');
     }
@@ -279,41 +279,6 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final calls = _filteredCalls;
 
-    if (calls.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: context.colors.whiteColor,
-          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-          border: Border.all(
-            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.phone_badge_plus,
-                size: 44,
-                color: context.colors.darkGreyColor.withValues(alpha: 0.4),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'No call logs found',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: context.colors.darkGreyColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     CustomerCallHistory? selectedCall;
     if (_selectedCallId != null) {
       selectedCall = calls.firstWhere(
@@ -324,38 +289,203 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= 650;
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Top Header Row Matching Notes Tab (media_1788026914269.png)
+          _buildHeader(calls, selectedCall, isDark),
+          const SizedBox(height: 16),
 
-          if (!isWide || selectedCall == null) {
-            return _buildCallsList(calls, _selectedCallId ?? '', isDark, false);
-          }
+          // 2. Main Content (List or 2-Column Master-Detail)
+          Expanded(
+            child: calls.isEmpty
+                ? _buildEmptyState(isDark)
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 650;
 
-          // 2-Column Master-Detail Mode
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left Column: Calls List (flex: 4)
-              Expanded(
-                flex: 4,
-                child: _buildCallsList(calls, _selectedCallId!, isDark, true),
+                      if (!isWide || selectedCall == null) {
+                        return _buildCallsList(
+                            calls, _selectedCallId ?? '', isDark, false);
+                      }
+
+                      // 2-Column Master-Detail Mode
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Left Column: Calls List (flex: 4)
+                          Expanded(
+                            flex: 4,
+                            child: _buildCallsList(
+                                calls, _selectedCallId!, isDark, true),
+                          ),
+                          const SizedBox(width: 14),
+
+                          // Right Column: Call Detail Card (flex: 5)
+                          Expanded(
+                            flex: 5,
+                            child: _buildCallDetailCard(selectedCall, isDark),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(
+    List<CustomerCallHistory> calls,
+    CustomerCallHistory? selectedCall,
+    bool isDark,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Left: Icon + CALL LOGS + Count Badge
+        Row(
+          children: [
+            Icon(
+              CupertinoIcons.phone_fill,
+              size: 19,
+              color: context.colors.primaryLightColor,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'CALL LOGS',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              const SizedBox(width: 14),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: context.colors.primaryLightColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${calls.length}',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: context.colors.primaryLightColor,
+                ),
+              ),
+            ),
+          ],
+        ),
 
-              // Right Column: Call Detail Card (flex: 5)
-              Expanded(
-                flex: 5,
-                child: _buildCallDetailCard(selectedCall, isDark),
+        // Right: Search Box + Close Button if call selected
+        Row(
+          children: [
+            SizedBox(
+              width: 220,
+              height: 38,
+              child: TextField(
+                controller: _searchCtrl,
+                onChanged: (val) {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                },
+                style: const TextStyle(fontSize: 12),
+                decoration: InputDecoration(
+                  hintText: 'Search calls...',
+                  hintStyle: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.darkGreyColor.withOpacity(0.7),
+                  ),
+                  prefixIcon: Icon(
+                    CupertinoIcons.search,
+                    size: 15,
+                    color: context.colors.darkGreyColor,
+                  ),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(CupertinoIcons.clear_thick, size: 14),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  isDense: true,
+                  filled: true,
+                  fillColor:
+                      isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: context.colors.primaryLightColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (selectedCall != null) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: 'Close details',
+                onPressed: () => setState(() => _selectedCallId = null),
+                icon: Icon(
+                  CupertinoIcons.clear,
+                  size: 16,
+                  color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                splashRadius: 16,
               ),
             ],
-          );
-        },
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(bool isDark) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            CupertinoIcons.phone_badge_plus,
+            size: 44,
+            color: context.colors.darkGreyColor.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No call logs found',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: context.colors.darkGreyColor,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -368,55 +498,6 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   ) {
     return Column(
       children: [
-        SizedBox(
-         width: MediaQuery.sizeOf(context).width,
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: (val) {
-                    setState(() {
-                      _searchQuery = val;
-                    });
-                  },
-                  style: const TextStyle(fontSize: 12),
-                  decoration: InputDecoration(
-                    hintText: 'Search calls...',
-                    hintStyle: TextStyle(
-                      fontSize: 11,
-                      color: context.colors.darkGreyColor.withOpacity(0.7),
-                    ),
-                    prefixIcon: Icon(
-                      CupertinoIcons.search,
-                      size: 15,
-                      color: context.colors.darkGreyColor,
-                    ),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(CupertinoIcons.clear_thick,
-                                size: 14),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              setState(() {
-                                _searchQuery = '';
-                              });
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: isDark
-                        ? const Color(0xFF1E293B)
-                        : const Color(0xFFF1F5F9),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-        const SizedBox(height: 10),
-
         // List of Call Cards
         Expanded(
           child: ListView.separated(
@@ -433,14 +514,12 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
 
         // Footer: "X of X calls" with horizontal lines
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.only(top: 8),
           child: Row(
             children: [
               Expanded(
                 child: Divider(
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -457,9 +536,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ),
               Expanded(
                 child: Divider(
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -488,15 +565,47 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
-              : context.colors.whiteColor,
+              ? (isDark
+                  ? context.colors.primaryLightColor.withValues(alpha: 0.16)
+                  : const Color(0xFFEEF2FF))
+              : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? context.colors.primaryLightColor
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: context.colors.primaryLightColor.withValues(alpha: 0.18),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           children: [
+            // Distinctive Accent Strip when Selected
+            if (isSelected) ...[
+              Container(
+                width: 3.5,
+                height: 28,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: context.colors.primaryLightColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ],
+
+            // Rounded Square Icon Matching Mockup
             _buildCallIconBox(call),
             const SizedBox(width: 10),
 
+            // Title & Date/Time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,8 +614,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     title,
                     style: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                      color: isSelected
+                          ? context.colors.primaryLightColor
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -576,27 +687,172 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       notes: call.summary,
     );
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.colors.whiteColor,
-        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1. Metadata 3-Column Card in App Theme Colors
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: Row(
             children: [
-              Spacer(),
+              // 1. Duration (Clock/Stopwatch Icon + Column)
+              Expanded(
+                flex: 3,
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.stopwatch,
+                      size: 16,
+                      color: context.colors.primaryLightColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Duration',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: context.colors.darkGreyColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            call.duration.isNotEmpty ? call.duration : '0:00',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 28,
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+              const SizedBox(width: 10),
+
+              // 2. Date & Time (Calendar Icon + Column)
+              Expanded(
+                flex: 5,
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.calendar,
+                      size: 16,
+                      color: context.colors.primaryLightColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Date & Time',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: context.colors.darkGreyColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${call.callDate} • ${call.callTime}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 28,
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+              const SizedBox(width: 10),
+
+              // 3. Agent (Smart Robot Icon + Column)
+              Expanded(
+                flex: 3,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.smart_toy_outlined,
+                      size: 17,
+                      color: context.colors.primaryLightColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Agent',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              color: context.colors.darkGreyColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            call.scenario != null && call.scenario!.isNotEmpty
+                                ? call.scenario!
+                                : 'Sara (Sales)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Action: Schedule Button
               IconButton(
-                tooltip: 'Close details',
-                onPressed: () {
-                  setState(() => _selectedCallId = null);
+                tooltip: 'Schedule Follow-up',
+                onPressed: () async {
+                  await CallActionDialog.show(
+                    context,
+                    fullName: widget.user.fullName,
+                    phone: widget.user.phone,
+                    initialTab: 'schedule',
+                  );
                 },
                 icon: Icon(
-                  CupertinoIcons.clear,
-                  size: 20,
-                  color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                  CupertinoIcons.calendar,
+                  size: 16,
+                  color: context.colors.primaryLightColor,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
@@ -604,333 +860,169 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color:
-                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              ),
-            ),
-            child: Row(
+        ),
+        const SizedBox(height: 12),
+
+        // 2. Audio Player (Right below metadata card)
+        CallAudioPlayerWidget(
+          call: callHistoryModel,
+          compact: true,
+        ),
+        const SizedBox(height: 12),
+
+        // Scrollable Sections: AI Summary & Call Transcript
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Duration (Clock/Stopwatch Icon + Column)
-                Expanded(
-                  flex: 3,
-                  child: Row(
+                // 3. AI Summary Card in App Theme Colors
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        CupertinoIcons.stopwatch,
-                        size: 16,
-                        color: context.colors.primaryLightColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Duration',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: context.colors.darkGreyColor,
-                                fontWeight: FontWeight.w500,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.sparkles,
+                                size: 15,
+                                color: context.colors.primaryLightColor,
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              call.duration.isNotEmpty ? call.duration : '0:00',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w800,
-                                color: Theme.of(context).colorScheme.onSurface,
+                              const SizedBox(width: 8),
+                              Text(
+                                'AI Summary',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (call.outcome.isNotEmpty) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: context.colors.primaryLightColor
+                                    .withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: context.colors.primaryLightColor
+                                      .withValues(alpha: 0.35),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                call.outcome,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: context.colors.primaryLightColor,
+                                ),
                               ),
                             ),
                           ],
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        call.summary != null && call.summary!.isNotEmpty
+                            ? call.summary!
+                            : 'Customer (${widget.user.fullName}) was contacted by AI (B2B Sales). Key project scope, budget estimation, and delivery terms were discussed. Customer expressed strong interest in proceeding.',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.45,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.88),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 28,
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFE2E8F0),
-                ),
-                const SizedBox(width: 10),
+                const SizedBox(height: 12),
 
-                // 2. Date & Time (Calendar Icon + Column)
-                Expanded(
-                  flex: 5,
-                  child: Row(
-                    children: [
-                      Icon(
-                        CupertinoIcons.calendar,
-                        size: 16,
-                        color: context.colors.primaryLightColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Date & Time',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: context.colors.darkGreyColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${call.callDate} • ${call.callTime}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                // 4. Call Transcript Card in App Theme Colors
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    ),
                   ),
-                ),
-                Container(
-                  width: 1,
-                  height: 28,
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFE2E8F0),
-                ),
-                const SizedBox(width: 10),
-
-                // 3. Agent (Smart Robot Icon + Column)
-                Expanded(
-                  flex: 3,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.smart_toy_outlined,
-                        size: 17,
-                        color: context.colors.primaryLightColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Agent',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: context.colors.darkGreyColor,
-                                fontWeight: FontWeight.w500,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.chat_bubble_2_fill,
+                                size: 15,
+                                color: context.colors.primaryLightColor,
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              call.scenario != null && call.scenario!.isNotEmpty
-                                  ? call.scenario!
-                                  : 'Sara (Sales)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: Theme.of(context).colorScheme.onSurface,
+                              const SizedBox(width: 8),
+                              Text(
+                                'Call Transcript',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ],
+                          ),
+                          InkWell(
+                            onTap: () => _copyTranscript(call),
+                            borderRadius: BorderRadius.circular(4),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  CupertinoIcons.doc_on_doc,
+                                  size: 12,
+                                  color: context.colors.primaryLightColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Copy All',
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: context.colors.primaryLightColor,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 12),
+                      _buildTranscriptList(call, isDark),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-
-          // 2. Audio Player (Right below metadata card)
-          CallAudioPlayerWidget(
-            call: callHistoryModel,
-            compact: true,
-          ),
-          const SizedBox(height: 12),
-
-          // Scrollable Sections: AI Summary & Call Transcript
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 3. AI Summary Card in App Theme Colors
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark
-                            ? const Color(0xFF334155)
-                            : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  CupertinoIcons.sparkles,
-                                  size: 15,
-                                  color: context.colors.primaryLightColor,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'AI Summary',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (call.outcome.isNotEmpty) ...[
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: context.colors.primaryLightColor
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: context.colors.primaryLightColor
-                                        .withValues(alpha: 0.35),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  call.outcome,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: context.colors.primaryLightColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          call.summary != null && call.summary!.isNotEmpty
-                              ? call.summary!
-                              : 'Customer (${widget.user.fullName}) was contacted by AI (B2B Sales). Key project scope, budget estimation, and delivery terms were discussed. Customer expressed strong interest in proceeding.',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            height: 1.45,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.88),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 4. Call Transcript Card in App Theme Colors
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark
-                            ? const Color(0xFF334155)
-                            : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  CupertinoIcons.chat_bubble_2_fill,
-                                  size: 15,
-                                  color: context.colors.primaryLightColor,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Call Transcript',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            InkWell(
-                              onTap: () => _copyTranscript(call),
-                              borderRadius: BorderRadius.circular(4),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.doc_on_doc,
-                                    size: 12,
-                                    color: context.colors.primaryLightColor,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Copy All',
-                                    style: TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: context.colors.primaryLightColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        _buildTranscriptList(call, isDark),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -973,7 +1065,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isDark ? context.colors.whiteColor : const Color(0xFFF8FAFC),
+            color: isDark ? const Color(0xFF131D31) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
@@ -990,8 +1082,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     height: 24,
                     decoration: BoxDecoration(
                       color: isAi
-                          ? context.colors.primaryLightColor
-                              .withValues(alpha: 0.2)
+                          ? context.colors.primaryLightColor.withValues(alpha: 0.2)
                           : context.colors.successColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
                     ),

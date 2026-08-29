@@ -460,10 +460,6 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
 
   Widget _buildTopTabs(User user) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final callCount = user.callLogs.isNotEmpty
-        ? user.callLogs.length
-        : (user.lastContact != null ? 8 : 0);
-    final noteCount = user.notesList.length;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -477,7 +473,6 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           _buildTabItem(
             index: 1,
             label: 'Call Logs',
-            count: callCount,
             isDark: isDark,
           ),
           const SizedBox(width: 8),
@@ -486,7 +481,6 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           _buildTabItem(
             index: 2,
             label: 'Notes',
-            count: noteCount,
             isDark: isDark,
           ),
         ],
