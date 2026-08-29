@@ -10,7 +10,6 @@ import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/features/customers/widgets/customer_detail_user_info_box.dart';
 import 'package:callx_ai/features/customers/widgets/customer_detail_user_summary.dart';
 import 'package:callx_ai/features/customers/widgets/customer_detail_notes_widget.dart';
-import 'package:callx_ai/features/customers/widgets/customer_call_logs_tab.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
@@ -26,7 +25,6 @@ class CustomerDetailPage extends StatefulWidget {
 }
 
 class _CustomerDetailPageState extends State<CustomerDetailPage> {
-  int _selectedBottomTabIndex = 0;
   late final TextEditingController _companyNameCtrl;
   late final TextEditingController _firstNameCtrl;
   late final TextEditingController _lastNameCtrl;
@@ -436,54 +434,12 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
               ),
               const SizedBox(height: 16),
 
-              //! TABS HEADER (CALL LOGS / NOTES / DOCUMENTS)
-              Container(
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: context.colors.whiteColor,
-                  borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                ),
-                child: Row(
-                  children: [
-                    _buildBottomTabButton(
-                      index: 0,
-                      label: 'CALL LOGS',
-                      icon: CupertinoIcons.phone_arrow_down_left,
-                      count: user.callLogs.isNotEmpty
-                          ? user.callLogs.length
-                          : (user.lastContact != 'Never' &&
-                                  user.lastContact.isNotEmpty
-                              ? 2
-                              : 0),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildBottomTabButton(
-                      index: 1,
-                      label: 'NOTES',
-                      icon: CupertinoIcons.square_list,
-                      count: user.notesList.length,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildBottomTabButton(
-                      index: 2,
-                      label: 'DOCUMENTS',
-                      icon: CupertinoIcons.doc_text,
-                      count: user.documents.length,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              //! DYNAMIC BOTTOM CONTENT (CALL LOGS / NOTES / DOCUMENTS)
+              //! NOTES & SEARCH MANAGER (FIGMA SYSTEM)
               Expanded(
                 flex: 5,
-                child: _selectedBottomTabIndex == 0
-                    ? CustomerCallLogsTab(user: user)
-                    : (_selectedBottomTabIndex == 1
-                        ? CustomerDetailNotesWidget(user: user)
-                        : _buildDocumentsTab(user)),
+                child: CustomerDetailNotesWidget(
+                  user: user,
+                ),
               ),
             ],
           ),
@@ -500,184 +456,5 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
         ),
       ],
     ).withPullToRefresh(onRefresh: _refreshCustomer);
-  }
-
-  Widget _buildBottomTabButton({
-    required int index,
-    required String label,
-    required IconData icon,
-    required int count,
-  }) {
-    final isSelected = _selectedBottomTabIndex == index;
-    return InkWell(
-      onTap: () => setState(() => _selectedBottomTabIndex = index),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? context.colors.primaryLightColor.withValues(alpha: 0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected
-                ? context.colors.primaryLightColor.withValues(alpha: 0.35)
-                : Colors.transparent,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected
-                  ? context.colors.primaryLightColor
-                  : context.colors.darkGreyColor,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected
-                    ? context.colors.primaryLightColor
-                    : context.colors.darkGreyColor,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? context.colors.primaryLightColor
-                    : (Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white10
-                        : const Color(0xFFF1F5F9)),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected
-                      ? Colors.white
-                      : context.colors.darkGreyColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDocumentsTab(User user) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.colors.whiteColor,
-        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(CupertinoIcons.doc_text,
-                  size: 18, color: context.colors.primaryLightColor),
-              const SizedBox(width: 8),
-              Text(
-                'ATTACHED DOCUMENTS',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.1,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: user.documents.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          CupertinoIcons.doc_on_clipboard,
-                          size: 40,
-                          color:
-                              context.colors.darkGreyColor.withOpacity(0.4),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'No documents attached to this customer yet.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.darkGreyColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.separated(
-                    itemCount: user.documents.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
-                      final doc = user.documents[index];
-                      return Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E293B)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF334155)
-                                : const Color(0xFFE2E8F0),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(CupertinoIcons.doc_fill,
-                                size: 20,
-                                color: context.colors.primaryLightColor),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    doc.name,
-                                    style: const TextStyle(
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    '${doc.size} • ${doc.uploadDate}',
-                                    style: TextStyle(
-                                        fontSize: 11,
-                                        color: context.colors.darkGreyColor),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
   }
 }
