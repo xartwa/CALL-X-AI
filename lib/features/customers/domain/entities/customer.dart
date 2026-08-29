@@ -138,8 +138,11 @@ class Customer {
       'status': status == 'Inactive' ? 'Deactive' : status,
       'reasonForContact': reasonForContact,
       'reason_for_contact': reasonForContact,
-      'tags': tags,
     };
+
+    if (tags.isNotEmpty) {
+      data['tags'] = tags;
+    }
 
     if (email.trim().isNotEmpty) {
       data['email'] = email.trim();

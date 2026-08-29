@@ -62,7 +62,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
   String _leadQuality = 'Excellent';
   String _lastContactResult = 'Interested';
   String _status = 'Active';
-  final List<String> _tags = ['Hot Lead'];
+  final List<String> _tags = const [];
 
   @override
   void dispose() {
