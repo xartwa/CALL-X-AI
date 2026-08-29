@@ -55,8 +55,6 @@ class CustomerDetailUserInfoBox extends StatefulWidget {
 }
 
 class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
-  int _activeTopTab = 0; // 0: Overview, 1: Call Logs
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -66,129 +64,12 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Minimal Sleek Top Tab Bar
-          _buildTopTabs(context, isDark),
-          const SizedBox(height: 14),
-
           // Card 1: Customer Information
           _buildCustomerInformationCard(context, isDark),
           const SizedBox(height: 14),
 
           // Card 2: Lead & Status
           _buildLeadStatusCard(context, isDark),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopTabs(BuildContext context, bool isDark) {
-    final callCount = widget.user.callLogs.isNotEmpty
-        ? widget.user.callLogs.length
-        : (widget.user.lastContact != null ? 8 : 0);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      child: Row(
-        children: [
-          // Overview Tab
-          InkWell(
-            onTap: () => setState(() => _activeTopTab = 0),
-            borderRadius: BorderRadius.circular(6),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Overview',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: _activeTopTab == 0
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      color: _activeTopTab == 0
-                          ? context.colors.primaryLightColor
-                          : context.colors.darkGreyColor,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    height: 2,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: _activeTopTab == 0
-                          ? context.colors.primaryLightColor
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Call Logs Tab
-          InkWell(
-            onTap: () => setState(() => _activeTopTab = 1),
-            borderRadius: BorderRadius.circular(6),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Call Logs',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: _activeTopTab == 1
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: _activeTopTab == 1
-                              ? context.colors.primaryLightColor
-                              : context.colors.darkGreyColor,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 1.5),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white10
-                              : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '$callCount',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: isDark
-                                ? Colors.white70
-                                : context.colors.darkGreyColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    height: 2,
-                    width: 55,
-                    decoration: BoxDecoration(
-                      color: _activeTopTab == 1
-                          ? context.colors.primaryLightColor
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );

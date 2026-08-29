@@ -10,6 +10,7 @@ import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/features/customers/widgets/customer_detail_user_info_box.dart';
 import 'package:callx_ai/features/customers/widgets/customer_detail_user_summary.dart';
 import 'package:callx_ai/features/customers/widgets/customer_detail_notes_widget.dart';
+import 'package:callx_ai/features/customers/widgets/customer_call_logs_tab.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
@@ -25,6 +26,7 @@ class CustomerDetailPage extends StatefulWidget {
 }
 
 class _CustomerDetailPageState extends State<CustomerDetailPage> {
+  int _selectedTabIndex = 0; // 0: Overview, 1: Call Logs, 2: Notes
   late final TextEditingController _companyNameCtrl;
   late final TextEditingController _firstNameCtrl;
   late final TextEditingController _lastNameCtrl;
@@ -405,41 +407,39 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              //! 20 FIELDS INFO BOX
-              Expanded(
-                flex: 6,
-                child: CustomerDetailUserInfoBox(
-                  companyNameCtrl: _companyNameCtrl,
-                  firstNameCtrl: _firstNameCtrl,
-                  lastNameCtrl: _lastNameCtrl,
-                  emailCtrl: _emailCtrl,
-                  phoneCtrl: _phoneCtrl,
-                  jobTitleCtrl: _jobTitleCtrl,
-                  websiteCtrl: _websiteCtrl,
-                  addressCtrl: _addressCtrl,
-                  cityCtrl: _cityCtrl,
-                  stateCtrl: _stateCtrl,
-                  countryCtrl: _countryCtrl,
-                  reasonCtrl: _reasonCtrl,
-                  nextFollowUpDateCtrl: _nextFollowUpDateCtrl,
-                  companyTypeNotifier: _companyTypeNotifier,
-                  leadStatusNotifier: _leadStatusNotifier,
-                  leadPriorityNotifier: _leadPriorityNotifier,
-                  leadQualityNotifier: _leadQualityNotifier,
-                  lastContactResultNotifier: _lastContactResultNotifier,
-                  user: user,
-                ),
-              ),
-              const SizedBox(height: 16),
+              //! MINIMAL TOP TABS (Overview / Call Logs / Notes)
+              _buildTopTabs(user),
+              const SizedBox(height: 12),
 
-              //! NOTES & SEARCH MANAGER (FIGMA SYSTEM)
+              //! DYNAMIC TAB CONTENT
               Expanded(
-                flex: 5,
-                child: CustomerDetailNotesWidget(
-                  user: user,
-                ),
+                child: _selectedTabIndex == 0
+                    ? CustomerDetailUserInfoBox(
+                        companyNameCtrl: _companyNameCtrl,
+                        firstNameCtrl: _firstNameCtrl,
+                        lastNameCtrl: _lastNameCtrl,
+                        emailCtrl: _emailCtrl,
+                        phoneCtrl: _phoneCtrl,
+                        jobTitleCtrl: _jobTitleCtrl,
+                        websiteCtrl: _websiteCtrl,
+                        addressCtrl: _addressCtrl,
+                        cityCtrl: _cityCtrl,
+                        stateCtrl: _stateCtrl,
+                        countryCtrl: _countryCtrl,
+                        reasonCtrl: _reasonCtrl,
+                        nextFollowUpDateCtrl: _nextFollowUpDateCtrl,
+                        companyTypeNotifier: _companyTypeNotifier,
+                        leadStatusNotifier: _leadStatusNotifier,
+                        leadPriorityNotifier: _leadPriorityNotifier,
+                        leadQualityNotifier: _leadQualityNotifier,
+                        lastContactResultNotifier: _lastContactResultNotifier,
+                        user: user,
+                      )
+                    : (_selectedTabIndex == 1
+                        ? CustomerCallLogsTab(user: user)
+                        : CustomerDetailNotesWidget(user: user)),
               ),
             ],
           ),
@@ -456,5 +456,111 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
         ),
       ],
     ).withPullToRefresh(onRefresh: _refreshCustomer);
+  }
+
+  Widget _buildTopTabs(User user) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final callCount = user.callLogs.isNotEmpty
+        ? user.callLogs.length
+        : (user.lastContact != null ? 8 : 0);
+    final noteCount = user.notesList.length;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Row(
+        children: [
+          // Overview Tab
+          _buildTabItem(index: 0, label: 'Overview', isDark: isDark),
+          const SizedBox(width: 8),
+
+          // Call Logs Tab
+          _buildTabItem(
+            index: 1,
+            label: 'Call Logs',
+            count: callCount,
+            isDark: isDark,
+          ),
+          const SizedBox(width: 8),
+
+          // Notes Tab
+          _buildTabItem(
+            index: 2,
+            label: 'Notes',
+            count: noteCount,
+            isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabItem({
+    required int index,
+    required String label,
+    int? count,
+    required bool isDark,
+  }) {
+    final isSelected = _selectedTabIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _selectedTabIndex = index),
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? context.colors.primaryLightColor
+                        : context.colors.darkGreyColor,
+                  ),
+                ),
+                if (count != null) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 1.5),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white10
+                          : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isDark
+                            ? Colors.white70
+                            : context.colors.darkGreyColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            Container(
+              height: 2,
+              width: count != null ? 55 : 45,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? context.colors.primaryLightColor
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
