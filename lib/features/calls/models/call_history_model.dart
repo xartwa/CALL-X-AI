@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/app_date_time.dart';
 
 class CallTranscriptMessage {
   final String speaker; // 'ai' or 'customer' or 'agent'
@@ -42,6 +43,8 @@ class CallHistoryModel {
   final String duration;
   final String callTime;
   final String callDate;
+  final DateTime? scheduledFor;
+  final DateTime? createdAt;
   final String? notes;
   final String? email;
   final String? leadPriority;
@@ -63,6 +66,8 @@ class CallHistoryModel {
     required this.duration,
     required this.callTime,
     required this.callDate,
+    this.scheduledFor,
+    this.createdAt,
     this.statusColor,
     this.notes,
     this.email,
@@ -76,6 +81,11 @@ class CallHistoryModel {
     this.customerId,
   });
 
+  DateTime? get dateTime =>
+      AppDateTime.combine(callDate, callTime) ?? scheduledFor ?? createdAt;
+
+  DateTime? get nextFollowUpAt => AppDateTime.tryParse(nextFollowUpDate);
+
   CallHistoryModel copyWith({
     String? id,
     String? fullName,
@@ -87,6 +97,8 @@ class CallHistoryModel {
     String? duration,
     String? callTime,
     String? callDate,
+    DateTime? scheduledFor,
+    DateTime? createdAt,
     String? notes,
     String? email,
     String? leadPriority,
@@ -109,6 +121,8 @@ class CallHistoryModel {
       duration: duration ?? this.duration,
       callTime: callTime ?? this.callTime,
       callDate: callDate ?? this.callDate,
+      scheduledFor: scheduledFor ?? this.scheduledFor,
+      createdAt: createdAt ?? this.createdAt,
       notes: notes ?? this.notes,
       email: email ?? this.email,
       leadPriority: leadPriority ?? this.leadPriority,
@@ -130,13 +144,16 @@ class CallHistoryModel {
         'status': status,
         'assignee': assignee,
         'duration': duration,
-        'callTime': callTime,
-        'callDate': callDate,
+        if (dateTime != null) 'occurredAt': AppDateTime.apiDateTime(dateTime!),
+        if (scheduledFor != null)
+          'scheduledFor': AppDateTime.apiDateTime(scheduledFor!),
+        if (createdAt != null) 'createdAt': AppDateTime.apiDateTime(createdAt!),
         'notes': notes,
         'email': email,
         'leadPriority': leadPriority,
         'lastContactResult': lastContactResult,
-        'nextFollowUpDate': nextFollowUpDate,
+        if (nextFollowUpAt != null)
+          'nextFollowUpDate': AppDateTime.apiDateTime(nextFollowUpAt!),
         'tags': tags,
         'statusColor': statusColor?.toARGB32(),
         'recordingUrl': recordingUrl,
@@ -177,7 +194,9 @@ class CallHistoryModel {
           .toList();
     }
 
-    final fullName = (json['fullName'] ?? json['full_name'] ?? json['name'] ?? 'Contact').toString();
+    final fullName =
+        (json['fullName'] ?? json['full_name'] ?? json['name'] ?? 'Contact')
+            .toString();
     final status = (json['status'] ?? 'Completed').toString();
     final assignee = (json['assignee'] ?? 'AI Assistant').toString();
     final direction = (json['direction'] ??
@@ -198,21 +217,41 @@ class CallHistoryModel {
     return CallHistoryModel(
       id: json['id']?.toString() ?? '',
       fullName: fullName,
-      companyName: (json['companyName'] ?? json['company_name'] ?? json['company'] ?? '').toString(),
-      phone: (json['phone'] ?? json['phone_number'] ?? json['phoneNumber'] ?? '').toString(),
+      companyName:
+          (json['companyName'] ?? json['company_name'] ?? json['company'] ?? '')
+              .toString(),
+      phone:
+          (json['phone'] ?? json['phone_number'] ?? json['phoneNumber'] ?? '')
+              .toString(),
       status: status,
       assignee: assignee,
       duration: (json['duration'] ?? '0:00').toString(),
       callTime: (json['callTime'] ?? json['call_time'] ?? '').toString(),
       callDate: (json['callDate'] ?? json['call_date'] ?? '').toString(),
+      scheduledFor: AppDateTime.tryParseApiDateTime(
+          json['scheduledFor'] ?? json['scheduled_for']),
+      createdAt: AppDateTime.tryParseApiDateTime(
+        json['occurredAt'] ?? json['createdAt'] ?? json['created_at'],
+      ),
       notes: json['notes'] as String?,
       email: json['email'] as String?,
-      leadPriority: (json['leadPriority'] ?? json['lead_priority'] ?? 'Warm').toString(),
-      lastContactResult: (json['lastContactResult'] ?? json['last_contact_result'] ?? 'Interested').toString(),
-      nextFollowUpDate: (json['nextFollowUpDate'] ?? json['next_follow_up_date'] ?? json['follow_up_date'] ?? '').toString(),
+      leadPriority:
+          (json['leadPriority'] ?? json['lead_priority'] ?? 'Warm').toString(),
+      lastContactResult: (json['lastContactResult'] ??
+              json['last_contact_result'] ??
+              'Interested')
+          .toString(),
+      nextFollowUpDate: switch (AppDateTime.tryParseApiDateTime(
+        json['nextFollowUpDate'] ?? json['next_follow_up_date'],
+      )) {
+        final value? => AppDateTime.apiDateTime(value),
+        null => '',
+      },
       tags: parsedTags,
       statusColor: color,
-      recordingUrl: (json['recordingUrl'] ?? json['recording_url'] ?? json['audio_url']) as String?,
+      recordingUrl: (json['recordingUrl'] ??
+          json['recording_url'] ??
+          json['audio_url']) as String?,
       transcript: parsedTranscript,
       direction: direction,
       customerId: customerIdRaw?.toString(),
@@ -227,29 +266,31 @@ class CallHistoryModel {
       CallTranscriptMessage(
         speaker: 'ai',
         speakerName: agentName.isNotEmpty ? agentName : 'AI Agent',
-        text: 'Hello $customerName! Calling from CallX AI regarding your recent inquiry.',
+        text:
+            'Hello $customerName! Calling from CallX AI regarding your recent inquiry.',
         timestamp: '00:03',
       ),
       CallTranscriptMessage(
         speaker: 'customer',
         speakerName: customerName,
-        text: 'Hi, thanks for reaching out. I was looking for quotation details.',
+        text:
+            'Hi, thanks for reaching out. I was looking for quotation details.',
         timestamp: '00:08',
       ),
       CallTranscriptMessage(
         speaker: 'ai',
         speakerName: agentName.isNotEmpty ? agentName : 'AI Agent',
-        text: 'I have prepared your estimation overview. I will email the full proposal document to you now.',
+        text:
+            'I have prepared your estimation overview. I will email the full proposal document to you now.',
         timestamp: '00:15',
       ),
       CallTranscriptMessage(
         speaker: 'customer',
         speakerName: customerName,
-        text: 'Great, please send it over and let us follow up after my review.',
+        text:
+            'Great, please send it over and let us follow up after my review.',
         timestamp: '00:24',
       ),
     ];
   }
 }
-
-

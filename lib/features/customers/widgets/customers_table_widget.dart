@@ -5,6 +5,7 @@ import 'package:callx_ai/core/widgets/app_action_button.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/widgets/custom_tag_widget.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
@@ -187,7 +188,9 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
         DataColumn2(
             label: const Text('COMPANY'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: Text(text.phone.toUpperCase()), size: ColumnSize.L, onSort: _sort),
+            label: Text(text.phone.toUpperCase()),
+            size: ColumnSize.L,
+            onSort: _sort),
         DataColumn2(
             label: const Text('EMAIL'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
@@ -200,7 +203,8 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             label: const Text('TAG'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
             label: const Text('FOLLOW-UP'), size: ColumnSize.L, onSort: _sort),
-        DataColumn2(label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
+        DataColumn2(
+            label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
       ],
       rows: _sortedUsers.map((user) {
         final initials = user.fullName.trim().isEmpty
@@ -220,17 +224,17 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             DataCell(InkWell(
               onTap: () => context.goNamed(AppRoutesPath.customerDetailName,
                   pathParameters: {'id': user.id.toString()}),
-              child:  Flexible(
-                    child: Text(
-                      user.fullName.isNotEmpty ? user.fullName : 'No Name',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+              child: Flexible(
+                child: Text(
+                  user.fullName.isNotEmpty ? user.fullName : 'No Name',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             )),
 
             DataCell(Text(
@@ -322,7 +326,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             ),
 
             DataCell(Text(
-              user.nextFollowUpDate?.toString() ?? '-',
+              AppDateTime.displayDateOrDateTime(user.nextFollowUpDate),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: user.nextFollowUpDate != null

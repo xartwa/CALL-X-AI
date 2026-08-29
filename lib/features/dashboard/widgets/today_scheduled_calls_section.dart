@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
@@ -20,7 +20,9 @@ class TodayScheduledCallsSection extends StatelessWidget {
     final dashboardState = context.watch<DashboardCubit>().state;
     final todayCalls = dashboardState.snapshot?.todayCalls.items ??
         const <DashboardTodayCall>[];
-    final todayLabel = DateFormat('EEEE, MMM d').format(DateTime.now());
+    final todayLabel = AppDateTime.displayWeekdayDate(
+      dashboardState.snapshot?.date ?? DateTime.now(),
+    );
 
     return Container(
       decoration: BoxDecoration(

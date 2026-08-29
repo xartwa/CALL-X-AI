@@ -1,5 +1,6 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -39,9 +40,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
   void initState() {
     super.initState();
     nameController = TextEditingController(
-      text: widget.templateToEdit != null
-          ? widget.templateToEdit!['name']
-          : '',
+      text: widget.templateToEdit != null ? widget.templateToEdit!['name'] : '',
     );
     subjectController = TextEditingController(
       text: widget.templateToEdit != null
@@ -124,7 +123,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
         .replaceAll('{name}', 'John Doe')
         .replaceAll('{company}', 'Acme Corporation')
         .replaceAll('{phone}', '+1 (555) 234-5678')
-        .replaceAll('{date}', '16 Aug 2026')
+        .replaceAll('{date}', AppDateTime.displayDate(DateTime.now()))
         .replaceAll('{agent}', 'Alex Morgan');
 
     return Dialog(
@@ -285,9 +284,8 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[700],
+                              color:
+                                  isDark ? Colors.grey[400] : Colors.grey[700],
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -311,13 +309,11 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                                 style: const TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600),
-                                textAlignVertical:
-                                    TextAlignVertical.center,
+                                textAlignVertical: TextAlignVertical.center,
                                 decoration: InputDecoration(
                                   isDense: true,
-                                  contentPadding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 12),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
                                   hintText:
                                       'e.g. Next Steps for {name} ({company})',
                                   hintStyle: TextStyle(
@@ -339,9 +335,8 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[700],
+                              color:
+                                  isDark ? Colors.grey[400] : Colors.grey[700],
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -350,8 +345,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                           TextField(
                             controller: bodyController,
                             maxLines: 9,
-                            style: const TextStyle(
-                                fontSize: 13, height: 1.5),
+                            style: const TextStyle(fontSize: 13, height: 1.5),
                             decoration: InputDecoration(
                               isDense: true,
                               hintText:
@@ -380,8 +374,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                                 borderRadius: BorderRadius.circular(
                                     ThemeConstants.buttonRadius),
                                 borderSide: BorderSide(
-                                    color:
-                                        context.colors.primaryLightColor),
+                                    color: context.colors.primaryLightColor),
                               ),
                               filled: true,
                               fillColor: isDark
@@ -436,7 +429,6 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                             ],
                           ),
                           const Divider(height: 20, thickness: 0.5),
-
                           Text('Sample Subject:',
                               style: TextStyle(
                                   fontSize: 11,
@@ -452,9 +444,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                             style: const TextStyle(
                                 fontSize: 12.5, fontWeight: FontWeight.w700),
                           ),
-
                           const Divider(height: 18, thickness: 0.5),
-
                           Expanded(
                             child: SingleChildScrollView(
                               child: Container(

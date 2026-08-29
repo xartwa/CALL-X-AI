@@ -36,11 +36,11 @@ void main() {
     repository.detailCustomer = Customer(
       id: '42',
       fullName: 'Detail Customer',
-      notesList: const [
+      notesList: [
         CustomerNote(
           id: 'note-1',
           content: 'Keep me visible',
-          date: '2026-08-29T08:30:00Z',
+          date: DateTime.utc(2026, 8, 29, 8, 30),
         ),
       ],
       notesCount: 1,

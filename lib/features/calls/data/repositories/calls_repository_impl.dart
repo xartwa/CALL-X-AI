@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/utils/app_date_time.dart';
 import '../../../../core/widgets/advanced_filter_dialog.dart';
 import '../../data/dto/calls_kpi_dto.dart';
 import '../../data/dto/paginated_calls_dto.dart';
@@ -104,9 +104,8 @@ class CallsRepositoryImpl implements CallsRepository {
         }
 
         if (dateRange != null) {
-          final fmt = DateFormat('yyyy-MM-dd');
-          query['date_from'] = fmt.format(dateRange.start);
-          query['date_to'] = fmt.format(dateRange.end);
+          query['date_from'] = AppDateTime.apiDate(dateRange.start);
+          query['date_to'] = AppDateTime.apiDate(dateRange.end);
         }
 
         if (filterState != null) {
@@ -137,7 +136,8 @@ class CallsRepositoryImpl implements CallsRepository {
                     CallHistoryModel.fromJson(Map<String, dynamic>.from(m)))
                 .toList(growable: false);
             final count = allResults.length;
-            final computedTotalPages = (count / (pageSize > 0 ? pageSize : 10)).ceil().clamp(1, 9999);
+            final computedTotalPages =
+                (count / (pageSize > 0 ? pageSize : 10)).ceil().clamp(1, 9999);
             final startIndex = ((page - 1) * pageSize).clamp(0, count);
             final endIndex = (startIndex + pageSize).clamp(0, count);
             final pagedSlice = allResults.sublist(startIndex, endIndex);
@@ -151,7 +151,8 @@ class CallsRepositoryImpl implements CallsRepository {
             );
           }
           final json = Map<String, dynamic>.from(data as Map);
-          return PaginatedCallsDto.fromJson(json, page: page, requestedPageSize: pageSize);
+          return PaginatedCallsDto.fromJson(json,
+              page: page, requestedPageSize: pageSize);
         });
       });
 
@@ -187,8 +188,7 @@ class CallsRepositoryImpl implements CallsRepository {
       });
 
   @override
-  Future<Map<String, dynamic>> getCustomerInfo(String id) =>
-      _request(() async {
+  Future<Map<String, dynamic>> getCustomerInfo(String id) => _request(() async {
         return await remote.customerInfo(id);
       });
 

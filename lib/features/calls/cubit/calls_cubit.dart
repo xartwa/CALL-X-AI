@@ -68,7 +68,8 @@ class CallsCubit extends Cubit<CallsState> {
   void setSearch(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () {
-      emit(state.copyWith(searchQuery: query, currentPage: 1, isRefreshing: true));
+      emit(state.copyWith(
+          searchQuery: query, currentPage: 1, isRefreshing: true));
       _fetchCalls(page: 1).then((_) {
         if (!isClosed) emit(state.copyWith(isRefreshing: false));
       });
@@ -77,7 +78,8 @@ class CallsCubit extends Cubit<CallsState> {
 
   Future<void> setStatus(String status) async {
     if (status == state.selectedStatus) return;
-    emit(state.copyWith(selectedStatus: status, currentPage: 1, isRefreshing: true));
+    emit(state.copyWith(
+        selectedStatus: status, currentPage: 1, isRefreshing: true));
     await _fetchCalls(page: 1);
     if (!isClosed) {
       emit(state.copyWith(isRefreshing: false));
@@ -113,12 +115,12 @@ class CallsCubit extends Cubit<CallsState> {
           return b.fullName.toLowerCase().compareTo(a.fullName.toLowerCase());
         case 'Date (Newest)':
         case 'Newest First':
-          return '${b.callDate} ${b.callTime}'
-              .compareTo('${a.callDate} ${a.callTime}');
+          return (b.dateTime ?? DateTime(1900))
+              .compareTo(a.dateTime ?? DateTime(1900));
         case 'Date (Oldest)':
         case 'Oldest First':
-          return '${a.callDate} ${a.callTime}'
-              .compareTo('${b.callDate} ${b.callTime}');
+          return (a.dateTime ?? DateTime(1900))
+              .compareTo(b.dateTime ?? DateTime(1900));
         case 'Duration (Longest)':
         case 'Longest Duration':
           return b.duration.compareTo(a.duration);
@@ -168,7 +170,8 @@ class CallsCubit extends Cubit<CallsState> {
     try {
       final detailedCall = await repository.getCallDetail(call.id);
       if (!isClosed && state.selectedCall?.id == call.id) {
-        emit(state.copyWith(selectedCall: detailedCall, isLoadingDetail: false));
+        emit(
+            state.copyWith(selectedCall: detailedCall, isLoadingDetail: false));
       }
     } catch (_) {
       if (!isClosed) {
@@ -182,11 +185,13 @@ class CallsCubit extends Cubit<CallsState> {
 
     try {
       final updated = await repository.scheduleFollowUp(callId, followUpDate);
-      final updatedCalls = state.calls.map((c) => c.id == callId ? updated : c).toList();
+      final updatedCalls =
+          state.calls.map((c) => c.id == callId ? updated : c).toList();
 
       emit(state.copyWith(
         calls: updatedCalls,
-        selectedCall: state.selectedCall?.id == callId ? updated : state.selectedCall,
+        selectedCall:
+            state.selectedCall?.id == callId ? updated : state.selectedCall,
         isUpdatingFollowUp: false,
         actionFeedbackMessage: 'Follow-up scheduled for $followUpDate',
       ));
@@ -203,11 +208,13 @@ class CallsCubit extends Cubit<CallsState> {
 
     try {
       final updated = await repository.clearFollowUp(callId);
-      final updatedCalls = state.calls.map((c) => c.id == callId ? updated : c).toList();
+      final updatedCalls =
+          state.calls.map((c) => c.id == callId ? updated : c).toList();
 
       emit(state.copyWith(
         calls: updatedCalls,
-        selectedCall: state.selectedCall?.id == callId ? updated : state.selectedCall,
+        selectedCall:
+            state.selectedCall?.id == callId ? updated : state.selectedCall,
         isUpdatingFollowUp: false,
         actionFeedbackMessage: 'Follow-up cleared',
       ));
@@ -222,7 +229,8 @@ class CallsCubit extends Cubit<CallsState> {
   Future<void> callAgain(String callId) async {
     try {
       await repository.callAgain(callId);
-      emit(state.copyWith(actionFeedbackMessage: 'Outbound call queued successfully'));
+      emit(state.copyWith(
+          actionFeedbackMessage: 'Outbound call queued successfully'));
       await refresh();
     } catch (e) {
       emit(state.copyWith(errorMessage: 'Failed to initiate outbound call.'));

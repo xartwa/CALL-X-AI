@@ -3,7 +3,7 @@ import 'package:callx_ai/features/calls/widgets/clean_date_range_picker.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class EmailFollowUpsHeaders extends StatefulWidget {
   final String selectedStatus;
@@ -243,8 +243,8 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                         : InkWell(
                             onTap: () {
                               setState(() => _isSearchExpanded = true);
-                              Future.delayed(
-                                  const Duration(milliseconds: 100), () {
+                              Future.delayed(const Duration(milliseconds: 100),
+                                  () {
                                 _searchFocusNode.requestFocus();
                               });
                             },
@@ -292,7 +292,9 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                                       : FontWeight.w500,
                                   color: isSelected
                                       ? Theme.of(context).colorScheme.primary
-                                      : (isDark ? Colors.white : Colors.black87),
+                                      : (isDark
+                                          ? Colors.white
+                                          : Colors.black87),
                                 ),
                               ),
                               Container(
@@ -303,7 +305,8 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                                       ? Theme.of(context).colorScheme.primary
                                       : (isDark
                                           ? Colors.white10
-                                          : Colors.black.withValues(alpha: 0.05)),
+                                          : Colors.black
+                                              .withValues(alpha: 0.05)),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -423,8 +426,11 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                           const SizedBox(width: 6),
                           Text(
                             widget.selectedDateRange == null
-                                ? 'Time'
-                                : '${DateFormat('dd MMM').format(widget.selectedDateRange!.start)} - ${DateFormat('dd MMM').format(widget.selectedDateRange!.end)}',
+                                ? 'Date'
+                                : AppDateTime.displayRange(
+                                    widget.selectedDateRange!.start,
+                                    widget.selectedDateRange!.end,
+                                  ),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -545,7 +551,9 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                                   fontWeight: FontWeight.w700,
                                   color: isSortActive
                                       ? Theme.of(context).colorScheme.primary
-                                      : (isDark ? Colors.white70 : Colors.black87),
+                                      : (isDark
+                                          ? Colors.white70
+                                          : Colors.black87),
                                 ),
                               ),
                             ],

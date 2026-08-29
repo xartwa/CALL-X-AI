@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
 
 enum _CallType { single, group }
@@ -234,9 +234,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
 
     if (!buildContext.mounted) return;
 
-    final today = DateTime.now();
-    final formatter = DateFormat('yyyy/MM/dd');
-    final timeFormatter = DateFormat('HH:mm');
+    final now = DateTime.now();
 
     final calls = preferences.loadCalls();
     final isScheduled = _timingMode == _TimingMode.schedule;
@@ -267,8 +265,9 @@ class _CallActionDialogState extends State<CallActionDialog> {
             : AppStrings.current.callActionCompleted,
         'assignee': 'AI (${_selectedScenario.category})',
         'duration': isScheduled ? '0:00' : '2:15',
-        'callTime': isScheduled ? '14:00' : timeFormatter.format(today),
-        'callDate': formatter.format(today),
+        'createdAt': AppDateTime.apiDateTime(now),
+        if (isScheduled)
+          'scheduledFor': AppDateTime.apiDateTime(_scheduledFor()!),
         'notes': 'Scenario: ${_selectedScenario.title}',
         'email': _selectedUser!.email,
         'leadPriority': 'Hot',
@@ -318,8 +317,9 @@ class _CallActionDialogState extends State<CallActionDialog> {
           'status': isScheduled ? 'Upcoming' : 'Queued',
           'assignee': 'AI Bot #${i + 1}',
           'duration': '0:00',
-          'callTime': isScheduled ? '15:00' : timeFormatter.format(today),
-          'callDate': formatter.format(today),
+          'createdAt': AppDateTime.apiDateTime(now),
+          if (isScheduled)
+            'scheduledFor': AppDateTime.apiDateTime(_scheduledFor()!),
           'notes':
               'Batch: ${_groupTargetMode == _GroupTargetMode.manual ? "Manual List" : _selectedGroupSegment} (${_selectedScenario.title})',
           'leadPriority': 'Hot',
@@ -812,7 +812,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       ),
                       PresetChipWidget(
                         label: _customDate != null
-                            ? DateFormat('dd MMM').format(_customDate!)
+                            ? AppDateTime.displayDate(_customDate!)
                             : 'Custom Date',
                         isSelected: _selectedDatePreset == 'Custom',
                         onTap: () async {
@@ -1405,7 +1405,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       ),
                       PresetChipWidget(
                         label: _customDate != null
-                            ? DateFormat('dd MMM').format(_customDate!)
+                            ? AppDateTime.displayDate(_customDate!)
                             : 'Custom Date',
                         isSelected: _selectedDatePreset == 'Custom',
                         onTap: () async {

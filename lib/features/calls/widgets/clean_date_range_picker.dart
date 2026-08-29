@@ -3,7 +3,7 @@ import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class CleanDateRangePicker extends StatefulWidget {
   final DateTimeRange? initialRange;
@@ -101,7 +101,7 @@ class _CleanDateRangePickerState extends State<CleanDateRangePicker> {
                     Expanded(
                       child: Text(
                         date != null
-                            ? DateFormat('dd MMM yyyy').format(date)
+                            ? AppDateTime.displayDate(date)
                             : 'Select Date',
                         style: TextStyle(
                           fontSize: 13,

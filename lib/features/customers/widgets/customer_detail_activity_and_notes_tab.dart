@@ -5,6 +5,7 @@ import 'package:callx_ai/features/customers/widgets/customers_table_widget.dart'
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class CustomerDetailActivityAndNotesTab extends StatelessWidget {
   final User user;
@@ -25,7 +26,7 @@ class CustomerDetailActivityAndNotesTab extends StatelessWidget {
       _TimelineEvent(
         title: text.customerProfileCreated,
         description: text.customerProfileCreatedDesc,
-        date: user.createdAt?.toString() ?? '-',
+        date: AppDateTime.displayDateTime(user.createdAt),
         icon: CupertinoIcons.person_add_solid,
         color: context.colors.primaryLightColor,
       ),
@@ -33,7 +34,7 @@ class CustomerDetailActivityAndNotesTab extends StatelessWidget {
         _TimelineEvent(
           title: text.lastCustomerContactTitle,
           description: text.lastCustomerContactDesc,
-          date: user.lastContact?.toString() ?? '-',
+          date: AppDateTime.displayDateTime(user.lastContact),
           icon: CupertinoIcons.phone_fill,
           color: context.colors.successColor,
         ),
@@ -41,7 +42,7 @@ class CustomerDetailActivityAndNotesTab extends StatelessWidget {
         _TimelineEvent(
           title: text.reasonLogged,
           description: user.reasonForContact,
-          date: user.createdAt?.toString() ?? '-',
+          date: AppDateTime.displayDateTime(user.createdAt),
           icon: CupertinoIcons.doc_text_fill,
           color: context.colors.warningColor,
         ),

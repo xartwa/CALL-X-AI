@@ -15,6 +15,7 @@ import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 
 class CustomerDetailPage extends StatefulWidget {
@@ -79,8 +80,9 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     _stateCtrl = TextEditingController(text: user.state);
     _countryCtrl = TextEditingController(text: user.country);
     _reasonCtrl = TextEditingController(text: user.reasonForContact);
-    _nextFollowUpDateCtrl =
-        TextEditingController(text: user.nextFollowUpDate?.toString() ?? '');
+    _nextFollowUpDateCtrl = TextEditingController(
+        text: AppDateTime.displayDateOrDateTime(user.nextFollowUpDate,
+            fallback: ''));
 
     _companyTypeNotifier = ValueNotifier<String>(
         user.companyType.isNotEmpty ? user.companyType : 'GC');
@@ -117,7 +119,10 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     _stateCtrl.text = user.state;
     _countryCtrl.text = user.country;
     _reasonCtrl.text = user.reasonForContact;
-    _nextFollowUpDateCtrl.text = user.nextFollowUpDate?.toString() ?? '';
+    _nextFollowUpDateCtrl.text = AppDateTime.displayDateOrDateTime(
+      user.nextFollowUpDate,
+      fallback: '',
+    );
     _companyTypeNotifier.value =
         user.companyType.isEmpty ? 'GC' : user.companyType;
     _leadStatusNotifier.value =
@@ -509,8 +514,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                   label,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected
                         ? context.colors.primaryLightColor
                         : context.colors.darkGreyColor,
@@ -522,9 +526,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 6, vertical: 1.5),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white10
-                          : const Color(0xFFF1F5F9),
+                      color: isDark ? Colors.white10 : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(

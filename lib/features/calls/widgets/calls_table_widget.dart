@@ -4,6 +4,7 @@ import 'package:callx_ai/core/widgets/app_action_button.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/widgets/custom_tag_widget.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
@@ -77,9 +78,8 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
             result = a.duration.compareTo(b.duration);
             break;
           case 4:
-            final dateA = '${a.callDate} ${a.callTime}';
-            final dateB = '${b.callDate} ${b.callTime}';
-            result = dateA.compareTo(dateB);
+            result = (a.dateTime ?? DateTime(1900))
+                .compareTo(b.dateTime ?? DateTime(1900));
             break;
           case 5:
             result = (a.leadPriority ?? '')
@@ -94,8 +94,8 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
                 a.assignee.toLowerCase().compareTo(b.assignee.toLowerCase());
             break;
           case 8:
-            result = (a.nextFollowUpDate ?? '')
-                .compareTo(b.nextFollowUpDate ?? '');
+            result = (a.nextFollowUpAt ?? DateTime(1900))
+                .compareTo(b.nextFollowUpAt ?? DateTime(1900));
             break;
         }
         return ascending ? result : -result;
@@ -176,25 +176,35 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
             label: const Text('CONTACT'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
             label: const Text('COMPANY'), size: ColumnSize.L, onSort: _sort),
-        DataColumn2(label: Text(text.phone.toUpperCase()), size: ColumnSize.L, onSort: _sort),
+        DataColumn2(
+            label: Text(text.phone.toUpperCase()),
+            size: ColumnSize.L,
+            onSort: _sort),
         DataColumn2(
             label: const Text('DURATION'), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: Text(text.dateTime.toUpperCase()), size: ColumnSize.L, onSort: _sort),
+            label: Text(text.dateTime.toUpperCase()),
+            size: ColumnSize.L,
+            onSort: _sort),
         DataColumn2(
             label: const Text('PRIORITY'), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: Text(text.status.toUpperCase()), size: ColumnSize.M, onSort: _sort),
+            label: Text(text.status.toUpperCase()),
+            size: ColumnSize.M,
+            onSort: _sort),
         DataColumn2(
-            label: Text(text.assignee.toUpperCase()), size: ColumnSize.M, onSort: _sort),
+            label: Text(text.assignee.toUpperCase()),
+            size: ColumnSize.M,
+            onSort: _sort),
         DataColumn2(
             label: const Text('FOLLOW-UP'), size: ColumnSize.M, onSort: _sort),
-        DataColumn2(label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
+        DataColumn2(
+            label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
       ],
       rows: _sortedCalls.map((call) {
         final isSelected =
             context.watch<CallsCubit>().state.selectedCall?.id == call.id ||
-            context.watch<SelectedCallCubit>().state?.id == call.id;
+                context.watch<SelectedCallCubit>().state?.id == call.id;
 
         return DataRow2(
           selected: isSelected,
@@ -331,7 +341,7 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
 
             // Date - Time
             DataCell(Text(
-              '${call.callDate} - ${call.callTime}',
+              AppDateTime.displayDateTime(call.dateTime),
               style: const TextStyle(fontSize: 12),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -386,12 +396,11 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
               ],
             )),
 
-
             // Follow-Up
             DataCell(Text(
               (call.nextFollowUpDate != null &&
                       call.nextFollowUpDate!.isNotEmpty)
-                  ? call.nextFollowUpDate!
+                  ? AppDateTime.displayDateOrDateTime(call.nextFollowUpDate)
                   : '-',
               style: TextStyle(
                 fontSize: 12,

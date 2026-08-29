@@ -24,8 +24,9 @@ class CallsRemoteDataSource {
           String id, String followUpDate) async =>
       Map<String, dynamic>.from((await client.http.post(
         '/calls/$id/schedule-follow-up/',
-        data: {'follow_up_date': followUpDate},
-      )).data as Map);
+        data: {'followUpDate': followUpDate},
+      ))
+          .data as Map);
 
   Future<Map<String, dynamic>> clearFollowUp(String id) async =>
       Map<String, dynamic>.from(

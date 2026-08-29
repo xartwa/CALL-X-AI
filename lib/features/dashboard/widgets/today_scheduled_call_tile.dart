@@ -10,6 +10,7 @@ import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class TodayScheduledCallTile extends StatefulWidget {
   final DashboardTodayCall call;
@@ -110,8 +111,12 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
         .join()
         .toUpperCase();
 
-    final timeHour = widget.call.timeLabel;
-    final timePeriod = widget.call.meridiem;
+    final legacyTime =
+        '${widget.call.timeLabel} ${widget.call.meridiem}'.trim();
+    final timeHour = AppDateTime.displayTime(
+      widget.call.scheduledFor ?? legacyTime,
+      fallback: '--:--',
+    );
 
     // Tag logic
     String? displayTag;
@@ -198,16 +203,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                     ),
                     Row(
                       children: [
-                        Text(
-                          timePeriod,
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.darkGreyColor,
-                          ),
-                        ),
                         if (widget.isNext) ...[
-                          const SizedBox(width: 4),
                           Container(
                             width: 5,
                             height: 5,

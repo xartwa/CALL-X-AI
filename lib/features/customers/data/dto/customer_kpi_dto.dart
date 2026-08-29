@@ -1,4 +1,5 @@
 import '../../domain/repositories/customer_repository.dart';
+import '../../../../core/utils/app_date_time.dart';
 
 class CustomerKpiDto {
   const CustomerKpiDto(this.rawJson);
@@ -34,8 +35,8 @@ class CustomerKpiDto {
         contactedToday: _int(json['contactedToday'] ??
             json['contacted_today'] ??
             json['contacted']),
-        date: DateTime.tryParse(
-            '${json['date'] ?? json['updated_at'] ?? json['updatedAt']}'),
+        date: AppDateTime.tryParseApiDate(
+            json['date'] ?? json['updated_at'] ?? json['updatedAt']),
       );
 }
 

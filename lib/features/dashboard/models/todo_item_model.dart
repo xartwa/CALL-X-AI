@@ -1,3 +1,5 @@
+import '../../../core/utils/app_date_time.dart';
+
 class TodoItemModel {
   final String id;
   final String text;
@@ -30,7 +32,7 @@ class TodoItemModel {
       'id': id,
       'text': text,
       'isCompleted': isCompleted,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': AppDateTime.apiDateTime(createdAt),
     };
   }
 
@@ -40,9 +42,7 @@ class TodoItemModel {
           DateTime.now().millisecondsSinceEpoch.toString(),
       text: json['text'] as String? ?? '',
       isCompleted: json['isCompleted'] as bool? ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
-          : DateTime.now(),
+      createdAt: AppDateTime.tryParse(json['createdAt']) ?? DateTime.now(),
     );
   }
 }

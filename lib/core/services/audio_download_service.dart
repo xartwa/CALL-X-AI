@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
+import '../utils/app_date_time.dart';
 import 'audio_file_helper.dart';
 
 class AudioDownloadResult {
@@ -37,9 +38,9 @@ class AudioDownloadService {
         .replaceAll(RegExp(r'[^\w\s-]'), '')
         .trim()
         .replaceAll(' ', '_');
-    final dateStr = (callDate != null && callDate.isNotEmpty)
-        ? callDate.replaceAll('/', '-').replaceAll(' ', '_')
-        : 'recent';
+    final parsedDate = AppDateTime.tryParse(callDate);
+    final dateStr =
+        parsedDate == null ? 'recent' : AppDateTime.apiDate(parsedDate);
     return 'Call_Log_${sanitizedName}_$dateStr.mp3';
   }
 
@@ -165,12 +166,48 @@ class AudioDownloadService {
   List<int> _generateMinimalAudioBytes() {
     // 44-byte minimal silent PCM WAV header
     return [
-      0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00,
-      0x57, 0x41, 0x56, 0x6f, 0x74, 0x20, 0x10, 0x00,
-      0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x44, 0xac,
-      0x00, 0x00, 0x88, 0x58, 0x01, 0x00, 0x02, 0x00,
-      0x10, 0x00, 0x64, 0x61, 0x74, 0x61, 0x00, 0x00,
-      0x00, 0x00,
+      0x52,
+      0x49,
+      0x46,
+      0x46,
+      0x24,
+      0x00,
+      0x00,
+      0x00,
+      0x57,
+      0x41,
+      0x56,
+      0x6f,
+      0x74,
+      0x20,
+      0x10,
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x01,
+      0x00,
+      0x44,
+      0xac,
+      0x00,
+      0x00,
+      0x88,
+      0x58,
+      0x01,
+      0x00,
+      0x02,
+      0x00,
+      0x10,
+      0x00,
+      0x64,
+      0x61,
+      0x74,
+      0x61,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
     ];
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:callx_ai/features/customers/domain/entities/customer.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 void main() {
   test('parses camelCase customer and nullable detail media', () {
@@ -49,5 +50,18 @@ void main() {
     expect(filters.toQuery(2, 20), containsPair('pageSize', 20));
     expect(filters.toQuery(2, 20), containsPair('search', 'arta'));
     expect(filters.toQuery(2, 20), containsPair('sort', 'az'));
+  });
+
+  test('normalizes a human follow-up date to the UTC API contract', () {
+    final customer = Customer(
+      id: 'customer-2',
+      fullName: 'Jane Smith',
+      nextFollowUpDate: '17 Jan 2026',
+    );
+
+    expect(customer.nextFollowUpDate, DateTime(2026, 1, 17));
+    final expected = AppDateTime.apiDateTime(DateTime(2026, 1, 17));
+    expect(customer.toApiJson()['nextFollowUpDate'], expected);
+    expect(customer.toApiJson()['next_follow_up_date'], expected);
   });
 }

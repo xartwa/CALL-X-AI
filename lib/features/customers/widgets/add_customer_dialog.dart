@@ -9,7 +9,7 @@ import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class AddCustomerDialog extends StatefulWidget {
   const AddCustomerDialog({super.key});
@@ -62,6 +62,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
   String _leadQuality = 'Excellent';
   String _lastContactResult = 'Interested';
   String _status = 'Active';
+  DateTime? _nextFollowUp;
   final List<String> _tags = const [];
 
   @override
@@ -85,11 +86,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      final today = DateTime.now();
-      final formattedDate =
-          "${today.year}/${today.month.toString().padLeft(2, '0')}/${today.day.toString().padLeft(2, '0')}";
-      final timeFormatted =
-          "${today.hour.toString().padLeft(2, '0')}:${today.minute.toString().padLeft(2, '0')}";
+      final now = DateTime.now();
 
       List<CustomerNote> initialNotes = [];
       if (_noteCtrl.text.trim().isNotEmpty) {
@@ -97,7 +94,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
           CustomerNote(
             id: 'n_${DateTime.now().millisecondsSinceEpoch}',
             content: _noteCtrl.text.trim(),
-            date: '$formattedDate $timeFormatted',
+            date: now,
             author: 'Admin',
           ),
         );
@@ -120,8 +117,8 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         leadPriority: _leadPriority,
         leadQuality: _leadQuality,
         lastContactResult: _lastContactResult,
-        nextFollowUpDate: _nextFollowUpCtrl.text.trim(),
-        createdAt: formattedDate,
+        nextFollowUpDate: _nextFollowUp,
+        createdAt: now,
         lastContact: "Never",
         status: _status,
         reasonForContact: _reasonCtrl.text.trim(),
@@ -227,7 +224,6 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                                 controller: _phoneCtrl,
                                 hintText: 'e.g. 0912 345 6789',
                                 textInputType: TextInputType.phone,
-                              
                                 validator: (val) {
                                   if (val == null || val.trim().isEmpty) {
                                     return 'Phone number is required';
@@ -407,8 +403,9 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                             );
                             if (picked != null) {
                               setState(() {
+                                _nextFollowUp = picked;
                                 _nextFollowUpCtrl.text =
-                                    DateFormat('yyyy/MM/dd').format(picked);
+                                    AppDateTime.displayDate(picked);
                               });
                             }
                           },

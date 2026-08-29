@@ -1,4 +1,5 @@
 import '../../domain/entities/dashboard_snapshot.dart';
+import '../../../../core/utils/app_date_time.dart';
 
 class DashboardSnapshotModel {
   const DashboardSnapshotModel._(this.entity);
@@ -9,9 +10,9 @@ class DashboardSnapshotModel {
     final kpiJson = _map(json['kpi']);
     final callsJson = _map(json['todayCalls']);
     final reportsJson = _map(json['callReports']);
-    final generatedAt = DateTime.tryParse(_string(json['generatedAt']));
-    final date = DateTime.tryParse(_string(json['date']));
-    final callsDate = DateTime.tryParse(_string(callsJson['date']));
+    final generatedAt = AppDateTime.tryParseApiDateTime(json['generatedAt']);
+    final date = AppDateTime.tryParseApiDate(json['date']);
+    final callsDate = AppDateTime.tryParseApiDate(callsJson['date']);
     if (generatedAt == null || date == null || callsDate == null) {
       throw const FormatException('Invalid dashboard date fields');
     }
@@ -54,9 +55,7 @@ class DashboardTodayCallModel {
   final DashboardTodayCall entity;
 
   factory DashboardTodayCallModel.fromJson(Map<String, dynamic> json) {
-    final scheduled = json['scheduledFor'] == null
-        ? null
-        : DateTime.tryParse(_string(json['scheduledFor']));
+    final scheduled = AppDateTime.tryParseApiDateTime(json['scheduledFor']);
     return DashboardTodayCallModel._(DashboardTodayCall(
       id: _string(json['id']),
       customerId: _nullableString(json['customerId']),

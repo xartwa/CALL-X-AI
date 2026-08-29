@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/core/models/tag_model.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
 
 class CustomerDetailUserSummary extends StatelessWidget {
@@ -173,21 +173,17 @@ class CustomerDetailUserSummary extends StatelessWidget {
             _buildInfoRow(
               context,
               label: 'Next Follow-up',
-              value: DateFormat('yyyy/MM/dd').format(user.nextFollowUpDate!),
+              value: AppDateTime.displayDateOrDateTime(user.nextFollowUpDate),
               isHighlight: true,
             ),
           _buildInfoRow(context,
               label: 'Last Contact Result', value: user.lastContactResult),
           _buildInfoRow(context,
               label: text.createdAt,
-              value: user.createdAt != null
-                  ? DateFormat('yyyy/MM/dd  •  HH:mm').format(user.createdAt!)
-                  : '-'),
+              value: AppDateTime.displayDateTime(user.createdAt)),
           _buildInfoRow(context,
               label: text.lastContact,
-              value: user.lastContact != null
-                  ? DateFormat('yyyy/MM/dd  •  HH:mm').format(user.lastContact!)
-                  : '-'),
+              value: AppDateTime.displayDateTime(user.lastContact)),
 
           const Divider(height: 20),
 

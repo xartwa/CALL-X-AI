@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
@@ -96,7 +96,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
 
     final buffer = StringBuffer();
     buffer.writeln(
-        '=== Call Transcript: ${widget.call.fullName} (${widget.call.callDate} • ${widget.call.callTime}) ===');
+        '=== Call Transcript: ${widget.call.fullName} (${AppDateTime.displayDateTime(widget.call.dateTime)}) ===');
     for (final t in widget.call.transcript) {
       buffer.writeln('[${t.timestamp}] ${t.speakerName}: ${t.text}');
     }
@@ -114,9 +114,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
       _followUpDate = newDate;
     });
 
-    final formatted = (newDate != null && newDate.isNotEmpty)
-        ? newDate.replaceAll('/', '-')
-        : '';
+    final parsed = AppDateTime.tryParse(newDate);
+    final formatted = parsed == null ? '' : AppDateTime.apiDateTime(parsed);
 
     if (formatted.isNotEmpty) {
       await context
@@ -138,7 +137,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     AppUtils.showSnackBar(
       context: context,
       extraMessage: (newDate != null && newDate.isNotEmpty)
-          ? 'Follow-up scheduled for $newDate'
+          ? 'Follow-up scheduled for ${AppDateTime.displayDate(newDate)}'
           : 'Follow-up date cleared',
       toastificationType: ToastificationType.success,
     );
@@ -148,13 +147,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     final now = DateTime.now();
     DateTime initial = now.add(const Duration(days: 1));
     if (_followUpDate != null && _followUpDate!.isNotEmpty) {
-      try {
-        final parts = _followUpDate!.replaceAll('-', '/').split('/');
-        if (parts.length == 3) {
-          initial = DateTime(
-              int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
-        }
-      } catch (_) {}
+      initial = AppDateTime.tryParse(_followUpDate) ?? initial;
     }
 
     final picked = await AppUtils.showCustomDatePicker(
@@ -165,7 +158,9 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     );
 
     if (picked != null) {
-      final formatted = DateFormat('yyyy/MM/dd').format(picked);
+      final formatted = AppDateTime.apiDateTime(
+        DateTime(picked.year, picked.month, picked.day),
+      );
       _saveFollowUpDate(formatted);
     }
   }
@@ -269,11 +264,10 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                       child: Center(
                         child: Text(
                           initials,
-                          style:  TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
-                                            color: context.colors.primaryLightColor,
-
+                            color: context.colors.primaryLightColor,
                           ),
                         ),
                       ),
@@ -536,7 +530,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                           ? widget.call.duration
                                           : '0:00',
                                       style: TextStyle(
-                                        fontSize: 12.5,
+                                        fontSize: 10.5,
                                         fontWeight: FontWeight.w800,
                                         color: isDark
                                             ? Colors.white
@@ -578,9 +572,10 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${widget.call.callDate} • ${widget.call.callTime}',
+                                      AppDateTime.displayDateTime(
+                                          widget.call.dateTime),
                                       style: TextStyle(
-                                        fontSize: 12.5,
+                                        fontSize: 10.5,
                                         fontWeight: FontWeight.w800,
                                         color: isDark
                                             ? Colors.white
@@ -632,7 +627,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                           ? 'AI'
                                           : widget.call.assignee,
                                       style: TextStyle(
-                                        fontSize: 12.5,
+                                        fontSize: 10.5,
                                         fontWeight: FontWeight.w800,
                                         color: isDark
                                             ? Colors.white
@@ -996,7 +991,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                       Text(
                                         (_followUpDate != null &&
                                                 _followUpDate!.isNotEmpty)
-                                            ? _followUpDate!
+                                            ? AppDateTime.displayDateOrDateTime(
+                                                _followUpDate)
                                             : 'Click to select follow-up date',
                                         style: TextStyle(
                                           fontSize: 12.5,

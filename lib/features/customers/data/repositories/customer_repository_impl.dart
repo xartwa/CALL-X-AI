@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/utils/app_date_time.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../datasources/customer_remote_data_source.dart';
@@ -49,7 +50,8 @@ class CustomerRepositoryImpl implements CustomerRepository {
                 .toList(growable: false);
             final count = allResults.length;
             final validPageSize = pageSize > 0 ? pageSize : 10;
-            final computedTotalPages = (count / validPageSize).ceil().clamp(1, 9999);
+            final computedTotalPages =
+                (count / validPageSize).ceil().clamp(1, 9999);
             final startIndex = ((page - 1) * validPageSize).clamp(0, count);
             final endIndex = (startIndex + validPageSize).clamp(0, count);
             final pagedSlice = allResults.sublist(startIndex, endIndex);
@@ -73,8 +75,8 @@ class CustomerRepositoryImpl implements CustomerRepository {
           final validPageSize = pSize > 0 ? pSize : 10;
           final computedTotalPages =
               (count / validPageSize).ceil().clamp(1, 9999);
-          final totalPages =
-              _int(json['totalPages'] ?? json['total_pages'], computedTotalPages);
+          final totalPages = _int(
+              json['totalPages'] ?? json['total_pages'], computedTotalPages);
           final currentPage = _int(
               json['currentPage'] ?? json['current_page'] ?? json['page'],
               page);
@@ -121,7 +123,9 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<CustomerFilterOptions> getOptions({String? country, String? state}) =>
       _request(() async {
         final raw = await remote.options(country: country, state: state);
-        final j = raw['data'] is Map ? Map<String, dynamic>.from(raw['data'] as Map) : raw;
+        final j = raw['data'] is Map
+            ? Map<String, dynamic>.from(raw['data'] as Map)
+            : raw;
         return CustomerFilterOptions(
             country: _list(j['country'] ?? j['countries']),
             state: _list(j['state'] ?? j['states'] ?? j['provinces']),
@@ -147,7 +151,6 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _request(() async => _note(await remote.note(customerId, {
             'content': content,
             'author': author,
-            'date': DateTime.now().toIso8601String()
           })));
   @override
   Future<CustomerNote> updateNote(
@@ -160,13 +163,13 @@ class CustomerRepositoryImpl implements CustomerRepository {
   @override
   Future<List<String>> addTag(String customerId,
           {String? label, int? tagId, String color = '#6366F1'}) =>
-      _request(() => remote.tag(customerId,
-          label: label, tagId: tagId, color: color));
+      _request(() =>
+          remote.tag(customerId, label: label, tagId: tagId, color: color));
   @override
   Future<List<String>> removeTag(String customerId,
           {String? label, int? tagId}) =>
-      _request(() => remote.tag(customerId,
-          label: label, tagId: tagId, remove: true));
+      _request(() =>
+          remote.tag(customerId, label: label, tagId: tagId, remove: true));
   @override
   Future<CustomerImportResult> importCustomers({
     required List<int> bytes,
@@ -217,7 +220,9 @@ List<String> _list(Object? value) =>
 CustomerNote _note(Map<String, dynamic> j) => CustomerNote(
     id: '${j['id']}',
     content: '${j['content'] ?? ''}',
-    date: '${j['date'] ?? ''}',
+    date: AppDateTime.tryParseApiDateTime(j['date']) ??
+        AppDateTime.tryParseApiDateTime(j['createdAt']) ??
+        DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
     author: '${j['author'] ?? 'Admin'}');
 CustomerImportResult _importResult(Map<String, dynamic> json) =>
     CustomerImportResult(

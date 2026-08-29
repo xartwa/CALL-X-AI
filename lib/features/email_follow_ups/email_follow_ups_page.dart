@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class EmailFollowUpsPage extends StatefulWidget {
   const EmailFollowUpsPage({super.key});
@@ -115,6 +116,12 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     return counts;
   }
 
+  DateTime? _sentAt(Map<String, dynamic> email) =>
+      AppDateTime.tryParse(
+        email['sentAt'] ?? email['sent_at'] ?? email['createdAt'],
+      ) ??
+      AppDateTime.combine(email['sentDate'], email['sentTime']);
+
   List<Map<String, dynamic>> get _filteredEmails {
     return _allEmails.where((email) {
       // 1. Search Query
@@ -141,23 +148,14 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
 
       // 3. Date Range Filter
       if (_selectedDateRange != null) {
-        final dateStr = (email['sentDate'] ?? '').toString().trim();
-        if (dateStr.isNotEmpty) {
-          try {
-            final parts = dateStr.split('/');
-            if (parts.length == 3) {
-              final d = DateTime(
-                int.parse(parts[0]),
-                int.parse(parts[1]),
-                int.parse(parts[2]),
-              );
-              final start = DateTime(_selectedDateRange!.start.year,
-                  _selectedDateRange!.start.month, _selectedDateRange!.start.day);
-              final end = DateTime(_selectedDateRange!.end.year,
-                  _selectedDateRange!.end.month, _selectedDateRange!.end.day, 23, 59, 59);
-              if (d.isBefore(start) || d.isAfter(end)) return false;
-            }
-          } catch (_) {}
+        final sentAt = _sentAt(email);
+        if (sentAt == null ||
+            !AppDateTime.isWithinDateRange(
+              sentAt,
+              _selectedDateRange!.start,
+              _selectedDateRange!.end,
+            )) {
+          return false;
         }
       }
 
@@ -166,25 +164,21 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       ..sort((a, b) {
         switch (_selectedSort) {
           case 'Date (Newest)':
-            final dateA = '${a['sentDate'] ?? ''} ${a['sentTime'] ?? ''}';
-            final dateB = '${b['sentDate'] ?? ''} ${b['sentTime'] ?? ''}';
-            return dateB.compareTo(dateA);
+            return (_sentAt(b) ?? DateTime(1900))
+                .compareTo(_sentAt(a) ?? DateTime(1900));
           case 'Date (Oldest)':
-            final dateA = '${a['sentDate'] ?? ''} ${a['sentTime'] ?? ''}';
-            final dateB = '${b['sentDate'] ?? ''} ${b['sentTime'] ?? ''}';
-            return dateA.compareTo(dateB);
+            return (_sentAt(a) ?? DateTime(1900))
+                .compareTo(_sentAt(b) ?? DateTime(1900));
           case 'Recipient (A-Z)':
             return (a['recipientName'] ?? '')
                 .toString()
                 .toLowerCase()
-                .compareTo(
-                    (b['recipientName'] ?? '').toString().toLowerCase());
+                .compareTo((b['recipientName'] ?? '').toString().toLowerCase());
           case 'Recipient (Z-A)':
             return (b['recipientName'] ?? '')
                 .toString()
                 .toLowerCase()
-                .compareTo(
-                    (a['recipientName'] ?? '').toString().toLowerCase());
+                .compareTo((a['recipientName'] ?? '').toString().toLowerCase());
           case 'Subject (A-Z)':
             return (a['subject'] ?? '')
                 .toString()
@@ -340,22 +334,20 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                     : '${((deliveredCount / _allEmails.length) * 100).toInt()}%',
                 icon: CupertinoIcons.graph_circle_fill,
                 iconColor: context.colors.warningColor,
-                iconBgColor:
-                    context.colors.warningColor.withValues(alpha: 0.1),
+                iconBgColor: context.colors.warningColor.withValues(alpha: 0.1),
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
-    
+
         // Headers / Toolbar
         EmailFollowUpsHeaders(
           selectedStatus: _selectedStatus,
           selectedSort: _selectedSort,
           selectedDateRange: _selectedDateRange,
           statusCounts: _statusCounts,
-          onStatusChanged: (status) =>
-              setState(() => _selectedStatus = status),
+          onStatusChanged: (status) => setState(() => _selectedStatus = status),
           onSortChanged: (sort) => setState(() => _selectedSort = sort),
           onDateRangeChanged: (range) =>
               setState(() => _selectedDateRange = range),
@@ -366,7 +358,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
           onNewTemplatePressed: () => _showManageTemplateDialog(),
         ),
         const SizedBox(height: 16),
-    
+
         // Main Card with Tabs
         Expanded(
           child: Container(
@@ -384,8 +376,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
               children: [
                 // Tab Switcher Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -393,8 +385,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                         controller: _tabController,
                         isScrollable: true,
                         tabAlignment: TabAlignment.start,
-                        indicatorColor:
-                            Theme.of(context).colorScheme.primary,
+                        indicatorColor: Theme.of(context).colorScheme.primary,
                         labelColor: Theme.of(context).colorScheme.primary,
                         unselectedLabelColor: context.colors.darkGreyColor,
                         labelStyle: const TextStyle(
@@ -406,8 +397,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                           Tab(
                             child: Row(
                               children: [
-                                const Icon(CupertinoIcons.clock_fill,
-                                    size: 14),
+                                const Icon(CupertinoIcons.clock_fill, size: 14),
                                 const SizedBox(width: 6),
                                 Text(
                                     'SENT HISTORY (${_filteredEmails.length})'),
@@ -417,8 +407,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                           Tab(
                             child: Row(
                               children: [
-                                const Icon(
-                                    CupertinoIcons.doc_plaintext,
+                                const Icon(CupertinoIcons.doc_plaintext,
                                     size: 14),
                                 const SizedBox(width: 6),
                                 Text(
@@ -432,7 +421,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                   ),
                 ),
                 const Divider(height: 1, thickness: 0.5),
-    
+
                 // Tab Views
                 Expanded(
                   child: TabBarView(
@@ -440,7 +429,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                     children: [
                       // 1. Sent History DataTable2
                       _buildSentHistoryTable(emailsList, isDark),
-    
+
                       // 2. Email Templates Grid
                       _buildTemplatesGrid(templatesList, isDark),
                     ],
@@ -506,7 +495,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         DataColumn2(label: Text('TEMPLATE USED'), size: ColumnSize.M),
         DataColumn2(label: Text('DATE & TIME'), size: ColumnSize.M),
         DataColumn2(label: Text('STATUS'), size: ColumnSize.S),
-        DataColumn2(label: Text('ACTIONS'), size: ColumnSize.S, fixedWidth: 100),
+        DataColumn2(
+            label: Text('ACTIONS'), size: ColumnSize.S, fixedWidth: 100),
       ],
       rows: emails.map((email) {
         final status = (email['status'] ?? 'Delivered').toString();
@@ -593,7 +583,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
             // Date & Time
             DataCell(
               Text(
-                '${email['sentDate'] ?? ''}  •  ${email['sentTime'] ?? ''}',
+                AppDateTime.displayDateTime(_sentAt(email)),
                 style: const TextStyle(fontSize: 12),
               ),
             ),
@@ -601,8 +591,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
             // Status Tag
             DataCell(
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
@@ -710,14 +699,11 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.03)
-                : Colors.grey[50],
+            color:
+                isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey[50],
             borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
             border: Border.all(
-              color: isDark
-                  ? Colors.white12
-                  : context.colors.lightGreyColor,
+              color: isDark ? Colors.white12 : context.colors.lightGreyColor,
             ),
           ),
           child: Column(
@@ -728,8 +714,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: Theme.of(context)
                           .colorScheme
@@ -841,8 +827,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius:

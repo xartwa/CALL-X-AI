@@ -4,6 +4,7 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class EmailPreviewDialog extends StatelessWidget {
   final Map<String, dynamic> email;
@@ -79,7 +80,17 @@ class EmailPreviewDialog extends StatelessWidget {
             _buildPreviewField(
                 context,
                 AppStrings.current.emailFollowUpsSentDateTime,
-                '${email['sentDate']}  •  ${email['sentTime']}'),
+                AppDateTime.displayDateTime(
+                  AppDateTime.tryParse(
+                        email['sentAt'] ??
+                            email['sent_at'] ??
+                            email['createdAt'],
+                      ) ??
+                      AppDateTime.combine(
+                        email['sentDate'],
+                        email['sentTime'],
+                      ),
+                )),
             const Divider(height: 24),
             Text(
               AppStrings.current.emailFollowUpsEmailBody,

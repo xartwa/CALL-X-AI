@@ -8,7 +8,8 @@ import 'package:callx_ai/features/customers/widgets/customer_call_logs_tab.dart'
 import 'package:callx_ai/theme/app_colors.dart';
 
 void main() {
-  testWidgets('CustomerCallLogsTab renders call logs, handles selection, close, and unanswered toast',
+  testWidgets(
+      'CustomerCallLogsTab renders call logs, handles selection, close, and unanswered toast',
       (tester) async {
     tester.view.physicalSize = const Size(1200, 800);
     tester.view.devicePixelRatio = 1.0;
@@ -41,7 +42,8 @@ void main() {
             TranscriptTurn(
               speaker: 'ai',
               speakerName: 'Agent',
-              text: 'Good afternoon, Michael! Checking in regarding paper supplies.',
+              text:
+                  'Good afternoon, Michael! Checking in regarding paper supplies.',
             ),
             TranscriptTurn(
               speaker: 'customer',
@@ -85,14 +87,14 @@ void main() {
 
     // 1. Check Search and Left column list
     expect(find.text('Outgoing Call'), findsWidgets);
-    expect(find.text('Aug 28, 2026 • 14:00'), findsOneWidget);
+    expect(find.text('28 Aug 2026 • 14:00'), findsOneWidget);
     expect(find.text('03:12'), findsOneWidget);
     expect(find.text('Completed'), findsOneWidget);
     expect(find.text('No Answer'), findsOneWidget);
     expect(find.text('2 of 2 calls'), findsOneWidget);
 
     // 2. Click on the first completed call to open details
-    await tester.tap(find.text('Aug 28, 2026 • 14:00'));
+    await tester.tap(find.text('28 Aug 2026 • 14:00'));
     await tester.pumpAndSettle();
 
     // Check Detail View is open
@@ -100,7 +102,9 @@ void main() {
     expect(find.text('Client discussed paper bulk order for upcoming quarter.'),
         findsOneWidget);
     expect(find.text('Call Transcript'), findsOneWidget);
-    expect(find.text('Good afternoon, Michael! Checking in regarding paper supplies.'),
+    expect(
+        find.text(
+            'Good afternoon, Michael! Checking in regarding paper supplies.'),
         findsOneWidget);
     expect(find.text('Send me the contract right away.'), findsOneWidget);
     expect(find.byType(CallAudioPlayerWidget), findsOneWidget);

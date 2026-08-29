@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../../core/utils/app_date_time.dart';
 import '../../../../services/api_provider.dart';
 
 class CustomerRemoteDataSource {
@@ -70,8 +71,7 @@ class CustomerRemoteDataSource {
     );
     final data = response.data;
     if (data is Map && data['tags'] is List) {
-      return List<String>.from(
-          (data['tags'] as List).map((e) => e.toString()));
+      return List<String>.from((data['tags'] as List).map((e) => e.toString()));
     }
     if (data is List) {
       return List<String>.from(data.map((e) => e.toString()));
@@ -100,7 +100,8 @@ class CustomerRemoteDataSource {
     await client.http.post('/calls/dispatch-single/', data: {
       'customerId': customerId,
       'scenarioId': scenarioId,
-      if (scheduledFor != null) 'scheduledFor': scheduledFor.toIso8601String(),
+      if (scheduledFor != null)
+        'scheduledFor': AppDateTime.apiDateTime(scheduledFor),
     });
   }
 

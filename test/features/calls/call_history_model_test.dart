@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 void main() {
   group('CallHistoryModel Tests', () {
@@ -24,6 +25,9 @@ void main() {
       expect(json['id'], '101');
       expect(json['fullName'], 'Jane Doe');
       expect(json['lastContactResult'], 'Interested');
+      expect(json['occurredAt'], AppDateTime.apiDateTime(call.dateTime!));
+      expect(json, isNot(contains('callDate')));
+      expect(json, isNot(contains('callTime')));
 
       final deserialized = CallHistoryModel.fromJson(json);
       expect(deserialized.id, '101');
@@ -47,12 +51,12 @@ void main() {
 
       final updated = call.copyWith(
         notes: 'Updated follow-up note',
-        nextFollowUpDate: '2026/09/01',
+        nextFollowUpDate: '2026-09-01T07:00:00Z',
       );
 
       expect(updated.id, '102');
       expect(updated.notes, 'Updated follow-up note');
-      expect(updated.nextFollowUpDate, '2026/09/01');
+      expect(updated.nextFollowUpDate, '2026-09-01T07:00:00Z');
       expect(updated.fullName, 'Bob Builder');
     });
 

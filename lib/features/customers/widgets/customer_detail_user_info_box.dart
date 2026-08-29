@@ -3,7 +3,7 @@ import 'package:callx_ai/features/customers/models/customer_model.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class CustomerDetailUserInfoBox extends StatefulWidget {
   final TextEditingController companyNameCtrl;
@@ -545,7 +545,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               lastDate: DateTime(2035),
             );
             if (picked != null) {
-              controller.text = DateFormat('yyyy-MM-dd').format(picked);
+              controller.text = AppDateTime.displayDate(picked);
               setState(() {});
             }
           },

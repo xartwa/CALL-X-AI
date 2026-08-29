@@ -329,31 +329,31 @@ class PreferencesService {
           'id': '1',
           'text': 'Review weekly cold call metrics',
           'isCompleted': false,
-          'createdAt': '2026-08-26T09:00:00.000Z'
+          'createdAt': '2026-08-26T09:00:00Z'
         },
         {
           'id': '2',
           'text': 'Follow up with VIP qualified leads',
           'isCompleted': true,
-          'createdAt': '2026-08-26T08:30:00.000Z'
+          'createdAt': '2026-08-26T08:30:00Z'
         },
         {
           'id': '3',
           'text': 'Update outbound sales campaign script',
           'isCompleted': false,
-          'createdAt': '2026-08-26T08:00:00.000Z'
+          'createdAt': '2026-08-26T08:00:00Z'
         },
         {
           'id': '4',
           'text': 'Check telephony carrier logs',
           'isCompleted': false,
-          'createdAt': '2026-08-26T07:30:00.000Z'
+          'createdAt': '2026-08-26T07:30:00Z'
         },
         {
           'id': '5',
           'text': 'Schedule pipeline review meeting',
           'isCompleted': false,
-          'createdAt': '2026-08-26T07:00:00.000Z'
+          'createdAt': '2026-08-26T07:00:00Z'
         },
       ];
     }

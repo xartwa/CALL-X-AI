@@ -1,3 +1,5 @@
+import '../../../../core/utils/app_date_time.dart';
+
 class Customer {
   Customer({
     required Object id,
@@ -91,16 +93,17 @@ class Customer {
         leadStatus: '${json['leadStatus'] ?? 'New'}',
         leadQuality: '${json['leadQuality'] ?? 'Good'}',
         leadPriority: '${json['leadPriority'] ?? 'Warm'}',
-        nextFollowUpDate: _date(json['nextFollowUpDate']),
-        lastContact: _date(json['lastContact']),
+        nextFollowUpDate:
+            AppDateTime.tryParseApiDateTime(json['nextFollowUpDate']),
+        lastContact: AppDateTime.tryParseApiDateTime(json['lastContact']),
         lastContactResult: '${json['lastContactResult'] ?? 'Interested'}',
         reasonForContact: '${json['reasonForContact'] ?? ''}',
         status: '${json['status'] ?? 'Active'}',
         tags: _stringList(json['tags']),
         notesCount: _intValue(json['notesCount']),
         documentsCount: _intValue(json['documentsCount']),
-        createdAt: _date(json['createdAt']),
-        updatedAt: _date(json['updatedAt']),
+        createdAt: AppDateTime.tryParseApiDateTime(json['createdAt']),
+        updatedAt: AppDateTime.tryParseApiDateTime(json['updatedAt']),
         notesList: _notes(json['notesList']),
         documents: _documents(json['documents']),
         callLogs: _calls(json['callLogs']),
@@ -152,8 +155,7 @@ class Customer {
     }
 
     if (nextFollowUpDate != null) {
-      final formattedDate =
-          '${nextFollowUpDate!.year}-${nextFollowUpDate!.month.toString().padLeft(2, '0')}-${nextFollowUpDate!.day.toString().padLeft(2, '0')}';
+      final formattedDate = AppDateTime.apiDateTime(nextFollowUpDate!);
       data['nextFollowUpDate'] = formattedDate;
       data['next_follow_up_date'] = formattedDate;
       data['follow_up_date'] = formattedDate;
@@ -241,10 +243,10 @@ class CustomerNote {
 
   final String id;
   final String content;
-  final String date;
+  final DateTime date;
   final String author;
 
-  CustomerNote copyWith({String? content, String? date, String? author}) =>
+  CustomerNote copyWith({String? content, DateTime? date, String? author}) =>
       CustomerNote(
         id: id,
         content: content ?? this.content,
@@ -267,7 +269,7 @@ class CustomerDocument {
   final String name;
   final String size;
   final String type;
-  final String uploadDate;
+  final DateTime uploadDate;
   final String? fileUrl;
 
   factory CustomerDocument.fromJson(Map<String, dynamic> json) =>
@@ -276,7 +278,9 @@ class CustomerDocument {
         name: '${json['name'] ?? ''}',
         size: '${json['size'] ?? ''}',
         type: '${json['type'] ?? 'Document'}',
-        uploadDate: '${json['uploadDate'] ?? ''}',
+        uploadDate: AppDateTime.tryParseApiDateTime(json['uploadDate']) ??
+            AppDateTime.tryParseApiDateTime(json['createdAt']) ??
+            DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
         fileUrl: json['fileUrl']?.toString(),
       );
 }
@@ -317,6 +321,9 @@ class CustomerCallHistory {
   final String? summary;
   final String leadPriority;
   final DateTime? createdAt;
+
+  DateTime? get dateTime =>
+      AppDateTime.combine(callDate, callTime) ?? scheduledFor ?? createdAt;
 }
 
 class TranscriptTurn {
@@ -333,11 +340,7 @@ class TranscriptTurn {
   final String timestamp;
 }
 
-DateTime? _date(Object? value) => value == null || value == 'Never'
-    ? null
-    : value is DateTime
-        ? value
-        : DateTime.tryParse(value.toString().replaceAll('/', '-'));
+DateTime? _date(Object? value) => AppDateTime.tryParse(value);
 int _intValue(Object? value) =>
     value is num ? value.toInt() : int.tryParse('$value') ?? 0;
 List<String> _stringList(Object? value) =>
@@ -348,7 +351,9 @@ List<CustomerNote> _notes(Object? value) => value is List
         .map((e) => CustomerNote(
             id: '${e['id']}',
             content: '${e['content'] ?? ''}',
-            date: '${e['date'] ?? ''}',
+            date: AppDateTime.tryParseApiDateTime(e['date']) ??
+                AppDateTime.tryParseApiDateTime(e['createdAt']) ??
+                DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
             author: '${e['author'] ?? 'Admin'}'))
         .toList()
     : const [];
@@ -360,7 +365,9 @@ List<CustomerDocument> _documents(Object? value) => value is List
             name: '${e['name'] ?? ''}',
             size: '${e['size'] ?? ''}',
             type: '${e['type'] ?? 'Document'}',
-            uploadDate: '${e['uploadDate'] ?? e['upload_date'] ?? ''}',
+            uploadDate: AppDateTime.tryParseApiDateTime(e['uploadDate']) ??
+                AppDateTime.tryParseApiDateTime(e['createdAt']) ??
+                DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
             fileUrl: (e['fileUrl'] ?? e['file_url'])?.toString()))
         .toList()
     : const [];
@@ -371,22 +378,27 @@ List<CustomerCallHistory> _calls(Object? value) => value is List
             id: '${e['id'] ?? ''}',
             status: '${e['status'] ?? 'Completed'}',
             direction: '${e['direction'] ?? 'Outbound'}',
-            outcome: '${e['outcome'] ?? e['last_contact_result'] ?? e['lastContactResult'] ?? 'Interested'}',
+            outcome:
+                '${e['outcome'] ?? e['last_contact_result'] ?? e['lastContactResult'] ?? 'Interested'}',
             duration: '${e['duration'] ?? '01:30'}',
-            durationSeconds: _intValue(e['durationSeconds'] ?? e['duration_seconds']),
+            durationSeconds:
+                _intValue(e['durationSeconds'] ?? e['duration_seconds']),
             scheduledFor: _date(e['scheduledFor'] ?? e['scheduled_for']),
             callDate: '${e['callDate'] ?? e['call_date'] ?? ''}',
             callTime: '${e['callTime'] ?? e['call_time'] ?? ''}',
             scenario: (e['scenario'] ?? e['agent'])?.toString(),
             recordingUrl: (e['recordingUrl'] ?? e['recording_url'])?.toString(),
-            summary: (e['summary'] ?? e['ai_summary'] ?? e['notes'])?.toString(),
-            leadPriority: '${e['leadPriority'] ?? e['lead_priority'] ?? 'Warm'}',
+            summary:
+                (e['summary'] ?? e['ai_summary'] ?? e['notes'])?.toString(),
+            leadPriority:
+                '${e['leadPriority'] ?? e['lead_priority'] ?? 'Warm'}',
             transcript: e['transcript'] is List
                 ? (e['transcript'] as List)
                     .whereType<Map>()
                     .map((t) => TranscriptTurn(
                         speaker: '${t['speaker'] ?? 'ai'}',
-                        speakerName: t['speakerName']?.toString() ?? t['speaker_name']?.toString(),
+                        speakerName: t['speakerName']?.toString() ??
+                            t['speaker_name']?.toString(),
                         timestamp: '${t['timestamp'] ?? t['time'] ?? '00:00'}',
                         text: '${t['text'] ?? t['content'] ?? ''}'))
                     .toList()

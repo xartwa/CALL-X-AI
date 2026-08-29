@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
 import 'email_editor_toolbar.dart';
 
@@ -222,8 +222,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     if (!mounted) return;
 
     final now = DateTime.now();
-    final timeStr = DateFormat('HH:mm').format(now);
-    final dateStr = DateFormat('yyyy/MM/dd').format(now);
+    final sentAt = AppDateTime.apiDateTime(now);
 
     final customers = context.read<CustomersCubit>().state.users;
 
@@ -248,8 +247,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
             ? _selectedTemplate!['name']
             : 'Custom Email',
         'attachments': _attachments.map((f) => f.name).toList(),
-        'sentTime': timeStr,
-        'sentDate': dateStr,
+        'sentAt': sentAt,
         'status': 'Delivered',
       };
 
@@ -291,8 +289,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
               ? _selectedTemplate!['name']
               : 'Batch Campaign',
           'attachments': _attachments.map((f) => f.name).toList(),
-          'sentTime': timeStr,
-          'sentDate': dateStr,
+          'sentAt': sentAt,
           'status': 'Delivered',
         };
 
@@ -320,7 +317,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
         .replaceAll('{name}', _selectedUser?.fullName ?? 'Valued Customer')
         .replaceAll('{company}', _selectedUser?.companyName ?? 'Your Company')
         .replaceAll('{phone}', _selectedUser?.phone ?? '+1 (555) 000-0000')
-        .replaceAll('{date}', DateFormat('dd MMM yyyy').format(DateTime.now()))
+        .replaceAll('{date}', AppDateTime.displayDate(DateTime.now()))
         .replaceAll('{agent}', 'Alex Morgan');
 
     return Dialog(

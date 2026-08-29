@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/calls/widgets/details/call_audio_player_widget.dart';
@@ -47,7 +48,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '02:15',
         durationSeconds: 135,
-        callDate: '2026/08/29',
+        callDate: '2026-08-29',
         callTime: '19:44',
         scenario: 'Sara (Sales)',
         recordingUrl: 'https://example.com/recording_1.mp3',
@@ -95,7 +96,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '01:32',
         durationSeconds: 92,
-        callDate: '2026/08/26',
+        callDate: '2026-08-26',
         callTime: '14:10',
         scenario: 'Sara (Support)',
         summary:
@@ -123,7 +124,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '03:45',
         durationSeconds: 225,
-        callDate: '2026/08/22',
+        callDate: '2026-08-22',
         callTime: '11:03',
         scenario: 'Sara (Sales)',
         summary:
@@ -144,7 +145,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '00:47',
         durationSeconds: 47,
-        callDate: '2026/08/20',
+        callDate: '2026-08-20',
         callTime: '16:38',
         scenario: 'Billing Agent',
         summary:
@@ -157,7 +158,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '02:15',
         durationSeconds: 135,
-        callDate: '2026/08/17',
+        callDate: '2026-08-17',
         callTime: '10:22',
         scenario: 'Sara (Sales)',
         summary:
@@ -170,7 +171,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Interested',
         duration: '01:05',
         durationSeconds: 65,
-        callDate: '2026/08/15',
+        callDate: '2026-08-15',
         callTime: '09:15',
         scenario: 'Sara (Sales)',
         summary:
@@ -183,7 +184,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'No Answer',
         duration: '00:58',
         durationSeconds: 58,
-        callDate: '2026/08/12',
+        callDate: '2026-08-12',
         callTime: '17:50',
         scenario: 'Outreach Bot',
         summary:
@@ -196,7 +197,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '02:40',
         durationSeconds: 160,
-        callDate: '2026/08/10',
+        callDate: '2026-08-10',
         callTime: '13:08',
         scenario: 'Sara (Sales)',
         summary:
@@ -213,7 +214,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       final directionMatch = c.direction.toLowerCase().contains(query);
       final statusMatch = c.status.toLowerCase().contains(query);
       final dateMatch =
-          '${c.callDate} ${c.callTime}'.toLowerCase().contains(query);
+          '${c.callDate} ${c.callTime} ${AppDateTime.displayDateTime(c.dateTime)}'
+              .toLowerCase()
+              .contains(query);
       final summaryMatch = (c.summary ?? '').toLowerCase().contains(query);
       return directionMatch || statusMatch || dateMatch || summaryMatch;
     }).toList();
@@ -263,7 +266,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
 
     final buffer = StringBuffer();
     buffer.writeln(
-        '=== Call Transcript: ${widget.user.fullName} (${call.callDate} • ${call.callTime}) ===');
+        '=== Call Transcript: ${widget.user.fullName} (${AppDateTime.displayDateTime(call.dateTime)}) ===');
     for (final t in transcript) {
       final isAi =
           t.speaker.toLowerCase() == 'ai' || t.speaker.toLowerCase() == 'agent';
@@ -550,8 +553,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   ) {
     final isOutbound = call.direction.toLowerCase().contains('out');
     final title = isOutbound ? 'Outgoing Call' : 'Incoming Call';
-    final subtitle =
-        '${call.callDate.isNotEmpty ? call.callDate : '2026/08/29'} • ${call.callTime.isNotEmpty ? call.callTime : '19:44'}';
+    final subtitle = AppDateTime.displayDateTime(
+      call.dateTime,
+      fallback: 'Date unavailable',
+    );
 
     return InkWell(
       onTap: () => _onCallSelected(call),
@@ -650,6 +655,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       duration: call.duration,
       callDate: call.callDate,
       callTime: call.callTime,
+      scheduledFor: call.scheduledFor,
+      createdAt: call.createdAt,
       recordingUrl: call.recordingUrl,
       notes: call.summary,
     );
@@ -697,7 +704,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                           Text(
                             call.duration.isNotEmpty ? call.duration : '0:00',
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w800,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
@@ -741,9 +748,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${call.callDate} • ${call.callTime}',
+                            AppDateTime.displayDateTime(call.dateTime),
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w800,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
@@ -791,9 +798,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                           Text(
                             call.scenario != null && call.scenario!.isNotEmpty
                                 ? call.scenario!
-                                : 'Sara (Sales)',
+                                : 'AI',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w800,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),

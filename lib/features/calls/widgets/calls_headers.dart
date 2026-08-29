@@ -5,7 +5,7 @@ import 'package:callx_ai/features/calls/widgets/clean_date_range_picker.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class CallsHeaders extends StatefulWidget {
   final String selectedStatus;
@@ -151,7 +151,7 @@ class _CallsHeadersState extends State<CallsHeaders> {
                       'BATCH CALL',
                       style: TextStyle(
                         fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w600,
                         color: isDark ? Colors.white70 : Colors.black87,
                       ),
                     ),
@@ -271,18 +271,17 @@ class _CallsHeadersState extends State<CallsHeaders> {
                         status.toLowerCase();
                     return PopupMenuItem<String>(
                       value: status,
-                      child:  Text(
-                            status,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isSelected
-                                  ? FontWeight.w800
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark ? Colors.white : Colors.black87),
-                            ),
-                          ),
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight:
+                              isSelected ? FontWeight.w800 : FontWeight.w500,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : (isDark ? Colors.white : Colors.black87),
+                        ),
+                      ),
                     );
                   }).toList(),
                   child: Container(
@@ -382,8 +381,11 @@ class _CallsHeadersState extends State<CallsHeaders> {
                         const SizedBox(width: 6),
                         Text(
                           widget.selectedDateRange == null
-                              ? 'Time'
-                              : '${DateFormat('dd MMM').format(widget.selectedDateRange!.start)} - ${DateFormat('dd MMM').format(widget.selectedDateRange!.end)}',
+                              ? 'Date'
+                              : AppDateTime.displayRange(
+                                  widget.selectedDateRange!.start,
+                                  widget.selectedDateRange!.end,
+                                ),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,

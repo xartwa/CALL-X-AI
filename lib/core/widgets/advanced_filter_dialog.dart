@@ -205,19 +205,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            // Location Filters Section
-            Text(
-              'LOCATION',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.primary,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
