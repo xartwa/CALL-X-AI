@@ -1,16 +1,9 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
-import 'package:callx_ai/core/widgets/spaced_text.dart';
-import 'package:callx_ai/core/utils/utils.dart';
-import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
-import 'package:callx_ai/features/customers/widgets/customer_detail_custom_textfeild.dart';
+import 'package:callx_ai/features/customers/models/customer_model.dart';
 import 'package:callx_ai/theme/app_colors.dart';
-import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
-import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:toastification/toastification.dart';
 
 class CustomerDetailUserInfoBox extends StatefulWidget {
   final TextEditingController companyNameCtrl;
@@ -31,7 +24,7 @@ class CustomerDetailUserInfoBox extends StatefulWidget {
   final ValueNotifier<String> leadPriorityNotifier;
   final ValueNotifier<String> leadQualityNotifier;
   final ValueNotifier<String> lastContactResultNotifier;
-  final User user;
+  final Customer user;
 
   const CustomerDetailUserInfoBox({
     super.key,
@@ -61,518 +54,668 @@ class CustomerDetailUserInfoBox extends StatefulWidget {
       _CustomerDetailUserInfoBoxState();
 }
 
-class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
+  int _activeTopTab = 0; // 0: Overview, 1: Call Logs
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.colors.whiteColor,
-        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-      ),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Navigation Bar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Top Tab Bar (Overview / Call Logs 8)
+          _buildTopTabs(context, isDark),
+          const SizedBox(height: 16),
+
+          // Card 1: Customer Information
+          _buildCustomerInformationCard(context, isDark),
+          const SizedBox(height: 16),
+
+          // Card 2: Lead & Status
+          _buildLeadStatusCard(context, isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopTabs(BuildContext context, bool isDark) {
+    final callCount = widget.user.callLogs.isNotEmpty
+        ? widget.user.callLogs.length
+        : (widget.user.lastContact != null ? 8 : 0);
+
+    return Row(
+      children: [
+        // Overview Tab
+        InkWell(
+          onTap: () => setState(() => _activeTopTab = 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SpacedText(
-                text: "CUSTOMER PROFILE",
-                color: context.colors.blackColor,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2,
-                fontSize: 12,
-              ),
-              Container(
-                height: 36,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicator: BoxDecoration(
-                    color: context.colors.primaryLightColor,
-                    borderRadius: BorderRadius.circular(20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                child: Text(
+                  'Overview',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight:
+                        _activeTopTab == 0 ? FontWeight.w700 : FontWeight.w500,
+                    color: _activeTopTab == 0
+                        ? (isDark ? Colors.white : Colors.black87)
+                        : (isDark ? const Color(0xFF94A3B8) : Colors.grey[600]),
                   ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: context.colors.darkGreyColor,
-                  labelStyle: const TextStyle(
-                      fontSize: 11, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: const TextStyle(fontSize: 11),
-                  dividerColor: Colors.transparent,
-                  tabs: const [
-                    Tab(text: 'General & Contact'),
-                    Tab(text: 'Lead & Business'),
-                  ],
+                ),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                height: 2.5,
+                width: 74,
+                decoration: BoxDecoration(
+                  color: _activeTopTab == 0
+                      ? context.colors.primaryLightColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+        ),
+        const SizedBox(width: 24),
 
-          const Divider(height: 1),
-          const SizedBox(height: 20),
-          // Tab Content
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
+        // Call Logs Tab
+        InkWell(
+          onTap: () => setState(() => _activeTopTab = 1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                child: Row(
+                  children: [
+                    Text(
+                      'Call Logs',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: _activeTopTab == 1
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: _activeTopTab == 1
+                            ? (isDark ? Colors.white : Colors.black87)
+                            : (isDark
+                                ? const Color(0xFF94A3B8)
+                                : Colors.grey[600]),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '$callCount',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 2),
+              Container(
+                height: 2.5,
+                width: 90,
+                decoration: BoxDecoration(
+                  color: _activeTopTab == 1
+                      ? context.colors.primaryLightColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomerInformationCard(BuildContext context, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
+        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Title
+          Text(
+            'Customer Information',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // Row 1: Company Name | Job Title / Position | Company Type
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputField(
+                  label: 'Company Name',
+                  controller: widget.companyNameCtrl,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildInputField(
+                  label: 'Job Title / Position',
+                  controller: widget.jobTitleCtrl,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildDropdownField(
+                  label: 'Company Type',
+                  notifier: widget.companyTypeNotifier,
+                  items: const [
+                    'GC',
+                    'Subcontractor',
+                    'Supplier',
+                    'Developer',
+                    'Architect',
+                    'Engineer',
+                    'Consultant',
+                    'Other'
+                  ],
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Row 2: First Name | Last Name | Main Email
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputField(
+                  label: 'First Name',
+                  controller: widget.firstNameCtrl,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildInputField(
+                  label: 'Last Name',
+                  controller: widget.lastNameCtrl,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildInputField(
+                  label: 'Main Email',
+                  controller: widget.emailCtrl,
+                  prefixIcon: CupertinoIcons.mail,
+                  keyboardType: TextInputType.emailAddress,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Row 3: Phone Number | Website
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputField(
+                  label: 'Phone Number',
+                  controller: widget.phoneCtrl,
+                  prefixIcon: CupertinoIcons.phone,
+                  keyboardType: TextInputType.phone,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildInputField(
+                  label: 'Website',
+                  controller: widget.websiteCtrl,
+                  prefixIcon: CupertinoIcons.globe,
+                  keyboardType: TextInputType.url,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeadStatusCard(BuildContext context, bool isDark) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
+        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Title
+          Text(
+            'Lead & Status',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // Row 1: Lead Status | Lead Priority | Lead Quality
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdownField(
+                  label: 'Lead Status',
+                  notifier: widget.leadStatusNotifier,
+                  items: const [
+                    'New',
+                    'Contacted',
+                    'Qualified',
+                    'Proposal Sent',
+                    'Won',
+                    'Lost'
+                  ],
+                  dotColorGetter: _getLeadStatusColor,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildDropdownField(
+                  label: 'Lead Priority',
+                  notifier: widget.leadPriorityNotifier,
+                  items: const ['Hot', 'Warm', 'Cold'],
+                  dotColorGetter: _getLeadPriorityColor,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildDropdownField(
+                  label: 'Lead Quality',
+                  notifier: widget.leadQualityNotifier,
+                  items: const ['Excellent', 'Good', 'Fair', 'Poor'],
+                  dotColorGetter: _getLeadQualityColor,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Row 2: Last Contact Result | Next Follow-up Date | Reason for Contact / Inquiry
+          Row(
+            children: [
+              Expanded(
+                child: _buildDropdownField(
+                  label: 'Last Contact Result',
+                  notifier: widget.lastContactResultNotifier,
+                  items: const [
+                    'Interested',
+                    'Callback Requested',
+                    'Meeting Scheduled',
+                    'Not Interested',
+                    'No Answer',
+                    'Left Voicemail',
+                    'Closed/Won',
+                  ],
+                  dotColorGetter: (val) => const Color(0xFF8B5CF6),
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildDatePickerField(
+                  label: 'Next Follow-up Date',
+                  controller: widget.nextFollowUpDateCtrl,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildInputField(
+                  label: 'Reason for Contact / Inquiry',
+                  controller: widget.reasonCtrl,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    String hintText = '—',
+    IconData? prefixIcon,
+    TextInputType? keyboardType,
+    required bool isDark,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF131C2E) : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDark ? const Color(0xFF24344D) : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: Row(
+            children: [
+              if (prefixIcon != null) ...[
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 6),
+                  child: Icon(
+                    prefixIcon,
+                    size: 15,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF94A3B8),
+                    ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String label,
+    required ValueNotifier<String> notifier,
+    required List<String> items,
+    Color Function(String)? dotColorGetter,
+    required bool isDark,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        ValueListenableBuilder<String>(
+          valueListenable: notifier,
+          builder: (context, currentVal, _) {
+            final effectiveValue = items.contains(currentVal)
+                ? currentVal
+                : (items.isNotEmpty ? items.first : '');
+
+            return Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color:
+                    isDark ? const Color(0xFF131C2E) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF24344D)
+                      : const Color(0xFFE2E8F0),
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: effectiveValue.isNotEmpty ? effectiveValue : null,
+                  isExpanded: true,
+                  icon: Icon(
+                    CupertinoIcons.chevron_down,
+                    size: 14,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
+                  dropdownColor: isDark
+                      ? const Color(0xFF1E293B)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  items: items.map((item) {
+                    final dotColor = dotColorGetter?.call(item);
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Row(
+                        children: [
+                          if (dotColor != null) ...[
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: dotColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            item,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (newVal) {
+                    if (newVal != null) notifier.value = newVal;
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDatePickerField({
+    required String label,
+    required TextEditingController controller,
+    required bool isDark,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: () async {
+            final now = DateTime.now();
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: now,
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2035),
+            );
+            if (picked != null) {
+              controller.text = DateFormat('yyyy-MM-dd').format(picked);
+              setState(() {});
+            }
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF131C2E)
+                  : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFF24344D)
+                    : const Color(0xFFE2E8F0),
+              ),
+            ),
+            child: Row(
               children: [
-                _buildGeneralContactTab(context, isDark),
-                _buildLeadBusinessTab(context, isDark),
+                Icon(
+                  CupertinoIcons.calendar,
+                  size: 16,
+                  color: context.colors.primaryLightColor,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    controller.text.isNotEmpty
+                        ? controller.text
+                        : 'Select Date...',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: controller.text.isNotEmpty
+                          ? (isDark ? Colors.white : Colors.black87)
+                          : context.colors.primaryLightColor,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGeneralContactTab(BuildContext context, bool isDark) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        spacing: 25,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Row 1: Company Name & Job Title
-          Row(
-            children: [
-              CustomerDetailCustomTextfeild(
-                controller: widget.companyNameCtrl,
-                labelText: 'COMPANY NAME',
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.jobTitleCtrl,
-                labelText: 'JOB TITLE / POSITION',
-              ),
-            ],
-          ),
-
-          // Row 2: Contact First Name & Last Name
-          Row(
-            children: [
-              CustomerDetailCustomTextfeild(
-                controller: widget.firstNameCtrl,
-                labelText: 'FIRST NAME',
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.lastNameCtrl,
-                labelText: 'LAST NAME',
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.websiteCtrl,
-                labelText: 'WEBSITE',
-                textInputType: TextInputType.url,
-              ),
-            ],
-          ),
-
-          // Row 3: Email & Phone
-          Row(
-            children: [
-              CustomerDetailCustomTextfeild(
-                controller: widget.emailCtrl,
-                labelText: 'MAIN EMAIL',
-                textInputType: TextInputType.emailAddress,
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.phoneCtrl,
-                labelText: 'PHONE NUMBER',
-                textInputType: TextInputType.phone,
-              ),
-            ],
-          ),
-
-          // Row 4: Address, City, State, Country
-          Row(
-            children: [
-              CustomerDetailCustomTextfeild(
-                flex: 2,
-                controller: widget.addressCtrl,
-                labelText: 'STREET ADDRESS',
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.cityCtrl,
-                labelText: 'CITY',
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.stateCtrl,
-                labelText: 'PROVINCE / STATE',
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                controller: widget.countryCtrl,
-                labelText: 'COUNTRY',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLeadBusinessTab(BuildContext context, bool isDark) {
-    final settingsState = context.watch<WorkspaceSettingsCubit>().state;
-    const leadStatuses = ['New', 'Contacted', 'Qualified', 'Won', 'Lost'];
-
-    final leadQualities =
-        settingsState.leadQualities.map((e) => e.label).toList();
-    if (leadQualities.isEmpty) leadQualities.add('Excellent');
-
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Row 1: Company Type & Lead Status
-          Row(
-            children: [
-              // Company Type Dropdown
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'COMPANY TYPE',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ValueListenableBuilder<String>(
-                      valueListenable: widget.companyTypeNotifier,
-                      builder: (context, value, _) {
-                        return _buildDropdown(
-                          context,
-                          value: value,
-                          items: [
-                            'GC',
-                            'Developer',
-                            'Trade',
-                            'Startup',
-                            'Agency',
-                            'Consulting',
-                            'Enterprise',
-                            'General'
-                          ],
-                          onChanged: (val) {
-                            if (val != null)
-                              widget.companyTypeNotifier.value = val;
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Lead Status Dropdown
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'LEAD STATUS',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ValueListenableBuilder<String>(
-                      valueListenable: widget.leadStatusNotifier,
-                      builder: (context, value, _) {
-                        return _buildDropdown(
-                          context,
-                          value: value,
-                          items: leadStatuses,
-                          onChanged: (val) {
-                            if (val != null)
-                              widget.leadStatusNotifier.value = val;
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Lead Quality Dropdown
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'LEAD QUALITY',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ValueListenableBuilder<String>(
-                      valueListenable: widget.leadQualityNotifier,
-                      builder: (context, value, _) {
-                        return _buildDropdown(
-                          context,
-                          value: value,
-                          items: ['Excellent', 'Good', 'Average', 'Poor'],
-                          onChanged: (val) {
-                            if (val != null)
-                              widget.leadQualityNotifier.value = val;
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-
-          // Row 2: Lead Priority Selector (Hot / Warm / Cold) & Next Follow-Up Date
-          Row(
-            children: [
-              // Priority
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'LEAD PRIORITY',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ValueListenableBuilder<String>(
-                      valueListenable: widget.leadPriorityNotifier,
-                      builder: (context, priority, _) {
-                        return Row(
-                          children: [
-                            _buildPriorityChip('Hot', 'Hot',
-                                const Color(0xFFEF4444), priority),
-                            const SizedBox(width: 8),
-                            _buildPriorityChip('Warm', 'Warm',
-                                const Color(0xFFF59E0B), priority),
-                            const SizedBox(width: 8),
-                            _buildPriorityChip('Cold', 'Cold',
-                                const Color(0xFF3B82F6), priority),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Next Follow Up Date (Interactive)
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'NEXT FOLLOW-UP DATE',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.primaryLightColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: () async {
-                        final picked = await AppUtils.showCustomDatePicker(
-                          context: context,
-                          initialDate:
-                              DateTime.now().add(const Duration(days: 3)),
-                          firstDate: DateTime.now(),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (picked != null) {
-                          final f = DateFormat('yyyy/MM/dd');
-                          widget.nextFollowUpDateCtrl.text = f.format(picked);
-                        }
-                      },
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: context.colors.skyBlueColor,
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          border: Border.all(
-                            color: context.colors.primaryLightColor
-                                .withOpacity(0.4),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(CupertinoIcons.calendar_badge_plus,
-                                size: 18,
-                                color: context.colors.primaryLightColor),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                widget.nextFollowUpDateCtrl.text.isEmpty
-                                    ? 'Select Date...'
-                                    : widget.nextFollowUpDateCtrl.text,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.colors.primaryLightColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-
-          // Row 3: Last Contact Result & Reason For Contact
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'LAST CONTACT RESULT',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ValueListenableBuilder<String>(
-                      valueListenable: widget.lastContactResultNotifier,
-                      builder: (context, value, _) {
-                        return _buildDropdown(
-                          context,
-                          value: value,
-                          items: [
-                            'No answer',
-                            'Interested',
-                            'Call back',
-                            'Meeting booked',
-                            'Not interested'
-                          ],
-                          onChanged: (val) {
-                            if (val != null)
-                              widget.lastContactResultNotifier.value = val;
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              CustomerDetailCustomTextfeild(
-                flex: 2,
-                controller: widget.reasonCtrl,
-                labelText: 'REASON FOR CONTACT / INQUIRY',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropdown(
-    BuildContext context, {
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return AppDropdownWidget<String>(
-      value: items.contains(value) ? value : items.first,
-      items: items,
-      onChanged: onChanged,
-      itemBuilder: (item) => item,
-      hint: 'Select',
-    );
-  }
-
-  Widget _buildPriorityChip(
-      String key, String label, Color color, String activeKey) {
-    final isSelected = key.toLowerCase() == activeKey.toLowerCase();
-    return Expanded(
-      child: InkWell(
-        onTap: () {
-          widget.leadPriorityNotifier.value = key;
-        },
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: isSelected ? color.withOpacity(0.18) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected ? color : context.colors.lightGreyColor,
-              width: isSelected ? 1.5 : 1,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? color : context.colors.darkGreyColor,
-              ),
-            ),
-          ),
         ),
-      ),
+      ],
     );
+  }
+
+  Color _getLeadStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'new':
+        return const Color(0xFF10B981);
+      case 'contacted':
+        return const Color(0xFF3B82F6);
+      case 'qualified':
+        return const Color(0xFF14B8A6);
+      case 'won':
+        return const Color(0xFF059669);
+      case 'lost':
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFF10B981);
+    }
+  }
+
+  Color _getLeadPriorityColor(String priority) {
+    switch (priority.toLowerCase()) {
+      case 'hot':
+        return const Color(0xFFEF4444);
+      case 'warm':
+        return const Color(0xFFF59E0B);
+      case 'cold':
+        return const Color(0xFF3B82F6);
+      default:
+        return const Color(0xFFF59E0B);
+    }
+  }
+
+  Color _getLeadQualityColor(String quality) {
+    switch (quality.toLowerCase()) {
+      case 'excellent':
+        return const Color(0xFF10B981);
+      case 'good':
+        return const Color(0xFF14B8A6);
+      case 'fair':
+        return const Color(0xFFEAB308);
+      case 'poor':
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFF10B981);
+    }
   }
 }
