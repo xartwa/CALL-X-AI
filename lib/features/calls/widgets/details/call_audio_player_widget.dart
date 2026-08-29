@@ -32,20 +32,13 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
   Timer? _fallbackTimer;
 
   bool _isPlaying = false;
+  bool _isMuted = false;
   bool _isDownloading = false;
   double _playbackProgress = 0.0; // 0.0 to 1.0
   double _playbackSpeed = 1.0;
 
-  int _totalSeconds = 90;
+  int _totalSeconds = 135;
   int _currentSeconds = 0;
-
-  // Waveform bar heights (normalized 0.15 to 1.0)
-  static const List<double> _waveformData = [
-    0.2, 0.45, 0.7, 0.3, 0.85, 0.6, 0.95, 0.4, 0.75, 0.5,
-    0.8, 0.35, 0.9, 0.65, 0.4, 0.85, 0.7, 0.55, 0.95, 0.3,
-    0.6, 0.8, 0.45, 0.75, 0.9, 0.5, 0.85, 0.65, 0.4, 0.7,
-    0.95, 0.6, 0.8, 0.35, 0.9, 0.75, 0.5, 0.85, 0.4, 0.6,
-  ];
 
   @override
   void initState() {
@@ -108,9 +101,9 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       final mins = int.tryParse(parts[0]) ?? 0;
       final secs = int.tryParse(parts[1]) ?? 0;
       _totalSeconds = (mins * 60) + secs;
-      if (_totalSeconds == 0) _totalSeconds = 90;
+      if (_totalSeconds == 0) _totalSeconds = 135;
     } else {
-      _totalSeconds = 90;
+      _totalSeconds = 135;
     }
     _currentSeconds = 0;
     _playbackProgress = 0.0;
@@ -129,14 +122,15 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     if (url != null && url.startsWith('http')) {
       try {
         await _audioPlayer.setPlaybackRate(_playbackSpeed);
+        await _audioPlayer.setVolume(_isMuted ? 0.0 : 1.0);
         await _audioPlayer.play(UrlSource(url));
         return;
       } catch (_) {
-        // Fallback to simulated audio ticker if URL fails to load
+        // Fallback to synchronized timer ticker
       }
     }
 
-    // Fallback synchronized playback simulator for Web & offline calls
+    // Fallback synchronized playback simulator
     setState(() => _isPlaying = true);
     final intervalMs = (1000 / _playbackSpeed).round();
     _fallbackTimer?.cancel();
@@ -166,6 +160,15 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     if (mounted) {
       setState(() => _isPlaying = false);
     }
+  }
+
+  Future<void> _toggleMute() async {
+    setState(() {
+      _isMuted = !_isMuted;
+    });
+    try {
+      await _audioPlayer.setVolume(_isMuted ? 0.0 : 1.0);
+    } catch (_) {}
   }
 
   Future<void> _toggleSpeed() async {
@@ -241,53 +244,12 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isFailedOrPending = widget.call.status == 'Failed' ||
-        widget.call.status == 'Queued' ||
-        widget.call.status == 'Upcoming';
-
-    if (isFailedOrPending &&
-        (widget.call.duration == '0:00' || widget.call.duration.isEmpty)) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.white10 : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-          border: Border.all(
-            color: isDark ? Colors.white12 : context.colors.mediumGreyColor,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              CupertinoIcons.mic_slash,
-              size: 16,
-              color: context.colors.darkGreyColor,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                widget.call.status == 'Failed'
-                    ? 'No audio recording available (Call disconnected / unanswered)'
-                    : 'Audio recording will be generated once call session completes',
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: context.colors.darkGreyColor,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     final isDownloaded =
         AudioDownloadService.instance.isDownloaded(widget.call.id);
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(widget.compact ? 10 : 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -296,205 +258,147 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
           width: 1,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Player Header: Label + Playback Speed + Smart Download Icon
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.waveform,
-                    size: 15,
-                    color: context.colors.primaryLightColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Call Recording',
-                    style: TextStyle(
-                      fontSize: widget.compact ? 12 : 13,
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
+          // Play / Pause Round Button
+          InkWell(
+            onTap: _togglePlayPause,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: context.colors.primaryLightColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: context.colors.primaryLightColor
+                        .withValues(alpha: 0.35),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  // Speed button
-                  InkWell(
-                    onTap: _toggleSpeed,
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2.5),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white10 : Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: isDark ? Colors.white12 : Colors.grey[300]!,
-                        ),
-                      ),
-                      child: Text(
-                        '${_playbackSpeed}x',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: context.colors.primaryLightColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-
-                  // Smart Download button with status feedback
-                  InkWell(
-                    onTap: _handleDownload,
-                    borderRadius: BorderRadius.circular(6),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      child: _isDownloading
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.8,
-                              ),
-                            )
-                          : Icon(
-                              isDownloaded
-                                  ? CupertinoIcons.checkmark_alt_circle_fill
-                                  : CupertinoIcons.arrow_down_to_line,
-                              size: 14,
-                              color: isDownloaded
-                                  ? context.colors.successColor
-                                  : context.colors.darkGreyColor,
-                            ),
-                    ),
-                  ),
-                ],
+              child: Icon(
+                _isPlaying
+                    ? CupertinoIcons.pause_fill
+                    : CupertinoIcons.play_fill,
+                size: 16,
+                color: Colors.white,
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(width: 12),
 
-          // Main Controls Row: Play/Pause Button + Waveform + Timestamps
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Play/Pause Button
-              InkWell(
-                onTap: _togglePlayPause,
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  width: widget.compact ? 32 : 36,
-                  height: widget.compact ? 32 : 36,
-                  decoration: BoxDecoration(
-                    color: context.colors.primaryLightColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: context.colors.primaryLightColor
-                            .withValues(alpha: 0.35),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    _isPlaying
-                        ? CupertinoIcons.pause_fill
-                        : CupertinoIcons.play_fill,
-                    size: widget.compact ? 14 : 16,
-                    color: Colors.white,
-                  ),
+          // Elapsed / Total Duration Text
+          Text(
+            '${_formatTime(_currentSeconds)} / ${_formatTime(_totalSeconds)}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Track Slider
+          Expanded(
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 4,
+                thumbShape: const RoundSliderThumbShape(
+                  enabledThumbRadius: 6,
+                  elevation: 2,
+                ),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                activeTrackColor: context.colors.primaryLightColor,
+                inactiveTrackColor: isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFCBD5E1),
+                thumbColor: context.colors.primaryLightColor,
+                overlayColor:
+                    context.colors.primaryLightColor.withValues(alpha: 0.2),
+              ),
+              child: Slider(
+                value: _playbackProgress.clamp(0.0, 1.0),
+                onChanged: (val) {
+                  _seekTo(val);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          // Mute / Unmute Button
+          IconButton(
+            onPressed: _toggleMute,
+            splashRadius: 18,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: Icon(
+              _isMuted
+                  ? CupertinoIcons.speaker_slash_fill
+                  : CupertinoIcons.speaker_2_fill,
+              size: 18,
+              color: _isMuted
+                  ? context.colors.errorColor
+                  : context.colors.darkGreyColor,
+            ),
+            tooltip: _isMuted ? 'Unmute' : 'Mute',
+          ),
+          const SizedBox(width: 4),
+
+          // Speed Button (1.0x, 1.25x, 1.5x, 2.0x)
+          InkWell(
+            onTap: _toggleSpeed,
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark ? Colors.white12 : Colors.grey[300]!,
                 ),
               ),
-              const SizedBox(width: 12),
-
-              // Waveform Bars & Time Row
-              Expanded(
-                child: Column(
-                  children: [
-                    // Interactive Waveform Visualizer
-                    GestureDetector(
-                      onHorizontalDragUpdate: (details) {
-                        final RenderBox? box =
-                            context.findRenderObject() as RenderBox?;
-                        if (box == null) return;
-                        final localPos = details.localPosition.dx;
-                        final progress =
-                            (localPos / (box.size.width - 100)).clamp(0.0, 1.0);
-                        _seekTo(progress);
-                      },
-                      onTapDown: (details) {
-                        final RenderBox? box =
-                            context.findRenderObject() as RenderBox?;
-                        if (box == null) return;
-                        final localPos = details.localPosition.dx;
-                        final progress =
-                            (localPos / (box.size.width - 100)).clamp(0.0, 1.0);
-                        _seekTo(progress);
-                      },
-                      child: SizedBox(
-                        height: widget.compact ? 22 : 28,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: List.generate(_waveformData.length, (index) {
-                            final barProgress =
-                                (index + 1) / _waveformData.length;
-                            final isPassed = barProgress <= _playbackProgress;
-                            final heightFactor = _waveformData[index];
-
-                            return Expanded(
-                              child: Container(
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 1),
-                                height: (widget.compact ? 22 : 28) * heightFactor,
-                                decoration: BoxDecoration(
-                                  color: isPassed
-                                      ? context.colors.primaryLightColor
-                                      : (isDark
-                                          ? const Color(0xFF475569)
-                                          : const Color(0xFFCBD5E1)),
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    // Timestamps: Elapsed & Total
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _formatTime(_currentSeconds),
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.primaryLightColor,
-                          ),
-                        ),
-                        Text(
-                          _formatTime(_totalSeconds),
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w500,
-                            color: context.colors.darkGreyColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              child: Text(
+                '${_playbackSpeed}x',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.primaryLightColor,
                 ),
               ),
-            ],
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Smart Download Button
+          IconButton(
+            onPressed: _handleDownload,
+            splashRadius: 18,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            icon: _isDownloading
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.8,
+                    ),
+                  )
+                : Icon(
+                    isDownloaded
+                        ? CupertinoIcons.checkmark_alt_circle_fill
+                        : CupertinoIcons.arrow_down_to_line,
+                    size: 18,
+                    color: isDownloaded
+                        ? context.colors.successColor
+                        : context.colors.darkGreyColor,
+                  ),
+            tooltip: isDownloaded ? 'Downloaded' : 'Download recording',
           ),
         ],
       ),

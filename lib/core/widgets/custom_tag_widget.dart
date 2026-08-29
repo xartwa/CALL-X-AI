@@ -15,7 +15,7 @@ class CustomTagWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         color: backgroundColor ?? color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
@@ -27,7 +27,7 @@ class CustomTagWidget extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
           color: color,
         ),

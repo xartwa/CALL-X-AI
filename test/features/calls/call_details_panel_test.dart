@@ -10,6 +10,7 @@ import 'package:callx_ai/features/calls/data/dto/paginated_calls_dto.dart';
 import 'package:callx_ai/features/calls/domain/repositories/calls_repository.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_details_panel.dart';
+import 'package:callx_ai/features/calls/widgets/details/call_audio_player_widget.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 import 'package:callx_ai/theme/app_colors.dart';
@@ -92,7 +93,7 @@ void main() {
     expect(find.text('Customer Info'), findsOneWidget);
 
     // 3. Verify Audio Player
-    expect(find.text('Call Recording'), findsOneWidget);
+    expect(find.byType(CallAudioPlayerWidget), findsOneWidget);
 
     // 4. Verify AI Summary Section
     expect(find.text('AI Summary'), findsOneWidget);
