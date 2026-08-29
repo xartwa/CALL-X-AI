@@ -96,7 +96,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check Detail View is open
-    expect(find.text('Call Summary'), findsOneWidget);
+    expect(find.text('AI Summary'), findsOneWidget);
     expect(find.text('Client discussed paper bulk order for upcoming quarter.'),
         findsOneWidget);
     expect(find.text('Call Transcript'), findsOneWidget);
@@ -110,12 +110,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // Detail view should be closed
-    expect(find.text('Call Summary'), findsNothing);
+    expect(find.text('AI Summary'), findsNothing);
 
     // 4. Click on the unanswered call ("No Answer") -> should not open details
     await tester.tap(find.text('No Answer'));
     await tester.pump();
-    expect(find.text('Call Summary'), findsNothing);
+    expect(find.text('AI Summary'), findsNothing);
 
     // Clean up toastification timers
     toastification.dismissAll();

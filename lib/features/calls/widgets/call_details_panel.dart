@@ -235,7 +235,6 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
       ),
       child: Column(
         children: [
-          // 1. Exact Mockup Top Header Area
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 18, 18),
             decoration: BoxDecoration(

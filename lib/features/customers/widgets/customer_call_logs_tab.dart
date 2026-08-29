@@ -47,44 +47,42 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '02:15',
         durationSeconds: 135,
-        callDate: 'Aug 29, 2026',
+        callDate: '2026/08/29',
         callTime: '19:44',
-        scenario: 'Sara',
+        scenario: 'Sara (Sales)',
         recordingUrl: 'https://example.com/recording_1.mp3',
         summary:
             'Discussed pricing plans and enterprise package. Customer is interested and requested a demo. Follow-up scheduled for next week.',
         transcript: [
           TranscriptTurn(
             speaker: 'ai',
-            speakerName: 'Agent',
+            speakerName: 'AI',
             timestamp: '',
-            text: 'Hi, this is Arta from CallX. How can I help you today?',
+            text: 'Hi XARTA,',
           ),
           TranscriptTurn(
             speaker: 'customer',
             speakerName: 'Customer',
             timestamp: '',
-            text:
-                'Hi, I\'m looking for more information about your enterprise plan.',
+            text: 'can you hear me?',
           ),
           TranscriptTurn(
             speaker: 'ai',
-            speakerName: 'Agent',
+            speakerName: 'AI',
             timestamp: '',
-            text:
-                'Sure! Our enterprise plan includes more seats, priority support, and advanced analytics.',
+            text: 'Yes, I can hear you. How can I help you today?',
           ),
           TranscriptTurn(
             speaker: 'customer',
             speakerName: 'Customer',
             timestamp: '',
-            text: 'Sounds good. Can we schedule a demo for next week?',
+            text: 'I\'m looking for more information about your enterprise plan.',
           ),
           TranscriptTurn(
             speaker: 'ai',
-            speakerName: 'Agent',
+            speakerName: 'AI',
             timestamp: '',
-            text: 'Absolutely! I\'ll send you some available slots.',
+            text: 'Sure! Our enterprise plan includes unlimited seats and priority support.',
           ),
         ],
       ),
@@ -95,8 +93,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '01:32',
         durationSeconds: 92,
-        callDate: 'Aug 26, 2026',
+        callDate: '2026/08/26',
         callTime: '14:10',
+        scenario: 'Sara (Support)',
         summary:
             'Customer called to inquire about custom CRM integrations and API webhooks. Provided technical documentation.',
         transcript: [
@@ -108,7 +107,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
           ),
           TranscriptTurn(
             speaker: 'ai',
-            speakerName: 'Agent',
+            speakerName: 'AI',
             timestamp: '',
             text:
                 'Yes, we support realtime webhook notifications and REST endpoints for all call events.',
@@ -122,14 +121,15 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '03:45',
         durationSeconds: 225,
-        callDate: 'Aug 22, 2026',
+        callDate: '2026/08/22',
         callTime: '11:03',
+        scenario: 'Sara (Sales)',
         summary:
             'Deep dive on onboarding process. Client confirmed team size of 15 members.',
         transcript: [
           TranscriptTurn(
             speaker: 'ai',
-            speakerName: 'Agent',
+            speakerName: 'AI',
             timestamp: '',
             text: 'Hi, following up on your team onboarding request.',
           ),
@@ -142,8 +142,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '00:47',
         durationSeconds: 47,
-        callDate: 'Aug 20, 2026',
+        callDate: '2026/08/20',
         callTime: '16:38',
+        scenario: 'Billing Agent',
         summary:
             'Quick check on billing cycles and invoice payment methods. Confirmed ACH and Credit Card.',
       ),
@@ -154,8 +155,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '02:15',
         durationSeconds: 135,
-        callDate: 'Aug 17, 2026',
+        callDate: '2026/08/17',
         callTime: '10:22',
+        scenario: 'Sara (Sales)',
         summary:
             'Product walkthrough demo completed. Customer expressed high satisfaction with voice response speed.',
       ),
@@ -166,8 +168,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Interested',
         duration: '01:05',
         durationSeconds: 65,
-        callDate: 'Aug 15, 2026',
+        callDate: '2026/08/15',
         callTime: '09:15',
+        scenario: 'Sara (Sales)',
         summary:
             'Customer called to explore volume discounts for multiple branch locations.',
       ),
@@ -178,8 +181,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'No Answer',
         duration: '00:58',
         durationSeconds: 58,
-        callDate: 'Aug 12, 2026',
+        callDate: '2026/08/12',
         callTime: '17:50',
+        scenario: 'Outreach Bot',
         summary:
             'Call rang for 50 seconds without answer. System scheduled automatic retry.',
       ),
@@ -190,8 +194,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         outcome: 'Completed',
         duration: '02:40',
         durationSeconds: 160,
-        callDate: 'Aug 10, 2026',
+        callDate: '2026/08/10',
         callTime: '13:08',
+        scenario: 'Sara (Sales)',
         summary:
             'Initial discovery call. Discussed AI voice agent requirements and target KPIs.',
       ),
@@ -247,9 +252,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         : const [
             TranscriptTurn(
               speaker: 'ai',
-              speakerName: 'Agent',
+              speakerName: 'AI',
               timestamp: '',
-              text: 'Hi, this is Arta from CallX. How can I help you today?',
+              text: 'Hi, how can I help you today?',
             ),
           ];
 
@@ -259,7 +264,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     for (final t in transcript) {
       final isAi = t.speaker.toLowerCase() == 'ai' ||
           t.speaker.toLowerCase() == 'agent';
-      final speakerName = isAi ? 'Agent' : (t.speakerName ?? 'Customer');
+      final speakerName = isAi ? 'AI' : (t.speakerName ?? 'Customer');
       buffer.writeln('[$speakerName]: ${t.text}');
     }
 
@@ -318,12 +323,11 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 650;
 
-        // If no call is selected or screen is narrow, show single list view
         if (!isWide || selectedCall == null) {
           return _buildCallsList(calls, _selectedCallId ?? '', isDark, false);
         }
 
-        // 2-Column Master-Detail Mode (Clean & Minimal matching mockup)
+        // 2-Column Master-Detail Mode
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -466,7 +470,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     final isOutbound = call.direction.toLowerCase().contains('out');
     final title = isOutbound ? 'Outgoing Call' : 'Incoming Call';
     final subtitle =
-        '${call.callDate.isNotEmpty ? call.callDate : 'Aug 29, 2026'} • ${call.callTime.isNotEmpty ? call.callTime : '19:44'}';
+        '${call.callDate.isNotEmpty ? call.callDate : '2026/08/29'} • ${call.callTime.isNotEmpty ? call.callTime : '19:44'}';
 
     return InkWell(
       onTap: () => _onCallSelected(call),
@@ -488,7 +492,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         ),
         child: Row(
           children: [
-            _buildDirectionIcon(call),
+            // Rounded Square Icon Matching Mockup (media_1788023850507.png)
+            _buildCallIconBox(call),
             const SizedBox(width: 10),
 
             // Title & Date/Time
@@ -557,16 +562,11 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   }
 
   Widget _buildCallDetailCard(CustomerCallHistory call, bool isDark) {
-    final isOutbound = call.direction.toLowerCase().contains('out');
-    final title = isOutbound ? 'Outgoing Call' : 'Incoming Call';
-    final subtitle =
-        '${call.callDate.isNotEmpty ? call.callDate : 'Aug 29, 2026'} • ${call.callTime.isNotEmpty ? call.callTime : '19:44'}';
-
     final callHistoryModel = CallHistoryModel(
       id: call.id,
       fullName: widget.user.fullName,
       phone: widget.user.phone,
-      assignee: call.scenario ?? 'Sara',
+      assignee: call.scenario ?? 'Sara (Sales)',
       direction: call.direction,
       status: call.status,
       duration: call.duration,
@@ -577,182 +577,56 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     );
 
     return Container(
-      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
+        color: isDark ? const Color(0xFF0B132B) : context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-        border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-          width: 1,
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header: Direction Icon + Title + Subtitle + Status + Duration + Schedule + Close (✕)
-          Row(
-            children: [
-              _buildDirectionIcon(call, size: 36, iconSize: 18),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                  ],
-                ),
+          // 1. Metadata 3-Column Card Matching Mockup (media_1788023871391.png)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
               ),
-              _buildStatusBadge(call.status),
-              const SizedBox(width: 8),
-              Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.time,
-                    size: 13,
-                    color: context.colors.darkGreyColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    call.duration,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: 6),
-
-              // Schedule Button
-              IconButton(
-                tooltip: 'Schedule Follow-up',
-                onPressed: () async {
-                  await CallActionDialog.show(
-                    context,
-                    fullName: widget.user.fullName,
-                    phone: widget.user.phone,
-                    initialTab: 'schedule',
-                  );
-                },
-                icon: Icon(
-                  CupertinoIcons.calendar,
-                  size: 17,
-                  color: context.colors.primaryLightColor,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                splashRadius: 16,
-              ),
-              const SizedBox(width: 2),
-
-              // Close Details Tab Button
-              IconButton(
-                tooltip: 'Close call details',
-                onPressed: () {
-                  setState(() => _selectedCallId = null);
-                },
-                icon: Icon(
-                  CupertinoIcons.clear,
-                  size: 16,
-                  color: isDark ? Colors.white60 : context.colors.darkGreyColor,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                splashRadius: 16,
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-
-          // Scrollable Sections: Call Summary & Call Transcript
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 2. Call Summary Card
-                  Text(
-                    'Call Summary',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF131D31)
-                          : const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isDark
-                            ? const Color(0xFF1E293B)
-                            : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Text(
-                      call.summary != null && call.summary!.isNotEmpty
-                          ? call.summary!
-                          : 'Discussed pricing plans and enterprise package. Customer is interested and requested a demo. Follow-up scheduled for next week.',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        height: 1.45,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-
-                  // 3. Call Transcript Card (with Copy All)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+            child: Row(
+              children: [
+                // 1. Duration (Clock/Stopwatch Icon + Column)
+                Expanded(
+                  flex: 3,
+                  child: Row(
                     children: [
-                      Text(
-                        'Call Transcript',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      Icon(
+                        CupertinoIcons.stopwatch,
+                        size: 16,
+                        color: context.colors.primaryLightColor,
                       ),
-                      InkWell(
-                        onTap: () => _copyTranscript(call),
-                        borderRadius: BorderRadius.circular(4),
-                        child: Row(
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              CupertinoIcons.doc_on_doc,
-                              size: 12,
-                              color: context.colors.primaryLightColor,
-                            ),
-                            const SizedBox(width: 4),
                             Text(
-                              'Copy All',
+                              'Duration',
                               style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: context.colors.primaryLightColor,
+                                fontSize: 10.5,
+                                color: context.colors.darkGreyColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              call.duration.isNotEmpty ? call.duration : '0:00',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -760,18 +634,303 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  _buildTranscriptList(call, isDark),
-                ],
-              ),
+                ),
+                Container(
+                  width: 1,
+                  height: 28,
+                  color: isDark ? Colors.white10 : Colors.black12,
+                ),
+                const SizedBox(width: 10),
+
+                // 2. Date & Time (Calendar Icon + Column)
+                Expanded(
+                  flex: 5,
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.calendar,
+                        size: 16,
+                        color: context.colors.primaryLightColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Date & Time',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: context.colors.darkGreyColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${call.callDate} • ${call.callTime}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 28,
+                  color: isDark ? Colors.white10 : Colors.black12,
+                ),
+                const SizedBox(width: 10),
+
+                // 3. Agent (Smart Robot Icon + Column)
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.smart_toy_outlined,
+                        size: 17,
+                        color: context.colors.primaryLightColor,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Agent',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: context.colors.darkGreyColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              call.scenario != null && call.scenario!.isNotEmpty
+                                  ? call.scenario!
+                                  : 'Sara (Sales)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Action: Schedule Button
+                IconButton(
+                  tooltip: 'Schedule Follow-up',
+                  onPressed: () async {
+                    await CallActionDialog.show(
+                      context,
+                      fullName: widget.user.fullName,
+                      phone: widget.user.phone,
+                      initialTab: 'schedule',
+                    );
+                  },
+                  icon: Icon(
+                    CupertinoIcons.calendar,
+                    size: 16,
+                    color: context.colors.primaryLightColor,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                  splashRadius: 14,
+                ),
+
+                // Action: Close Button (✕)
+                IconButton(
+                  tooltip: 'Close details',
+                  onPressed: () {
+                    setState(() => _selectedCallId = null);
+                  },
+                  icon: Icon(
+                    CupertinoIcons.clear,
+                    size: 15,
+                    color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                  splashRadius: 14,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          // 4. Bottom Unified Audio Player
+          // 2. Audio Player (Right below metadata card, matching mockup!)
           CallAudioPlayerWidget(
             call: callHistoryModel,
             compact: true,
+          ),
+          const SizedBox(height: 12),
+
+          // Scrollable Sections: AI Summary & Call Transcript
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 3. AI Summary Card Matching Mockup
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  CupertinoIcons.sparkles,
+                                  size: 15,
+                                  color: context.colors.primaryLightColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'AI Summary',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (call.outcome.isNotEmpty) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: context.colors.primaryLightColor
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: context.colors.primaryLightColor
+                                        .withValues(alpha: 0.35),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  call.outcome,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: context.colors.primaryLightColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          call.summary != null && call.summary!.isNotEmpty
+                              ? call.summary!
+                              : 'Customer (${widget.user.fullName}) was contacted by AI (B2B Sales). Key project scope, budget estimation, and delivery terms were discussed. Customer expressed strong interest in proceeding.',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            height: 1.45,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.88),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 4. Call Transcript Card Matching Mockup (with Copy All)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  CupertinoIcons.chat_bubble_2_fill,
+                                  size: 15,
+                                  color: context.colors.primaryLightColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Call Transcript',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            InkWell(
+                              onTap: () => _copyTranscript(call),
+                              borderRadius: BorderRadius.circular(4),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.doc_on_doc,
+                                    size: 12,
+                                    color: context.colors.primaryLightColor,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Copy All',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.colors.primaryLightColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTranscriptList(call, isDark),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -784,35 +943,21 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         : const [
             TranscriptTurn(
               speaker: 'ai',
-              speakerName: 'Agent',
+              speakerName: 'AI',
               timestamp: '',
-              text: 'Hi, this is Arta from CallX. How can I help you today?',
+              text: 'Hi XARTA,',
             ),
             TranscriptTurn(
               speaker: 'customer',
-              speakerName: 'Customer',
+              speakerName: 'AI Assistant',
               timestamp: '',
-              text:
-                  'Hi, I\'m looking for more information about your enterprise plan.',
+              text: 'can you hear me?',
             ),
             TranscriptTurn(
               speaker: 'ai',
-              speakerName: 'Agent',
+              speakerName: 'AI',
               timestamp: '',
-              text:
-                  'Sure! Our enterprise plan includes more seats, priority support, and advanced analytics.',
-            ),
-            TranscriptTurn(
-              speaker: 'customer',
-              speakerName: 'Customer',
-              timestamp: '',
-              text: 'Sounds good. Can we schedule a demo for next week?',
-            ),
-            TranscriptTurn(
-              speaker: 'ai',
-              speakerName: 'Agent',
-              timestamp: '',
-              text: 'Absolutely! I\'ll send you some available slots.',
+              text: 'Yes, I can hear you. How can I help you today?',
             ),
           ];
 
@@ -823,12 +968,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final item = transcript[index];
-        final isAgent = item.speaker.toLowerCase() == 'ai' ||
+        final isAi = item.speaker.toLowerCase() == 'ai' ||
             item.speaker.toLowerCase() == 'agent';
-        final initial = isAgent ? 'A' : 'C';
-        final speakerName = isAgent ? 'Agent' : 'Customer';
-        final avatarColor =
-            isAgent ? context.colors.primaryLightColor : const Color(0xFF0284C7);
+        final speakerName = isAi ? 'AI' : (item.speakerName ?? 'Customer');
 
         return Container(
           width: double.infinity,
@@ -843,18 +985,26 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header Row: Avatar Box + Speaker Name (NO TIMESTAMPS)
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: avatarColor,
-                    child: Text(
-                      initial,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: isAi
+                          ? context.colors.primaryLightColor.withValues(alpha: 0.2)
+                          : context.colors.successColor.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Icon(
+                      isAi
+                          ? CupertinoIcons.sparkles
+                          : CupertinoIcons.person_fill,
+                      size: 13,
+                      color: isAi
+                          ? context.colors.primaryLightColor
+                          : context.colors.successColor,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -863,21 +1013,24 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : Colors.black87,
+                      color: isAi
+                          ? context.colors.primaryLightColor
+                          : context.colors.successColor,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
+
+              // Message Content Text
               Text(
                 item.text,
                 style: TextStyle(
                   fontSize: 12,
-                  height: 1.4,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.88),
+                  height: 1.45,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : const Color(0xFF1E293B),
                 ),
               ),
             ],
@@ -887,40 +1040,39 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     );
   }
 
-  Widget _buildDirectionIcon(
-    CustomerCallHistory call, {
-    double size = 30,
-    double iconSize = 14,
-  }) {
+  Widget _buildCallIconBox(CustomerCallHistory call) {
     final isOutbound = call.direction.toLowerCase().contains('out');
     final isFailed = call.status == 'Failed' || call.status == 'No Answer';
 
-    Color bgColor;
+    Color color;
     IconData icon;
 
     if (isFailed) {
-      bgColor = const Color(0xFF64748B);
+      color = const Color(0xFF64748B);
       icon = CupertinoIcons.phone_fill;
     } else if (isOutbound) {
-      bgColor = const Color(0xFF10B981);
-      icon = CupertinoIcons.arrow_up_right;
+      color = const Color(0xFF6366F1);
+      icon = CupertinoIcons.phone_arrow_up_right;
     } else {
-      bgColor = const Color(0xFF3B82F6);
-      icon = CupertinoIcons.arrow_down_left;
+      color = const Color(0xFF10B981);
+      icon = CupertinoIcons.phone_arrow_down_left;
     }
 
     return Container(
-      width: size,
-      height: size,
+      width: 34,
+      height: 34,
       decoration: BoxDecoration(
-        color: bgColor.withValues(alpha: 0.15),
-        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(
+          color: color.withValues(alpha: 0.25),
+        ),
       ),
       child: Center(
         child: Icon(
           icon,
-          size: iconSize,
-          color: bgColor,
+          size: 15,
+          color: color,
         ),
       ),
     );
