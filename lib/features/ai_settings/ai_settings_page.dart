@@ -9,6 +9,7 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
+import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 
 class AiSettingsPage extends StatefulWidget {
   const AiSettingsPage({super.key});
@@ -222,6 +223,10 @@ class _AiSettingsPageState extends State<AiSettingsPage>
           ),
         ),
       ],
+    ).withPullToRefresh(
+      onRefresh: () async {
+        if (mounted) setState(() {});
+      },
     );
   }
 }

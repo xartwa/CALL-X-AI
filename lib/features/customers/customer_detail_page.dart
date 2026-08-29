@@ -14,6 +14,7 @@ import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/utils/utils.dart';
+import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 
 class CustomerDetailPage extends StatefulWidget {
   const CustomerDetailPage({super.key, required this.customerId});
@@ -183,6 +184,13 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
       extraMessage: AppStrings.current.customerDetailsSaved,
       toastificationType: ToastificationType.success,
     );
+  }
+
+  Future<void> _refreshCustomer() async {
+    final loaded = await context
+        .read<CustomersCubit>()
+        .loadCustomerDetail(widget.customerId);
+    if (mounted && loaded != null) _syncControllers(loaded);
   }
 
   @override
@@ -447,6 +455,6 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           ),
         ),
       ],
-    );
+    ).withPullToRefresh(onRefresh: _refreshCustomer);
   }
 }

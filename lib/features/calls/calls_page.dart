@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/core/constants/app_strings.dart';
 import 'package:callx_ai/core/widgets/advanced_filter_dialog.dart';
+import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 
 class CallsPage extends StatefulWidget {
   const CallsPage({super.key});
@@ -456,6 +457,8 @@ class _CallsPageState extends State<CallsPage> {
                     : const SizedBox.shrink(),
               ),
             ],
+          ).withPullToRefresh(
+            onRefresh: () async => _reloadCalls(),
           );
         },
       ),

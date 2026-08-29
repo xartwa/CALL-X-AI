@@ -5,6 +5,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class CustomerDetailNotesWidget extends StatefulWidget {
   final User user;
@@ -25,6 +26,17 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
   String _searchQuery = '';
   String? _editingNoteId;
   final _editNoteCtrl = TextEditingController();
+
+  String _formatNoteDate(String value) {
+    final raw = value.trim();
+    if (raw.isEmpty) return 'Date unavailable';
+
+    final parsed = DateTime.tryParse(raw) ??
+        DateTime.tryParse(raw.replaceFirst(' ', 'T').replaceAll('/', '-'));
+    if (parsed == null) return raw;
+
+    return DateFormat('MMM d, yyyy  •  HH:mm').format(parsed.toLocal());
+  }
 
   @override
   void dispose() {
@@ -68,6 +80,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
       final q = _searchQuery.toLowerCase();
       return note.content.toLowerCase().contains(q) ||
           note.date.toLowerCase().contains(q) ||
+          _formatNoteDate(note.date).toLowerCase().contains(q) ||
           note.author.toLowerCase().contains(q);
     }).toList();
 
@@ -329,7 +342,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          note.date,
+                                          _formatNoteDate(note.date),
                                           style: TextStyle(
                                             fontSize: 11,
                                             color: context.colors.darkGreyColor,

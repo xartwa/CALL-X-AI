@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
-import 'package:callx_ai/features/customers/domain/entities/customer.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 
 void main() {
@@ -26,12 +25,44 @@ void main() {
     expect(cubit.state.pagination.currentPage, 1);
     await cubit.close();
   });
+
+  test('list refresh preserves detail-only notes for a loaded customer',
+      () async {
+    final repository = _FakeCustomerRepository();
+    final cubit = CustomersCubit(repository);
+
+    repository.detailCustomer = Customer(
+      id: '42',
+      fullName: 'Detail Customer',
+      notesList: const [
+        CustomerNote(
+          id: 'note-1',
+          content: 'Keep me visible',
+          date: '2026-08-29T08:30:00Z',
+        ),
+      ],
+      notesCount: 1,
+    );
+    await cubit.loadCustomerDetail('42');
+
+    repository.pageItems = [
+      Customer(id: '42', fullName: 'Updated Customer'),
+    ];
+    await cubit.loadPage();
+
+    expect(cubit.state.users.single.fullName, 'Updated Customer');
+    expect(cubit.state.users.single.notesList.single.id, 'note-1');
+    expect(cubit.state.users.single.notesCount, 1);
+    await cubit.close();
+  });
 }
 
 class _FakeCustomerRepository implements CustomerRepository {
   int listCalls = 0;
   int lastPage = 0;
   CustomerFilters lastFilters = const CustomerFilters();
+  List<Customer> pageItems = const [];
+  Customer? detailCustomer;
 
   @override
   Future<CustomerPage> getCustomers(CustomerFilters filters,
@@ -40,11 +71,11 @@ class _FakeCustomerRepository implements CustomerRepository {
     lastPage = page;
     lastFilters = filters;
     return CustomerPage(
-        const [], PaginationMeta(currentPage: page, pageSize: pageSize));
+        pageItems, PaginationMeta(currentPage: page, pageSize: pageSize));
   }
 
   @override
-  Future<Customer> getCustomer(String id) => throw UnimplementedError();
+  Future<Customer> getCustomer(String id) async => detailCustomer!;
   @override
   Future<CustomerKpi> getKpi() async => const CustomerKpi(
       totalCustomers: 0,

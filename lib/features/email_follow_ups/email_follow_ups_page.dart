@@ -13,6 +13,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 
 class EmailFollowUpsPage extends StatefulWidget {
   const EmailFollowUpsPage({super.key});
@@ -446,6 +447,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
           ),
         ),
       ],
+    ).withPullToRefresh(
+      onRefresh: () async => _loadData(),
     );
   }
 

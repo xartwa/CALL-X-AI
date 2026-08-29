@@ -15,6 +15,7 @@ import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/core/widgets/advanced_filter_dialog.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
+import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 
@@ -31,6 +32,12 @@ class _CustomersPageState extends State<CustomersPage> {
   DateTimeRange? _selectedDateRange;
   AdvancedFilterState _filterState = const AdvancedFilterState();
   String _sortField = 'Default';
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CustomersCubit>().loadInitial();
+  }
 
   void _showAddCustomerDialog(BuildContext context) async {
     final text = AppStrings.current;
@@ -328,6 +335,8 @@ class _CustomersPageState extends State<CustomersPage> {
               ),
             ),
           ],
+        ).withPullToRefresh(
+          onRefresh: context.read<CustomersCubit>().refresh,
         );
       },
     );

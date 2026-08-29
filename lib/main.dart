@@ -51,7 +51,7 @@ Future<void> main() async {
           BlocProvider(
             create: (context) => CustomersCubit(
               context.read<CustomerRepository>(),
-            )..loadInitial(),
+            ),
           ),
           BlocProvider(
               create: (_) => WorkspaceSettingsCubit(

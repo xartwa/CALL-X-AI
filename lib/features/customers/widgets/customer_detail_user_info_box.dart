@@ -213,12 +213,10 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox>
           // Row 4: Address, City, State, Country
           Row(
             children: [
-              Expanded(
+              CustomerDetailCustomTextfeild(
                 flex: 2,
-                child: CustomerDetailCustomTextfeild(
-                  controller: widget.addressCtrl,
-                  labelText: 'STREET ADDRESS',
-                ),
+                controller: widget.addressCtrl,
+                labelText: 'STREET ADDRESS',
               ),
               const SizedBox(width: 16),
               CustomerDetailCustomTextfeild(
@@ -519,12 +517,10 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox>
                 ),
               ),
               const SizedBox(width: 16),
-              Expanded(
+              CustomerDetailCustomTextfeild(
                 flex: 2,
-                child: CustomerDetailCustomTextfeild(
-                  controller: widget.reasonCtrl,
-                  labelText: 'REASON FOR CONTACT / INQUIRY',
-                ),
+                controller: widget.reasonCtrl,
+                labelText: 'REASON FOR CONTACT / INQUIRY',
               ),
             ],
           ),

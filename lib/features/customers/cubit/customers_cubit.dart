@@ -76,19 +76,30 @@ class CustomersCubit extends Cubit<CustomersState> {
     emit(state.copyWith(isInitialLoading: false));
   }
 
+  Future<void> refresh() async {
+    if (state.isRefreshing) return;
+    emit(state.copyWith(isRefreshing: true, clearListError: true));
+    await Future.wait([
+      loadPage(page: state.pagination.currentPage),
+      loadKpi(),
+      loadOptions(),
+    ]);
+    emit(state.copyWith(isRefreshing: false));
+  }
+
   Future<void> loadPage({int page = 1}) async {
     try {
       final result = await repository.getCustomers(state.filters,
           page: page,
           pageSize: state.pagination.pageSize,
           cancelToken: _cancelToken);
+      final users = result.items.map(_preserveLoadedDetails).toList();
       emit(state.copyWith(
-          users: result.items,
-          pagination: result.pagination,
-          clearListError: true));
+          users: users, pagination: result.pagination, clearListError: true));
     } catch (e) {
-      if (e is! AppException || e.type != AppErrorType.cancelled)
+      if (e is! AppException || e.type != AppErrorType.cancelled) {
         emit(state.copyWith(listError: 'Unable to load customers.'));
+      }
     }
   }
 
@@ -258,6 +269,28 @@ class CustomersCubit extends Cubit<CustomersState> {
     } finally {
       emit(state.copyWith(isSubmitting: false));
     }
+  }
+
+  Customer _preserveLoadedDetails(Customer summary) {
+    final existingIndex =
+        state.users.indexWhere((item) => item.id == summary.id);
+    if (existingIndex == -1) return summary;
+
+    final existing = state.users[existingIndex];
+    return summary.copyWith(
+      notesList:
+          summary.notesList.isEmpty ? existing.notesList : summary.notesList,
+      notesCount: summary.notesCount == 0 && existing.notesList.isNotEmpty
+          ? existing.notesCount
+          : summary.notesCount,
+      documents:
+          summary.documents.isEmpty ? existing.documents : summary.documents,
+      documentsCount:
+          summary.documentsCount == 0 && existing.documents.isNotEmpty
+              ? existing.documentsCount
+              : summary.documentsCount,
+      callLogs: summary.callLogs.isEmpty ? existing.callLogs : summary.callLogs,
+    );
   }
 
   @override

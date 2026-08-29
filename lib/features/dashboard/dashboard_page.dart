@@ -14,6 +14,7 @@ import 'domain/repositories/dashboard_repository.dart';
 import 'package:go_router/go_router.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/theme/app_colors.dart';
+import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'domain/usecases/get_dashboard_snapshot.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -38,7 +39,8 @@ class _DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
+    const content = SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: 60),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,6 +58,13 @@ class _DashboardView extends StatelessWidget {
           _DashboardContent(),
         ],
       ),
+    );
+    return content.withPullToRefresh(
+      scrollableChild: true,
+      onRefresh: () async {
+        context.read<TodoCubit>().loadTodos();
+        await context.read<DashboardCubit>().load(refresh: true);
+      },
     );
   }
 }

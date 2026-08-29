@@ -9,15 +9,18 @@ class CustomerDetailCustomTextfeild extends StatelessWidget {
     required this.labelText,
     this.textInputType,
     this.prefixIcon,
+    this.flex = 1,
   });
   final TextEditingController controller;
   final String labelText;
   final TextInputType? textInputType;
   final Widget? prefixIcon;
+  final int flex;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
+      flex: flex,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
