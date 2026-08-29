@@ -310,13 +310,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                   ],
                 ),
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                
               ),
               child: Center(
                 child: Icon(

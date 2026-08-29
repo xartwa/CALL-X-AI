@@ -272,14 +272,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                           ],
                         ),
                         borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF6366F1)
-                                .withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
+                     
                       ),
                       child: Center(
                         child: Text(

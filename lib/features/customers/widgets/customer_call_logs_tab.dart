@@ -496,7 +496,6 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             _buildCallIconBox(call),
             const SizedBox(width: 10),
 
-            // Title & Date/Time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,6 +576,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     );
 
     return Container(
+      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0B132B) : context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -584,7 +584,25 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Metadata 3-Column Card Matching Mockup (media_1788023871391.png)
+           Row(children: [
+                            Spacer(),
+
+               IconButton(
+                  tooltip: 'Close details',
+                  onPressed: () {
+                    setState(() => _selectedCallId = null);
+                  },
+                  icon: Icon(
+                    CupertinoIcons.clear,
+                    size: 15,
+                    color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                  splashRadius: 14,
+                ),
+           ],),
+                const SizedBox(height: 20),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -732,55 +750,19 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   ),
                 ),
 
-                // Action: Schedule Button
-                IconButton(
-                  tooltip: 'Schedule Follow-up',
-                  onPressed: () async {
-                    await CallActionDialog.show(
-                      context,
-                      fullName: widget.user.fullName,
-                      phone: widget.user.phone,
-                      initialTab: 'schedule',
-                    );
-                  },
-                  icon: Icon(
-                    CupertinoIcons.calendar,
-                    size: 16,
-                    color: context.colors.primaryLightColor,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                  splashRadius: 14,
-                ),
-
-                // Action: Close Button (✕)
-                IconButton(
-                  tooltip: 'Close details',
-                  onPressed: () {
-                    setState(() => _selectedCallId = null);
-                  },
-                  icon: Icon(
-                    CupertinoIcons.clear,
-                    size: 15,
-                    color: isDark ? Colors.white60 : context.colors.darkGreyColor,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                  splashRadius: 14,
-                ),
+           
+            
               ],
             ),
           ),
           const SizedBox(height: 12),
 
-          // 2. Audio Player (Right below metadata card, matching mockup!)
           CallAudioPlayerWidget(
             call: callHistoryModel,
             compact: true,
           ),
           const SizedBox(height: 12),
 
-          // Scrollable Sections: AI Summary & Call Transcript
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
