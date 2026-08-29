@@ -265,8 +265,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     buffer.writeln(
         '=== Call Transcript: ${widget.user.fullName} (${call.callDate} • ${call.callTime}) ===');
     for (final t in transcript) {
-      final isAi = t.speaker.toLowerCase() == 'ai' ||
-          t.speaker.toLowerCase() == 'agent';
+      final isAi =
+          t.speaker.toLowerCase() == 'ai' || t.speaker.toLowerCase() == 'agent';
       final speakerName = isAi ? 'AI' : (t.speakerName ?? 'Customer');
       buffer.writeln('[$speakerName]: ${t.text}');
     }
@@ -390,61 +390,53 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         Row(
           children: [
             SizedBox(
-              width: 220,
-              height: 38,
-              child: TextField(
-                controller: _searchCtrl,
-                onChanged: (val) {
-                  setState(() {
-                    _searchQuery = val;
-                  });
-                },
-                style: const TextStyle(fontSize: 12),
-                decoration: InputDecoration(
-                  hintText: 'Search calls...',
-                  hintStyle: TextStyle(
-                    fontSize: 12,
-                    color: context.colors.darkGreyColor.withOpacity(0.7),
-                  ),
-                  prefixIcon: Icon(
-                    CupertinoIcons.search,
-                    size: 15,
-                    color: context.colors.darkGreyColor,
-                  ),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(CupertinoIcons.clear_thick, size: 14),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                  isDense: true,
-                  filled: true,
-                  fillColor:
-                      isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? const Color(0xFF334155)
-                          : const Color(0xFFE2E8F0),
+                width: 220,
+                height: 38,
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val;
+                    });
+                  },
+                  style: const TextStyle(fontSize: 12),
+                  decoration: InputDecoration(
+                    hintText: 'Search calls...',
+                    hintStyle: TextStyle(
+                      fontSize: 11,
+                      color: context.colors.darkGreyColor.withOpacity(0.7),
                     ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: context.colors.primaryLightColor,
+                    prefixIcon: Icon(
+                      CupertinoIcons.search,
+                      size: 15,
+                      color: context.colors.darkGreyColor,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(CupertinoIcons.clear_thick,
+                                size: 14),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFF1F5F9),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
               ),
-            ),
             if (selectedCall != null) ...[
               const SizedBox(width: 8),
               IconButton(
@@ -519,7 +511,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             children: [
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -536,7 +530,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ),
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -560,8 +556,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     return InkWell(
       onTap: () => _onCallSelected(call),
       borderRadius: BorderRadius.circular(10),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
@@ -570,38 +565,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   : const Color(0xFFEEF2FF))
               : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? context.colors.primaryLightColor
-                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-            width: isSelected ? 1.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: context.colors.primaryLightColor.withValues(alpha: 0.18),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
         ),
         child: Row(
           children: [
-            // Distinctive Accent Strip when Selected
-            if (isSelected) ...[
-              Container(
-                width: 3.5,
-                height: 28,
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: context.colors.primaryLightColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
-
-            // Rounded Square Icon Matching Mockup
             _buildCallIconBox(call),
             const SizedBox(width: 10),
 
@@ -614,7 +580,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     title,
                     style: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                      fontWeight:
+                          isSelected ? FontWeight.w800 : FontWeight.w700,
                       color: isSelected
                           ? context.colors.primaryLightColor
                           : Theme.of(context).colorScheme.onSurface,
@@ -744,7 +711,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               Container(
                 width: 1,
                 height: 28,
-                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color:
+                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               ),
               const SizedBox(width: 10),
 
@@ -791,7 +759,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               Container(
                 width: 1,
                 height: 28,
-                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color:
+                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               ),
               const SizedBox(width: 10),
 
@@ -885,7 +854,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   child: Column(
@@ -907,7 +878,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -946,7 +918,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                         style: TextStyle(
                           fontSize: 12.5,
                           height: 1.45,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.88),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.88),
                         ),
                       ),
                     ],
@@ -962,7 +937,9 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   child: Column(
@@ -984,7 +961,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
-                                  color: Theme.of(context).colorScheme.onSurface,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -1082,7 +1060,8 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                     height: 24,
                     decoration: BoxDecoration(
                       color: isAi
-                          ? context.colors.primaryLightColor.withValues(alpha: 0.2)
+                          ? context.colors.primaryLightColor
+                              .withValues(alpha: 0.2)
                           : context.colors.successColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(6),
                     ),

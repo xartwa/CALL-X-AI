@@ -85,7 +85,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
     }).toList();
 
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
