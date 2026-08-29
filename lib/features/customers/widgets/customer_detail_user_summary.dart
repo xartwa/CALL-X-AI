@@ -71,39 +71,20 @@ class CustomerDetailUserSummary extends StatelessWidget {
       child: Column(
         spacing: 10,
         children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              CircleAvatar(
-                radius: 38,
-                backgroundColor:
-                    context.colors.primaryLightColor.withValues(alpha: 0.12),
-                child: Text(
-                  user.fullName.isNotEmpty
-                      ? user.fullName.characters.first.toUpperCase()
-                      : 'C',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                    color: context.colors.primaryLightColor,
-                  ),
-                ),
+          CircleAvatar(
+            radius: 38,
+            backgroundColor:
+                context.colors.primaryLightColor.withValues(alpha: 0.12),
+            child: Text(
+              user.fullName.isNotEmpty
+                  ? user.fullName.characters.first.toUpperCase()
+                  : 'C',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                color: context.colors.primaryLightColor,
               ),
-              Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: user.status == 'Active'
-                      ? context.colors.successColor
-                      : context.colors.errorColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    width: 2.5,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           Text(
             user.fullName.isNotEmpty ? user.fullName : 'Customer Name',

@@ -119,7 +119,9 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
         : '';
 
     if (formatted.isNotEmpty) {
-      await context.read<CallsCubit>().scheduleFollowUp(widget.call.id, formatted);
+      await context
+          .read<CallsCubit>()
+          .scheduleFollowUp(widget.call.id, formatted);
     } else {
       await context.read<CallsCubit>().clearFollowUp(widget.call.id);
     }
@@ -179,8 +181,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
 
     final customers = context.read<CustomersCubit>().state.users;
     final customer = customers.firstWhere(
-      (u) =>
-          u.phone == widget.call.phone || u.fullName == widget.call.fullName,
+      (u) => u.phone == widget.call.phone || u.fullName == widget.call.fullName,
       orElse: () => customers.isNotEmpty
           ? customers.first
           : Customer(
@@ -205,8 +206,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     final screenWidth = MediaQuery.of(context).size.width;
     final panelWidth = (screenWidth * 0.34).clamp(460.0, 520.0);
 
-    final statusColor = widget.call.statusColor ??
-        _getStatusColor(context, widget.call.status);
+    final statusColor =
+        widget.call.statusColor ?? _getStatusColor(context, widget.call.status);
 
     final initials = widget.call.fullName.trim().isEmpty
         ? '?'
@@ -254,33 +255,25 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Row: Avatar + Name + Status + Close
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Smooth Rounded Avatar
                     Container(
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF6366F1),
-                            Color(0xFF4F46E5),
-                          ],
-                        ),
+                        color: context.colors.primaryLightColor
+                            .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(30),
-                     
                       ),
                       child: Center(
                         child: Text(
                           initials,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                                            color: context.colors.primaryLightColor,
+
                           ),
                         ),
                       ),
@@ -302,9 +295,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark
-                                        ? Colors.white
-                                        : Colors.black87,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -319,8 +311,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   color: statusColor.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: statusColor
-                                        .withValues(alpha: 0.4),
+                                    color: statusColor.withValues(alpha: 0.4),
                                     width: 1,
                                   ),
                                 ),
@@ -342,9 +333,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               widget.call.companyName,
                               style: TextStyle(
                                 fontSize: 12.5,
-                                color: isDark
-                                    ? Colors.white60
-                                    : Colors.black54,
+                                color: isDark ? Colors.white60 : Colors.black54,
                                 fontWeight: FontWeight.w500,
                               ),
                               maxLines: 1,
@@ -444,8 +433,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                context.colors.primaryLightColor,
+                            backgroundColor: context.colors.primaryLightColor,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -532,8 +520,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Duration',
@@ -579,15 +566,13 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Date & Time',
                                       style: TextStyle(
                                         fontSize: 10.5,
-                                        color:
-                                            context.colors.darkGreyColor,
+                                        color: context.colors.darkGreyColor,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -629,15 +614,13 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Agent',
                                       style: TextStyle(
                                         fontSize: 10.5,
-                                        color:
-                                            context.colors.darkGreyColor,
+                                        color: context.colors.darkGreyColor,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -678,9 +661,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : Colors.white,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
@@ -692,16 +673,14 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
                                 Icon(
                                   CupertinoIcons.sparkles,
                                   size: 15,
-                                  color:
-                                      context.colors.primaryLightColor,
+                                  color: context.colors.primaryLightColor,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
@@ -709,27 +688,23 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark
-                                        ? Colors.white
-                                        : Colors.black87,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
                                   ),
                                 ),
                               ],
                             ),
                             if (widget.call.lastContactResult != null &&
-                                widget.call.lastContactResult!
-                                    .isNotEmpty) ...[
+                                widget.call.lastContactResult!.isNotEmpty) ...[
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: context.colors.primaryLightColor
                                       .withValues(alpha: 0.15),
-                                  borderRadius:
-                                      BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: context
-                                        .colors.primaryLightColor
+                                    color: context.colors.primaryLightColor
                                         .withValues(alpha: 0.35),
                                     width: 1,
                                   ),
@@ -739,8 +714,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: context
-                                        .colors.primaryLightColor,
+                                    color: context.colors.primaryLightColor,
                                   ),
                                 ),
                               ),
@@ -769,9 +743,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF0F172A)
-                            : Colors.white,
+                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
@@ -783,16 +755,14 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
                                   Icon(
                                     CupertinoIcons.chat_bubble_2_fill,
                                     size: 15,
-                                    color:
-                                        context.colors.primaryLightColor,
+                                    color: context.colors.primaryLightColor,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
@@ -814,8 +784,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                     Icon(
                                       CupertinoIcons.doc_on_doc,
                                       size: 12,
-                                      color: context
-                                          .colors.primaryLightColor,
+                                      color: context.colors.primaryLightColor,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -823,8 +792,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                       style: TextStyle(
                                         fontSize: 11.5,
                                         fontWeight: FontWeight.w700,
-                                        color: context
-                                            .colors.primaryLightColor,
+                                        color: context.colors.primaryLightColor,
                                       ),
                                     ),
                                   ],
@@ -838,8 +806,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                           ...widget.call.transcript.map((turn) {
                             final isAi = turn.speaker == 'ai';
                             return Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 10.0),
+                              padding: const EdgeInsets.only(bottom: 10.0),
                               child: Container(
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
@@ -847,18 +814,15 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   color: isDark
                                       ? const Color(0xFF1E293B)
                                       : const Color(0xFFF8FAFC),
-                                  borderRadius:
-                                      BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                     color: isDark
                                         ? const Color(0xFF334155)
-                                        : context
-                                            .colors.mediumGreyColor,
+                                        : context.colors.mediumGreyColor,
                                   ),
                                 ),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
@@ -868,47 +832,34 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                           decoration: BoxDecoration(
                                             color: isAi
                                                 ? context
-                                                    .colors
-                                                    .primaryLightColor
-                                                    .withValues(
-                                                        alpha: 0.2)
-                                                : context
-                                                    .colors
-                                                    .successColor
-                                                    .withValues(
-                                                        alpha: 0.2),
+                                                    .colors.primaryLightColor
+                                                    .withValues(alpha: 0.2)
+                                                : context.colors.successColor
+                                                    .withValues(alpha: 0.2),
                                             borderRadius:
-                                                BorderRadius
-                                                    .circular(6),
+                                                BorderRadius.circular(6),
                                           ),
                                           child: Icon(
                                             isAi
-                                                ? CupertinoIcons
-                                                    .sparkles
-                                                : CupertinoIcons
-                                                    .person_fill,
+                                                ? CupertinoIcons.sparkles
+                                                : CupertinoIcons.person_fill,
                                             size: 13,
                                             color: isAi
-                                                ? context.colors
-                                                    .primaryLightColor
-                                                : context.colors
-                                                    .successColor,
+                                                ? context
+                                                    .colors.primaryLightColor
+                                                : context.colors.successColor,
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          isAi
-                                              ? 'AI'
-                                              : turn.speakerName,
+                                          isAi ? 'AI' : turn.speakerName,
                                           style: TextStyle(
                                             fontSize: 12,
-                                            fontWeight:
-                                                FontWeight.w800,
+                                            fontWeight: FontWeight.w800,
                                             color: isAi
-                                                ? context.colors
-                                                    .primaryLightColor
-                                                : context.colors
-                                                    .successColor,
+                                                ? context
+                                                    .colors.primaryLightColor
+                                                : context.colors.successColor,
                                           ),
                                         ),
                                       ],
@@ -941,9 +892,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF0F172A)
-                          : Colors.white,
+                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
@@ -955,16 +904,14 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
                                 Icon(
                                   CupertinoIcons.calendar,
                                   size: 15,
-                                  color:
-                                      context.colors.primaryLightColor,
+                                  color: context.colors.primaryLightColor,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
@@ -972,9 +919,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark
-                                        ? Colors.white
-                                        : Colors.black87,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
                                   ),
                                 ),
                               ],
@@ -1001,8 +947,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                           onTap: _pickDate,
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
-                            constraints:
-                                const BoxConstraints(minHeight: 52),
+                            constraints: const BoxConstraints(minHeight: 52),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
@@ -1013,8 +958,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               border: Border.all(
                                 color: isDark
                                     ? const Color(0xFF1E293B)
-                                    : context
-                                        .colors.mediumGreyColor,
+                                    : context.colors.mediumGreyColor,
                               ),
                             ),
                             child: Row(
@@ -1023,24 +967,20 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                   width: 36,
                                   height: 36,
                                   decoration: BoxDecoration(
-                                    color: context
-                                        .colors.primaryLightColor
+                                    color: context.colors.primaryLightColor
                                         .withValues(alpha: 0.15),
-                                    borderRadius:
-                                        BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     CupertinoIcons.calendar,
                                     size: 18,
-                                    color: context
-                                        .colors.primaryLightColor,
+                                    color: context.colors.primaryLightColor,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
@@ -1049,34 +989,27 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w500,
-                                          color: context
-                                              .colors.darkGreyColor,
+                                          color: context.colors.darkGreyColor,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         (_followUpDate != null &&
-                                                _followUpDate!
-                                                    .isNotEmpty)
+                                                _followUpDate!.isNotEmpty)
                                             ? _followUpDate!
                                             : 'Click to select follow-up date',
                                         style: TextStyle(
                                           fontSize: 12.5,
-                                          fontWeight:
-                                              (_followUpDate != null &&
-                                                      _followUpDate!
-                                                          .isNotEmpty)
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w500,
-                                          color: (_followUpDate !=
-                                                      null &&
-                                                  _followUpDate!
-                                                      .isNotEmpty)
+                                          fontWeight: (_followUpDate != null &&
+                                                  _followUpDate!.isNotEmpty)
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: (_followUpDate != null &&
+                                                  _followUpDate!.isNotEmpty)
                                               ? (isDark
                                                   ? Colors.white
                                                   : Colors.black87)
-                                              : context
-                                                  .colors.darkGreyColor,
+                                              : context.colors.darkGreyColor,
                                         ),
                                       ),
                                     ],
@@ -1103,4 +1036,3 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     );
   }
 }
-
