@@ -869,68 +869,54 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                       CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Container(
-                                              width: 24,
-                                              height: 24,
-                                              decoration: BoxDecoration(
-                                                color: isAi
-                                                    ? context
-                                                        .colors
-                                                        .primaryLightColor
-                                                        .withValues(
-                                                            alpha: 0.2)
-                                                    : context
-                                                        .colors
-                                                        .successColor
-                                                        .withValues(
-                                                            alpha: 0.2),
-                                                borderRadius:
-                                                    BorderRadius
-                                                        .circular(6),
-                                              ),
-                                              child: Icon(
-                                                isAi
-                                                    ? CupertinoIcons
-                                                        .sparkles
-                                                    : CupertinoIcons
-                                                        .person_fill,
-                                                size: 13,
-                                                color: isAi
-                                                    ? context.colors
-                                                        .primaryLightColor
-                                                    : context.colors
-                                                        .successColor,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              isAi
-                                                  ? 'AI'
-                                                  : turn.speakerName,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight:
-                                                    FontWeight.w800,
-                                                color: isAi
-                                                    ? context.colors
-                                                        .primaryLightColor
-                                                    : context.colors
-                                                        .successColor,
-                                              ),
-                                            ),
-                                          ],
+                                        Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            color: isAi
+                                                ? context
+                                                    .colors
+                                                    .primaryLightColor
+                                                    .withValues(
+                                                        alpha: 0.2)
+                                                : context
+                                                    .colors
+                                                    .successColor
+                                                    .withValues(
+                                                        alpha: 0.2),
+                                            borderRadius:
+                                                BorderRadius
+                                                    .circular(6),
+                                          ),
+                                          child: Icon(
+                                            isAi
+                                                ? CupertinoIcons
+                                                    .sparkles
+                                                : CupertinoIcons
+                                                    .person_fill,
+                                            size: 13,
+                                            color: isAi
+                                                ? context.colors
+                                                    .primaryLightColor
+                                                : context.colors
+                                                    .successColor,
+                                          ),
                                         ),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          turn.timestamp,
+                                          isAi
+                                              ? 'AI'
+                                              : turn.speakerName,
                                           style: TextStyle(
-                                            fontSize: 11,
-                                            color: context
-                                                .colors.darkGreyColor,
+                                            fontSize: 12,
+                                            fontWeight:
+                                                FontWeight.w800,
+                                            color: isAi
+                                                ? context.colors
+                                                    .primaryLightColor
+                                                : context.colors
+                                                    .successColor,
                                           ),
                                         ),
                                       ],

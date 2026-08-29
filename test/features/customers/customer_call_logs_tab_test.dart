@@ -76,7 +76,7 @@ void main() {
     expect(find.text('1 of 1 calls'), findsOneWidget);
 
     // 2. Check Detail View
-    expect(find.text('Call Summary'), findsOneWidget);
+    expect(find.text('AI Summary'), findsOneWidget);
     expect(find.text('Client discussed paper bulk order for upcoming quarter.'),
         findsOneWidget);
     expect(find.text('Call Transcript'), findsOneWidget);
