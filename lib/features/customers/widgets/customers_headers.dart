@@ -305,13 +305,9 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                   itemBuilder: (context) => _statuses.map((status) {
                     final isSelected = widget.selectedStatus.toLowerCase() ==
                         status.toLowerCase();
-                    final count = widget.statusCounts[status] ?? 0;
                     return PopupMenuItem<String>(
                       value: status,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
+                      child:Text(
                             status,
                             style: TextStyle(
                               fontSize: 12,
@@ -322,34 +318,7 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                                   ? Theme.of(context).colorScheme.primary
                                   : (isDark ? Colors.white : Colors.black87),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withValues(alpha: 0.15)
-                                  : (isDark
-                                      ? Colors.white10
-                                      : context.colors.lightGreyColor),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '$count',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : context.colors.darkGreyColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                          )
                     );
                   }).toList(),
                   child: Container(

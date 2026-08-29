@@ -360,60 +360,53 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   ) {
     return Column(
       children: [
-        Container(
-          height: 40,
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-            ),
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 12),
-              Icon(
-                CupertinoIcons.search,
-                size: 15,
-                color: context.colors.darkGreyColor,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
+        SizedBox(
+         width: MediaQuery.sizeOf(context).width,
                 child: TextField(
                   controller: _searchCtrl,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val;
+                    });
+                  },
+                  style: const TextStyle(fontSize: 12),
                   decoration: InputDecoration(
-                    hintText: 'Search call logs...',
+                    hintText: 'Search calls...',
                     hintStyle: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 11,
+                      color: context.colors.darkGreyColor.withOpacity(0.7),
+                    ),
+                    prefixIcon: Icon(
+                      CupertinoIcons.search,
+                      size: 15,
                       color: context.colors.darkGreyColor,
                     ),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                    border: InputBorder.none,
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(CupertinoIcons.clear_thick,
+                                size: 14),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFF1F5F9),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
-                  onChanged: (val) => setState(() => _searchQuery = val),
                 ),
               ),
-              if (_searchQuery.isNotEmpty) ...[
-                IconButton(
-                  onPressed: () {
-                    _searchCtrl.clear();
-                    setState(() => _searchQuery = '');
-                  },
-                  icon:
-                      const Icon(CupertinoIcons.clear_circled_solid, size: 14),
-                  color: context.colors.darkGreyColor,
-                ),
-              ],
-            ],
-          ),
-        ),
         const SizedBox(height: 10),
 
         // List of Call Cards
