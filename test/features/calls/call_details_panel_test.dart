@@ -9,7 +9,7 @@ import 'package:callx_ai/features/customers/domain/repositories/customer_reposit
 import 'package:callx_ai/theme/app_colors.dart';
 
 void main() {
-  testWidgets('CallDetailsPanel renders header, audio player, tabs, and footer',
+  testWidgets('CallDetailsPanel renders single-view with header, audio player, AI summary, transcript, and notes',
       (tester) async {
     tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1.0;
@@ -28,9 +28,7 @@ void main() {
       notes: 'Customer satisfied with estimation quote.',
       email: 'john@abcconstruction.com',
       leadPriority: 'Hot',
-      sentimentScore: 88,
-      sentiment: 'Positive',
-      callIntent: 'Scope Estimation & Quote Proposal',
+      lastContactResult: 'Interested',
       tags: ['GC', 'Hot Lead', 'Vancouver'],
       transcript: const [
         CallTranscriptMessage(
@@ -44,7 +42,6 @@ void main() {
           speakerName: 'John Smith',
           text: 'Hi Sarah, glad you called back. Let us review.',
           timestamp: '00:12',
-          sentiment: 'positive',
         ),
       ],
     );
@@ -76,46 +73,30 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // 1. Verify Header Elements
-    expect(find.text('John Smith'), findsOneWidget);
+    // 1. Verify Header Elements & Customer Name
+    expect(find.text('John Smith'), findsWidgets);
     expect(find.text('Completed'), findsWidgets);
     expect(find.text('5:32'), findsWidgets);
 
-    // 2. Verify Tab labels
-    expect(find.text('Insights'), findsOneWidget);
-    expect(find.text('Transcript'), findsOneWidget);
-    expect(find.text('CRM'), findsOneWidget);
-    expect(find.text('Notes'), findsOneWidget);
+    // 2. Verify Action buttons
+    expect(find.text('CALL'), findsOneWidget);
+    expect(find.text('SCHEDULE'), findsOneWidget);
 
     // 3. Verify Audio Player
     expect(find.text('CALL RECORDING'), findsOneWidget);
 
-    // 4. Verify Insights Tab content (Default tab)
-    expect(find.text('EXECUTIVE AI SUMMARY'), findsOneWidget);
-    expect(find.text('SENTIMENT & CALL INTENT'), findsOneWidget);
-    expect(find.text('AI ACTION ITEMS & NEXT STEPS'), findsOneWidget);
+    // 4. Verify AI Summary Section
+    expect(find.text('AI SUMMARY'), findsOneWidget);
+    expect(find.text('Interested'), findsOneWidget);
 
-    // 5. Switch to Transcript Tab
-    await tester.tap(find.text('Transcript'));
-    await tester.pumpAndSettle();
+    // 5. Verify Transcript Section
+    expect(find.text('CALL TRANSCRIPT'), findsOneWidget);
     expect(find.text('Copy All'), findsOneWidget);
+    expect(find.text('Hello John! Calling regarding your project inquiry.'), findsOneWidget);
 
-    // 6. Switch to CRM Tab
-    await tester.tap(find.text('CRM'));
-    await tester.pumpAndSettle();
-    expect(find.text('CONTACT DETAILS'), findsOneWidget);
-    expect(find.text('LEAD CLASSIFICATION'), findsOneWidget);
-    expect(find.text('OPEN FULL CRM PROFILE'), findsOneWidget);
-
-    // 7. Switch to Notes Tab
-    await tester.tap(find.text('Notes'));
-    await tester.pumpAndSettle();
-    expect(find.text('INTERNAL CALL NOTES'), findsOneWidget);
+    // 6. Verify Notes & Follow-up Section
+    expect(find.text('NOTES & NEXT FOLLOW-UP'), findsOneWidget);
     expect(find.text('SAVE NOTES & FOLLOW-UP'), findsOneWidget);
-
-    // 8. Verify Footer Action buttons
-    expect(find.text('RE-DIAL'), findsOneWidget);
-    expect(find.text('SCHEDULE'), findsOneWidget);
 
     await customersCubit.close();
     await selectedCallCubit.close();
