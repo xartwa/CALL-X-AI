@@ -69,25 +69,36 @@ class CallsRepositoryImpl implements CallsRepository {
           query['lead_priority'] = leadPriority;
         }
 
-        if (sortField != null && sortField != 'Default') {
+        if (sortField != null &&
+            sortField != 'Default' &&
+            sortField.isNotEmpty) {
           switch (sortField) {
+            case 'Customer (A-Z)':
             case 'A-Z':
               query['ordering'] = 'full_name';
               break;
+            case 'Customer (Z-A)':
             case 'Z-A':
               query['ordering'] = '-full_name';
               break;
+            case 'Date (Newest)':
             case 'Newest First':
               query['ordering'] = '-created_at';
               break;
+            case 'Date (Oldest)':
             case 'Oldest First':
               query['ordering'] = 'created_at';
               break;
+            case 'Duration (Longest)':
             case 'Longest Duration':
               query['ordering'] = '-duration';
               break;
+            case 'Duration (Shortest)':
             case 'Shortest Duration':
               query['ordering'] = 'duration';
+              break;
+            default:
+              query['ordering'] = sortField;
               break;
           }
         }

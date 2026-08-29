@@ -212,6 +212,10 @@ class CallsPage extends StatelessWidget {
                         const SizedBox(width: 12),
                         CallDetailsPanel(
                           call: selectedCall,
+                          onClose: () {
+                            context.read<CallsCubit>().selectCall(null);
+                            context.read<SelectedCallCubit>().clearSelection();
+                          },
                           onCallAdded: () =>
                               context.read<CallsCubit>().refresh(),
                           onCallUpdated: (updated) {

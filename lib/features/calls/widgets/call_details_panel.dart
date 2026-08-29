@@ -21,6 +21,7 @@ class CallDetailsPanel extends StatefulWidget {
   final VoidCallback onCallAdded;
   final ValueChanged<CallHistoryModel>? onCallUpdated;
   final VoidCallback? onDelete;
+  final VoidCallback? onClose;
 
   const CallDetailsPanel({
     super.key,
@@ -28,6 +29,7 @@ class CallDetailsPanel extends StatefulWidget {
     required this.onCallAdded,
     this.onCallUpdated,
     this.onDelete,
+    this.onClose,
   });
 
   @override
@@ -399,8 +401,11 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     // Top Right Close Button
                     IconButton(
                       tooltip: 'Close details',
-                      onPressed: () =>
-                          context.read<SelectedCallCubit>().clearSelection(),
+                      onPressed: () {
+                        widget.onClose?.call();
+                        context.read<CallsCubit>().selectCall(null);
+                        context.read<SelectedCallCubit>().clearSelection();
+                      },
                       icon: Icon(
                         CupertinoIcons.clear,
                         size: 17,

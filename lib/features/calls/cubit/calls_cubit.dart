@@ -86,11 +86,50 @@ class CallsCubit extends Cubit<CallsState> {
 
   Future<void> setSort(String sortField) async {
     if (sortField == state.sortField) return;
-    emit(state.copyWith(sortField: sortField, currentPage: 1, isRefreshing: true));
+    final sortedList = _sortCallsInMemory(state.calls, sortField);
+    emit(state.copyWith(
+      sortField: sortField,
+      calls: sortedList,
+      currentPage: 1,
+      isRefreshing: true,
+    ));
     await _fetchCalls(page: 1);
     if (!isClosed) {
       emit(state.copyWith(isRefreshing: false));
     }
+  }
+
+  List<CallHistoryModel> _sortCallsInMemory(
+      List<CallHistoryModel> list, String sortField) {
+    if (sortField == 'Default' || sortField.isEmpty) return list;
+    final sorted = List<CallHistoryModel>.from(list);
+    sorted.sort((a, b) {
+      switch (sortField) {
+        case 'Customer (A-Z)':
+        case 'A-Z':
+          return a.fullName.toLowerCase().compareTo(b.fullName.toLowerCase());
+        case 'Customer (Z-A)':
+        case 'Z-A':
+          return b.fullName.toLowerCase().compareTo(a.fullName.toLowerCase());
+        case 'Date (Newest)':
+        case 'Newest First':
+          return '${b.callDate} ${b.callTime}'
+              .compareTo('${a.callDate} ${a.callTime}');
+        case 'Date (Oldest)':
+        case 'Oldest First':
+          return '${a.callDate} ${a.callTime}'
+              .compareTo('${b.callDate} ${b.callTime}');
+        case 'Duration (Longest)':
+        case 'Longest Duration':
+          return b.duration.compareTo(a.duration);
+        case 'Duration (Shortest)':
+        case 'Shortest Duration':
+          return a.duration.compareTo(b.duration);
+        default:
+          return 0;
+      }
+    });
+    return sorted;
   }
 
   Future<void> setDateRange(DateTimeRange? range) async {
@@ -221,8 +260,12 @@ class CallsCubit extends Cubit<CallsState> {
 
       if (isClosed || requestId != _listRequestId) return false;
 
+      final sortedCalls = state.sortField != 'Default'
+          ? _sortCallsInMemory(result.results, state.sortField)
+          : result.results;
+
       emit(state.copyWith(
-        calls: result.results,
+        calls: sortedCalls,
         totalCount: result.count,
         currentPage: page,
         clearErrorMessage: true,
