@@ -1,18 +1,22 @@
 import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
+import 'package:callx_ai/core/services/audio_download_service.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 
 class CallAudioPlayerWidget extends StatefulWidget {
   final CallHistoryModel call;
+  final bool compact;
 
   const CallAudioPlayerWidget({
     super.key,
     required this.call,
+    this.compact = false,
   });
 
   @override
@@ -20,12 +24,19 @@ class CallAudioPlayerWidget extends StatefulWidget {
 }
 
 class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
+  late final AudioPlayer _audioPlayer;
+  StreamSubscription? _playerStateSub;
+  StreamSubscription? _positionSub;
+  StreamSubscription? _durationSub;
+  StreamSubscription? _playerCompleteSub;
+  Timer? _fallbackTimer;
+
   bool _isPlaying = false;
+  bool _isDownloading = false;
   double _playbackProgress = 0.0; // 0.0 to 1.0
   double _playbackSpeed = 1.0;
-  Timer? _playbackTimer;
 
-  int _totalSeconds = 120;
+  int _totalSeconds = 90;
   int _currentSeconds = 0;
 
   // Waveform bar heights (normalized 0.15 to 1.0)
@@ -39,13 +50,53 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
   @override
   void initState() {
     super.initState();
+    _audioPlayer = AudioPlayer();
+    _initAudioPlayer();
     _parseDuration();
+  }
+
+  void _initAudioPlayer() {
+    _playerStateSub = _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
+      setState(() {
+        _isPlaying = state == PlayerState.playing;
+      });
+    });
+
+    _positionSub = _audioPlayer.onPositionChanged.listen((pos) {
+      if (!mounted) return;
+      setState(() {
+        _currentSeconds = pos.inSeconds;
+        if (_totalSeconds > 0) {
+          _playbackProgress = (_currentSeconds / _totalSeconds).clamp(0.0, 1.0);
+        }
+      });
+    });
+
+    _durationSub = _audioPlayer.onDurationChanged.listen((dur) {
+      if (!mounted) return;
+      if (dur.inSeconds > 0) {
+        setState(() {
+          _totalSeconds = dur.inSeconds;
+        });
+      }
+    });
+
+    _playerCompleteSub = _audioPlayer.onPlayerComplete.listen((_) {
+      if (!mounted) return;
+      setState(() {
+        _isPlaying = false;
+        _currentSeconds = 0;
+        _playbackProgress = 0.0;
+      });
+    });
   }
 
   @override
   void didUpdateWidget(CallAudioPlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.call.duration != widget.call.duration) {
+    if (oldWidget.call.id != widget.call.id ||
+        oldWidget.call.duration != widget.call.duration) {
       _stopPlayback();
       _parseDuration();
     }
@@ -65,24 +116,38 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     _playbackProgress = 0.0;
   }
 
-  void _togglePlayPause() {
+  Future<void> _togglePlayPause() async {
     if (_isPlaying) {
-      _stopPlayback();
+      await _stopPlayback();
     } else {
-      _startPlayback();
+      await _startPlayback();
     }
   }
 
-  void _startPlayback() {
+  Future<void> _startPlayback() async {
+    final url = widget.call.recordingUrl;
+    if (url != null && url.startsWith('http')) {
+      try {
+        await _audioPlayer.setPlaybackRate(_playbackSpeed);
+        await _audioPlayer.play(UrlSource(url));
+        return;
+      } catch (_) {
+        // Fallback to simulated audio ticker if URL fails to load
+      }
+    }
+
+    // Fallback synchronized playback simulator for Web & offline calls
     setState(() => _isPlaying = true);
     final intervalMs = (1000 / _playbackSpeed).round();
-    _playbackTimer?.cancel();
-    _playbackTimer = Timer.periodic(Duration(milliseconds: intervalMs), (timer) {
+    _fallbackTimer?.cancel();
+    _fallbackTimer =
+        Timer.periodic(Duration(milliseconds: intervalMs), (timer) {
       if (!mounted) return;
       setState(() {
         if (_currentSeconds < _totalSeconds) {
           _currentSeconds++;
-          _playbackProgress = _currentSeconds / _totalSeconds;
+          _playbackProgress =
+              (_currentSeconds / _totalSeconds).clamp(0.0, 1.0);
         } else {
           _stopPlayback();
           _currentSeconds = 0;
@@ -92,31 +157,68 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     });
   }
 
-  void _stopPlayback() {
-    _playbackTimer?.cancel();
-    _playbackTimer = null;
+  Future<void> _stopPlayback() async {
+    _fallbackTimer?.cancel();
+    _fallbackTimer = null;
+    try {
+      await _audioPlayer.pause();
+    } catch (_) {}
     if (mounted) {
       setState(() => _isPlaying = false);
     }
   }
 
-  void _toggleSpeed() {
+  Future<void> _toggleSpeed() async {
     final speeds = [1.0, 1.25, 1.5, 2.0];
     final nextIndex = (speeds.indexOf(_playbackSpeed) + 1) % speeds.length;
+    final newSpeed = speeds[nextIndex];
     setState(() {
-      _playbackSpeed = speeds[nextIndex];
+      _playbackSpeed = newSpeed;
     });
-    if (_isPlaying) {
-      _stopPlayback();
+
+    try {
+      await _audioPlayer.setPlaybackRate(newSpeed);
+    } catch (_) {}
+
+    if (_fallbackTimer != null) {
       _startPlayback();
     }
   }
 
-  void _seekTo(double progress) {
+  Future<void> _seekTo(double progress) async {
+    final targetSeconds = (_totalSeconds * progress).round();
     setState(() {
       _playbackProgress = progress.clamp(0.0, 1.0);
-      _currentSeconds = (_totalSeconds * _playbackProgress).round();
+      _currentSeconds = targetSeconds;
     });
+
+    try {
+      await _audioPlayer.seek(Duration(seconds: targetSeconds));
+    } catch (_) {}
+  }
+
+  Future<void> _handleDownload() async {
+    if (_isDownloading) return;
+    setState(() => _isDownloading = true);
+
+    final result = await AudioDownloadService.instance.downloadCallAudio(
+      callId: widget.call.id,
+      fullName: widget.call.fullName,
+      recordingUrl: widget.call.recordingUrl,
+    );
+
+    if (!mounted) return;
+    setState(() => _isDownloading = false);
+
+    AppUtils.showSnackBar(
+      context: context,
+      extraMessage: result.message,
+      toastificationType: result.isAlreadyDownloaded
+          ? ToastificationType.info
+          : (result.isSuccess
+              ? ToastificationType.success
+              : ToastificationType.error),
+    );
   }
 
   String _formatTime(int totalSec) {
@@ -127,7 +229,12 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
 
   @override
   void dispose() {
-    _playbackTimer?.cancel();
+    _fallbackTimer?.cancel();
+    _playerStateSub?.cancel();
+    _positionSub?.cancel();
+    _durationSub?.cancel();
+    _playerCompleteSub?.cancel();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -138,7 +245,8 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
         widget.call.status == 'Queued' ||
         widget.call.status == 'Upcoming';
 
-    if (isFailedOrPending && (widget.call.duration == '0:00' || widget.call.duration.isEmpty)) {
+    if (isFailedOrPending &&
+        (widget.call.duration == '0:00' || widget.call.duration.isEmpty)) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -174,9 +282,12 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       );
     }
 
+    final isDownloaded =
+        AudioDownloadService.instance.isDownloaded(widget.call.id);
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(widget.compact ? 10 : 14),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -188,7 +299,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Player Header: Label + Playback Speed + Download Icon
+          // Player Header: Label + Playback Speed + Smart Download Icon
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -203,7 +314,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                   Text(
                     'Call Recording',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: widget.compact ? 12 : 13,
                       fontWeight: FontWeight.w800,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
@@ -217,7 +328,8 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                     onTap: _toggleSpeed,
                     borderRadius: BorderRadius.circular(6),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2.5),
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white10 : Colors.white,
                         borderRadius: BorderRadius.circular(6),
@@ -237,23 +349,29 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                   ),
                   const SizedBox(width: 8),
 
-                  // Download button
+                  // Smart Download button with status feedback
                   InkWell(
-                    onTap: () {
-                      AppUtils.showSnackBar(
-                        context: context,
-                        extraMessage: 'Downloading audio recording for ${widget.call.fullName}...',
-                        toastificationType: ToastificationType.success,
-                      );
-                    },
+                    onTap: _handleDownload,
                     borderRadius: BorderRadius.circular(6),
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        CupertinoIcons.arrow_down_to_line,
-                        size: 14,
-                        color: context.colors.darkGreyColor,
-                      ),
+                      child: _isDownloading
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 1.8,
+                              ),
+                            )
+                          : Icon(
+                              isDownloaded
+                                  ? CupertinoIcons.checkmark_alt_circle_fill
+                                  : CupertinoIcons.arrow_down_to_line,
+                              size: 14,
+                              color: isDownloaded
+                                  ? context.colors.successColor
+                                  : context.colors.darkGreyColor,
+                            ),
                     ),
                   ),
                 ],
@@ -271,22 +389,25 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                 onTap: _togglePlayPause,
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: widget.compact ? 32 : 36,
+                  height: widget.compact ? 32 : 36,
                   decoration: BoxDecoration(
                     color: context.colors.primaryLightColor,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: context.colors.primaryLightColor.withValues(alpha: 0.35),
+                        color: context.colors.primaryLightColor
+                            .withValues(alpha: 0.35),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                   child: Icon(
-                    _isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill,
-                    size: 16,
+                    _isPlaying
+                        ? CupertinoIcons.pause_fill
+                        : CupertinoIcons.play_fill,
+                    size: widget.compact ? 14 : 16,
                     color: Colors.white,
                   ),
                 ),
@@ -300,30 +421,38 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                     // Interactive Waveform Visualizer
                     GestureDetector(
                       onHorizontalDragUpdate: (details) {
-                        final RenderBox box = context.findRenderObject() as RenderBox;
+                        final RenderBox? box =
+                            context.findRenderObject() as RenderBox?;
+                        if (box == null) return;
                         final localPos = details.localPosition.dx;
-                        final progress = (localPos / (box.size.width - 120)).clamp(0.0, 1.0);
+                        final progress =
+                            (localPos / (box.size.width - 100)).clamp(0.0, 1.0);
                         _seekTo(progress);
                       },
                       onTapDown: (details) {
-                        final RenderBox box = context.findRenderObject() as RenderBox;
+                        final RenderBox? box =
+                            context.findRenderObject() as RenderBox?;
+                        if (box == null) return;
                         final localPos = details.localPosition.dx;
-                        final progress = (localPos / (box.size.width - 120)).clamp(0.0, 1.0);
+                        final progress =
+                            (localPos / (box.size.width - 100)).clamp(0.0, 1.0);
                         _seekTo(progress);
                       },
                       child: SizedBox(
-                        height: 28,
+                        height: widget.compact ? 22 : 28,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: List.generate(_waveformData.length, (index) {
-                            final barProgress = (index + 1) / _waveformData.length;
+                            final barProgress =
+                                (index + 1) / _waveformData.length;
                             final isPassed = barProgress <= _playbackProgress;
                             final heightFactor = _waveformData[index];
 
                             return Expanded(
                               child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 1),
-                                height: 28 * heightFactor,
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 1),
+                                height: (widget.compact ? 22 : 28) * heightFactor,
                                 decoration: BoxDecoration(
                                   color: isPassed
                                       ? context.colors.primaryLightColor

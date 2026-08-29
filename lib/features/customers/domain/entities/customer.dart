@@ -297,6 +297,8 @@ class CustomerCallHistory {
     required this.transcript,
     required this.notes,
     required this.createdAt,
+    this.summary,
+    this.leadPriority = 'Warm',
   });
 
   final String id;
@@ -312,14 +314,23 @@ class CustomerCallHistory {
   final String? recordingUrl;
   final List<TranscriptTurn> transcript;
   final String? notes;
+  final String? summary;
+  final String leadPriority;
   final DateTime? createdAt;
 }
 
 class TranscriptTurn {
-  const TranscriptTurn({required this.speaker, required this.text});
+  const TranscriptTurn({
+    required this.speaker,
+    required this.text,
+    this.speakerName,
+    this.timestamp = '00:00',
+  });
 
   final String speaker;
   final String text;
+  final String? speakerName;
+  final String timestamp;
 }
 
 DateTime? _date(Object? value) => value == null || value == 'Never'
@@ -357,26 +368,30 @@ List<CustomerCallHistory> _calls(Object? value) => value is List
     ? value
         .whereType<Map>()
         .map((e) => CustomerCallHistory(
-            id: '${e['id']}',
-            status: '${e['status'] ?? ''}',
-            direction: '${e['direction'] ?? ''}',
-            outcome: '${e['outcome'] ?? ''}',
-            duration: '${e['duration'] ?? ''}',
-            durationSeconds: _intValue(e['durationSeconds']),
-            scheduledFor: _date(e['scheduledFor']),
-            callDate: '${e['callDate'] ?? ''}',
-            callTime: '${e['callTime'] ?? ''}',
-            scenario: e['scenario']?.toString(),
-            recordingUrl: e['recordingUrl']?.toString(),
+            id: '${e['id'] ?? ''}',
+            status: '${e['status'] ?? 'Completed'}',
+            direction: '${e['direction'] ?? 'Outbound'}',
+            outcome: '${e['outcome'] ?? e['last_contact_result'] ?? e['lastContactResult'] ?? 'Interested'}',
+            duration: '${e['duration'] ?? '01:30'}',
+            durationSeconds: _intValue(e['durationSeconds'] ?? e['duration_seconds']),
+            scheduledFor: _date(e['scheduledFor'] ?? e['scheduled_for']),
+            callDate: '${e['callDate'] ?? e['call_date'] ?? ''}',
+            callTime: '${e['callTime'] ?? e['call_time'] ?? ''}',
+            scenario: (e['scenario'] ?? e['agent'])?.toString(),
+            recordingUrl: (e['recordingUrl'] ?? e['recording_url'])?.toString(),
+            summary: (e['summary'] ?? e['ai_summary'] ?? e['notes'])?.toString(),
+            leadPriority: '${e['leadPriority'] ?? e['lead_priority'] ?? 'Warm'}',
             transcript: e['transcript'] is List
                 ? (e['transcript'] as List)
                     .whereType<Map>()
                     .map((t) => TranscriptTurn(
-                        speaker: '${t['speaker'] ?? ''}',
-                        text: '${t['text'] ?? ''}'))
+                        speaker: '${t['speaker'] ?? 'ai'}',
+                        speakerName: t['speakerName']?.toString() ?? t['speaker_name']?.toString(),
+                        timestamp: '${t['timestamp'] ?? t['time'] ?? '00:00'}',
+                        text: '${t['text'] ?? t['content'] ?? ''}'))
                     .toList()
                 : const [],
             notes: e['notes']?.toString(),
-            createdAt: _date(e['createdAt'])))
+            createdAt: _date(e['createdAt'] ?? e['created_at'])))
         .toList()
     : const [];

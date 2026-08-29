@@ -22,6 +22,7 @@ dependencies:
   dropdown_button2: ^2.3.9
   flutter_colorpicker: ^1.1.0
   file_picker: ^8.1.7
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
