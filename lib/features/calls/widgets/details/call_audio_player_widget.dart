@@ -241,6 +241,14 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     super.dispose();
   }
 
+  String get _formattedSpeed {
+    if (_playbackSpeed == 1.0) return '1x';
+    if (_playbackSpeed == 1.25) return '1.25x';
+    if (_playbackSpeed == 1.5) return '1.5x';
+    if (_playbackSpeed == 2.0) return '2x';
+    return '${_playbackSpeed}x';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -251,41 +259,49 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
           width: 1,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Play / Pause Round Button
+          // Play / Pause Round Button with Smooth Gradient and Glow
           InkWell(
             onTap: _togglePlayPause,
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
-                color: context.colors.primaryLightColor,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF6366F1),
+                    Color(0xFF4F46E5),
+                  ],
+                ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: context.colors.primaryLightColor
-                        .withValues(alpha: 0.35),
-                    blurRadius: 6,
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.35),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(
-                _isPlaying
-                    ? CupertinoIcons.pause_fill
-                    : CupertinoIcons.play_fill,
-                size: 16,
-                color: Colors.white,
+              child: Center(
+                child: Icon(
+                  _isPlaying
+                      ? CupertinoIcons.pause_fill
+                      : CupertinoIcons.play_fill,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -296,11 +312,12 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
             '${_formatTime(_currentSeconds)} / ${_formatTime(_totalSeconds)}',
             style: TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
 
           // Track Slider
           Expanded(
@@ -328,14 +345,14 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
 
-          // Mute / Unmute Button
+          // Mute / Unmute Volume Button
           IconButton(
             onPressed: _toggleMute,
-            splashRadius: 18,
+            splashRadius: 16,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
             icon: Icon(
               _isMuted
                   ? CupertinoIcons.speaker_slash_fill
@@ -349,26 +366,29 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
           ),
           const SizedBox(width: 4),
 
-          // Speed Button (1.0x, 1.25x, 1.5x, 2.0x)
+          // Speed Button with FIXED WIDTH to prevent resizing jitter (1x, 1.25x, 1.5x, 2x)
           InkWell(
             onTap: _toggleSpeed,
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(8),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+              width: 44,
+              height: 28,
               decoration: BoxDecoration(
-                color: isDark ? Colors.white10 : Colors.white,
-                borderRadius: BorderRadius.circular(6),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isDark ? Colors.white12 : Colors.grey[300]!,
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  width: 1,
                 ),
               ),
-              child: Text(
-                '${_playbackSpeed}x',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.primaryLightColor,
+              child: Center(
+                child: Text(
+                  _formattedSpeed,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.primaryLightColor,
+                  ),
                 ),
               ),
             ),
@@ -378,9 +398,9 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
           // Smart Download Button
           IconButton(
             onPressed: _handleDownload,
-            splashRadius: 18,
+            splashRadius: 16,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
             icon: _isDownloading
                 ? const SizedBox(
                     width: 14,
@@ -405,3 +425,4 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     );
   }
 }
+
