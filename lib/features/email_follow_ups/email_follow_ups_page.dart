@@ -304,44 +304,47 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Stat Cards Row
-        Row(
-          children: [
-            StatCardWidget(
-              label: 'TOTAL SENT EMAILS',
-              value: _allEmails.length.toString(),
-              icon: CupertinoIcons.mail_solid,
-              iconColor: context.colors.primaryLightColor,
-              iconBgColor:
-                  context.colors.primaryLightColor.withValues(alpha: 0.1),
-            ),
-            const SizedBox(width: 14),
-            StatCardWidget(
-              label: 'DELIVERED',
-              value: deliveredCount.toString(),
-              icon: CupertinoIcons.checkmark_seal_fill,
-              iconColor: const Color(0xFF10B981),
-              iconBgColor: const Color(0xFF10B981).withValues(alpha: 0.1),
-            ),
-            const SizedBox(width: 14),
-            StatCardWidget(
-              label: 'ACTIVE TEMPLATES',
-              value: _allTemplates.length.toString(),
-              icon: CupertinoIcons.square_stack_3d_up_fill,
-              iconColor: const Color(0xFF8B5CF6),
-              iconBgColor: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
-            ),
-            const SizedBox(width: 14),
-            StatCardWidget(
-              label: 'DELIVERY RATE',
-              value: _allEmails.isEmpty
-                  ? '100%'
-                  : '${((deliveredCount / _allEmails.length) * 100).toInt()}%',
-              icon: CupertinoIcons.graph_circle_fill,
-              iconColor: context.colors.warningColor,
-              iconBgColor:
-                  context.colors.warningColor.withValues(alpha: 0.1),
-            ),
-          ],
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StatCardWidget(
+                label: 'TOTAL SENT EMAILS',
+                value: _allEmails.length.toString(),
+                icon: CupertinoIcons.mail_solid,
+                iconColor: context.colors.primaryLightColor,
+                iconBgColor:
+                    context.colors.primaryLightColor.withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: 'DELIVERED',
+                value: deliveredCount.toString(),
+                icon: CupertinoIcons.checkmark_seal_fill,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFF10B981).withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: 'ACTIVE TEMPLATES',
+                value: _allTemplates.length.toString(),
+                icon: CupertinoIcons.square_stack_3d_up_fill,
+                iconColor: const Color(0xFF8B5CF6),
+                iconBgColor: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: 'DELIVERY RATE',
+                value: _allEmails.isEmpty
+                    ? '100%'
+                    : '${((deliveredCount / _allEmails.length) * 100).toInt()}%',
+                icon: CupertinoIcons.graph_circle_fill,
+                iconColor: context.colors.warningColor,
+                iconBgColor:
+                    context.colors.warningColor.withValues(alpha: 0.1),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
     
@@ -367,13 +370,14 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         // Main Card with Tabs
         Expanded(
           child: Container(
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.onPrimary,
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               border: Border.all(
                 color: isDark
-                    ? Colors.white10
-                    : context.colors.lightGreyColor,
+                    ? const Color(0xFF1E293B)
+                    : context.colors.mediumGreyColor.withValues(alpha: 0.35),
               ),
             ),
             child: Column(
@@ -479,16 +483,21 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       columnSpacing: 16,
       horizontalMargin: 18,
       minWidth: 1200,
-      headingRowHeight: 46,
-      dataRowHeight: 56,
-      headingRowColor: WidgetStatePropertyAll(
-        isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey[100],
-      ),
+      headingRowHeight: 52,
+      dataRowHeight: 70,
+      showCheckboxColumn: false,
+      dividerThickness: 0.5,
+      headingRowColor: WidgetStatePropertyAll(context.colors.skyBlueColor),
       headingTextStyle: TextStyle(
-        fontWeight: FontWeight.w800,
-        color: isDark ? Colors.white70 : Colors.black87,
+        fontWeight: FontWeight.w700,
+        color: context.colors.darkGreyColor,
         fontSize: 11.5,
         letterSpacing: 0.6,
+      ),
+      dataTextStyle: TextStyle(
+        fontSize: 12.5,
+        color: Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500,
       ),
       columns: const [
         DataColumn2(label: Text('RECIPIENT CONTACT'), size: ColumnSize.L),
@@ -505,6 +514,14 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         final attachments = email['attachments'] as List?;
 
         return DataRow2(
+          color: WidgetStateProperty.resolveWith<Color?>((s) {
+            if (s.contains(WidgetState.hovered)) {
+              return isDark
+                  ? Colors.white.withValues(alpha: 0.035)
+                  : context.colors.primaryLightColor.withValues(alpha: 0.04);
+            }
+            return null;
+          }),
           cells: [
             // Contact Name & Email
             DataCell(

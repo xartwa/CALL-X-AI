@@ -136,39 +136,45 @@ class _CustomersPageState extends State<CustomersPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Stats Banner Row
-            Row(
-              spacing: 12,
-              children: [
-                StatCardWidget(
-                  label: AppStrings.current.customersTotalCustomers,
-                  value: '$totalUsers',
-                  icon: CupertinoIcons.group_solid,
-                  iconColor: context.colors.primaryLightColor,
-                  iconBgColor:
-                      context.colors.primaryLightColor.withOpacity(0.12),
-                ),
-                StatCardWidget(
-                  label: AppStrings.current.customersActiveAccounts,
-                  value: '$activeUsers',
-                  icon: CupertinoIcons.checkmark_alt_circle,
-                  iconColor: context.colors.successColor,
-                  iconBgColor: context.colors.successColor.withOpacity(0.12),
-                ),
-                StatCardWidget(
-                  label: AppStrings.current.customersInactiveAccounts,
-                  value: '$deactiveUsers',
-                  icon: CupertinoIcons.minus_circle,
-                  iconColor: context.colors.errorColor,
-                  iconBgColor: context.colors.errorColor.withOpacity(0.12),
-                ),
-                StatCardWidget(
-                  label: AppStrings.current.customersContactedToday,
-                  value: '$contactedUsers',
-                  icon: CupertinoIcons.phone_badge_plus,
-                  iconColor: context.colors.queuedColor,
-                  iconBgColor: context.colors.queuedColor.withOpacity(0.12),
-                ),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 12,
+                children: [
+                  StatCardWidget(
+                    label: AppStrings.current.customersTotalCustomers,
+                    value: '$totalUsers',
+                    icon: CupertinoIcons.group_solid,
+                    iconColor: context.colors.primaryLightColor,
+                    iconBgColor:
+                        context.colors.primaryLightColor.withValues(alpha: 0.12),
+                  ),
+                  StatCardWidget(
+                    label: AppStrings.current.customersActiveAccounts,
+                    value: '$activeUsers',
+                    icon: CupertinoIcons.checkmark_alt_circle,
+                    iconColor: context.colors.successColor,
+                    iconBgColor:
+                        context.colors.successColor.withValues(alpha: 0.12),
+                  ),
+                  StatCardWidget(
+                    label: AppStrings.current.customersInactiveAccounts,
+                    value: '$deactiveUsers',
+                    icon: CupertinoIcons.minus_circle,
+                    iconColor: context.colors.errorColor,
+                    iconBgColor:
+                        context.colors.errorColor.withValues(alpha: 0.12),
+                  ),
+                  StatCardWidget(
+                    label: AppStrings.current.customersContactedToday,
+                    value: '$contactedUsers',
+                    icon: CupertinoIcons.phone_badge_plus,
+                    iconColor: context.colors.queuedColor,
+                    iconBgColor:
+                        context.colors.queuedColor.withValues(alpha: 0.12),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             CustomersHeaders(
@@ -247,6 +253,12 @@ class _CustomersPageState extends State<CustomersPage> {
                 color: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                  side: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF1E293B)
+                        : context.colors.mediumGreyColor.withValues(alpha: 0.35),
+                    width: 1,
+                  ),
                 ),
                 child: state.isRefreshing && paginatedUsers.isEmpty
                     ? const AppLoadingView(compact: true)

@@ -321,42 +321,45 @@ class _CallsPageState extends State<CallsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      spacing: 16,
-                      children: [
-                        StatCardWidget(
-                          label: AppStrings.current.callsTotalCalls,
-                          value: '$totalFilteredCalls',
-                          icon: CupertinoIcons.phone,
-                          iconColor: context.colors.primaryLightColor,
-                          iconBgColor: context.colors.primaryLightColor
-                              .withValues(alpha: 0.12),
-                        ),
-                        StatCardWidget(
-                          label: AppStrings.current.callsCompletedCalls,
-                          value: '$completedCalls',
-                          icon: CupertinoIcons.checkmark_alt_circle,
-                          iconColor: context.colors.successColor,
-                          iconBgColor:
-                              context.colors.successColor.withValues(alpha: 0.12),
-                        ),
-                        StatCardWidget(
-                          label: AppStrings.current.callsFailedCalls,
-                          value: '$failedCalls',
-                          icon: CupertinoIcons.clear_thick_circled,
-                          iconColor: context.colors.errorColor,
-                          iconBgColor:
-                              context.colors.errorColor.withValues(alpha: 0.12),
-                        ),
-                        StatCardWidget(
-                          label: AppStrings.current.callsPendingUpcoming,
-                          value: '$pendingCalls',
-                          icon: CupertinoIcons.clock,
-                          iconColor: context.colors.queuedColor,
-                          iconBgColor:
-                              context.colors.queuedColor.withValues(alpha: 0.12),
-                        ),
-                      ],
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 12,
+                        children: [
+                          StatCardWidget(
+                            label: AppStrings.current.callsTotalCalls,
+                            value: '$totalFilteredCalls',
+                            icon: CupertinoIcons.phone,
+                            iconColor: context.colors.primaryLightColor,
+                            iconBgColor: context.colors.primaryLightColor
+                                .withValues(alpha: 0.12),
+                          ),
+                          StatCardWidget(
+                            label: AppStrings.current.callsCompletedCalls,
+                            value: '$completedCalls',
+                            icon: CupertinoIcons.checkmark_alt_circle,
+                            iconColor: context.colors.successColor,
+                            iconBgColor:
+                                context.colors.successColor.withValues(alpha: 0.12),
+                          ),
+                          StatCardWidget(
+                            label: AppStrings.current.callsFailedCalls,
+                            value: '$failedCalls',
+                            icon: CupertinoIcons.clear_thick_circled,
+                            iconColor: context.colors.errorColor,
+                            iconBgColor:
+                                context.colors.errorColor.withValues(alpha: 0.12),
+                          ),
+                          StatCardWidget(
+                            label: AppStrings.current.callsPendingUpcoming,
+                            value: '$pendingCalls',
+                            icon: CupertinoIcons.clock,
+                            iconColor: context.colors.queuedColor,
+                            iconBgColor:
+                                context.colors.queuedColor.withValues(alpha: 0.12),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 16),
                     CallsHeaders(
@@ -407,6 +410,13 @@ class _CallsPageState extends State<CallsPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius:
                               BorderRadius.circular(ThemeConstants.boxRadius),
+                          side: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF1E293B)
+                                : context.colors.mediumGreyColor
+                                    .withValues(alpha: 0.35),
+                            width: 1,
+                          ),
                         ),
                         child: Column(
                           children: [

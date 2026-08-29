@@ -146,47 +146,49 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
   @override
   Widget build(BuildContext context) {
     final text = AppStrings.current;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return DataTable2(
       columnSpacing: 16,
-      horizontalMargin: 16,
-      minWidth: 1600,
-      headingRowHeight: 55,
-      dataRowHeight: 64,
+      horizontalMargin: 18,
+      minWidth: 1500,
+      headingRowHeight: 52,
+      dataRowHeight: 70,
       showCheckboxColumn: false,
       dividerThickness: 0.5,
       sortColumnIndex: _sortColumnIndex,
       sortAscending: _sortAscending,
       headingRowColor: WidgetStatePropertyAll(context.colors.skyBlueColor),
       headingTextStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        color: context.colors.blackColor,
-        fontSize: 12,
-        letterSpacing: 0.3,
+        fontWeight: FontWeight.w700,
+        color: context.colors.darkGreyColor,
+        fontSize: 11.5,
+        letterSpacing: 0.6,
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: context.colors.blackColor.withValues(alpha: 0.87),
+        color: Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500,
       ),
       columns: [
         DataColumn2(
-            label: const Text('Contact'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('CONTACT'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Company'), size: ColumnSize.L, onSort: _sort),
-        DataColumn2(label: Text(text.phone), size: ColumnSize.L, onSort: _sort),
+            label: const Text('COMPANY'), size: ColumnSize.L, onSort: _sort),
+        DataColumn2(label: Text(text.phone.toUpperCase()), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Duration'), size: ColumnSize.M, onSort: _sort),
+            label: const Text('DURATION'), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: Text(text.dateTime), size: ColumnSize.L, onSort: _sort),
+            label: Text(text.dateTime.toUpperCase()), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Priority'), size: ColumnSize.M, onSort: _sort),
+            label: const Text('PRIORITY'), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: Text(text.status), size: ColumnSize.M, onSort: _sort),
+            label: Text(text.status.toUpperCase()), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: Text(text.assignee), size: ColumnSize.M, onSort: _sort),
+            label: Text(text.assignee.toUpperCase()), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: const Text('Follow-Up'), size: ColumnSize.M, onSort: _sort),
-        DataColumn2(label: Text(text.actions), size: ColumnSize.L),
+            label: const Text('FOLLOW-UP'), size: ColumnSize.M, onSort: _sort),
+        DataColumn2(label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
       ],
       rows: _sortedCalls.map((call) {
         final isSelected =
@@ -198,10 +200,14 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
               context.read<SelectedCallCubit>().selectCall(call),
           color: WidgetStateProperty.resolveWith<Color?>((s) {
             if (s.contains(WidgetState.selected)) {
-              return context.colors.skyBlueColor.withValues(alpha: 0.4);
+              return isDark
+                  ? const Color(0xFF1D284F).withValues(alpha: 0.45)
+                  : context.colors.primaryLightColor.withValues(alpha: 0.09);
             }
             if (s.contains(WidgetState.hovered)) {
-              return context.colors.skyBlueColor.withValues(alpha: 0.25);
+              return isDark
+                  ? Colors.white.withValues(alpha: 0.035)
+                  : context.colors.primaryLightColor.withValues(alpha: 0.04);
             }
             return null;
           }),

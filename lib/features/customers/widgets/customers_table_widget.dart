@@ -156,53 +156,63 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final text = AppStrings.current;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return DataTable2(
       columnSpacing: 16,
-      horizontalMargin: 16,
-      minWidth: 1600,
-      headingRowHeight: 55,
-      dataRowHeight: 64,
+      horizontalMargin: 18,
+      minWidth: 1500,
+      headingRowHeight: 52,
+      dataRowHeight: 70,
       showCheckboxColumn: false,
       dividerThickness: 0.5,
       sortColumnIndex: _sortColumnIndex,
       sortAscending: _sortAscending,
       headingRowColor: WidgetStatePropertyAll(context.colors.skyBlueColor),
       headingTextStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        color: context.colors.blackColor,
-        fontSize: 12,
-        letterSpacing: 0.3,
+        fontWeight: FontWeight.w700,
+        color: context.colors.darkGreyColor,
+        fontSize: 11.5,
+        letterSpacing: 0.6,
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: context.colors.blackColor.withOpacity(0.87),
+        color: Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w500,
       ),
       columns: [
         DataColumn2(
-            label: const Text('Customer'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('CUSTOMER'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Company'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('COMPANY'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Phone'), size: ColumnSize.L, onSort: _sort),
+            label: Text(text.phone.toUpperCase()), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Email'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('EMAIL'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Location'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('LOCATION'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Priority'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('PRIORITY'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Lead'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('LEAD'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Tag'), size: ColumnSize.L, onSort: _sort),
+            label: const Text('TAG'), size: ColumnSize.L, onSort: _sort),
         DataColumn2(
-            label: const Text('Follow-Up'), size: ColumnSize.L, onSort: _sort),
-        DataColumn2(label: Text(text.actions), size: ColumnSize.L),
+            label: const Text('FOLLOW-UP'), size: ColumnSize.L, onSort: _sort),
+        DataColumn2(label: Text(text.actions.toUpperCase()), size: ColumnSize.L),
       ],
       rows: _sortedUsers.map((user) {
+        final initials = user.fullName.trim().isEmpty
+            ? '?'
+            : user.fullName.trim()[0].toUpperCase();
+
         return DataRow2(
           color: WidgetStateProperty.resolveWith<Color?>((s) {
             if (s.contains(WidgetState.hovered)) {
-              return context.colors.skyBlueColor.withOpacity(0.25);
+              return isDark
+                  ? Colors.white.withValues(alpha: 0.035)
+                  : context.colors.primaryLightColor.withValues(alpha: 0.04);
             }
             return null;
           }),
@@ -210,14 +220,40 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             DataCell(InkWell(
               onTap: () => context.goNamed(AppRoutesPath.customerDetailName,
                   pathParameters: {'id': user.id.toString()}),
-              child: Text(
-                user.fullName.isNotEmpty ? user.fullName : 'No Name',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: context.colors.primaryLightColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        initials,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: context.colors.primaryLightColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      user.fullName.isNotEmpty ? user.fullName : 'No Name',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             )),
 

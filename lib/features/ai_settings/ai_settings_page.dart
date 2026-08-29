@@ -83,41 +83,44 @@ class _AiSettingsPageState extends State<AiSettingsPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Stat Cards Row
-        Row(
-          children: [
-            StatCardWidget(
-              label: 'AI CALL LINES',
-              value: '10 Active',
-              icon: CupertinoIcons.phone_badge_plus,
-              iconColor: context.colors.primaryLightColor,
-              iconBgColor:
-                  context.colors.primaryLightColor.withValues(alpha: 0.1),
-            ),
-            const SizedBox(width: 16),
-            StatCardWidget(
-              label: 'SELECTED VOICE',
-              value: 'Sarah (US)',
-              icon: CupertinoIcons.mic_circle_fill,
-              iconColor: const Color(0xFF10B981),
-              iconBgColor: const Color(0xFF10B981).withValues(alpha: 0.1),
-            ),
-            const SizedBox(width: 16),
-            StatCardWidget(
-              label: 'OUTBOUND CAMPAIGN',
-              value: 'B2B Sales',
-              icon: CupertinoIcons.phone_arrow_up_right,
-              iconColor: const Color(0xFF8B5CF6),
-              iconBgColor: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
-            ),
-            const SizedBox(width: 16),
-            StatCardWidget(
-              label: 'INBOUND RECEPTION',
-              value: '24/7 Active',
-              icon: CupertinoIcons.phone_arrow_down_left,
-              iconColor: context.colors.warningColor,
-              iconBgColor: context.colors.warningColor.withValues(alpha: 0.1),
-            ),
-          ],
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StatCardWidget(
+                label: 'AI CALL LINES',
+                value: '10 Active',
+                icon: CupertinoIcons.phone_badge_plus,
+                iconColor: context.colors.primaryLightColor,
+                iconBgColor:
+                    context.colors.primaryLightColor.withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 16),
+              StatCardWidget(
+                label: 'SELECTED VOICE',
+                value: 'Sarah (US)',
+                icon: CupertinoIcons.mic_circle_fill,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFF10B981).withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 16),
+              StatCardWidget(
+                label: 'OUTBOUND CAMPAIGN',
+                value: 'B2B Sales',
+                icon: CupertinoIcons.phone_arrow_up_right,
+                iconColor: const Color(0xFF8B5CF6),
+                iconBgColor: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 16),
+              StatCardWidget(
+                label: 'INBOUND RECEPTION',
+                value: '24/7 Active',
+                icon: CupertinoIcons.phone_arrow_down_left,
+                iconColor: context.colors.warningColor,
+                iconBgColor: context.colors.warningColor.withValues(alpha: 0.1),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
         

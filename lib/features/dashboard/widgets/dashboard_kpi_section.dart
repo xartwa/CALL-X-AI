@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
@@ -18,44 +19,46 @@ class DashboardKpiSection extends StatelessWidget {
           return const _KpiLoading();
         }
         if (kpi == null) return const SizedBox.shrink();
-        return Row(
-          children: [
-            Expanded(
-              child: _KpiCard(
-                title: "Total Calls",
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StatCardWidget(
+                label: "Total Calls",
                 value: "${kpi.totalCalls}",
                 icon: CupertinoIcons.phone_fill,
                 iconColor: context.colors.primaryLightColor,
+                iconBgColor:
+                    context.colors.primaryLightColor.withValues(alpha: 0.12),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _KpiCard(
-                title: "Calls Today",
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: "Calls Today",
                 value: "${kpi.callsToday}",
                 icon: CupertinoIcons.phone_badge_plus,
                 iconColor: context.colors.warningColor,
+                iconBgColor:
+                    context.colors.warningColor.withValues(alpha: 0.12),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _KpiCard(
-                title: "Success Rate",
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: "Success Rate",
                 value: "${kpi.successRate.toStringAsFixed(1)}%",
                 icon: CupertinoIcons.checkmark_alt_circle,
                 iconColor: context.colors.successColor,
+                iconBgColor:
+                    context.colors.successColor.withValues(alpha: 0.12),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _KpiCard(
-                title: "Total Follow-ups",
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: "Total Follow-ups",
                 value: "${kpi.totalFollowUps}",
                 icon: CupertinoIcons.mail_solid,
                 iconColor: const Color(0xFF8B5CF6),
+                iconBgColor: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -71,12 +74,12 @@ class _KpiLoading extends StatelessWidget {
           4,
           (index) => Expanded(
             child: Padding(
-              padding: EdgeInsets.only(right: index == 3 ? 0 : 16),
+              padding: EdgeInsets.only(right: index == 3 ? 0 : 14),
               child: SizedBox(
-                height: 112,
+                height: 82,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: context.colors.whiteColor,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const AppLoadingView(compact: true),
@@ -88,84 +91,3 @@ class _KpiLoading extends StatelessWidget {
       );
 }
 
-class _KpiCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color iconColor;
-
-  const _KpiCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.whiteColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.colors.mediumGreyColor.withValues(alpha: 0.25),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                      color: context.colors.darkGreyColor,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: iconColor,
-                      size: 18,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: context.colors.blackColor,
-                  letterSpacing: -1.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
