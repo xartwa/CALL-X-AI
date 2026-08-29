@@ -48,6 +48,7 @@ class CallHistoryModel {
   final List<String> tags;
   final String? recordingUrl;
   final List<CallTranscriptMessage> transcript;
+  final String direction; // 'Inbound' or 'Outbound'
 
   CallHistoryModel({
     required this.id,
@@ -68,6 +69,7 @@ class CallHistoryModel {
     this.tags = const [],
     this.recordingUrl,
     this.transcript = const [],
+    this.direction = 'Outbound',
   });
 
   CallHistoryModel copyWith({
@@ -89,6 +91,7 @@ class CallHistoryModel {
     List<String>? tags,
     String? recordingUrl,
     List<CallTranscriptMessage>? transcript,
+    String? direction,
   }) {
     return CallHistoryModel(
       id: id ?? this.id,
@@ -109,6 +112,7 @@ class CallHistoryModel {
       tags: tags ?? this.tags,
       recordingUrl: recordingUrl ?? this.recordingUrl,
       transcript: transcript ?? this.transcript,
+      direction: direction ?? this.direction,
     );
   }
 
@@ -131,6 +135,7 @@ class CallHistoryModel {
         'statusColor': statusColor?.toARGB32(),
         'recordingUrl': recordingUrl,
         'transcript': transcript.map((t) => t.toJson()).toList(),
+        'direction': direction,
       };
 
   factory CallHistoryModel.fromJson(
@@ -160,6 +165,8 @@ class CallHistoryModel {
     final fullName = json['fullName'] as String? ?? 'Contact';
     final status = json['status'] as String? ?? 'Completed';
     final assignee = json['assignee'] as String? ?? 'AI Assistant';
+    final direction = json['direction'] as String? ??
+        (json['callDirection'] as String? ?? 'Outbound');
 
     if (parsedTranscript.isEmpty && status == 'Completed') {
       parsedTranscript = _generateDefaultTranscript(fullName, assignee);
@@ -184,6 +191,7 @@ class CallHistoryModel {
       statusColor: color,
       recordingUrl: json['recordingUrl'] as String?,
       transcript: parsedTranscript,
+      direction: direction,
     );
   }
 

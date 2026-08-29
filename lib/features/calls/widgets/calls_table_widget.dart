@@ -93,11 +93,6 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
                 a.assignee.toLowerCase().compareTo(b.assignee.toLowerCase());
             break;
           case 8:
-            final tagA = a.tags.isNotEmpty ? a.tags.first.toLowerCase() : '';
-            final tagB = b.tags.isNotEmpty ? b.tags.first.toLowerCase() : '';
-            result = tagA.compareTo(tagB);
-            break;
-          case 9:
             result = (a.nextFollowUpDate ?? '')
                 .compareTo(b.nextFollowUpDate ?? '');
             break;
@@ -190,8 +185,6 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
         DataColumn2(
             label: Text(text.assignee), size: ColumnSize.M, onSort: _sort),
         DataColumn2(
-            label: const Text('Tag'), size: ColumnSize.M, onSort: _sort),
-        DataColumn2(
             label: const Text('Follow-Up'), size: ColumnSize.M, onSort: _sort),
         DataColumn2(label: Text(text.actions), size: ColumnSize.L),
       ],
@@ -213,17 +206,48 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
             return null;
           }),
           cells: [
-            // Contact Name (Clickable)
+            // Contact Name (Clickable) with Call Direction Icon
             DataCell(InkWell(
               onTap: () => context.read<SelectedCallCubit>().selectCall(call),
-              child: Text(
-                call.fullName.isNotEmpty ? call.fullName : 'No Name',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Tooltip(
+                    message: call.direction == 'Inbound'
+                        ? 'Incoming Call (Inbound)'
+                        : 'Outgoing Call (Outbound)',
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: (call.direction.toLowerCase() == 'inbound')
+                            ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                            : const Color(0xFF6366F1).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Icon(
+                        (call.direction.toLowerCase() == 'inbound')
+                            ? CupertinoIcons.phone_arrow_down_left
+                            : CupertinoIcons.phone_arrow_up_right,
+                        size: 11,
+                        color: (call.direction.toLowerCase() == 'inbound')
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFF6366F1),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      call.fullName.isNotEmpty ? call.fullName : 'No Name',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             )),
 
@@ -349,16 +373,6 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
               ],
             )),
 
-            // Tag
-            DataCell(
-              call.tags.isEmpty
-                  ? Text('-',
-                      style: TextStyle(color: context.colors.darkGreyColor))
-                  : CustomTagWidget(
-                      label: call.tags.first,
-                      color: _getSemanticColor(context, call.tags.first),
-                    ),
-            ),
 
             // Follow-Up
             DataCell(Text(

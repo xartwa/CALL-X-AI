@@ -8,7 +8,6 @@ import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/core/utils/utils.dart';
-import 'package:callx_ai/core/widgets/custom_tag_widget.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
@@ -35,14 +34,11 @@ class CallDetailsPanel extends StatefulWidget {
 }
 
 class _CallDetailsPanelState extends State<CallDetailsPanel> {
-  late final TextEditingController _notesCtrl;
   String? _followUpDate;
-  bool _isSavingNotes = false;
 
   @override
   void initState() {
     super.initState();
-    _notesCtrl = TextEditingController(text: widget.call.notes ?? '');
     _followUpDate = widget.call.nextFollowUpDate;
   }
 
@@ -50,15 +46,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
   void didUpdateWidget(CallDetailsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.call.id != widget.call.id) {
-      _notesCtrl.text = widget.call.notes ?? '';
       _followUpDate = widget.call.nextFollowUpDate;
     }
-  }
-
-  @override
-  void dispose() {
-    _notesCtrl.dispose();
-    super.dispose();
   }
 
   Color _getStatusColor(BuildContext context, String status) {
@@ -78,7 +67,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
 
     switch (widget.call.status) {
       case 'Completed':
-        return 'Customer (${widget.call.fullName}) was contacted by ${widget.call.assignee}. Key project scope, budget estimation, and delivery terms were discussed. Customer expressed strong interest in proceeding.';
+        return 'Customer (${widget.call.fullName}) was contacted by AI (B2B Sales).\nKey project scope, budget estimation, and delivery terms were discussed.\nCustomer expressed strong interest in proceeding.';
       case 'Failed':
         return 'Call was unanswered or disconnected. A follow-up attempt has been logged for scheduling.';
       case 'Queued':
@@ -117,50 +106,51 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     );
   }
 
-  void _saveNotesAndFollowUp() async {
-    setState(() => _isSavingNotes = true);
-    await Future.delayed(const Duration(milliseconds: 150));
+  void _saveFollowUpDate(String? newDate) {
+    setState(() {
+      _followUpDate = newDate;
+    });
 
     final updated = widget.call.copyWith(
-      notes: _notesCtrl.text.trim(),
-      nextFollowUpDate: _followUpDate ?? '',
+      nextFollowUpDate: newDate ?? '',
     );
 
     widget.onCallUpdated?.call(updated);
+    context.read<SelectedCallCubit>().updateFollowUpDate(newDate ?? '');
 
-    if (mounted) {
-      setState(() => _isSavingNotes = false);
-      AppUtils.showSnackBar(
-        context: context,
-        extraMessage: 'Call notes & follow-up saved',
-        toastificationType: ToastificationType.success,
-      );
-    }
+    AppUtils.showSnackBar(
+      context: context,
+      extraMessage: (newDate != null && newDate.isNotEmpty)
+          ? 'Follow-up scheduled for $newDate'
+          : 'Follow-up date cleared',
+      toastificationType: ToastificationType.success,
+    );
   }
 
   void _pickDate() async {
     final now = DateTime.now();
-    final picked = await showDatePicker(
+    DateTime initial = now.add(const Duration(days: 1));
+    if (_followUpDate != null && _followUpDate!.isNotEmpty) {
+      try {
+        final parts = _followUpDate!.split('/');
+        if (parts.length == 3) {
+          initial = DateTime(
+              int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+        }
+      } catch (_) {}
+    }
+
+    final picked = await AppUtils.showCustomDatePicker(
       context: context,
-      initialDate: now.add(const Duration(days: 1)),
+      initialDate: initial.isBefore(now) ? now : initial,
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
     );
 
     if (picked != null) {
       final formatted = DateFormat('yyyy/MM/dd').format(picked);
-      setState(() {
-        _followUpDate = formatted;
-      });
+      _saveFollowUpDate(formatted);
     }
-  }
-
-  void _setPresetDate(int daysToAdd) {
-    final target = DateTime.now().add(Duration(days: daysToAdd));
-    final formatted = DateFormat('yyyy/MM/dd').format(target);
-    setState(() {
-      _followUpDate = formatted;
-    });
   }
 
   void _navigateToCustomerProfile() {
@@ -170,8 +160,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
           u.phone == widget.call.phone || u.fullName == widget.call.fullName,
       orElse: () => customers.isNotEmpty
           ? customers.first
-          : User(
-              id: 1,
+          : Customer(
+              id: '1',
               fullName: widget.call.fullName,
               email: widget.call.email ?? '',
               phone: widget.call.phone,
@@ -194,6 +184,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
 
     final statusColor = widget.call.statusColor ??
         _getStatusColor(context, widget.call.status);
+
     final initials = widget.call.fullName.trim().isEmpty
         ? '?'
         : widget.call.fullName.trim()[0].toUpperCase();
@@ -207,7 +198,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
           color: isDark
-              ? Colors.white10
+              ? const Color(0xFF1E293B)
               : context.colors.lightGreyColor.withValues(alpha: 0.8),
           width: 1,
         ),
@@ -221,18 +212,18 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
       ),
       child: Column(
         children: [
-          // 1. Fixed Header Area
+          // 1. Exact Mockup Top Header Area
           Container(
-            padding: const EdgeInsets.fromLTRB(18, 16, 14, 14),
+            padding: const EdgeInsets.fromLTRB(20, 20, 18, 18),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              color: isDark ? const Color(0xFF0F172A) : Colors.white,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(ThemeConstants.boxRadius),
               ),
               border: Border(
                 bottom: BorderSide(
                   color: isDark
-                      ? Colors.white10
+                      ? const Color(0xFF1E293B)
                       : context.colors.mediumGreyColor,
                   width: 1,
                 ),
@@ -241,61 +232,160 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Status & Close Row
+                // Top Row: Avatar + Name + Status + Close
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomTagWidget(
-                      label: widget.call.status,
-                      color: statusColor,
-                    ),
-                    const SizedBox(width: 8),
-                    if (widget.call.duration.isNotEmpty &&
-                        widget.call.duration != '0:00') ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.white10 : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white12
-                                : Colors.grey[300]!,
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.timer,
-                              size: 11,
-                              color: context.colors.darkGreyColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              widget.call.duration,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: isDark
-                                    ? Colors.white70
-                                    : Colors.black87,
-                              ),
-                            ),
+                    // Smooth Rounded Avatar
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF6366F1),
+                            Color(0xFF4F46E5),
                           ],
                         ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6366F1)
+                                .withValues(alpha: 0.35),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                    ],
-                    const Spacer(),
+                      child: Center(
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+
+                    // Customer Name, Company, Phone
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  widget.call.fullName.isNotEmpty
+                                      ? widget.call.fullName
+                                      : 'Contact',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Status Pill Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: statusColor
+                                        .withValues(alpha: 0.4),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  widget.call.status,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: statusColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Company name (only shown if not empty)
+                          if (widget.call.companyName.isNotEmpty) ...[
+                            const SizedBox(height: 3),
+                            Text(
+                              widget.call.companyName,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: isDark
+                                    ? Colors.white60
+                                    : Colors.black54,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          const SizedBox(height: 5),
+                          // Phone with copy action
+                          InkWell(
+                            onTap: () => _copyToClipboard(
+                                widget.call.phone, 'Phone number'),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.phone_fill,
+                                  size: 12,
+                                  color: isDark
+                                      ? Colors.white60
+                                      : context.colors.darkGreyColor,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  widget.call.phone,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : Colors.black87,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  CupertinoIcons.doc_on_doc,
+                                  size: 12,
+                                  color: context.colors.primaryLightColor,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Top Right Close Button
                     IconButton(
                       tooltip: 'Close details',
                       onPressed: () =>
                           context.read<SelectedCallCubit>().clearSelection(),
                       icon: Icon(
-                        CupertinoIcons.clear_thick,
-                        size: 16,
-                        color: context.colors.darkGreyColor,
+                        CupertinoIcons.clear,
+                        size: 17,
+                        color: isDark
+                            ? Colors.white60
+                            : context.colors.darkGreyColor,
                       ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -303,102 +393,15 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
 
-                // Customer Info Row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: context.colors.primaryLightColor
-                          .withValues(alpha: 0.15),
-                      child: Text(
-                        initials,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: context.colors.primaryLightColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.call.fullName.isNotEmpty
-                                ? widget.call.fullName
-                                : 'Contact',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              if (widget.call.companyName.isNotEmpty) ...[
-                                Flexible(
-                                  child: Text(
-                                    widget.call.companyName,
-                                    style: TextStyle(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: context.colors.primaryLightColor,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Text(' • ',
-                                    style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: context.colors.darkGreyColor)),
-                              ],
-                              InkWell(
-                                onTap: () => _copyToClipboard(
-                                    widget.call.phone, 'Phone number'),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      widget.call.phone,
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: context.colors.darkGreyColor,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      CupertinoIcons.doc_on_doc,
-                                      size: 11,
-                                      color: context.colors.primaryLightColor,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // 2. Action Buttons Row (Direct Call, Schedule, View Profile)
+                // Action Buttons Row: Call Again & Customer Info
                 Row(
                   children: [
+                    // Call Again (Primary Solid)
                     Expanded(
-                      flex: 5,
                       child: SizedBox(
-                        height: 36,
+                        height: 40,
                         child: ElevatedButton.icon(
                           onPressed: () async {
                             await CallActionDialog.show(
@@ -415,11 +418,10 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                             color: Colors.white,
                           ),
                           label: const Text(
-                            'CALL',
+                            'Call Again',
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
                           ),
@@ -428,81 +430,44 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                 context.colors.primaryLightColor,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
+                    // Customer Info (Outlined / Tinted)
                     Expanded(
-                      flex: 5,
                       child: SizedBox(
-                        height: 36,
+                        height: 40,
                         child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await CallActionDialog.show(
-                              context,
-                              fullName: widget.call.fullName,
-                              phone: widget.call.phone,
-                              initialTab: 'schedule',
-                            );
-                            widget.onCallAdded();
-                          },
+                          onPressed: _navigateToCustomerProfile,
                           icon: Icon(
-                            CupertinoIcons.calendar,
-                            size: 13,
+                            CupertinoIcons.person_fill,
+                            size: 14,
                             color: context.colors.primaryLightColor,
                           ),
                           label: Text(
-                            'SCHEDULE',
+                            'Customer Info',
                             style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
                               color: context.colors.primaryLightColor,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
+                            backgroundColor: isDark
+                                ? const Color(0xFF131D31)
+                                : const Color(0xFFF1F5F9),
                             side: BorderSide(
                               color: context.colors.primaryLightColor
-                                  .withValues(alpha: 0.6),
-                              width: 1.1,
+                                  .withValues(alpha: 0.35),
+                              width: 1.2,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Tooltip(
-                      message: 'View Full CRM Profile',
-                      child: SizedBox(
-                        height: 36,
-                        width: 36,
-                        child: OutlinedButton(
-                          onPressed: _navigateToCustomerProfile,
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            side: BorderSide(
-                              color: isDark
-                                  ? Colors.white24
-                                  : context.colors.mediumGreyColor,
-                              width: 1,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                            ),
-                          ),
-                          child: Icon(
-                            CupertinoIcons.person_crop_circle,
-                            size: 16,
-                            color: context.colors.primaryLightColor,
                           ),
                         ),
                       ),
@@ -520,136 +485,303 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 3. Audio Recording Player
-                  CallAudioPlayerWidget(call: widget.call),
-                  const SizedBox(height: 14),
+                  // 2. Call Metadata Card (Duration, Date & Time, Agent)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // 1. Duration
+                        Expanded(
+                          flex: 3,
+                          child: Row(
+                            children: [
+                              Icon(CupertinoIcons.stopwatch,
+                                  size: 16,
+                                  color: context.colors.primaryLightColor),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Duration',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color: context.colors.darkGreyColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      widget.call.duration.isNotEmpty
+                                          ? widget.call.duration
+                                          : '0:00',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 28,
+                          color: isDark ? Colors.white10 : Colors.black12,
+                        ),
+                        const SizedBox(width: 10),
+                        // 2. Date & Time
+                        Expanded(
+                          flex: 5,
+                          child: Row(
+                            children: [
+                              Icon(CupertinoIcons.calendar,
+                                  size: 16,
+                                  color: context.colors.primaryLightColor),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Date & Time',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color:
+                                            context.colors.darkGreyColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${widget.call.callDate} • ${widget.call.callTime}',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 28,
+                          color: isDark ? Colors.white10 : Colors.black12,
+                        ),
+                        const SizedBox(width: 10),
+                        // 3. Agent (Smart Robot Icon)
+                        Expanded(
+                          flex: 3,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.smart_toy_outlined,
+                                size: 17,
+                                color: context.colors.primaryLightColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Agent',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color:
+                                            context.colors.darkGreyColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      widget.call.assignee
+                                              .toLowerCase()
+                                              .contains('ai')
+                                          ? 'AI'
+                                          : widget.call.assignee,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
-                  // 4. AI Executive Summary & Outcome
+                  // 3. Call Recording Player Card
+                  CallAudioPlayerWidget(call: widget.call),
+                  const SizedBox(height: 12),
+
+                  // 4. AI Summary Card
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: isDark
-                            ? [
-                                const Color(0xFF1E293B),
-                                const Color(0xFF0F172A)
-                              ]
-                            : [
-                                const Color(0xFFF0F7FF),
-                                const Color(0xFFE0E7FF)
-                              ],
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.boxRadius),
+                      color: isDark
+                          ? const Color(0xFF0F172A)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
-                            ? context.colors.primaryLightColor
-                                .withValues(alpha: 0.3)
-                            : const Color(0xFFBFDBFE),
-                        width: 1,
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
                                 Icon(
                                   CupertinoIcons.sparkles,
-                                  size: 14,
-                                  color: context.colors.primaryLightColor,
+                                  size: 15,
+                                  color:
+                                      context.colors.primaryLightColor,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'AI SUMMARY',
+                                  'AI Summary',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.8,
-                                    color: context.colors.primaryLightColor,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                 ),
                               ],
                             ),
                             if (widget.call.lastContactResult != null &&
-                                widget.call.lastContactResult!.isNotEmpty) ...[
+                                widget.call.lastContactResult!
+                                    .isNotEmpty) ...[
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                    horizontal: 10, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: context.colors.primaryLightColor
                                       .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius:
+                                      BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: context
+                                        .colors.primaryLightColor
+                                        .withValues(alpha: 0.35),
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Text(
                                   widget.call.lastContactResult!,
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: context.colors.primaryLightColor,
+                                    color: context
+                                        .colors.primaryLightColor,
                                   ),
                                 ),
                               ),
                             ],
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Text(
                           summaryText,
                           style: TextStyle(
                             fontSize: 12.5,
                             height: 1.45,
                             color: isDark
-                                ? Colors.white.withValues(alpha: 0.9)
+                                ? Colors.white.withValues(alpha: 0.85)
                                 : const Color(0xFF1E293B),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
 
-                  // 5. Call Transcript Section
+                  // 5. Call Transcript Card
                   if (widget.call.transcript.isNotEmpty) ...[
                     Container(
+                      width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color:
-                            isDark ? const Color(0xFF1E293B) : Colors.white,
-                        borderRadius:
-                            BorderRadius.circular(ThemeConstants.boxRadius),
+                        color: isDark
+                            ? const Color(0xFF0F172A)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? Colors.white10
-                              : context.colors.mediumGreyColor,
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
                                 children: [
                                   Icon(
                                     CupertinoIcons.chat_bubble_2_fill,
-                                    size: 14,
-                                    color: context.colors.primaryLightColor,
+                                    size: 15,
+                                    color:
+                                        context.colors.primaryLightColor,
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'CALL TRANSCRIPT',
+                                    'Call Transcript',
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.8,
                                       color: isDark
                                           ? Colors.white
                                           : Colors.black87,
@@ -659,330 +791,299 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               ),
                               InkWell(
                                 onTap: _copyTranscript,
-                                borderRadius: BorderRadius.circular(4),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.doc_on_doc,
-                                        size: 12,
-                                        color:
-                                            context.colors.primaryLightColor,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.doc_on_doc,
+                                      size: 12,
+                                      color: context
+                                          .colors.primaryLightColor,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Copy All',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: context
+                                            .colors.primaryLightColor,
                                       ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Copy All',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: context
-                                              .colors.primaryLightColor,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
 
-                          // Transcript Turns
+                          // Turns List Matching Mockup
                           ...widget.call.transcript.map((turn) {
                             final isAi = turn.speaker == 'ai';
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 22,
-                                    height: 22,
-                                    decoration: BoxDecoration(
-                                      color: isAi
-                                          ? context.colors.primaryLightColor
-                                              .withValues(alpha: 0.15)
-                                          : context.colors.successColor
-                                              .withValues(alpha: 0.15),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      isAi
-                                          ? CupertinoIcons.bolt_badge_a
-                                          : CupertinoIcons.person_fill,
-                                      size: 11,
-                                      color: isAi
-                                          ? context.colors.primaryLightColor
-                                          : context.colors.successColor,
-                                    ),
+                              padding:
+                                  const EdgeInsets.only(bottom: 10.0),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF131D31)
+                                      : const Color(0xFFF8FAFC),
+                                  borderRadius:
+                                      BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF1E293B)
+                                        : context
+                                            .colors.mediumGreyColor,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              turn.speakerName,
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
+                                            Container(
+                                              width: 24,
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: isAi
+                                                    ? context
+                                                        .colors
+                                                        .primaryLightColor
+                                                        .withValues(
+                                                            alpha: 0.2)
+                                                    : context
+                                                        .colors
+                                                        .successColor
+                                                        .withValues(
+                                                            alpha: 0.2),
+                                                borderRadius:
+                                                    BorderRadius
+                                                        .circular(6),
+                                              ),
+                                              child: Icon(
+                                                isAi
+                                                    ? CupertinoIcons
+                                                        .sparkles
+                                                    : CupertinoIcons
+                                                        .person_fill,
+                                                size: 13,
                                                 color: isAi
                                                     ? context.colors
                                                         .primaryLightColor
-                                                    : (isDark
-                                                        ? Colors.white
-                                                        : Colors.black87),
+                                                    : context.colors
+                                                        .successColor,
                                               ),
                                             ),
+                                            const SizedBox(width: 8),
                                             Text(
-                                              turn.timestamp,
+                                              isAi
+                                                  ? 'AI'
+                                                  : turn.speakerName,
                                               style: TextStyle(
-                                                fontSize: 10,
-                                                color: context
-                                                    .colors.darkGreyColor,
+                                                fontSize: 12,
+                                                fontWeight:
+                                                    FontWeight.w800,
+                                                color: isAi
+                                                    ? context.colors
+                                                        .primaryLightColor
+                                                    : context.colors
+                                                        .successColor,
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 2),
-                                        Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 6),
-                                          decoration: BoxDecoration(
-                                            color: isAi
-                                                ? (isDark
-                                                    ? const Color(0xFF1E293B)
-                                                    : const Color(0xFFEFF6FF))
-                                                : (isDark
-                                                    ? const Color(0xFF0F172A)
-                                                    : const Color(0xFFF8FAFC)),
-                                            borderRadius: BorderRadius.circular(
-                                                ThemeConstants.boxRadius),
-                                            border: Border.all(
-                                              color: isAi
-                                                  ? (isDark
-                                                      ? Colors.white10
-                                                      : const Color(0xFFDBEAFE))
-                                                  : (isDark
-                                                      ? Colors.white12
-                                                      : context.colors
-                                                          .mediumGreyColor),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            turn.text,
-                                            style: TextStyle(
-                                              fontSize: 11.5,
-                                              height: 1.35,
-                                              color: isDark
-                                                  ? Colors.white
-                                                      .withValues(alpha: 0.9)
-                                                  : const Color(0xFF1E293B),
-                                            ),
+                                        Text(
+                                          turn.timestamp,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: context
+                                                .colors.darkGreyColor,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      turn.text,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        height: 1.4,
+                                        color: isDark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.9)
+                                            : const Color(0xFF1E293B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           }),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
                   ],
 
-                  // 6. Notes & Follow-up Section
+                  // 6. Next Steps (Follow-Up) Card
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.boxRadius),
+                      color: isDark
+                          ? const Color(0xFF0F172A)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
-                            ? Colors.white10
-                            : context.colors.mediumGreyColor,
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              CupertinoIcons.doc_plaintext,
-                              size: 14,
-                              color: context.colors.primaryLightColor,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'NOTES & NEXT FOLLOW-UP',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Text Field for Agent Notes
-                        Container(
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF0F172A)
-                                : const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white12
-                                  : context.colors.mediumGreyColor,
-                            ),
-                          ),
-                          child: TextField(
-                            controller: _notesCtrl,
-                            maxLines: 3,
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1.35,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            decoration: InputDecoration(
-                              hintText:
-                                  'Add private follow-up notes or action requirements...',
-                              hintStyle: TextStyle(
-                                fontSize: 11.5,
-                                color: context.colors.darkGreyColor,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.all(10),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Follow-up Date Selector Bar
-                        InkWell(
-                          onTap: _pickDate,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF0F172A)
-                                  : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white12
-                                    : context.colors.mediumGreyColor,
-                              ),
-                            ),
-                            child: Row(
+                            Row(
                               children: [
                                 Icon(
                                   CupertinoIcons.calendar,
-                                  size: 14,
-                                  color: context.colors.primaryLightColor,
+                                  size: 15,
+                                  color:
+                                      context.colors.primaryLightColor,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                                 Text(
-                                  (_followUpDate != null &&
-                                          _followUpDate!.isNotEmpty)
-                                      ? 'Follow-up: $_followUpDate'
-                                      : 'Set follow-up date',
+                                  'Next Steps',
                                   style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: (_followUpDate != null &&
-                                            _followUpDate!.isNotEmpty)
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    color: (_followUpDate != null &&
-                                            _followUpDate!.isNotEmpty)
-                                        ? (isDark
-                                            ? Colors.white
-                                            : Colors.black87)
-                                        : context.colors.darkGreyColor,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
-                                ),
-                                const Spacer(),
-                                Icon(
-                                  CupertinoIcons.chevron_right,
-                                  size: 12,
-                                  color: context.colors.darkGreyColor,
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Presets Row (Tomorrow, In 3 Days, Next Week)
-                        Row(
-                          children: [
-                            _buildPresetChip(
-                                'Tomorrow', () => _setPresetDate(1)),
-                            const SizedBox(width: 6),
-                            _buildPresetChip(
-                                'In 3 Days', () => _setPresetDate(3)),
-                            const SizedBox(width: 6),
-                            _buildPresetChip(
-                                'Next Week', () => _setPresetDate(7)),
+                            if (_followUpDate != null &&
+                                _followUpDate!.isNotEmpty)
+                              InkWell(
+                                onTap: () => _saveFollowUpDate(null),
+                                child: Text(
+                                  'Clear',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.colors.errorColor,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 12),
 
-                        // Save Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 36,
-                          child: ElevatedButton.icon(
-                            onPressed:
-                                _isSavingNotes ? null : _saveNotesAndFollowUp,
-                            icon: _isSavingNotes
-                                ? const SizedBox(
-                                    width: 12,
-                                    height: 12,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Icon(CupertinoIcons.checkmark_alt,
-                                    size: 14, color: Colors.white),
-                            label: Text(
-                              _isSavingNotes
-                                  ? 'SAVING...'
-                                  : 'SAVE NOTES & FOLLOW-UP',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                                color: Colors.white,
+                        // Interactive Follow-up Date Box
+                        InkWell(
+                          onTap: _pickDate,
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            constraints:
+                                const BoxConstraints(minHeight: 52),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF131D31)
+                                  : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : context
+                                        .colors.mediumGreyColor,
                               ),
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  context.colors.primaryLightColor,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                              ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: context
+                                        .colors.primaryLightColor
+                                        .withValues(alpha: 0.15),
+                                    borderRadius:
+                                        BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    CupertinoIcons.calendar,
+                                    size: 18,
+                                    color: context
+                                        .colors.primaryLightColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Next Follow-up Date',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color: context
+                                              .colors.darkGreyColor,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        (_followUpDate != null &&
+                                                _followUpDate!
+                                                    .isNotEmpty)
+                                            ? _followUpDate!
+                                            : 'Click to select follow-up date',
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight:
+                                              (_followUpDate != null &&
+                                                      _followUpDate!
+                                                          .isNotEmpty)
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w500,
+                                          color: (_followUpDate !=
+                                                      null &&
+                                                  _followUpDate!
+                                                      .isNotEmpty)
+                                              ? (isDark
+                                                  ? Colors.white
+                                                  : Colors.black87)
+                                              : context
+                                                  .colors.darkGreyColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  CupertinoIcons.chevron_right,
+                                  size: 15,
+                                  color: context.colors.darkGreyColor,
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -997,34 +1098,5 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
       ),
     );
   }
-
-  Widget _buildPresetChip(String label, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.white10 : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(
-              color: isDark ? Colors.white12 : context.colors.mediumGreyColor,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white70 : Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
+

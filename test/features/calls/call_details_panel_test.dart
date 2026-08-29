@@ -79,24 +79,24 @@ void main() {
     expect(find.text('5:32'), findsWidgets);
 
     // 2. Verify Action buttons
-    expect(find.text('CALL'), findsOneWidget);
-    expect(find.text('SCHEDULE'), findsOneWidget);
+    expect(find.text('Call Again'), findsOneWidget);
+    expect(find.text('Customer Info'), findsOneWidget);
 
     // 3. Verify Audio Player
-    expect(find.text('CALL RECORDING'), findsOneWidget);
+    expect(find.text('Call Recording'), findsOneWidget);
 
     // 4. Verify AI Summary Section
-    expect(find.text('AI SUMMARY'), findsOneWidget);
+    expect(find.text('AI Summary'), findsOneWidget);
     expect(find.text('Interested'), findsOneWidget);
 
     // 5. Verify Transcript Section
-    expect(find.text('CALL TRANSCRIPT'), findsOneWidget);
+    expect(find.text('Call Transcript'), findsOneWidget);
     expect(find.text('Copy All'), findsOneWidget);
     expect(find.text('Hello John! Calling regarding your project inquiry.'), findsOneWidget);
 
-    // 6. Verify Notes & Follow-up Section
-    expect(find.text('NOTES & NEXT FOLLOW-UP'), findsOneWidget);
-    expect(find.text('SAVE NOTES & FOLLOW-UP'), findsOneWidget);
+    // 6. Verify Next Steps & Follow-up Section
+    expect(find.text('Next Steps'), findsOneWidget);
+    expect(find.text('Next Follow-up Date'), findsOneWidget);
 
     await customersCubit.close();
     await selectedCallCubit.close();

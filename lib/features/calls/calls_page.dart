@@ -64,6 +64,7 @@ class _CallsPageState extends State<CallsPage> {
           leadPriority: 'Hot',
           nextFollowUpDate: '2026/08/20',
           tags: ['GC', 'Hot Lead', 'Vancouver'],
+          direction: 'Outbound',
         ),
         CallHistoryModel(
           id: '2',
@@ -79,6 +80,7 @@ class _CallsPageState extends State<CallsPage> {
           leadPriority: 'Warm',
           nextFollowUpDate: '2026/08/22',
           tags: ['Developer', 'Calgary'],
+          direction: 'Inbound',
         ),
         CallHistoryModel(
           id: '3',
@@ -96,6 +98,7 @@ class _CallsPageState extends State<CallsPage> {
           leadPriority: 'Hot',
           nextFollowUpDate: '2026/08/18',
           tags: ['Agency', 'Startup', 'Toronto'],
+          direction: 'Outbound',
         ),
         CallHistoryModel(
           id: '4',
@@ -110,6 +113,7 @@ class _CallsPageState extends State<CallsPage> {
           statusColor: context.colors.errorColor,
           leadPriority: 'Hot',
           tags: ['GC', 'Vancouver'],
+          direction: 'Inbound',
         ),
         CallHistoryModel(
           id: '5',
@@ -126,6 +130,7 @@ class _CallsPageState extends State<CallsPage> {
           statusColor: context.colors.successColor,
           leadPriority: 'Warm',
           tags: ['Design', 'Toronto'],
+          direction: 'Outbound',
         ),
       ];
 

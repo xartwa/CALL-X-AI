@@ -140,8 +140,8 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
 
     if (isFailedOrPending && (widget.call.duration == '0:00' || widget.call.duration.isEmpty)) {
       return Container(
-        margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: isDark ? Colors.white10 : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -175,7 +175,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     }
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
@@ -196,17 +196,16 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                 children: [
                   Icon(
                     CupertinoIcons.waveform,
-                    size: 14,
+                    size: 15,
                     color: context.colors.primaryLightColor,
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   Text(
-                    'CALL RECORDING',
+                    'Call Recording',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                      color: context.colors.primaryLightColor,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                 ],
