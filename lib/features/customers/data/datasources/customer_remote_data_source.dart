@@ -78,10 +78,13 @@ class CustomerRemoteDataSource {
     }
     return <String>[];
   }
-  Future<Map<String, dynamic>> importFile(String path) async =>
+
+  Future<Map<String, dynamic>> importFile(
+          List<int> bytes, String fileName) async =>
       Map<String, dynamic>.from((await client.http.post('/customers/import/',
-              data: FormData.fromMap(
-                  {'file': await MultipartFile.fromFile(path)})))
+              data: FormData.fromMap({
+                'file': MultipartFile.fromBytes(bytes, filename: fileName),
+              })))
           .data as Map);
   Future<List<int>> exportFile(Map<String, dynamic> query) async {
     final response = await client.http.get(

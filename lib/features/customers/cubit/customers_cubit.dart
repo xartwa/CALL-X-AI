@@ -269,10 +269,16 @@ class CustomersCubit extends Cubit<CustomersState> {
     }
   }
 
-  Future<CustomerImportResult?> importCustomers(String path) async {
+  Future<CustomerImportResult?> importCustomers({
+    required List<int> bytes,
+    required String fileName,
+  }) async {
     emit(state.copyWith(isImporting: true, clearActionError: true));
     try {
-      final result = await repository.importCustomers(path);
+      final result = await repository.importCustomers(
+        bytes: bytes,
+        fileName: fileName,
+      );
       await Future.wait([loadPage(), loadKpi(), loadOptions()]);
       return result;
     } catch (_) {

@@ -136,6 +136,24 @@ void main() {
     expect(cubit.state.options, isNotNull);
     await cubit.close();
   });
+
+  test('Excel import forwards browser bytes and refreshes customer data',
+      () async {
+    final repository = _FakeCustomerRepository();
+    final cubit = CustomersCubit(repository);
+
+    final result = await cubit.importCustomers(
+      bytes: const [80, 75, 3, 4],
+      fileName: 'customers.xlsx',
+    );
+
+    expect(repository.importedBytes, const [80, 75, 3, 4]);
+    expect(repository.importedFileName, 'customers.xlsx');
+    expect(repository.listCalls, 1);
+    expect(result?.created, 1);
+    expect(cubit.state.isImporting, isFalse);
+    await cubit.close();
+  });
 }
 
 class _FakeCustomerRepository implements CustomerRepository {
@@ -147,6 +165,8 @@ class _FakeCustomerRepository implements CustomerRepository {
   CustomerFilters lastFilters = const CustomerFilters();
   List<Customer> pageItems = const [];
   Customer? detailCustomer;
+  List<int>? importedBytes;
+  String? importedFileName;
   final List<Completer<CustomerPage>> _pendingListRequests = [];
 
   void completeListRequest(int index, CustomerPage response) {
@@ -205,8 +225,15 @@ class _FakeCustomerRepository implements CustomerRepository {
           {String? label, int? tagId}) async =>
       const [];
   @override
-  Future<CustomerImportResult> importCustomers(String path) async =>
-      const CustomerImportResult(created: 0, updated: 0, errors: []);
+  Future<CustomerImportResult> importCustomers({
+    required List<int> bytes,
+    required String fileName,
+  }) async {
+    importedBytes = bytes;
+    importedFileName = fileName;
+    return const CustomerImportResult(created: 1, updated: 0, errors: []);
+  }
+
   @override
   Future<List<int>> exportCustomers(CustomerFilters filters) async => const [];
   @override

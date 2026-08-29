@@ -168,14 +168,27 @@ class CustomerRepositoryImpl implements CustomerRepository {
       _request(() => remote.tag(customerId,
           label: label, tagId: tagId, remove: true));
   @override
-  Future<CustomerImportResult> importCustomers(String path) =>
-      _request(() async {
-        final j = await remote.importFile(path);
-        return CustomerImportResult(
-            created: _int(j['created']),
-            updated: _int(j['updated']),
-            errors: _list(j['errors']));
-      });
+  Future<CustomerImportResult> importCustomers({
+    required List<int> bytes,
+    required String fileName,
+  }) async {
+    try {
+      return _importResult(await remote.importFile(bytes, fileName));
+    } on DioException catch (error) {
+      final responseData = error.response?.data;
+      if (responseData is Map && responseData['errors'] is List) {
+        return _importResult(Map<String, dynamic>.from(responseData));
+      }
+      throw AppException.fromDio(error);
+    } on AppException {
+      rethrow;
+    } on FormatException {
+      throw const AppException(AppErrorType.invalidData);
+    } catch (_) {
+      throw const AppException(AppErrorType.unknown);
+    }
+  }
+
   @override
   Future<List<int>> exportCustomers(CustomerFilters filters) =>
       _request(() => remote.exportFile(filters.toQuery(1, 100000)));
@@ -206,3 +219,9 @@ CustomerNote _note(Map<String, dynamic> j) => CustomerNote(
     content: '${j['content'] ?? ''}',
     date: '${j['date'] ?? ''}',
     author: '${j['author'] ?? 'Admin'}');
+CustomerImportResult _importResult(Map<String, dynamic> json) =>
+    CustomerImportResult(
+      created: _int(json['created']),
+      updated: _int(json['updated']),
+      errors: _list(json['errors']),
+    );

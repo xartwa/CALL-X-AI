@@ -183,6 +183,7 @@ class _FakeCallsRepository implements CallsRepository {
   Future<void> deleteCall(String id) async {}
 }
 
+
 class _FakeCustomerRepository implements CustomerRepository {
   @override
   Future<CustomerPage> getCustomers(CustomerFilters filters,
@@ -226,7 +227,10 @@ class _FakeCustomerRepository implements CustomerRepository {
           {String? label, int? tagId}) async =>
       const [];
   @override
-  Future<CustomerImportResult> importCustomers(String path) async =>
+  Future<CustomerImportResult> importCustomers({
+    required List<int> bytes,
+    required String fileName,
+  }) async =>
       const CustomerImportResult(created: 0, updated: 0, errors: []);
   @override
   Future<List<int>> exportCustomers(CustomerFilters filters) async => const [];
@@ -242,4 +246,3 @@ class _FakeCustomerRepository implements CustomerRepository {
   @override
   Future<void> deleteDocument(String customerId, String documentId) async {}
 }
-

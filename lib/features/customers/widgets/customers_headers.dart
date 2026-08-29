@@ -13,6 +13,8 @@ class CustomersHeaders extends StatefulWidget {
   final DateTimeRange? selectedDateRange;
   final AdvancedFilterState? filterState;
   final Map<String, int> statusCounts;
+  final bool isImporting;
+  final bool isExporting;
   final ValueChanged<String> onStatusChanged;
   final ValueChanged<DateTimeRange?> onDateRangeChanged;
   final ValueChanged<String> onSearchChanged;
@@ -34,6 +36,8 @@ class CustomersHeaders extends StatefulWidget {
     this.selectedDateRange,
     this.filterState,
     required this.statusCounts,
+    this.isImporting = false,
+    this.isExporting = false,
     required this.onStatusChanged,
     required this.onDateRangeChanged,
     required this.onSearchChanged,
@@ -149,7 +153,8 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                 SizedBox(
                   height: 36,
                   child: OutlinedButton(
-                    onPressed: widget.onImportPressed,
+                    onPressed:
+                        widget.isImporting ? null : widget.onImportPressed,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                           color: isDark
@@ -160,20 +165,26 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                             BorderRadius.circular(ThemeConstants.buttonRadius),
                       ),
                     ),
-                    child: Text(
-                      'Import'.toUpperCase(),
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black87),
-                    ),
+                    child: widget.isImporting
+                        ? const SizedBox.square(
+                            dimension: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            'Import'.toUpperCase(),
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : Colors.black87),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
                   height: 36,
                   child: OutlinedButton(
-                    onPressed: widget.onExportPressed,
+                    onPressed:
+                        widget.isExporting ? null : widget.onExportPressed,
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                           color: isDark
@@ -184,13 +195,18 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                             BorderRadius.circular(ThemeConstants.buttonRadius),
                       ),
                     ),
-                    child: Text(
-                      'Export'.toUpperCase(),
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.black87),
-                    ),
+                    child: widget.isExporting
+                        ? const SizedBox.square(
+                            dimension: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            'Export'.toUpperCase(),
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : Colors.black87),
+                          ),
                   ),
                 ),
               ],

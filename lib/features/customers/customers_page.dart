@@ -16,6 +16,7 @@ import 'package:callx_ai/core/widgets/advanced_filter_dialog.dart';
 import 'package:callx_ai/features/customers/domain/repositories/customer_repository.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
+import 'package:callx_ai/core/services/file_download_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 
@@ -61,20 +62,38 @@ class _CustomersPageState extends State<CustomersPage> {
     final picked = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['xlsx'],
+      withData: true,
     );
     if (!context.mounted || picked == null) return;
     final file = picked.files.single;
-    if (file.size > 10 * 1024 * 1024 || file.path == null) {
+    final bytes = file.bytes;
+    if (!file.name.toLowerCase().endsWith('.xlsx') ||
+        file.size > 10 * 1024 * 1024 ||
+        bytes == null ||
+        bytes.isEmpty) {
       AppUtils.showSnackBar(
         context: context,
-        extraMessage: 'Select an .xlsx file smaller than 10 MB.',
+        extraMessage:
+            'Select a valid, non-empty .xlsx file smaller than 10 MB.',
         toastificationType: ToastificationType.error,
       );
       return;
     }
-    final result =
-        await context.read<CustomersCubit>().importCustomers(file.path!);
-    if (!context.mounted || result == null) return;
+    final cubit = context.read<CustomersCubit>();
+    final result = await cubit.importCustomers(
+      bytes: bytes,
+      fileName: file.name,
+    );
+    if (!context.mounted) return;
+    if (result == null) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage:
+            cubit.state.actionError ?? 'The Excel file could not be imported.',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -91,13 +110,41 @@ class _CustomersPageState extends State<CustomersPage> {
   }
 
   Future<void> _exportCustomers(BuildContext context) async {
-    final bytes = await context.read<CustomersCubit>().exportCustomers();
-    if (!context.mounted || bytes == null) return;
-    await FilePicker.platform.saveFile(
-      dialogTitle: 'Export customers',
-      fileName: 'customers.xlsx',
-      bytes: Uint8List.fromList(bytes),
-    );
+    final cubit = context.read<CustomersCubit>();
+    final bytes = await cubit.exportCustomers();
+    if (!context.mounted) return;
+    if (bytes == null || bytes.isEmpty) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage:
+            cubit.state.actionError ?? 'The customer export is empty.',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
+
+    try {
+      final saved = await saveDownloadedFile(
+        bytes: Uint8List.fromList(bytes),
+        fileName: 'customers.xlsx',
+        mimeType:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      if (context.mounted && saved) {
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'Customer export downloaded successfully.',
+          toastificationType: ToastificationType.success,
+        );
+      }
+    } catch (_) {
+      if (!context.mounted) return;
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'The Excel file could not be saved.',
+        toastificationType: ToastificationType.error,
+      );
+    }
   }
 
   @override
@@ -194,6 +241,8 @@ class _CustomersPageState extends State<CustomersPage> {
                     : ['All Cities', ...state.options!.city],
                 priorities: const ['All', 'Hot', 'Warm', 'Cold'],
                 statusCounts: statusCounts,
+                isImporting: state.isImporting,
+                isExporting: state.isExporting,
                 onStatusChanged: (status) {
                   setState(() => _statusFilter = status);
                   context.read<CustomersCubit>().setFilters(CustomerFilters(

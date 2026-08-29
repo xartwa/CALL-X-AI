@@ -126,7 +126,10 @@ abstract interface class CustomerRepository {
       {String? label, int? tagId, String color = '#6366F1'});
   Future<List<String>> removeTag(String customerId,
       {String? label, int? tagId});
-  Future<CustomerImportResult> importCustomers(String path);
+  Future<CustomerImportResult> importCustomers({
+    required List<int> bytes,
+    required String fileName,
+  });
   Future<List<int>> exportCustomers(CustomerFilters filters);
   Future<void> dispatchCall(String customerId, String scenarioId,
       {DateTime? scheduledFor});
