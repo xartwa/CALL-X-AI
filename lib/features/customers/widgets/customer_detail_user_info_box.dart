@@ -401,9 +401,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         Container(
           height: 44,
           decoration: BoxDecoration(
-            color: isDark
-                ? context.colors.darkGreyColor.withOpacity(0.7)
-                : const Color(0xFFF8FAFC),
+            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
@@ -482,9 +480,8 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: isDark
-                    ? context.colors.darkGreyColor.withOpacity(0.7)
-                    : const Color(0xFFF8FAFC),
+                color:
+                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isDark
@@ -565,9 +562,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: isDark
-                  ? context.colors.darkGreyColor.withOpacity(0.7)
-                  : const Color(0xFFF8FAFC),
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color:
