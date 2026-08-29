@@ -266,8 +266,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                     'Meeting Scheduled',
                     'Not Interested',
                     'No Answer',
-                    'Left Voicemail',
-                    'Closed/Won',
                   ],
                   isDark: isDark,
                 ),

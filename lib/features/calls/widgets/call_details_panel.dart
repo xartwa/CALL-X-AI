@@ -510,12 +510,12 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                         horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF0F172A)
+                          ? const Color(0xFF1E293B)
                           : const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
-                            ? const Color(0xFF1E293B)
+                            ? const Color(0xFF334155)
                             : const Color(0xFFE2E8F0),
                       ),
                     ),
@@ -679,12 +679,12 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF0F172A)
+                          ? const Color(0xFF1E293B)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
-                            ? const Color(0xFF1E293B)
+                            ? const Color(0xFF334155)
                             : const Color(0xFFE2E8F0),
                       ),
                     ),
@@ -845,13 +845,13 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF131D31)
+                                      ? const Color(0xFF1E293B)
                                       : const Color(0xFFF8FAFC),
                                   borderRadius:
                                       BorderRadius.circular(10),
                                   border: Border.all(
                                     color: isDark
-                                        ? const Color(0xFF1E293B)
+                                        ? const Color(0xFF334155)
                                         : context
                                             .colors.mediumGreyColor,
                                   ),

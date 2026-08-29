@@ -281,10 +281,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         width: double.infinity,
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
+          color: context.colors.whiteColor,
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
           border: Border.all(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
           ),
         ),
         child: Center(
@@ -361,10 +361,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         Container(
           height: 40,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
             ),
           ),
           child: Row(
@@ -434,7 +434,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             children: [
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -451,7 +451,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ),
               Expanded(
                 child: Divider(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                   thickness: 1,
                 ),
               ),
@@ -480,22 +480,23 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? const Color(0xFF131C2E) : const Color(0xFFEFF6FF))
-              : (isDark ? const Color(0xFF0F172A) : context.colors.whiteColor),
+              ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
+              : context.colors.whiteColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected
                 ? context.colors.primaryLightColor
-                : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
             width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
-            // Rounded Square Icon Matching Mockup (media_1788023850507.png)
+            // Rounded Square Icon Matching Mockup
             _buildCallIconBox(call),
             const SizedBox(width: 10),
 
+            // Title & Date/Time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,41 +577,22 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     );
 
     return Container(
-      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0B132B) : context.colors.whiteColor,
+        color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Row(children: [
-                            Spacer(),
-
-               IconButton(
-                  tooltip: 'Close details',
-                  onPressed: () {
-                    setState(() => _selectedCallId = null);
-                  },
-                  icon: Icon(
-                    CupertinoIcons.clear,
-                    size: 15,
-                    color: isDark ? Colors.white60 : context.colors.darkGreyColor,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                  splashRadius: 14,
-                ),
-           ],),
-                const SizedBox(height: 20),
+          // 1. Metadata 3-Column Card in App Theme Colors
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               ),
             ),
             child: Row(
@@ -656,7 +638,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                 Container(
                   width: 1,
                   height: 28,
-                  color: isDark ? Colors.white10 : Colors.black12,
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
                 const SizedBox(width: 10),
 
@@ -703,7 +685,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                 Container(
                   width: 1,
                   height: 28,
-                  color: isDark ? Colors.white10 : Colors.black12,
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
                 const SizedBox(width: 10),
 
@@ -750,34 +732,70 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   ),
                 ),
 
-           
-            
+                // Action: Schedule Button
+                IconButton(
+                  tooltip: 'Schedule Follow-up',
+                  onPressed: () async {
+                    await CallActionDialog.show(
+                      context,
+                      fullName: widget.user.fullName,
+                      phone: widget.user.phone,
+                      initialTab: 'schedule',
+                    );
+                  },
+                  icon: Icon(
+                    CupertinoIcons.calendar,
+                    size: 16,
+                    color: context.colors.primaryLightColor,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                  splashRadius: 14,
+                ),
+
+                // Action: Close Button (✕)
+                IconButton(
+                  tooltip: 'Close details',
+                  onPressed: () {
+                    setState(() => _selectedCallId = null);
+                  },
+                  icon: Icon(
+                    CupertinoIcons.clear,
+                    size: 15,
+                    color: isDark ? Colors.white60 : context.colors.darkGreyColor,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                  splashRadius: 14,
+                ),
               ],
             ),
           ),
           const SizedBox(height: 12),
 
+          // 2. Audio Player (Right below metadata card)
           CallAudioPlayerWidget(
             call: callHistoryModel,
             compact: true,
           ),
           const SizedBox(height: 12),
 
+          // Scrollable Sections: AI Summary & Call Transcript
           Expanded(
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 3. AI Summary Card Matching Mockup
+                  // 3. AI Summary Card in App Theme Colors
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Column(
@@ -846,15 +864,15 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   ),
                   const SizedBox(height: 12),
 
-                  // 4. Call Transcript Card Matching Mockup (with Copy All)
+                  // 4. Call Transcript Card in App Theme Colors
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Column(
@@ -958,10 +976,10 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF131D31) : const Color(0xFFF8FAFC),
+            color: isDark ? context.colors.whiteColor : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
             ),
           ),
           child: Column(
