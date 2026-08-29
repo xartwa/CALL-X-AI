@@ -66,13 +66,13 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Tab Bar (Overview / Call Logs 8)
+          // Minimal Sleek Top Tab Bar
           _buildTopTabs(context, isDark),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Card 1: Customer Information
           _buildCustomerInformationCard(context, isDark),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Card 2: Lead & Status
           _buildLeadStatusCard(context, isDark),
@@ -86,117 +86,123 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         ? widget.user.callLogs.length
         : (widget.user.lastContact != null ? 8 : 0);
 
-    return Row(
-      children: [
-        // Overview Tab
-        InkWell(
-          onTap: () => setState(() => _activeTopTab = 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                child: Text(
-                  'Overview',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight:
-                        _activeTopTab == 0 ? FontWeight.w700 : FontWeight.w500,
-                    color: _activeTopTab == 0
-                        ? (isDark ? Colors.white : Colors.black87)
-                        : (isDark ? const Color(0xFF94A3B8) : Colors.grey[600]),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                height: 2.5,
-                width: 74,
-                decoration: BoxDecoration(
-                  color: _activeTopTab == 0
-                      ? context.colors.primaryLightColor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 24),
-
-        // Call Logs Tab
-        InkWell(
-          onTap: () => setState(() => _activeTopTab = 1),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                child: Row(
-                  children: [
-                    Text(
-                      'Call Logs',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: _activeTopTab == 1
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: _activeTopTab == 1
-                            ? (isDark ? Colors.white : Colors.black87)
-                            : (isDark
-                                ? const Color(0xFF94A3B8)
-                                : Colors.grey[600]),
-                      ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Row(
+        children: [
+          // Overview Tab
+          InkWell(
+            onTap: () => setState(() => _activeTopTab = 0),
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Overview',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: _activeTopTab == 0
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: _activeTopTab == 0
+                          ? context.colors.primaryLightColor
+                          : context.colors.darkGreyColor,
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF1E293B)
-                            : const Color(0xFFE2E8F0),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '$callCount',
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    height: 2,
+                    width: 45,
+                    decoration: BoxDecoration(
+                      color: _activeTopTab == 0
+                          ? context.colors.primaryLightColor
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Call Logs Tab
+          InkWell(
+            onTap: () => setState(() => _activeTopTab = 1),
+            borderRadius: BorderRadius.circular(6),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Call Logs',
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white70 : Colors.black87,
+                          fontSize: 13,
+                          fontWeight: _activeTopTab == 1
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: _activeTopTab == 1
+                              ? context.colors.primaryLightColor
+                              : context.colors.darkGreyColor,
                         ),
                       ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white10
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$callCount',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.white70
+                                : context.colors.darkGreyColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    height: 2,
+                    width: 55,
+                    decoration: BoxDecoration(
+                      color: _activeTopTab == 1
+                          ? context.colors.primaryLightColor
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Container(
-                height: 2.5,
-                width: 90,
-                decoration: BoxDecoration(
-                  color: _activeTopTab == 1
-                      ? context.colors.primaryLightColor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildCustomerInformationCard(BuildContext context, bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
+        color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
           width: 1,
         ),
       ),
@@ -207,12 +213,12 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           Text(
             'Customer Information',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 13.5,
               fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           // Row 1: Company Name | Job Title / Position | Company Type
           Row(
@@ -252,7 +258,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Row 2: First Name | Last Name | Main Email
           Row(
@@ -284,7 +290,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Row 3: Phone Number | Website
           Row(
@@ -318,12 +324,12 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
   Widget _buildLeadStatusCard(BuildContext context, bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : context.colors.whiteColor,
+        color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
           width: 1,
         ),
       ),
@@ -334,14 +340,14 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           Text(
             'Lead & Status',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 13.5,
               fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : Colors.black87,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
-          // Row 1: Lead Status | Lead Priority | Lead Quality
+          // Row 1: Lead Status | Lead Quality | Last Contact Result (Clean Dropdowns, No Dots)
           Row(
             children: [
               Expanded(
@@ -356,17 +362,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                     'Won',
                     'Lost'
                   ],
-                  dotColorGetter: _getLeadStatusColor,
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _buildDropdownField(
-                  label: 'Lead Priority',
-                  notifier: widget.leadPriorityNotifier,
-                  items: const ['Hot', 'Warm', 'Cold'],
-                  dotColorGetter: _getLeadPriorityColor,
                   isDark: isDark,
                 ),
               ),
@@ -376,17 +371,10 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   label: 'Lead Quality',
                   notifier: widget.leadQualityNotifier,
                   items: const ['Excellent', 'Good', 'Fair', 'Poor'],
-                  dotColorGetter: _getLeadQualityColor,
                   isDark: isDark,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Row 2: Last Contact Result | Next Follow-up Date | Reason for Contact / Inquiry
-          Row(
-            children: [
+              const SizedBox(width: 14),
               Expanded(
                 child: _buildDropdownField(
                   label: 'Last Contact Result',
@@ -400,29 +388,126 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                     'Left Voicemail',
                     'Closed/Won',
                   ],
-                  dotColorGetter: (val) => const Color(0xFF8B5CF6),
                   isDark: isDark,
                 ),
               ),
-              const SizedBox(width: 14),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Row 2: Lead Priority (3 Button Chips) | Next Follow-up Date (Interactive Picker)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Lead Priority Chips (Hot / Warm / Cold)
               Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Lead Priority',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: context.colors.darkGreyColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    ValueListenableBuilder<String>(
+                      valueListenable: widget.leadPriorityNotifier,
+                      builder: (context, priority, _) {
+                        return Row(
+                          children: [
+                            _buildPriorityChip('Hot', 'Hot',
+                                const Color(0xFFEF4444), priority, isDark),
+                            const SizedBox(width: 8),
+                            _buildPriorityChip('Warm', 'Warm',
+                                const Color(0xFFF59E0B), priority, isDark),
+                            const SizedBox(width: 8),
+                            _buildPriorityChip('Cold', 'Cold',
+                                const Color(0xFF3B82F6), priority, isDark),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 14),
+
+              // Next Follow-up Date
+              Expanded(
+                flex: 1,
                 child: _buildDatePickerField(
                   label: 'Next Follow-up Date',
                   controller: widget.nextFollowUpDateCtrl,
                   isDark: isDark,
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _buildInputField(
-                  label: 'Reason for Contact / Inquiry',
-                  controller: widget.reasonCtrl,
-                  isDark: isDark,
-                ),
-              ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPriorityChip(
+    String key,
+    String label,
+    Color color,
+    String activeKey,
+    bool isDark,
+  ) {
+    final isSelected = key.toLowerCase() == activeKey.toLowerCase();
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          widget.leadPriorityNotifier.value = key;
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          height: 44,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: isDark ? 0.22 : 0.12)
+                : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected
+                  ? color
+                  : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: isSelected
+                        ? color
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -443,17 +528,17 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: FontWeight.w500,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: context.colors.darkGreyColor,
           ),
         ),
         const SizedBox(height: 6),
         Container(
           height: 44,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF131C2E) : const Color(0xFFF8FAFC),
+            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isDark ? const Color(0xFF24344D) : const Color(0xFFE2E8F0),
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
             ),
           ),
           child: Row(
@@ -464,9 +549,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   child: Icon(
                     prefixIcon,
                     size: 15,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
+                    color: context.colors.darkGreyColor,
                   ),
                 ),
               ] else ...[
@@ -479,16 +562,14 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   decoration: InputDecoration(
                     hintText: hintText,
                     hintStyle: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? const Color(0xFF64748B)
-                          : const Color(0xFF94A3B8),
+                      color: context.colors.darkGreyColor.withValues(alpha: 0.7),
                     ),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -507,7 +588,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
     required String label,
     required ValueNotifier<String> notifier,
     required List<String> items,
-    Color Function(String)? dotColorGetter,
     required bool isDark,
   }) {
     return Column(
@@ -518,7 +598,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: FontWeight.w500,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: context.colors.darkGreyColor,
           ),
         ),
         const SizedBox(height: 6),
@@ -534,11 +614,11 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color:
-                    isDark ? const Color(0xFF131C2E) : const Color(0xFFF8FAFC),
+                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isDark
-                      ? const Color(0xFF24344D)
+                      ? const Color(0xFF334155)
                       : const Color(0xFFE2E8F0),
                 ),
               ),
@@ -549,40 +629,21 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   icon: Icon(
                     CupertinoIcons.chevron_down,
                     size: 14,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
+                    color: context.colors.darkGreyColor,
                   ),
-                  dropdownColor: isDark
-                      ? const Color(0xFF1E293B)
-                      : Colors.white,
+                  dropdownColor:
+                      isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(8),
                   items: items.map((item) {
-                    final dotColor = dotColorGetter?.call(item);
                     return DropdownMenuItem<String>(
                       value: item,
-                      child: Row(
-                        children: [
-                          if (dotColor != null) ...[
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                color: dotColor,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Text(
-                            item,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     );
                   }).toList(),
@@ -611,7 +672,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: FontWeight.w500,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: context.colors.darkGreyColor,
           ),
         ),
         const SizedBox(height: 6),
@@ -635,12 +696,12 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF131C2E)
+                  ? const Color(0xFF0F172A)
                   : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isDark
-                    ? const Color(0xFF24344D)
+                    ? const Color(0xFF334155)
                     : const Color(0xFFE2E8F0),
               ),
             ),
@@ -661,7 +722,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: controller.text.isNotEmpty
-                          ? (isDark ? Colors.white : Colors.black87)
+                          ? Theme.of(context).colorScheme.onSurface
                           : context.colors.primaryLightColor,
                     ),
                   ),
@@ -672,50 +733,5 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         ),
       ],
     );
-  }
-
-  Color _getLeadStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'new':
-        return const Color(0xFF10B981);
-      case 'contacted':
-        return const Color(0xFF3B82F6);
-      case 'qualified':
-        return const Color(0xFF14B8A6);
-      case 'won':
-        return const Color(0xFF059669);
-      case 'lost':
-        return const Color(0xFFEF4444);
-      default:
-        return const Color(0xFF10B981);
-    }
-  }
-
-  Color _getLeadPriorityColor(String priority) {
-    switch (priority.toLowerCase()) {
-      case 'hot':
-        return const Color(0xFFEF4444);
-      case 'warm':
-        return const Color(0xFFF59E0B);
-      case 'cold':
-        return const Color(0xFF3B82F6);
-      default:
-        return const Color(0xFFF59E0B);
-    }
-  }
-
-  Color _getLeadQualityColor(String quality) {
-    switch (quality.toLowerCase()) {
-      case 'excellent':
-        return const Color(0xFF10B981);
-      case 'good':
-        return const Color(0xFF14B8A6);
-      case 'fair':
-        return const Color(0xFFEAB308);
-      case 'poor':
-        return const Color(0xFFEF4444);
-      default:
-        return const Color(0xFF10B981);
-    }
   }
 }
