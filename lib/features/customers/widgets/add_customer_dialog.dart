@@ -19,7 +19,7 @@ class AddCustomerDialog extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Add Customer',
-      barrierColor: Colors.black.withOpacity(0.5),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) => const AddCustomerDialog(),
       transitionBuilder: (context, anim1, anim2, child) {
@@ -63,39 +63,6 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
   String _lastContactResult = 'Interested';
   String _status = 'Active';
   final List<String> _tags = ['Hot Lead'];
-
-  // Kept available for future tag color previews.
-  Color _getTagColor(BuildContext context, String text) {
-    final state = context.read<WorkspaceSettingsCubit>().state;
-    final lower = text.toLowerCase();
-
-    for (final tag in state.customTags) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
-    }
-
-    if (lower.contains('hot') ||
-        lower.contains('vip') ||
-        lower.contains('namovafagh')) {
-      return const Color(0xFFEF4444); // Red
-    }
-    if (lower.contains('gc') ||
-        lower.contains('developer') ||
-        lower.contains('movafagh')) {
-      return const Color(0xFF10B981); // Emerald
-    }
-    if (lower.contains('branding') ||
-        lower.contains('warm') ||
-        lower.contains('paygiri')) {
-      return const Color(0xFFF59E0B); // Amber
-    }
-    if (lower.contains('agency') || lower.contains('vancouver')) {
-      return const Color(0xFF3B82F6); // Blue
-    }
-    if (lower.contains('proposal') || lower.contains('startup')) {
-      return const Color(0xFF8B5CF6); // Purple
-    }
-    return const Color(0xFF06B6D4); // Cyan
-  }
 
   @override
   void dispose() {
@@ -178,6 +145,8 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         settingsState.leadQualities.map((e) => e.label).toList();
     if (leadQualities.isEmpty) leadQualities.add('Excellent');
 
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Dialog(
       backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       shape: RoundedRectangleBorder(
@@ -185,9 +154,9 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
       ),
       elevation: 12,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           maxWidth: 680,
-          maxHeight: 780,
+          maxHeight: (screenHeight * 0.88).clamp(520.0, 800.0),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -513,10 +482,10 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
 
   Widget _buildSectionHeader(String title) {
     return Container(
-      margin: EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: context.colors.primaryLightColor.withOpacity(0.08),
+        color: context.colors.primaryLightColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -551,7 +520,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
             color: isDark ? Colors.grey[300] : Colors.grey[700],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         AppTextFieldWidget(
           controller: controller,
           hintText: hintText,
@@ -602,7 +571,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         onTap: () => setState(() => _leadPriority = key),
         borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 15),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color:
                 isSelected ? color.withValues(alpha: 0.18) : Colors.transparent,

@@ -214,7 +214,6 @@ class CallsPage extends StatelessWidget {
                           call: selectedCall,
                           onClose: () {
                             context.read<CallsCubit>().selectCall(null);
-                            context.read<SelectedCallCubit>().clearSelection();
                           },
                           onCallAdded: () =>
                               context.read<CallsCubit>().refresh(),

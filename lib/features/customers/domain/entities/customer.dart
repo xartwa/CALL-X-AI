@@ -106,26 +106,58 @@ class Customer {
         callLogs: _calls(json['callLogs']),
       );
 
-  Map<String, dynamic> toApiJson() => {
-        'fullName': fullName,
-        'phoneNumber': phoneNumber,
-        'companyName': companyName,
-        'email': email,
-        'jobTitle': jobTitle,
-        'website': website,
-        'streetAddress': streetAddress,
-        'city': city,
-        'provinceState': provinceState,
-        'country': country,
-        'companyType': companyType,
-        'leadStatus': leadStatus,
-        'leadQuality': leadQuality,
-        'leadPriority': leadPriority,
-        'nextFollowUpDate': nextFollowUpDate?.toIso8601String(),
-        'status': status == 'Inactive' ? 'Deactive' : status,
-        'reasonForContact': reasonForContact,
-        'tags': tags,
-      };
+  Map<String, dynamic> toApiJson() {
+    final Map<String, dynamic> data = {
+      // Primary fields in both camelCase and snake_case for Django backend compatibility
+      'fullName': fullName,
+      'full_name': fullName,
+      'name': fullName,
+      'phoneNumber': phoneNumber,
+      'phone_number': phoneNumber,
+      'phone': phoneNumber,
+      'companyName': companyName,
+      'company_name': companyName,
+      'jobTitle': jobTitle,
+      'job_title': jobTitle,
+      'streetAddress': streetAddress,
+      'street_address': streetAddress,
+      'address': streetAddress,
+      'city': city,
+      'provinceState': provinceState,
+      'province_state': provinceState,
+      'state': provinceState,
+      'country': country,
+      'companyType': companyType,
+      'company_type': companyType,
+      'leadStatus': leadStatus,
+      'lead_status': leadStatus,
+      'leadQuality': leadQuality,
+      'lead_quality': leadQuality,
+      'leadPriority': leadPriority,
+      'lead_priority': leadPriority,
+      'status': status == 'Inactive' ? 'Deactive' : status,
+      'reasonForContact': reasonForContact,
+      'reason_for_contact': reasonForContact,
+      'tags': tags,
+    };
+
+    if (email.trim().isNotEmpty) {
+      data['email'] = email.trim();
+    }
+    if (website.trim().isNotEmpty) {
+      data['website'] = website.trim();
+    }
+
+    if (nextFollowUpDate != null) {
+      final formattedDate =
+          '${nextFollowUpDate!.year}-${nextFollowUpDate!.month.toString().padLeft(2, '0')}-${nextFollowUpDate!.day.toString().padLeft(2, '0')}';
+      data['nextFollowUpDate'] = formattedDate;
+      data['next_follow_up_date'] = formattedDate;
+      data['follow_up_date'] = formattedDate;
+    }
+
+    return data;
+  }
 
   Map<String, dynamic> toJson() => {...toApiJson(), 'id': id};
 

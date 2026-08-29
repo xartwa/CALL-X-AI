@@ -316,8 +316,26 @@ class CustomersCubit extends Cubit<CustomersState> {
     emit(state.copyWith(isSubmitting: true, clearActionError: true));
     try {
       await action();
-    } catch (_) {
-      emit(state.copyWith(actionError: 'Action could not be completed.'));
+    } catch (e) {
+      String errorMessage = 'Action could not be completed.';
+      if (e is AppException) {
+        if (e.fieldErrors.isNotEmpty) {
+          final buffer = StringBuffer();
+          e.fieldErrors.forEach((field, errors) {
+            buffer.writeln('$field: ${errors.join(', ')}');
+          });
+          errorMessage = buffer.toString().trim();
+        } else if (e.details != null && e.details!.isNotEmpty) {
+          errorMessage = e.details!;
+        } else if (e.type == AppErrorType.network) {
+          errorMessage = 'Network error. Please check your connection.';
+        } else if (e.type == AppErrorType.timeout) {
+          errorMessage = 'Request timed out. Please try again.';
+        } else if (e.type == AppErrorType.unauthorized) {
+          errorMessage = 'Session expired. Please log in again.';
+        }
+      }
+      emit(state.copyWith(actionError: errorMessage));
     } finally {
       emit(state.copyWith(isSubmitting: false));
     }

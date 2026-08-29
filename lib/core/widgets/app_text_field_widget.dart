@@ -95,10 +95,11 @@ class AppTextFieldWidget extends StatelessWidget {
                       : context.colors.errorColor),
               borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius)),
           errorStyle: TextStyle(
-              fontSize: 12.0,
-              height: 0.1, // Minimizes the padding of the error text
+              fontSize: 11.5,
+              height: 1.25,
               color: context.colors.errorColor,
               fontWeight: FontWeight.w500),
+          errorMaxLines: 2,
           labelStyle: const TextStyle(
             fontSize: 14.0,
           ),
