@@ -261,7 +261,8 @@ class _CallsPageState extends State<CallsPage> {
           call.status.toLowerCase().contains(q) ||
           call.assignee.toLowerCase().contains(q) ||
           (call.notes != null && call.notes!.toLowerCase().contains(q));
-      final matchesPriority = _filterState.priority == 'All Priorities' ||
+      final matchesPriority = _filterState.priority == 'All' ||
+          _filterState.priority == 'All Priorities' ||
           (call.leadPriority != null &&
               call.leadPriority!.toLowerCase() ==
                   _filterState.priority.toLowerCase());

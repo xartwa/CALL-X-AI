@@ -404,12 +404,14 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            _buildPriorityChoice('High', 'High', Colors.red),
+                            _buildPriorityChoice(
+                                'Hot', 'Hot', const Color(0xFFEF4444)),
                             const SizedBox(width: 12),
                             _buildPriorityChoice(
-                                'Medium', 'Medium', Colors.orange),
+                                'Warm', 'Warm', const Color(0xFFF59E0B)),
                             const SizedBox(width: 12),
-                            _buildPriorityChoice('Low', 'Low', Colors.green),
+                            _buildPriorityChoice(
+                                'Cold', 'Cold', const Color(0xFF3B82F6)),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -602,8 +604,9 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 15),
           decoration: BoxDecoration(
-            color: isSelected ? color.withOpacity(0.18) : Colors.transparent,
-        borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+            color:
+                isSelected ? color.withValues(alpha: 0.18) : Colors.transparent,
+            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
             border: Border.all(
               color: isSelected ? color : context.colors.lightGreyColor,
               width: isSelected ? 1.5 : 1,

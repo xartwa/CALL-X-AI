@@ -186,9 +186,7 @@ class _CustomersPageState extends State<CustomersPage> {
                 cities: state.options == null
                     ? null
                     : ['All Cities', ...state.options!.city],
-                priorities: state.options == null
-                    ? null
-                    : ['All Priorities', ...state.options!.leadPriority],
+                priorities: const ['All', 'Hot', 'Warm', 'Cold'],
                 statusCounts: statusCounts,
                 onStatusChanged: (status) {
                   setState(() => _statusFilter = status);

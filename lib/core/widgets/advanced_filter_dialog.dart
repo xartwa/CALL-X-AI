@@ -14,21 +14,21 @@ class AdvancedFilterState {
     this.country = 'All Countries',
     this.province = 'All Provinces',
     this.city = 'All Cities',
-    this.priority = 'All Priorities',
+    this.priority = 'All',
   });
 
   bool get isActive =>
       country != 'All Countries' ||
       province != 'All Provinces' ||
       city != 'All Cities' ||
-      priority != 'All Priorities';
+      (priority != 'All' && priority != 'All Priorities');
 
   int get activeCount {
     int count = 0;
     if (country != 'All Countries') count++;
     if (province != 'All Provinces') count++;
     if (city != 'All Cities') count++;
-    if (priority != 'All Priorities') count++;
+    if (priority != 'All' && priority != 'All Priorities') count++;
     return count;
   }
 }
@@ -76,7 +76,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
   static const String _allCountries = 'All Countries';
   static const String _allProvinces = 'All Provinces';
   static const String _allCities = 'All Cities';
-  static const String _allPriorities = 'All Priorities';
+  static const String _allPriorities = 'All';
 
   late String _selectedCountry;
   late String _selectedProvince;
@@ -90,7 +90,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     _selectedCountry = initial.country;
     _selectedProvince = initial.province;
     _selectedCity = initial.city;
-    _selectedPriority = initial.priority;
+    _selectedPriority = initial.priority == 'All Priorities' ? 'All' : initial.priority;
   }
 
   final List<String> _countries = const [
@@ -123,7 +123,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
   ];
 
   final List<String> _priorities = const [
-    'All Priorities',
+    'All',
     'Hot',
     'Warm',
     'Cold',
