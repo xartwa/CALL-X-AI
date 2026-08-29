@@ -66,10 +66,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         children: [
           // Card 1: Customer Information
           _buildCustomerInformationCard(context, isDark),
-          const SizedBox(height: 14),
-
-          // Card 2: Lead & Status
-          _buildLeadStatusCard(context, isDark),
         ],
       ),
     );
@@ -82,7 +78,6 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
       decoration: BoxDecoration(
         color: context.colors.whiteColor,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-      
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,134 +189,131 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               ),
             ],
           ),
+          const SizedBox(height: 15),
+
+          Divider(),
+          const SizedBox(height: 15),
+
+          _buildLeadStatusCard(context, isDark),
         ],
       ),
     );
   }
 
   Widget _buildLeadStatusCard(BuildContext context, bool isDark) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.colors.whiteColor,
-        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-        
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Title
-          Text(
-            'Lead & Status',
-            style: TextStyle(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w700,
-              color: Theme.of(context).colorScheme.onSurface,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Title
+        Text(
+          'Lead & Status',
+          style: TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Row 1: Lead Status | Lead Quality | Last Contact Result (Clean Dropdowns, No Dots)
+        Row(
+          children: [
+            Expanded(
+              child: _buildDropdownField(
+                label: 'Lead Status',
+                notifier: widget.leadStatusNotifier,
+                items: const [
+                  'New',
+                  'Contacted',
+                  'Qualified',
+                  'Proposal Sent',
+                  'Won',
+                  'Lost'
+                ],
+                isDark: isDark,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _buildDropdownField(
+                label: 'Lead Quality',
+                notifier: widget.leadQualityNotifier,
+                items: const ['Excellent', 'Good', 'Fair', 'Poor'],
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _buildDropdownField(
+                label: 'Last Contact Result',
+                notifier: widget.lastContactResultNotifier,
+                items: const [
+                  'Interested',
+                  'Needs follow-up',
+                  'Appointment booked',
+                  'Not Interested',
+                  'No Answer',
+                ],
+                isDark: isDark,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
 
-          // Row 1: Lead Status | Lead Quality | Last Contact Result (Clean Dropdowns, No Dots)
-          Row(
-            children: [
-              Expanded(
-                child: _buildDropdownField(
-                  label: 'Lead Status',
-                  notifier: widget.leadStatusNotifier,
-                  items: const [
-                    'New',
-                    'Contacted',
-                    'Qualified',
-                    'Proposal Sent',
-                    'Won',
-                    'Lost'
-                  ],
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _buildDropdownField(
-                  label: 'Lead Quality',
-                  notifier: widget.leadQualityNotifier,
-                  items: const ['Excellent', 'Good', 'Fair', 'Poor'],
-                  isDark: isDark,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _buildDropdownField(
-                  label: 'Last Contact Result',
-                  notifier: widget.lastContactResultNotifier,
-                  items: const [
-                    'Interested',
-                    'Needs follow-up',
-                    'Appointment booked',
-                    'Not Interested',
-                    'No Answer',
-                  ],
-                  isDark: isDark,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Row 2: Lead Priority (3 Button Chips) | Next Follow-up Date (Interactive Picker)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Lead Priority Chips (Hot / Warm / Cold)
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Lead Priority',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w500,
-                        color: context.colors.darkGreyColor,
-                      ),
+        // Row 2: Lead Priority (3 Button Chips) | Next Follow-up Date (Interactive Picker)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            // Lead Priority Chips (Hot / Warm / Cold)
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Lead Priority',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: context.colors.darkGreyColor,
                     ),
-                    const SizedBox(height: 6),
-                    ValueListenableBuilder<String>(
-                      valueListenable: widget.leadPriorityNotifier,
-                      builder: (context, priority, _) {
-                        return Row(
-                          children: [
-                            _buildPriorityChip('Hot', 'Hot',
-                                const Color(0xFFEF4444), priority, isDark),
-                            const SizedBox(width: 8),
-                            _buildPriorityChip('Warm', 'Warm',
-                                const Color(0xFFF59E0B), priority, isDark),
-                            const SizedBox(width: 8),
-                            _buildPriorityChip('Cold', 'Cold',
-                                const Color(0xFF3B82F6), priority, isDark),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 6),
+                  ValueListenableBuilder<String>(
+                    valueListenable: widget.leadPriorityNotifier,
+                    builder: (context, priority, _) {
+                      return Row(
+                        children: [
+                          _buildPriorityChip('Hot', 'Hot',
+                              const Color(0xFFEF4444), priority, isDark),
+                          const SizedBox(width: 8),
+                          _buildPriorityChip('Warm', 'Warm',
+                              const Color(0xFFF59E0B), priority, isDark),
+                          const SizedBox(width: 8),
+                          _buildPriorityChip('Cold', 'Cold',
+                              const Color(0xFF3B82F6), priority, isDark),
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
+            ),
+            const SizedBox(width: 14),
 
-              // Next Follow-up Date
-              Expanded(
-                flex: 1,
-                child: _buildDatePickerField(
-                  label: 'Next Follow-up Date',
-                  controller: widget.nextFollowUpDateCtrl,
-                  isDark: isDark,
-                ),
+            // Next Follow-up Date
+            Expanded(
+              flex: 1,
+              child: _buildDatePickerField(
+                label: 'Next Follow-up Date',
+                controller: widget.nextFollowUpDateCtrl,
+                isDark: isDark,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -349,7 +341,9 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             border: Border.all(
               color: isSelected
                   ? color
-                  : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                  : (isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0)),
               width: isSelected ? 1.5 : 1,
             ),
           ),
@@ -370,8 +364,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                   label,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     color: isSelected
                         ? color
                         : Theme.of(context).colorScheme.onSurface,
@@ -408,7 +401,9 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         Container(
           height: 44,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+            color: isDark
+                ? context.colors.darkGreyColor.withOpacity(0.7)
+                : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
@@ -442,7 +437,8 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                     hintStyle: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: context.colors.darkGreyColor.withValues(alpha: 0.7),
+                      color:
+                          context.colors.darkGreyColor.withValues(alpha: 0.7),
                     ),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -486,8 +482,9 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                color: isDark
+                    ? context.colors.darkGreyColor.withOpacity(0.7)
+                    : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isDark
@@ -569,13 +566,12 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF0F172A)
+                  ? context.colors.darkGreyColor.withOpacity(0.7)
                   : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: isDark
-                    ? const Color(0xFF334155)
-                    : const Color(0xFFE2E8F0),
+                color:
+                    isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
               ),
             ),
             child: Row(

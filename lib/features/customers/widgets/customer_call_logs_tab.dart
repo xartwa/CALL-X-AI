@@ -322,33 +322,41 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 650;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.colors.whiteColor,
+        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 650;
 
-        if (!isWide || selectedCall == null) {
-          return _buildCallsList(calls, _selectedCallId ?? '', isDark, false);
-        }
+          if (!isWide || selectedCall == null) {
+            return _buildCallsList(calls, _selectedCallId ?? '', isDark, false);
+          }
 
-        // 2-Column Master-Detail Mode
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Left Column: Calls List (flex: 4)
-            Expanded(
-              flex: 4,
-              child: _buildCallsList(calls, _selectedCallId!, isDark, true),
-            ),
-            const SizedBox(width: 14),
+          // 2-Column Master-Detail Mode
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column: Calls List (flex: 4)
+              Expanded(
+                flex: 4,
+                child: _buildCallsList(calls, _selectedCallId!, isDark, true),
+              ),
+              const SizedBox(width: 14),
 
-            // Right Column: Call Detail Card (flex: 5)
-            Expanded(
-              flex: 5,
-              child: _buildCallDetailCard(selectedCall, isDark),
-            ),
-          ],
-        );
-      },
+              // Right Column: Call Detail Card (flex: 5)
+              Expanded(
+                flex: 5,
+                child: _buildCallDetailCard(selectedCall, isDark),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
