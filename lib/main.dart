@@ -77,8 +77,9 @@ Future<void> main() async {
           BlocProvider(
             create: (context) => CustomersCubit(
               context.read<CustomerRepository>(),
-            ),
+            )..loadInitial(resetFilters: true),
           ),
+
           BlocProvider(
             create: (context) => CallsCubit(
               context.read<CallsRepository>(),

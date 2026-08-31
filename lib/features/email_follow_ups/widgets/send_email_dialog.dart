@@ -49,7 +49,11 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
   // Single Recipient
   User? _selectedUser;
+  bool _isDirectRecipient = false;
   final TextEditingController _customRecipientCtrl = TextEditingController();
+  final TextEditingController _customRecipientNameCtrl =
+      TextEditingController();
+
 
   // Batch Selection
   final Set<String> _manualSelectedUserIds = {};
@@ -96,8 +100,12 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
 
     final customers = context.read<CustomersCubit>().state.users;
+    if (customers.isEmpty) {
+      context.read<CustomersCubit>().loadInitial(resetFilters: false);
+    }
     _selectedUser = customers.isNotEmpty ? customers.first : null;
     _selectedTemplate = widget.preloadedTemplate;
+
 
     _subjectCtrl = TextEditingController(
       text: widget.preloadedTemplate != null && _selectedUser != null
@@ -135,8 +143,10 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     _bodyCtrl.dispose();
     _customSenderCtrl.dispose();
     _customRecipientCtrl.dispose();
+    _customRecipientNameCtrl.dispose();
     _searchCustomerCtrl.dispose();
     super.dispose();
+
   }
 
   String get _resolvedSender {
@@ -277,39 +287,45 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
 
     if (_mode == _EmailSendMode.single) {
-      final recipientName = _selectedUser?.fullName ??
-          (_customRecipientCtrl.text.isNotEmpty
-              ? _customRecipientCtrl.text
-              : 'Direct Client');
-      final recipientEmail = _selectedUser?.email ??
-          (_customRecipientCtrl.text.isNotEmpty
-              ? _customRecipientCtrl.text
-              : 'client@example.com');
+      final recipientName = _isDirectRecipient
+          ? (_customRecipientNameCtrl.text.trim().isNotEmpty
+              ? _customRecipientNameCtrl.text.trim()
+              : 'Direct Client')
+          : (_selectedUser?.fullName ?? 'Client');
+      final recipientEmail = _isDirectRecipient
+          ? _customRecipientCtrl.text.trim()
+          : (_selectedUser?.email ?? '');
+      final companyName = _isDirectRecipient
+          ? 'Client Company'
+          : (_selectedUser?.companyName ?? 'Your Company');
+      final phone = _isDirectRecipient ? '' : (_selectedUser?.phone ?? '');
+
       final renderedSubject = _renderContent(
         subject,
         name: recipientName,
-        company: _selectedUser?.companyName ?? 'Your Company',
-        phone: _selectedUser?.phone ?? '',
+        company: companyName,
+        phone: phone,
       );
       final renderedBody = _renderContent(
         body,
         name: recipientName,
-        company: _selectedUser?.companyName ?? 'Your Company',
-        phone: _selectedUser?.phone ?? '',
+        company: companyName,
+        phone: phone,
       );
 
       if (!recipientEmail.contains('@')) {
         setState(() => _isSending = false);
         AppUtils.showSnackBar(
           context: context,
-          extraMessage: 'Select a customer with a valid email address.',
+          extraMessage: 'Please enter a valid recipient email address.',
           toastificationType: ToastificationType.warning,
         );
         return;
       }
 
       final sent = await widget.onSendEmail({
-        if (_selectedUser != null) 'customerId': _selectedUser!.id,
+        if (!_isDirectRecipient && _selectedUser != null)
+          'customerId': _selectedUser!.id,
         if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
         'senderAlias': _resolvedSender,
         'recipientName': recipientName,
@@ -317,6 +333,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
         'subject': renderedSubject,
         'body': renderedBody,
       });
+
       if (!mounted) return;
       setState(() => _isSending = false);
       if (!sent) {
@@ -402,8 +419,12 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final customers = context.read<CustomersCubit>().state.users;
+    final customers = context.watch<CustomersCubit>().state.users;
+    if (_selectedUser == null && customers.isNotEmpty) {
+      _selectedUser = customers.first;
+    }
     final targetCount = _getBatchTargetCount(customers);
+
 
     final previewBody = _bodyCtrl.text
         .replaceAll('{name}', _selectedUser?.fullName ?? 'Valued Customer')
@@ -765,29 +786,198 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
                           // RECIPIENT ROW
                           if (_mode == _EmailSendMode.single) ...[
-                            Text(
-                              'TO (RECIPIENT)',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                                color: isDark
-                                    ? Colors.grey[400]
-                                    : Colors.grey[700],
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'TO (RECIPIENT)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.5,
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[700],
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => setState(
+                                          () => _isDirectRecipient = false),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: !_isDirectRecipient
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withValues(alpha: 0.12)
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          'CUSTOMER',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            color: !_isDirectRecipient
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                : (isDark
+                                                    ? Colors.grey[500]
+                                                    : Colors.grey[600]),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () => setState(
+                                          () => _isDirectRecipient = true),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: _isDirectRecipient
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withValues(alpha: 0.12)
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          'DIRECT EMAIL',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            color: _isDirectRecipient
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                : (isDark
+                                                    ? Colors.grey[500]
+                                                    : Colors.grey[600]),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 8),
-                            AppDropdownWidget<User>(
-                              value: _selectedUser,
-                              hint: 'Select recipient customer',
-                              items: customers,
-                              height: 46,
-                              itemBuilder: (u) =>
-                                  '${u.fullName} (${u.email.isNotEmpty ? u.email : u.companyName})',
-                              onChanged: (u) =>
-                                  setState(() => _selectedUser = u),
-                            ),
+                            if (!_isDirectRecipient)
+                              AppDropdownWidget<User>(
+                                value: _selectedUser,
+                                hint: 'Select recipient customer',
+                                items: customers,
+                                height: 46,
+                                itemBuilder: (u) =>
+                                    '${u.fullName} (${u.email.isNotEmpty ? u.email : u.companyName})',
+                                onChanged: (u) =>
+                                    setState(() => _selectedUser = u),
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      height: 46,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                            ThemeConstants.buttonRadius),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? Colors.white12
+                                              : context.colors.lightGreyColor,
+                                        ),
+                                        color: isDark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.03)
+                                            : Colors.black
+                                                .withValues(alpha: 0.02),
+                                      ),
+                                      child: TextField(
+                                        controller: _customRecipientCtrl,
+                                        style: const TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600),
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 14),
+                                          hintText:
+                                              'Recipient Email (e.g. client@gmail.com)',
+                                          hintStyle: TextStyle(
+                                              fontSize: 12.5,
+                                              color:
+                                                  context.colors.darkGreyColor),
+                                          border: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      height: 46,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                            ThemeConstants.buttonRadius),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? Colors.white12
+                                              : context.colors.lightGreyColor,
+                                        ),
+                                        color: isDark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.03)
+                                            : Colors.black
+                                                .withValues(alpha: 0.02),
+                                      ),
+                                      child: TextField(
+                                        controller: _customRecipientNameCtrl,
+                                        style: const TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600),
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  horizontal: 14),
+                                          hintText: 'Name (optional)',
+                                          hintStyle: TextStyle(
+                                              fontSize: 12.5,
+                                              color:
+                                                  context.colors.darkGreyColor),
+                                          border: InputBorder.none,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ] else ...[
+
                             // BATCH TARGET SELECTION
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

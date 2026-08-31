@@ -4,7 +4,9 @@ import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/core/widgets/app_action_button.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
+import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/email_follow_ups_headers.dart';
+
 import 'package:callx_ai/features/email_follow_ups/widgets/email_preview_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/manage_template_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
@@ -42,11 +44,20 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       if (!_tabController.indexIsChanging) setState(() {});
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<EmailFollowUpsCubit>().loadInitial();
+      if (mounted) {
+        context.read<EmailFollowUpsCubit>().loadInitial();
+        context.read<CustomersCubit>().loadInitial(resetFilters: false);
+      }
     });
   }
 
-  Future<void> _loadData() => context.read<EmailFollowUpsCubit>().refresh();
+  Future<void> _loadData() async {
+    await Future.wait([
+      context.read<EmailFollowUpsCubit>().refresh(),
+      context.read<CustomersCubit>().refresh(),
+    ]);
+  }
+
 
   List<Map<String, dynamic>> get _allTemplates => context
       .read<EmailFollowUpsCubit>()
