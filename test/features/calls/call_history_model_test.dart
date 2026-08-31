@@ -18,6 +18,14 @@ void main() {
         email: 'jane@acme.com',
         leadPriority: 'Hot',
         lastContactResult: 'Interested',
+        transcript: const [
+          CallTranscriptMessage(
+            speaker: 'ai',
+            speakerName: 'AI Agent (Emma)',
+            text: 'Hello Jane! Calling regarding your inquiry.',
+            timestamp: '00:03',
+          ),
+        ],
       );
 
       final json = call.toJson();
@@ -35,6 +43,7 @@ void main() {
       expect(deserialized.duration, '3:45');
       expect(deserialized.transcript, isNotEmpty);
     });
+
 
     test('copyWith updates specific fields accurately', () {
       final call = CallHistoryModel(

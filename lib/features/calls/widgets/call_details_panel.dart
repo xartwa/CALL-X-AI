@@ -71,17 +71,25 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
 
     switch (widget.call.status) {
       case 'Completed':
-        return 'Customer (${widget.call.fullName}) was contacted by AI (B2B Sales).\nKey project scope, budget estimation, and delivery terms were discussed.\nCustomer expressed strong interest in proceeding.';
+        return 'Call session completed successfully.';
       case 'Failed':
-        return 'Call was unanswered or disconnected. A follow-up attempt has been logged for scheduling.';
+        return 'Call was not connected or was unanswered. No audio recording or transcript is available.';
+      case 'Busy':
+        return 'The customer line was busy. Call could not be connected.';
+      case 'No Answer':
+        return 'Call was not answered by recipient.';
       case 'Queued':
-        return 'Call is placed in the outbound queue. The system will initiate dialing as soon as an AI line is available.';
+        return 'Call is queued and pending outbound dispatch.';
       case 'Upcoming':
-        return 'Scheduled outgoing call. The system will initiate dialing at the specified date and time.';
+        final dateStr = widget.call.scheduledFor != null
+            ? AppDateTime.displayDateTime(widget.call.scheduledFor)
+            : (widget.call.callDate.isNotEmpty ? widget.call.callDate : 'scheduled date');
+        return 'Call is scheduled for $dateStr. Dialing will be initiated automatically at that time.';
       default:
         return 'Call session record logged.';
     }
   }
+
 
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
@@ -127,12 +135,19 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
 
     if (!mounted) return;
 
+
     final updated = widget.call.copyWith(
-      nextFollowUpDate: newDate,
+      nextFollowUpDate: newDate != null ? AppDateTime.apiDateTime(newDate) : null,
     );
 
     widget.onCallUpdated?.call(updated);
     context.read<SelectedCallCubit>().updateFollowUpDate(newDate);
+    try {
+      context.read<CustomersCubit>().refresh();
+    } catch (_) {}
+
+
+
 
     AppUtils.showSnackBar(
       context: context,

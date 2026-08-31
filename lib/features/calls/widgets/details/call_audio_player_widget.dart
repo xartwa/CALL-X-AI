@@ -95,21 +95,33 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     }
   }
 
+  bool get _hasAudio =>
+      (widget.call.recordingUrl != null &&
+          widget.call.recordingUrl!.trim().isNotEmpty) ||
+      _totalSeconds > 0;
+
   void _parseDuration() {
     final parts = widget.call.duration.split(':');
     if (parts.length == 2) {
       final mins = int.tryParse(parts[0]) ?? 0;
       final secs = int.tryParse(parts[1]) ?? 0;
       _totalSeconds = (mins * 60) + secs;
-      if (_totalSeconds == 0) _totalSeconds = 135;
     } else {
-      _totalSeconds = 135;
+      _totalSeconds = 0;
     }
     _currentSeconds = 0;
     _playbackProgress = 0.0;
   }
 
   Future<void> _togglePlayPause() async {
+    if (!_hasAudio) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'No audio recording available for this call session.',
+        toastificationType: ToastificationType.info,
+      );
+      return;
+    }
     if (_isPlaying) {
       await _stopPlayback();
     } else {
@@ -130,8 +142,11 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       }
     }
 
+    if (_totalSeconds <= 0) return;
+
     // Fallback synchronized playback simulator
     setState(() => _isPlaying = true);
+
     final intervalMs = (1000 / _playbackSpeed).round();
     _fallbackTimer?.cancel();
     _fallbackTimer =
@@ -276,12 +291,49 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (!_hasAudio) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              CupertinoIcons.mic_slash,
+              size: 16,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'No audio recording available for this call',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final isDownloaded =
         AudioDownloadService.instance.isDownloaded(widget.call.id);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -301,14 +353,21 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF6366F1),
-                    Color(0xFF4F46E5),
-                  ],
-                ),
+                gradient: _hasAudio
+                    ? const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF6366F1),
+                          Color(0xFF4F46E5),
+                        ],
+                      )
+                    : null,
+                color: _hasAudio
+                    ? null
+                    : (isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1)),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -317,7 +376,9 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                       ? CupertinoIcons.pause_fill
                       : CupertinoIcons.play_fill,
                   size: 16,
-                  color: Colors.white,
+                  color: _hasAudio
+                      ? Colors.white
+                      : (isDark ? Colors.white38 : Colors.black38),
                 ),
               ),
             ),
@@ -326,12 +387,16 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
 
           // Elapsed / Total Duration Text
           Text(
-            '${_formatTime(_currentSeconds)} / ${_formatTime(_totalSeconds)}',
+            _hasAudio
+                ? '${_formatTime(_currentSeconds)} / ${_formatTime(_totalSeconds)}'
+                : '00:00 / 00:00',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: _hasAudio
+                  ? Theme.of(context).colorScheme.onSurface
+                  : (isDark ? Colors.white38 : Colors.black38),
             ),
           ),
           const SizedBox(width: 12),
@@ -346,21 +411,32 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                   elevation: 2,
                 ),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                activeTrackColor: context.colors.primaryLightColor,
+                activeTrackColor: _hasAudio
+                    ? context.colors.primaryLightColor
+                    : (isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1)),
                 inactiveTrackColor:
                     isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
-                thumbColor: context.colors.primaryLightColor,
+                thumbColor: _hasAudio
+                    ? context.colors.primaryLightColor
+                    : (isDark
+                        ? const Color(0xFF475569)
+                        : const Color(0xFF94A3B8)),
                 overlayColor:
                     context.colors.primaryLightColor.withValues(alpha: 0.2),
               ),
               child: Slider(
                 value: _playbackProgress.clamp(0.0, 1.0),
-                onChanged: (val) {
-                  _seekTo(val);
-                },
+                onChanged: _hasAudio
+                    ? (val) {
+                        _seekTo(val);
+                      }
+                    : null,
               ),
             ),
           ),
+
           const SizedBox(width: 8),
 
           // Mute / Unmute Volume Button

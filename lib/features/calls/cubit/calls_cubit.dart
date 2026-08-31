@@ -187,9 +187,11 @@ class CallsCubit extends Cubit<CallsState> {
       final updated = await repository.scheduleFollowUp(callId, followUpDate);
       final updatedCalls =
           state.calls.map((c) => c.id == callId ? updated : c).toList();
+      final stats = await repository.getStats();
 
       emit(state.copyWith(
         calls: updatedCalls,
+        kpi: stats,
         selectedCall:
             state.selectedCall?.id == callId ? updated : state.selectedCall,
         isUpdatingFollowUp: false,
@@ -210,14 +212,17 @@ class CallsCubit extends Cubit<CallsState> {
       final updated = await repository.clearFollowUp(callId);
       final updatedCalls =
           state.calls.map((c) => c.id == callId ? updated : c).toList();
+      final stats = await repository.getStats();
 
       emit(state.copyWith(
         calls: updatedCalls,
+        kpi: stats,
         selectedCall:
             state.selectedCall?.id == callId ? updated : state.selectedCall,
         isUpdatingFollowUp: false,
         actionFeedbackMessage: 'Follow-up cleared',
       ));
+
     } catch (e) {
       emit(state.copyWith(
         isUpdatingFollowUp: false,
@@ -225,6 +230,7 @@ class CallsCubit extends Cubit<CallsState> {
       ));
     }
   }
+
 
   Future<void> callAgain(String callId) async {
     try {

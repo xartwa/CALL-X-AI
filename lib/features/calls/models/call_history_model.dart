@@ -168,9 +168,13 @@ class CallHistoryModel {
       };
 
   factory CallHistoryModel.fromJson(
-    Map<String, dynamic> json, {
+    Map<String, dynamic> rawJson, {
     Color? defaultStatusColor,
   }) {
+    final json = (rawJson['call'] is Map)
+        ? Map<String, dynamic>.from(rawJson['call'] as Map)
+        : rawJson;
+
     List<String> parsedTags = [];
     if (json['tags'] != null && json['tags'] is List) {
       for (final t in json['tags'] as List) {
@@ -202,7 +206,7 @@ class CallHistoryModel {
     final fullName =
         (json['fullName'] ?? json['full_name'] ?? json['name'] ?? 'Contact')
             .toString();
-    final status = (json['status'] ?? 'Completed').toString();
+    final status = (json['status'] ?? 'Queued').toString();
     final assignee = (json['assignee'] ?? 'AI Assistant').toString();
     final direction = (json['direction'] ??
             json['call_direction'] ??
@@ -215,11 +219,8 @@ class CallHistoryModel {
         (json['customer'] is Map ? json['customer']['id'] : null) ??
         (json['customer'] is num ? json['customer'].toString() : null);
 
-    if (parsedTranscript.isEmpty && status.toLowerCase() == 'completed') {
-      parsedTranscript = _generateDefaultTranscript(fullName, assignee);
-    }
-
     return CallHistoryModel(
+
       id: json['id']?.toString() ?? '',
       fullName: fullName,
       companyName:
@@ -259,40 +260,5 @@ class CallHistoryModel {
       customerId: customerIdRaw?.toString(),
     );
   }
-
-  static List<CallTranscriptMessage> _generateDefaultTranscript(
-    String customerName,
-    String agentName,
-  ) {
-    return [
-      CallTranscriptMessage(
-        speaker: 'ai',
-        speakerName: agentName.isNotEmpty ? agentName : 'AI Agent',
-        text:
-            'Hello $customerName! Calling from CallX AI regarding your recent inquiry.',
-        timestamp: '00:03',
-      ),
-      CallTranscriptMessage(
-        speaker: 'customer',
-        speakerName: customerName,
-        text:
-            'Hi, thanks for reaching out. I was looking for quotation details.',
-        timestamp: '00:08',
-      ),
-      CallTranscriptMessage(
-        speaker: 'ai',
-        speakerName: agentName.isNotEmpty ? agentName : 'AI Agent',
-        text:
-            'I have prepared your estimation overview. I will email the full proposal document to you now.',
-        timestamp: '00:15',
-      ),
-      CallTranscriptMessage(
-        speaker: 'customer',
-        speakerName: customerName,
-        text:
-            'Great, please send it over and let us follow up after my review.',
-        timestamp: '00:24',
-      ),
-    ];
-  }
 }
+
