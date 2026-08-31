@@ -131,8 +131,14 @@ abstract interface class CustomerRepository {
     required String fileName,
   });
   Future<List<int>> exportCustomers(CustomerFilters filters);
-  Future<void> dispatchCall(String customerId, String scenarioId,
-      {DateTime? scheduledFor});
+  Future<void> dispatchCall({
+    String? customerId,
+    String? scenarioId,
+    String? phone,
+    String? fullName,
+    DateTime? scheduledFor,
+  });
+
   Future<List<Map<String, dynamic>>> getScenarios();
   Future<CustomerDocument> uploadDocument(String customerId, String path,
       {void Function(int sent, int total)? onProgress});

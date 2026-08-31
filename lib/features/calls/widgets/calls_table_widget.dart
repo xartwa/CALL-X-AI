@@ -372,7 +372,9 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
                   context,
                   fullName: call.fullName,
                   phone: call.phone,
+                  customerId: call.customerId,
                 ),
+
               ),
               const SizedBox(width: 8),
               AppActionButton(

@@ -95,18 +95,36 @@ class CustomerRemoteDataSource {
     return List<int>.from(response.data as List);
   }
 
-  Future<void> dispatchCall(String customerId, String scenarioId,
-      {DateTime? scheduledFor}) async {
-    await client.http.post('/calls/dispatch-single/', data: {
-      'customerId': customerId,
-      'scenarioId': scenarioId,
+  Future<void> dispatchCall({
+    String? customerId,
+    String? scenarioId,
+    String? phone,
+    String? fullName,
+    DateTime? scheduledFor,
+  }) async {
+    final payload = <String, dynamic>{
+      if (customerId != null && customerId.isNotEmpty && customerId != '-1')
+        'customerId': customerId,
+      if (scenarioId != null && scenarioId.isNotEmpty)
+        'scenarioId': scenarioId,
+      if (phone != null && phone.isNotEmpty)
+        'phone': phone,
+      if (fullName != null && fullName.isNotEmpty)
+        'fullName': fullName,
       if (scheduledFor != null)
         'scheduledFor': AppDateTime.apiDateTime(scheduledFor),
-    });
+    };
+    await client.http.post('/calls/dispatch-single/', data: payload);
   }
 
+
   Future<List<Map<String, dynamic>>> scenarios() async {
-    final response = await client.http.get('/scenarios/');
+    Response response;
+    try {
+      response = await client.http.get('/scenarios/');
+    } catch (_) {
+      response = await client.http.get('/cartesia/scenarios/');
+    }
     final data = response.data is Map
         ? (response.data as Map)['results']
         : response.data;
@@ -115,6 +133,7 @@ class CustomerRemoteDataSource {
         .map((item) => Map<String, dynamic>.from(item))
         .toList();
   }
+
 
   Future<Map<String, dynamic>> uploadDocument(String customerId, String path,
       {ProgressCallback? onProgress}) async {

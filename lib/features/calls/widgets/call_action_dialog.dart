@@ -127,25 +127,35 @@ class _CallActionDialogState extends State<CallActionDialog> {
       );
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final raw = await context.read<CustomersCubit>().getScenarios();
-      if (!mounted) return;
-      if (raw.isEmpty) {
-        setState(() => _scenarioError = 'No active call scenarios found.');
-        return;
+      final customersCubit = context.read<CustomersCubit>();
+      if (customersCubit.state.users.isEmpty) {
+        customersCubit.loadInitial();
       }
-      final scenarios = raw
-          .map((item) => ConversationScenario(
-                id: '${item['id']}',
-                title: '${item['name'] ?? 'Scenario'}',
-                category: '${item['category'] ?? ''}',
-                description: '${item['pitchSummary'] ?? ''}',
-              ))
-          .toList();
-      setState(() {
-        _scenarios = scenarios;
-        _selectedScenario = scenarios.first;
-        _scenarioError = null;
-      });
+      try {
+        final raw = await customersCubit.getScenarios();
+
+        if (!mounted) return;
+        if (raw.isEmpty) {
+          setState(() => _scenarioError = 'No active call scenarios found.');
+          return;
+        }
+        final scenarios = raw
+            .map((item) => ConversationScenario(
+                  id: '${item['id']}',
+                  title: '${item['name'] ?? 'Scenario'}',
+                  category: '${item['category'] ?? ''}',
+                  description: '${item['pitchSummary'] ?? ''}',
+                ))
+            .toList();
+        setState(() {
+          _scenarios = scenarios;
+          _selectedScenario = scenarios.first;
+          _scenarioError = null;
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _scenarioError = 'Failed to load scenarios.');
+      }
     });
   }
 
@@ -234,15 +244,27 @@ class _CallActionDialogState extends State<CallActionDialog> {
       }
 
       final dispatched = await customersCubit.dispatchCall(
-        _selectedUser!.id.toString(),
-        scenario.id,
+        customerId: _selectedUser!.id != '-1' ? _selectedUser!.id.toString() : null,
+        scenarioId: scenario.id,
+        phone: _selectedUser!.phone,
+        fullName: _selectedUser!.fullName,
         scheduledFor: _scheduledFor(),
       );
       if (!dispatched) {
-        if (mounted) setState(() => _isCalling = false);
+        if (mounted) {
+          setState(() => _isCalling = false);
+          if (customersCubit.state.actionError != null) {
+            AppUtils.showSnackBar(
+              context: context,
+              extraMessage: customersCubit.state.actionError!,
+              toastificationType: ToastificationType.error,
+            );
+          }
+        }
         return;
       }
       await callsCubit.refresh();
+
 
       if (buildContext.mounted) {
         setState(() => _isCalling = false);
@@ -394,11 +416,14 @@ class _CallActionDialogState extends State<CallActionDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final customers = context.read<CustomersCubit>().state.users;
+    final customersState = context.watch<CustomersCubit>().state;
+    final customers = customersState.users;
+    final isCustomersLoading = customersState.isInitialLoading;
 
     if (_isCalling) {
       return _buildCallingAnimation(isDark);
     }
+
 
     final targetCount = _getGroupTargetCount(customers);
 
@@ -558,12 +583,15 @@ class _CallActionDialogState extends State<CallActionDialog> {
                   const SizedBox(height: 8),
                   AppDropdownWidget<User>(
                     value: _selectedUser,
-                    hint: 'Choose customer or enter phone number',
+                    hint: isCustomersLoading
+                        ? 'Loading customers...'
+                        : (customers.isEmpty ? 'No customers found' : 'Choose customer or enter phone number'),
                     items: customers,
                     itemBuilder: (user) =>
                         '${user.fullName} (${user.companyName.isNotEmpty ? user.companyName : user.phone})',
                     onChanged: (user) => setState(() => _selectedUser = user),
                   ),
+
                   const SizedBox(height: 22),
                 ] else ...[
                   Container(

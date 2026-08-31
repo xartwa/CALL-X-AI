@@ -302,17 +302,32 @@ class CustomersCubit extends Cubit<CustomersState> {
     }
   }
 
-  Future<bool> dispatchCall(String customerId, String scenarioId,
-      {DateTime? scheduledFor}) async {
+  Future<bool> dispatchCall({
+    String? customerId,
+    String? scenarioId,
+    String? phone,
+    String? fullName,
+    DateTime? scheduledFor,
+  }) async {
     try {
-      await repository.dispatchCall(customerId, scenarioId,
-          scheduledFor: scheduledFor);
+      await repository.dispatchCall(
+        customerId: customerId,
+        scenarioId: scenarioId,
+        phone: phone,
+        fullName: fullName,
+        scheduledFor: scheduledFor,
+      );
       return true;
+    } on AppException catch (e) {
+      emit(state.copyWith(actionError: e.details ?? 'The call could not be dispatched.'));
+      return false;
     } catch (_) {
+
       emit(state.copyWith(actionError: 'The call could not be dispatched.'));
       return false;
     }
   }
+
 
   Future<List<Map<String, dynamic>>> getScenarios() =>
       repository.getScenarios();

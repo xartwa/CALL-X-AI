@@ -196,10 +196,21 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<List<int>> exportCustomers(CustomerFilters filters) =>
       _request(() => remote.exportFile(filters.toQuery(1, 100000)));
   @override
-  Future<void> dispatchCall(String customerId, String scenarioId,
-          {DateTime? scheduledFor}) =>
-      _request(() => remote.dispatchCall(customerId, scenarioId,
-          scheduledFor: scheduledFor));
+  Future<void> dispatchCall({
+    String? customerId,
+    String? scenarioId,
+    String? phone,
+    String? fullName,
+    DateTime? scheduledFor,
+  }) =>
+      _request(() => remote.dispatchCall(
+            customerId: customerId,
+            scenarioId: scenarioId,
+            phone: phone,
+            fullName: fullName,
+            scheduledFor: scheduledFor,
+          ));
+
   @override
   Future<List<Map<String, dynamic>>> getScenarios() =>
       _request(remote.scenarios);

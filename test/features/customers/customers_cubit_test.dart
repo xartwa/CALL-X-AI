@@ -238,8 +238,14 @@ class _FakeCustomerRepository implements CustomerRepository {
   @override
   Future<List<int>> exportCustomers(CustomerFilters filters) async => const [];
   @override
-  Future<void> dispatchCall(String customerId, String scenarioId,
-      {DateTime? scheduledFor}) async {}
+  Future<void> dispatchCall({
+    String? customerId,
+    String? scenarioId,
+    String? phone,
+    String? fullName,
+    DateTime? scheduledFor,
+  }) async {}
+
   @override
   Future<List<Map<String, dynamic>>> getScenarios() async => const [];
   @override

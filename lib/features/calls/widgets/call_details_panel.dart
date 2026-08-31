@@ -406,8 +406,10 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               context,
                               fullName: widget.call.fullName,
                               phone: widget.call.phone,
+                              customerId: widget.call.customerId,
                               initialTab: 'callNow',
                             );
+
                             widget.onCallAdded();
                           },
                           icon: const Icon(
