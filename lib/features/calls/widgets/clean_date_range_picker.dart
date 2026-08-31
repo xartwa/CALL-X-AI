@@ -280,8 +280,8 @@ class _CleanDateRangePickerState extends State<CleanDateRangePicker> {
                               context,
                               initial: endDate,
                               first: startDate ?? DateTime(2020),
-                              last: DateTime.now()
-                                  .add(const Duration(days: 365)),
+                              last:
+                                  DateTime.now().add(const Duration(days: 365)),
                             );
                             if (picked != null) {
                               setState(() {

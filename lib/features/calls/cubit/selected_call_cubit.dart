@@ -5,7 +5,7 @@ class SelectedCallCubit extends Cubit<CallHistoryModel?> {
   SelectedCallCubit() : super(null);
 
   void selectCall(CallHistoryModel call) => emit(call);
-  
+
   void clearSelection() => emit(null);
 
   void updateCall(CallHistoryModel updatedCall) {
@@ -18,10 +18,9 @@ class SelectedCallCubit extends Cubit<CallHistoryModel?> {
     }
   }
 
-  void updateFollowUpDate(String nextFollowUpDate) {
+  void updateFollowUpDate(DateTime? nextFollowUpDate) {
     if (state != null) {
       emit(state!.copyWith(nextFollowUpDate: nextFollowUpDate));
     }
   }
 }
-

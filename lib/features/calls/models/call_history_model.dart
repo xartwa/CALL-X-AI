@@ -33,6 +33,8 @@ class CallTranscriptMessage {
 }
 
 class CallHistoryModel {
+  static const Object _unset = Object();
+
   final String id;
   final String fullName;
   final String companyName;
@@ -49,7 +51,7 @@ class CallHistoryModel {
   final String? email;
   final String? leadPriority;
   final String? lastContactResult;
-  final String? nextFollowUpDate;
+  final DateTime? nextFollowUpDate;
   final List<String> tags;
   final String? recordingUrl;
   final List<CallTranscriptMessage> transcript;
@@ -73,18 +75,18 @@ class CallHistoryModel {
     this.email,
     this.leadPriority = 'Warm',
     this.lastContactResult = 'Interested',
-    this.nextFollowUpDate = '',
+    Object? nextFollowUpDate = _unset,
     this.tags = const [],
     this.recordingUrl,
     this.transcript = const [],
     this.direction = 'Outbound',
     this.customerId,
-  });
+  }) : nextFollowUpDate = AppDateTime.tryParse(nextFollowUpDate);
 
   DateTime? get dateTime =>
       AppDateTime.combine(callDate, callTime) ?? scheduledFor ?? createdAt;
 
-  DateTime? get nextFollowUpAt => AppDateTime.tryParse(nextFollowUpDate);
+  DateTime? get nextFollowUpAt => nextFollowUpDate;
 
   CallHistoryModel copyWith({
     String? id,
@@ -103,7 +105,7 @@ class CallHistoryModel {
     String? email,
     String? leadPriority,
     String? lastContactResult,
-    String? nextFollowUpDate,
+    Object? nextFollowUpDate = _unset,
     List<String>? tags,
     String? recordingUrl,
     List<CallTranscriptMessage>? transcript,
@@ -127,7 +129,9 @@ class CallHistoryModel {
       email: email ?? this.email,
       leadPriority: leadPriority ?? this.leadPriority,
       lastContactResult: lastContactResult ?? this.lastContactResult,
-      nextFollowUpDate: nextFollowUpDate ?? this.nextFollowUpDate,
+      nextFollowUpDate: identical(nextFollowUpDate, _unset)
+          ? this.nextFollowUpDate
+          : nextFollowUpDate,
       tags: tags ?? this.tags,
       recordingUrl: recordingUrl ?? this.recordingUrl,
       transcript: transcript ?? this.transcript,
@@ -144,7 +148,8 @@ class CallHistoryModel {
         'status': status,
         'assignee': assignee,
         'duration': duration,
-        if (dateTime != null) 'occurredAt': AppDateTime.apiDateTime(dateTime!),
+        'callDate': callDate,
+        'callTime': callTime,
         if (scheduledFor != null)
           'scheduledFor': AppDateTime.apiDateTime(scheduledFor!),
         if (createdAt != null) 'createdAt': AppDateTime.apiDateTime(createdAt!),
@@ -152,8 +157,8 @@ class CallHistoryModel {
         'email': email,
         'leadPriority': leadPriority,
         'lastContactResult': lastContactResult,
-        if (nextFollowUpAt != null)
-          'nextFollowUpDate': AppDateTime.apiDateTime(nextFollowUpAt!),
+        if (nextFollowUpDate != null)
+          'nextFollowUpDate': AppDateTime.apiDateTime(nextFollowUpDate!),
         'tags': tags,
         'statusColor': statusColor?.toARGB32(),
         'recordingUrl': recordingUrl,
@@ -241,12 +246,9 @@ class CallHistoryModel {
               json['last_contact_result'] ??
               'Interested')
           .toString(),
-      nextFollowUpDate: switch (AppDateTime.tryParseApiDateTime(
+      nextFollowUpDate: AppDateTime.tryParseApiDateTime(
         json['nextFollowUpDate'] ?? json['next_follow_up_date'],
-      )) {
-        final value? => AppDateTime.apiDateTime(value),
-        null => '',
-      },
+      ),
       tags: parsedTags,
       statusColor: color,
       recordingUrl: (json['recordingUrl'] ??

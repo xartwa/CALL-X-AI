@@ -20,7 +20,10 @@ class WorkspaceConfigurationModel {
     final stagesList = (rawStages is List ? rawStages : [])
         .map((e) => e is Map<String, dynamic>
             ? TagModel.fromJson(e)
-            : TagModel(id: e.toString(), label: e.toString(), color: const Color(0xFF3B82F6)))
+            : TagModel(
+                id: e.toString(),
+                label: e.toString(),
+                color: const Color(0xFF3B82F6)))
         .toList();
 
     // Custom tags
@@ -28,7 +31,10 @@ class WorkspaceConfigurationModel {
     final tagsList = (rawTags is List ? rawTags : [])
         .map((e) => e is Map<String, dynamic>
             ? TagModel.fromJson(e)
-            : TagModel(id: e.toString(), label: e.toString(), color: const Color(0xFF3B82F6)))
+            : TagModel(
+                id: e.toString(),
+                label: e.toString(),
+                color: const Color(0xFF3B82F6)))
         .toList();
 
     // Tag colors
@@ -43,7 +49,8 @@ class WorkspaceConfigurationModel {
           colorsList.add(TagModel.hexToColor(item));
         } else if (item is int) {
           colorsList.add(Color(item));
-          hexStrings.add('#${(item & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}');
+          hexStrings.add(
+              '#${(item & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}');
         }
       }
     }

@@ -3,11 +3,12 @@ import 'package:callx_ai/core/widgets/chip_tag_widget.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/core/widgets/app_action_button.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/email_follow_ups_headers.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/email_preview_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/manage_template_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
-import 'package:callx_ai/services/preferences_service.dart';
+import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,10 +28,6 @@ class EmailFollowUpsPage extends StatefulWidget {
 class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late PreferencesService _preferences;
-
-  List<Map<String, dynamic>> _allEmails = [];
-  List<Map<String, dynamic>> _allTemplates = [];
 
   String _searchQuery = '';
   String _selectedStatus = 'All';
@@ -44,62 +41,26 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) setState(() {});
     });
-    _preferences = context.read<PreferencesService>();
-    _loadData();
-  }
-
-  void _loadData() {
-    setState(() {
-      _allEmails = _preferences.loadEmails();
-      _allTemplates = _preferences.loadTemplates();
-
-      // Seed mock templates if empty
-      if (_allTemplates.isEmpty) {
-        _allTemplates = [
-          {
-            'id': '1',
-            'name': 'Contract & Project Proposal',
-            'category': 'Billing & Contracts',
-            'subject': 'Proposal & Scope of Work for {name} - CallX AI',
-            'body':
-                '<p>Hi <b>{name}</b>,</p><p>Thank you for speaking with our team today regarding {company}. We have prepared the official scope of work and project proposal tailored to your requirements.</p><p>Please find the attached proposal summary. Looking forward to your review!</p><p>Best regards,<br><b>{agent}</b></p>',
-          },
-          {
-            'id': '2',
-            'name': 'Follow-Up After Call',
-            'category': 'Follow-Up & Closing',
-            'subject': 'Great speaking with you, {name}!',
-            'body':
-                '<p>Hi <b>{name}</b>,</p><p>Thank you for your valuable time on our call today. As discussed, I am following up with key points and action items for {company}.</p><p>Let me know if you would like to schedule our next follow-up session.</p><p>Best regards,<br><b>{agent}</b></p>',
-          },
-          {
-            'id': '3',
-            'name': 'Demo Confirmation & Calendar',
-            'category': 'Sales & Outreach',
-            'subject': 'Confirmed: CallX AI Product Demo with {company}',
-            'body':
-                '<p>Hi <b>{name}</b>,</p><p>This is a quick confirmation for our upcoming product demo scheduled on {date}.</p><p>We will walk you through our AI voice automation and answer all your technical questions.</p><p>See you soon!<br><b>{agent}</b></p>',
-          },
-          {
-            'id': '4',
-            'name': 'Special Pricing & Discount Offer',
-            'category': 'Sales & Outreach',
-            'subject': 'Exclusive 20% Partnership Offer for {company}',
-            'body':
-                '<p>Hi <b>{name}</b>,</p><p>We are excited about the potential collaboration with {company}. For this month only, we are offering an exclusive tier discount on our AI line deployment.</p><p>Let us know if you would like to lock in this tier before it closes!</p><p>Warm regards,<br><b>{agent}</b></p>',
-          },
-        ];
-        _saveTemplates();
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<EmailFollowUpsCubit>().loadInitial();
     });
   }
 
-  void _saveEmails() {
-    _preferences.saveEmails(_allEmails);
-  }
+  Future<void> _loadData() => context.read<EmailFollowUpsCubit>().refresh();
 
-  void _saveTemplates() {
-    _preferences.saveTemplates(_allTemplates);
+  List<Map<String, dynamic>> get _allTemplates => context
+      .read<EmailFollowUpsCubit>()
+      .state
+      .templates
+      .map((template) => template.toViewMap())
+      .toList(growable: false);
+
+  List<Map<String, dynamic>> get _allEmails {
+    final state = context.read<EmailFollowUpsCubit>().state;
+    final templates = {for (final item in state.templates) item.id: item};
+    return state.logs
+        .map((log) => log.toViewMap(templates))
+        .toList(growable: false);
   }
 
   @override
@@ -218,12 +179,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
           preloadedTemplate: preloadedTemplate,
           allTemplates: _allTemplates,
           startInGroupMode: startInGroupMode,
-          onSendEmail: (newEmail) {
-            setState(() {
-              _allEmails.insert(0, newEmail);
-              _saveEmails();
-            });
-          },
+          onSendEmail: context.read<EmailFollowUpsCubit>().send,
         );
       },
     );
@@ -236,20 +192,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       builder: (context) {
         return ManageTemplateDialog(
           templateToEdit: templateToEdit,
-          onSaveTemplate: (template) {
-            setState(() {
-              if (templateToEdit == null) {
-                _allTemplates.insert(0, template);
-              } else {
-                final idx = _allTemplates
-                    .indexWhere((t) => t['id'] == templateToEdit['id']);
-                if (idx != -1) {
-                  _allTemplates[idx] = template;
-                }
-              }
-              _saveTemplates();
-            });
-          },
+          onSaveTemplate: context.read<EmailFollowUpsCubit>().saveTemplate,
         );
       },
     );
@@ -285,6 +228,16 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
 
   @override
   Widget build(BuildContext context) {
+    final emailState = context.watch<EmailFollowUpsCubit>().state;
+    if (emailState.isLoading && emailState.logs.isEmpty) {
+      return const AppLoadingView(message: 'Loading email activity...');
+    }
+    if (emailState.errorMessage != null && emailState.logs.isEmpty) {
+      return AppErrorView(
+        message: emailState.errorMessage!,
+        onRetry: context.read<EmailFollowUpsCubit>().loadInitial,
+      );
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final emailsList = _filteredEmails;
     final templatesList = _filteredTemplates;
@@ -442,7 +395,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         ),
       ],
     ).withPullToRefresh(
-      onRefresh: () async => _loadData(),
+      onRefresh: _loadData,
     );
   }
 
@@ -628,13 +581,9 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                         message:
                             'Are you sure you want to delete this email from history?',
                         confirmLabel: 'DELETE',
-                        onConfirm: () {
-                          setState(() {
-                            _allEmails
-                                .removeWhere((e) => e['id'] == email['id']);
-                            _saveEmails();
-                          });
-                        },
+                        onConfirm: () => context
+                            .read<EmailFollowUpsCubit>()
+                            .deleteLog(email['id'].toString()),
                       );
                     },
                   ),
@@ -737,13 +686,9 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                             message:
                                 'Are you sure you want to delete template "${temp['name']}"?',
                             confirmLabel: 'DELETE',
-                            onConfirm: () {
-                              setState(() {
-                                _allTemplates
-                                    .removeWhere((t) => t['id'] == temp['id']);
-                                _saveTemplates();
-                              });
-                            },
+                            onConfirm: () => context
+                                .read<EmailFollowUpsCubit>()
+                                .deleteTemplate(temp['id'].toString()),
                           );
                         },
                       ),

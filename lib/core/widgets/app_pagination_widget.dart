@@ -47,8 +47,9 @@ class AppPaginationWidget extends StatelessWidget {
 
     // Theme-tailored colors
     final primaryColor = theme.colorScheme.primary;
-    final activeBg =
-        isDark ? primaryColor.withOpacity(0.2) : primaryColor.withOpacity(0.08);
+    final activeBg = isDark
+        ? primaryColor.withValues(alpha: 0.2)
+        : primaryColor.withValues(alpha: 0.08);
     final activeText =
         isDark ? theme.colorScheme.onPrimaryContainer : primaryColor;
     final inactiveText = isDark ? Colors.grey[400] : const Color(0xFF64748B);
@@ -96,7 +97,7 @@ class AppPaginationWidget extends StatelessWidget {
                 child: InkWell(
                   onTap: () => onPageChanged(pageNum),
                   borderRadius: BorderRadius.circular(20),
-                  hoverColor: primaryColor.withOpacity(0.05),
+                  hoverColor: primaryColor.withValues(alpha: 0.05),
                   child: Container(
                     width: 36,
                     height: 36,

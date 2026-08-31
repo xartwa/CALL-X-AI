@@ -248,7 +248,8 @@ class _AddTagDialogState extends State<AddTagDialog> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: isDark ? 0.15 : 0.08),
+                            color:
+                                color.withValues(alpha: isDark ? 0.15 : 0.08),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: color.withValues(alpha: 0.4),
@@ -283,4 +284,3 @@ class _AddTagDialogState extends State<AddTagDialog> {
     );
   }
 }
-

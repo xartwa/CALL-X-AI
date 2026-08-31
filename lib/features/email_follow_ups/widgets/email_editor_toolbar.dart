@@ -45,8 +45,7 @@ class EmailEditorToolbar extends StatelessWidget {
     } else {
       final newText = '$text$textToInsert';
       controller.text = newText;
-      controller.selection =
-          TextSelection.collapsed(offset: newText.length);
+      controller.selection = TextSelection.collapsed(offset: newText.length);
     }
   }
 
@@ -151,20 +150,17 @@ class EmailEditorToolbar extends StatelessWidget {
                       final linkText = textCtrl.text.trim();
                       final url = urlCtrl.text.trim();
                       if (url.isNotEmpty) {
-                        final display =
-                            linkText.isNotEmpty ? linkText : url;
-                        _insertText(
-                            controller, '<a href="$url">$display</a>');
+                        final display = linkText.isNotEmpty ? linkText : url;
+                        _insertText(controller, '<a href="$url">$display</a>');
                       }
                       Navigator.pop(dialogCtx);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(dialogCtx).colorScheme.primary,
+                      backgroundColor: Theme.of(dialogCtx).colorScheme.primary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            ThemeConstants.buttonRadius),
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
                       ),
                     ),
                     child: const Text(
@@ -371,11 +367,14 @@ class EmailEditorToolbar extends StatelessWidget {
                   controller, '<span style="color: $colorHex;">', '</span>');
             },
             itemBuilder: (context) => [
-              _buildColorItem('Primary Blue', '#3B82F6', const Color(0xFF3B82F6)),
-              _buildColorItem('Emerald Green', '#10B981', const Color(0xFF10B981)),
+              _buildColorItem(
+                  'Primary Blue', '#3B82F6', const Color(0xFF3B82F6)),
+              _buildColorItem(
+                  'Emerald Green', '#10B981', const Color(0xFF10B981)),
               _buildColorItem('Coral Red', '#EF4444', const Color(0xFFEF4444)),
               _buildColorItem('Amber Gold', '#F59E0B', const Color(0xFFF59E0B)),
-              _buildColorItem('Royal Purple', '#8B5CF6', const Color(0xFF8B5CF6)),
+              _buildColorItem(
+                  'Royal Purple', '#8B5CF6', const Color(0xFF8B5CF6)),
               _buildColorItem('Charcoal', '#374151', const Color(0xFF374151)),
             ],
             child: Container(

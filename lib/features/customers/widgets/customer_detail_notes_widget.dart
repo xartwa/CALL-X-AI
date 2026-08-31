@@ -109,7 +109,8 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: context.colors.primaryLightColor.withOpacity(0.12),
+                      color: context.colors.primaryLightColor
+                          .withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -139,7 +140,8 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                     hintText: 'Search notes...',
                     hintStyle: TextStyle(
                       fontSize: 11,
-                      color: context.colors.darkGreyColor.withOpacity(0.7),
+                      color:
+                          context.colors.darkGreyColor.withValues(alpha: 0.7),
                     ),
                     prefixIcon: Icon(
                       CupertinoIcons.search,
@@ -200,7 +202,8 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                   decoration: InputDecoration(
                     hintText: 'Write a new note here...',
                     hintStyle: TextStyle(
-                      color: context.colors.darkGreyColor.withOpacity(0.6),
+                      color:
+                          context.colors.darkGreyColor.withValues(alpha: 0.6),
                       fontSize: 12,
                     ),
                     border: InputBorder.none,
@@ -252,7 +255,8 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                         Icon(
                           CupertinoIcons.doc_text,
                           size: 36,
-                          color: context.colors.darkGreyColor.withOpacity(0.3),
+                          color: context.colors.darkGreyColor
+                              .withValues(alpha: 0.3),
                         ),
                         const SizedBox(height: 8),
                         Text(

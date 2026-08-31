@@ -16,7 +16,8 @@ import 'package:callx_ai/features/customers/domain/repositories/customer_reposit
 import 'package:callx_ai/theme/app_colors.dart';
 
 void main() {
-  testWidgets('CallDetailsPanel renders single-view with header, audio player, AI summary, transcript, and notes',
+  testWidgets(
+      'CallDetailsPanel renders single-view with header, audio player, AI summary, transcript, and notes',
       (tester) async {
     tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1.0;
@@ -102,7 +103,8 @@ void main() {
     // 5. Verify Transcript Section
     expect(find.text('Call Transcript'), findsOneWidget);
     expect(find.text('Copy All'), findsOneWidget);
-    expect(find.text('Hello John! Calling regarding your project inquiry.'), findsOneWidget);
+    expect(find.text('Hello John! Calling regarding your project inquiry.'),
+        findsOneWidget);
 
     // 6. Verify Next Steps & Follow-up Section
     expect(find.text('Next Steps'), findsOneWidget);
@@ -134,8 +136,7 @@ class _FakeCallsRepository implements CallsRepository {
       const CallsKpiDto();
 
   @override
-  Future<CallHistoryModel> getCallDetail(String id) async =>
-      CallHistoryModel(
+  Future<CallHistoryModel> getCallDetail(String id) async => CallHistoryModel(
         id: id,
         fullName: 'John Smith',
         phone: '0912 345 6789',
@@ -147,7 +148,8 @@ class _FakeCallsRepository implements CallsRepository {
       );
 
   @override
-  Future<CallHistoryModel> scheduleFollowUp(String id, String followUpDate) async =>
+  Future<CallHistoryModel> scheduleFollowUp(
+          String id, String followUpDate) async =>
       CallHistoryModel(
         id: id,
         fullName: 'John Smith',
@@ -161,8 +163,7 @@ class _FakeCallsRepository implements CallsRepository {
       );
 
   @override
-  Future<CallHistoryModel> clearFollowUp(String id) async =>
-      CallHistoryModel(
+  Future<CallHistoryModel> clearFollowUp(String id) async => CallHistoryModel(
         id: id,
         fullName: 'John Smith',
         phone: '0912 345 6789',
@@ -180,9 +181,16 @@ class _FakeCallsRepository implements CallsRepository {
   Future<Map<String, dynamic>> getCustomerInfo(String id) async => {};
 
   @override
+  Future<void> launchBatch({
+    required String name,
+    required String scenarioId,
+    required List<String> customerIds,
+    required int concurrentLines,
+  }) async {}
+
+  @override
   Future<void> deleteCall(String id) async {}
 }
-
 
 class _FakeCustomerRepository implements CustomerRepository {
   @override

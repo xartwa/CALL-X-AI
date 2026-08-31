@@ -37,7 +37,8 @@ class _FakeWorkspaceRepository implements WorkspaceRepository {
   List<TagModel>? lastSavedTags;
 
   @override
-  Future<WorkspaceConfigurationModel> getWorkspaceConfiguration({Object? cancelToken}) async {
+  Future<WorkspaceConfigurationModel> getWorkspaceConfiguration(
+      {Object? cancelToken}) async {
     if (shouldThrow) throw Exception('Server error');
     return config;
   }
@@ -73,7 +74,8 @@ void main() {
       repository = _FakeWorkspaceRepository();
     });
 
-    test('loadConfiguration loads pipeline stages, custom tags, and tag colors', () async {
+    test('loadConfiguration loads pipeline stages, custom tags, and tag colors',
+        () async {
       final cubit = WorkspaceSettingsCubit(
         workspaceRepository: repository,
         preferencesService: preferencesService,
@@ -90,11 +92,18 @@ void main() {
       await cubit.close();
     });
 
-    test('performs one-time migration for local tags not present on the server', () async {
+    test('performs one-time migration for local tags not present on the server',
+        () async {
       // Save local custom tags in preferences before migration
       await preferencesService.saveCustomTags([
-        const TagModel(id: 'local-1', label: 'High Budget', color: Color(0xFF10B981)), // Duplicate
-        const TagModel(id: 'local-2', label: 'VIP Client', color: Color(0xFFEC4899)), // New
+        const TagModel(
+            id: 'local-1',
+            label: 'High Budget',
+            color: Color(0xFF10B981)), // Duplicate
+        const TagModel(
+            id: 'local-2',
+            label: 'VIP Client',
+            color: Color(0xFFEC4899)), // New
       ]);
 
       final cubit = WorkspaceSettingsCubit(
@@ -114,7 +123,9 @@ void main() {
       await cubit.close();
     });
 
-    test('saveCustomTags updates backend and emits loaded state with updated custom tags', () async {
+    test(
+        'saveCustomTags updates backend and emits loaded state with updated custom tags',
+        () async {
       final cubit = WorkspaceSettingsCubit(
         workspaceRepository: repository,
         preferencesService: preferencesService,
@@ -124,7 +135,8 @@ void main() {
 
       final newDraft = [
         const TagModel(id: '1', label: 'High Budget', color: Color(0xFF10B981)),
-        const TagModel(id: '', label: 'Enterprise Lead', color: Color(0xFF3B82F6)),
+        const TagModel(
+            id: '', label: 'Enterprise Lead', color: Color(0xFF3B82F6)),
       ];
 
       final result = await cubit.saveCustomTags(newDraft);

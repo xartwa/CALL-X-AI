@@ -167,12 +167,12 @@ class _TodoListCardState extends State<TodoListCard> {
           BlocBuilder<TodoCubit, TodoState>(
             builder: (context, state) {
               if (state.todos.isEmpty) {
-                  return const SizedBox(
-                    height: 92,
-                    child: Center(
-                      child: Text('All caught up!'),
-                    ),
-                  );
+                return const SizedBox(
+                  height: 92,
+                  child: Center(
+                    child: Text('All caught up!'),
+                  ),
+                );
               }
 
               return ConstrainedBox(

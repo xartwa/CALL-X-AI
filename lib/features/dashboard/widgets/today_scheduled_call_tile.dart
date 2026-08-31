@@ -2,15 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:toastification/toastification.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import '../domain/entities/dashboard_snapshot.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
-import 'package:callx_ai/services/preferences_service.dart';
-import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.dart';
 
 class TodayScheduledCallTile extends StatefulWidget {
   final DashboardTodayCall call;
@@ -46,25 +44,16 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
   }
 
   void _openEmail(BuildContext context) {
-    final prefs = context.read<PreferencesService>();
-    final templates = prefs.loadTemplates();
+    final emailCubit = context.read<EmailFollowUpsCubit>();
+    final templates = emailCubit.state.templates
+        .map((template) => template.toViewMap())
+        .toList(growable: false);
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => SendEmailDialog(
         allTemplates: templates,
-        onSendEmail: (newEmail) {
-          final existing = prefs.loadEmails();
-          existing.insert(0, newEmail);
-          prefs.saveEmails(existing);
-          AppUtils.showSnackBar(
-            context: context,
-            title: 'Email Sent',
-            extraMessage:
-                'Follow-up email dispatched to ${widget.call.fullName}.',
-            toastificationType: ToastificationType.success,
-          );
-        },
+        onSendEmail: emailCubit.send,
       ),
     );
   }

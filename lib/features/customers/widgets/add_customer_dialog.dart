@@ -60,8 +60,8 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
   String _leadStatus = 'New';
   String _leadPriority = 'Hot';
   String _leadQuality = 'Excellent';
-  String _lastContactResult = 'Interested';
-  String _status = 'Active';
+  final String _lastContactResult = 'Interested';
+  final String _status = 'Active';
   DateTime? _nextFollowUp;
   final List<String> _tags = const [];
 
@@ -393,15 +393,13 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                         const SizedBox(height: 8),
                         InkWell(
                           onTap: () async {
-                            final picked =
-                                await AppDateTimePicker.pickDateTime(
+                            final picked = await AppDateTimePicker.pickDateTime(
                               context,
                               initial: _nextFollowUp ??
-                                  DateTime.now()
-                                      .add(const Duration(days: 2)),
+                                  DateTime.now().add(const Duration(days: 2)),
                               first: DateTime.now(),
-                              last: DateTime.now()
-                                  .add(const Duration(days: 365)),
+                              last:
+                                  DateTime.now().add(const Duration(days: 365)),
                             );
                             if (picked != null) {
                               setState(() {
@@ -419,7 +417,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                   color: context.colors.primaryLightColor
-                                      .withOpacity(0.4)),
+                                      .withValues(alpha: 0.4)),
                             ),
                             child: Row(
                               children: [

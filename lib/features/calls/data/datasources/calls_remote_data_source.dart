@@ -40,6 +40,22 @@ class CallsRemoteDataSource {
       Map<String, dynamic>.from(
           (await client.http.get('/calls/$id/customer-info/')).data as Map);
 
+  Future<Map<String, dynamic>> launchBatch({
+    required String name,
+    required String scenarioId,
+    required List<String> customerIds,
+    required int concurrentLines,
+  }) async =>
+      Map<String, dynamic>.from(
+        (await client.http.post('/calls/campaigns/launch/', data: {
+          'name': name,
+          'scenarioId': scenarioId,
+          'customerIds': customerIds,
+          'concurrentLines': concurrentLines,
+        }))
+            .data as Map,
+      );
+
   Future<void> delete(String id) async {
     await client.http.delete('/calls/$id/');
   }

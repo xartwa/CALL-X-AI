@@ -30,5 +30,12 @@ abstract class CallsRepository {
 
   Future<Map<String, dynamic>> getCustomerInfo(String id);
 
+  Future<void> launchBatch({
+    required String name,
+    required String scenarioId,
+    required List<String> customerIds,
+    required int concurrentLines,
+  });
+
   Future<void> deleteCall(String id);
 }

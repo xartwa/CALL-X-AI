@@ -152,7 +152,6 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
                   ],
                 ),
                 const SizedBox(height: 20),
-
                 const Text('SCENARIO NAME',
                     style:
                         TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800)),
@@ -177,7 +176,6 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 const Text('CATEGORY',
                     style:
                         TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800)),
@@ -192,7 +190,6 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
                   },
                 ),
                 const SizedBox(height: 24),
-
                 SizedBox(
                   width: double.infinity,
                   height: 46,
@@ -326,8 +323,8 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
                     hintText: 'e.g. What is your ideal project start timeline?',
                     contentPadding: const EdgeInsets.all(12),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                            ThemeConstants.buttonRadius)),
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius)),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -574,7 +571,8 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
               hintText: 'e.g. Hello {name}, this is Alex calling from...',
               contentPadding: const EdgeInsets.all(16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                borderRadius:
+                    BorderRadius.circular(ThemeConstants.buttonRadius),
                 borderSide: BorderSide(
                     color: isDark
                         ? Colors.white12
@@ -608,7 +606,8 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
               hintText: 'Briefly describe what your business offers...',
               contentPadding: const EdgeInsets.all(16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                borderRadius:
+                    BorderRadius.circular(ThemeConstants.buttonRadius),
                 borderSide: BorderSide(
                     color: isDark
                         ? Colors.white12
@@ -682,9 +681,8 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
                   borderRadius:
                       BorderRadius.circular(ThemeConstants.buttonRadius),
                   border: Border.all(
-                    color: isDark
-                        ? Colors.white10
-                        : context.colors.lightGreyColor,
+                    color:
+                        isDark ? Colors.white10 : context.colors.lightGreyColor,
                   ),
                 ),
                 child: Row(
@@ -718,7 +716,11 @@ class _OutboundCampaignsTabState extends State<OutboundCampaignsTab> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(CupertinoIcons.delete, size: 15,color: AppColors.errorColor,),
+                      icon: const Icon(
+                        CupertinoIcons.delete,
+                        size: 15,
+                        color: AppColors.errorColor,
+                      ),
                       onPressed: () {
                         setState(() => _selectedScenario.qualifyingQuestions
                             .removeAt(idx));

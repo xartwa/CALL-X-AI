@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
-import 'package:callx_ai/core/utils/app_date_time.dart';
 
 void main() {
   group('CallHistoryModel Tests', () {
@@ -25,9 +24,9 @@ void main() {
       expect(json['id'], '101');
       expect(json['fullName'], 'Jane Doe');
       expect(json['lastContactResult'], 'Interested');
-      expect(json['occurredAt'], AppDateTime.apiDateTime(call.dateTime!));
-      expect(json, isNot(contains('callDate')));
-      expect(json, isNot(contains('callTime')));
+      expect(json['callDate'], '2026/08/29');
+      expect(json['callTime'], '11:00');
+      expect(json, isNot(contains('occurredAt')));
 
       final deserialized = CallHistoryModel.fromJson(json);
       expect(deserialized.id, '101');
@@ -56,8 +55,11 @@ void main() {
 
       expect(updated.id, '102');
       expect(updated.notes, 'Updated follow-up note');
-      expect(updated.nextFollowUpDate, '2026-09-01T07:00:00Z');
+      expect(updated.nextFollowUpDate, DateTime.utc(2026, 9, 1, 7));
       expect(updated.fullName, 'Bob Builder');
+      expect(updated.copyWith(notes: 'kept').nextFollowUpDate,
+          DateTime.utc(2026, 9, 1, 7));
+      expect(updated.copyWith(nextFollowUpDate: null).nextFollowUpDate, isNull);
     });
 
     test('CallTranscriptMessage serialization and deserialization', () {

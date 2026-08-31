@@ -5,7 +5,8 @@ class WorkspaceRemoteDataSource {
   const WorkspaceRemoteDataSource(this.client);
   final DioClient client;
 
-  Future<Map<String, dynamic>> getWorkspaceConfiguration({CancelToken? cancelToken}) async {
+  Future<Map<String, dynamic>> getWorkspaceConfiguration(
+      {CancelToken? cancelToken}) async {
     final response = await client.http.get(
       '/customers/workspace-configuration/',
       cancelToken: cancelToken,

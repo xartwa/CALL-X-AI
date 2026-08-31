@@ -90,4 +90,3 @@ class _KpiLoading extends StatelessWidget {
         ),
       );
 }
-

@@ -38,7 +38,7 @@ class CallDetailsPanel extends StatefulWidget {
 }
 
 class _CallDetailsPanelState extends State<CallDetailsPanel> {
-  String? _followUpDate;
+  DateTime? _followUpDate;
 
   @override
   void initState() {
@@ -110,13 +110,12 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     );
   }
 
-  void _saveFollowUpDate(String? newDate) async {
+  void _saveFollowUpDate(DateTime? newDate) async {
     setState(() {
       _followUpDate = newDate;
     });
 
-    final parsed = AppDateTime.tryParse(newDate);
-    final formatted = parsed == null ? '' : AppDateTime.apiDateTime(parsed);
+    final formatted = newDate == null ? '' : AppDateTime.apiDateTime(newDate);
 
     if (formatted.isNotEmpty) {
       await context
@@ -129,15 +128,15 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     if (!mounted) return;
 
     final updated = widget.call.copyWith(
-      nextFollowUpDate: newDate ?? '',
+      nextFollowUpDate: newDate,
     );
 
     widget.onCallUpdated?.call(updated);
-    context.read<SelectedCallCubit>().updateFollowUpDate(newDate ?? '');
+    context.read<SelectedCallCubit>().updateFollowUpDate(newDate);
 
     AppUtils.showSnackBar(
       context: context,
-      extraMessage: (newDate != null && newDate.isNotEmpty)
+      extraMessage: newDate != null
           ? 'Follow-up scheduled for ${AppDateTime.displayDateTime(newDate)}'
           : 'Follow-up date cleared',
       toastificationType: ToastificationType.success,
@@ -147,8 +146,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
   void _pickDate() async {
     final now = DateTime.now();
     DateTime initial = now.add(const Duration(days: 1));
-    if (_followUpDate != null && _followUpDate!.isNotEmpty) {
-      initial = AppDateTime.tryParse(_followUpDate) ?? initial;
+    if (_followUpDate != null) {
+      initial = _followUpDate!;
     }
 
     final picked = await AppDateTimePicker.pickDateTime(
@@ -159,7 +158,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     );
 
     if (picked != null) {
-      _saveFollowUpDate(AppDateTime.apiDateTime(picked));
+      _saveFollowUpDate(picked);
     }
   }
 
@@ -918,8 +917,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                 ),
                               ],
                             ),
-                            if (_followUpDate != null &&
-                                _followUpDate!.isNotEmpty)
+                            if (_followUpDate != null)
                               InkWell(
                                 onTap: () => _saveFollowUpDate(null),
                                 child: Text(
@@ -987,19 +985,16 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        (_followUpDate != null &&
-                                                _followUpDate!.isNotEmpty)
+                                        _followUpDate != null
                                             ? AppDateTime.displayDateOrDateTime(
                                                 _followUpDate)
                                             : 'Click to select follow-up date & time',
                                         style: TextStyle(
                                           fontSize: 12.5,
-                                          fontWeight: (_followUpDate != null &&
-                                                  _followUpDate!.isNotEmpty)
+                                          fontWeight: _followUpDate != null
                                               ? FontWeight.w700
                                               : FontWeight.w500,
-                                          color: (_followUpDate != null &&
-                                                  _followUpDate!.isNotEmpty)
+                                          color: _followUpDate != null
                                               ? (isDark
                                                   ? Colors.white
                                                   : Colors.black87)

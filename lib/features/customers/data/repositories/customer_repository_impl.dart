@@ -141,7 +141,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
       CustomerDto(await remote.create(customer.toApiJson())).toEntity());
   @override
   Future<Customer> updateCustomer(Customer customer) => _request(() async =>
-      CustomerDto(await remote.update('${customer.id}', customer.toApiJson()))
+      CustomerDto(await remote.update(customer.id, customer.toApiJson()))
           .toEntity());
   @override
   Future<void> deleteCustomer(String id) => _request(() => remote.delete(id));

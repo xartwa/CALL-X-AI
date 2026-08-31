@@ -1,12 +1,11 @@
-import 'package:callx_ai/core/constants/app_strings.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/widgets/preset_chip_widget.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
+import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
-import 'package:callx_ai/services/preferences_service.dart';
 import 'package:flutter/material.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:flutter/cupertino.dart';
@@ -87,48 +86,14 @@ class _CallActionDialogState extends State<CallActionDialog> {
   String _customerSearchQuery = '';
 
   // Conversation Scenarios
-  List<ConversationScenario> _scenarios = const [
-    ConversationScenario(
-      id: 'sales_qualification',
-      title: 'General Sales & Qualification',
-      category: 'B2B Sales',
-      description:
-          'Qualifies lead budget, timeline, and decision-maker status.',
-    ),
-    ConversationScenario(
-      id: 'contractor_estimation',
-      title: 'Contractor & Renovation Estimation',
-      category: 'Construction',
-      description: 'Gathers project scope, square footage, and budget ranges.',
-    ),
-    ConversationScenario(
-      id: 'real_estate_pitch',
-      title: 'Real Estate Seller & Investor Pitch',
-      category: 'Real Estate',
-      description: 'Engages homeowners and investors for property acquisition.',
-    ),
-    ConversationScenario(
-      id: 'saas_demo_booking',
-      title: 'SaaS & Tech Demo Booking',
-      category: 'Technology',
-      description:
-          'Pitches product capabilities and books calendar live demos.',
-    ),
-    ConversationScenario(
-      id: 'follow_up_care',
-      title: 'Follow-Up & Customer Care',
-      category: 'Customer Success',
-      description: 'Checks post-call satisfaction and confirms next steps.',
-    ),
-  ];
-
-  late ConversationScenario _selectedScenario;
+  List<ConversationScenario> _scenarios = const [];
+  ConversationScenario? _selectedScenario;
+  String? _scenarioError;
 
   // Group Call States
   String _selectedGroupSegment = 'All Hot Leads';
   final List<String> _groupSegments = const [
     'All Hot Leads',
-    'Queued Calls',
     'All Active Customers',
     'Recent Inquiries (7 Days)',
   ];
@@ -149,8 +114,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
     _timingMode = widget.initialTab == 'schedule'
         ? _TimingMode.schedule
         : _TimingMode.callNow;
-    _selectedScenario = _scenarios.first;
-
+    if (_callType == _CallType.group) _timingMode = _TimingMode.callNow;
     if (widget.fullName != null && widget.phone != null) {
       _selectedUser = User(
         id: widget.customerId ?? '-1',
@@ -164,7 +128,11 @@ class _CallActionDialogState extends State<CallActionDialog> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final raw = await context.read<CustomersCubit>().getScenarios();
-      if (!mounted || raw.isEmpty) return;
+      if (!mounted) return;
+      if (raw.isEmpty) {
+        setState(() => _scenarioError = 'No active call scenarios found.');
+        return;
+      }
       final scenarios = raw
           .map((item) => ConversationScenario(
                 id: '${item['id']}',
@@ -176,6 +144,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
       setState(() {
         _scenarios = scenarios;
         _selectedScenario = scenarios.first;
+        _scenarioError = null;
       });
     });
   }
@@ -206,41 +175,57 @@ class _CallActionDialogState extends State<CallActionDialog> {
   }
 
   int _getGroupTargetCount(List<User> customers) {
+    return _groupTargets(customers).length;
+  }
+
+  List<User> _groupTargets(List<User> customers) {
     if (_groupTargetMode == _GroupTargetMode.manual) {
-      return _manualSelectedUserIds.length;
+      return customers
+          .where((user) => _manualSelectedUserIds.contains(user.id))
+          .toList(growable: false);
     }
-    switch (_selectedGroupSegment) {
-      case 'All Hot Leads':
-        return customers
-            .where((u) => u.leadPriority.toLowerCase() == 'hot')
-            .length
-            .clamp(1, 999);
-      case 'Queued Calls':
-        return 8;
-      case 'All Active Customers':
-        return customers.length;
-      case 'Recent Inquiries (7 Days)':
-        return 6;
-      default:
-        return customers.length;
-    }
+    return switch (_selectedGroupSegment) {
+      'All Hot Leads' => customers
+          .where((u) => u.leadPriority.toLowerCase() == 'hot')
+          .toList(growable: false),
+      'All Active Customers' => customers
+          .where((u) => u.status.toLowerCase() == 'active')
+          .toList(growable: false),
+      'Recent Inquiries (7 Days)' => customers.where((u) {
+          final createdAt = u.createdAt;
+          return createdAt != null &&
+              DateTime.now().difference(createdAt).inDays <= 7;
+        }).toList(growable: false),
+      _ => const <User>[],
+    };
   }
 
   void _triggerCall() async {
-    setState(() => _isCalling = true);
+    final scenario = _selectedScenario;
+    if (scenario == null) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: _scenarioError ?? 'Select an active call scenario.',
+        toastificationType: ToastificationType.warning,
+      );
+      return;
+    }
 
+    final isScheduled = _timingMode == _TimingMode.schedule;
+    if (_callType == _CallType.group && isScheduled) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'Batch scheduling is not supported by the server yet.',
+        toastificationType: ToastificationType.warning,
+      );
+      return;
+    }
+
+    setState(() => _isCalling = true);
     final buildContext = context;
     final navigator = Navigator.of(context);
-    final preferences = context.read<PreferencesService>();
-
-    await Future.delayed(const Duration(milliseconds: 1300));
-
-    if (!buildContext.mounted) return;
-
-    final now = DateTime.now();
-
-    final calls = preferences.loadCalls();
-    final isScheduled = _timingMode == _TimingMode.schedule;
+    final customersCubit = context.read<CustomersCubit>();
+    final callsCubit = context.read<CallsCubit>();
 
     if (_callType == _CallType.single) {
       if (_selectedUser == null) {
@@ -248,39 +233,16 @@ class _CallActionDialogState extends State<CallActionDialog> {
         return;
       }
 
-      final dispatched = await buildContext.read<CustomersCubit>().dispatchCall(
-            _selectedUser!.id.toString(),
-            _selectedScenario.id,
-            scheduledFor: _scheduledFor(),
-          );
+      final dispatched = await customersCubit.dispatchCall(
+        _selectedUser!.id.toString(),
+        scenario.id,
+        scheduledFor: _scheduledFor(),
+      );
       if (!dispatched) {
         if (mounted) setState(() => _isCalling = false);
         return;
       }
-
-      final newId = (calls.length + 1).toString();
-      final newCall = {
-        'id': newId,
-        'fullName': _selectedUser!.fullName,
-        'phone': _selectedUser!.phone,
-        'status': isScheduled
-            ? AppStrings.current.callActionUpcoming
-            : AppStrings.current.callActionCompleted,
-        'assignee': 'AI (${_selectedScenario.category})',
-        'duration': isScheduled ? '0:00' : '2:15',
-        'createdAt': AppDateTime.apiDateTime(now),
-        if (isScheduled)
-          'scheduledFor': AppDateTime.apiDateTime(_scheduledFor()!),
-        'notes': 'Scenario: ${_selectedScenario.title}',
-        'email': _selectedUser!.email,
-        'leadPriority': 'Hot',
-        'statusColor': isScheduled
-            ? buildContext.colors.queuedColor.toARGB32()
-            : buildContext.colors.successColor.toARGB32(),
-      };
-
-      calls.insert(0, newCall);
-      await preferences.saveCalls(calls);
+      await callsCubit.refresh();
 
       if (buildContext.mounted) {
         setState(() => _isCalling = false);
@@ -291,46 +253,33 @@ class _CallActionDialogState extends State<CallActionDialog> {
           title: isScheduled
               ? 'Call Scheduled Successfully'
               : 'Call Initiated with ${_selectedUser!.fullName}',
-          extraMessage: 'Scenario: ${_selectedScenario.title}',
+          extraMessage: 'Scenario: ${scenario.title}',
           toastificationType: ToastificationType.success,
         );
       }
     } else {
-      // Group / Batch Call
-      final customers = buildContext.read<CustomersCubit>().state.users;
-      List<User> targetList = [];
-
-      if (_groupTargetMode == _GroupTargetMode.manual) {
-        targetList = customers
-            .where((u) => _manualSelectedUserIds.contains(u.id))
-            .toList();
-      } else {
-        targetList = customers;
+      final customers = customersCubit.state.users;
+      final targets = _groupTargets(customers);
+      if (targets.isEmpty) {
+        setState(() => _isCalling = false);
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'Select at least one customer for this campaign.',
+          toastificationType: ToastificationType.warning,
+        );
+        return;
       }
 
-      final count = targetList.isEmpty ? 5 : targetList.length;
-
-      for (int i = 0; i < count.clamp(1, 10); i++) {
-        final targetUser = i < targetList.length ? targetList[i] : null;
-        final newId = (calls.length + i + 1).toString();
-        calls.insert(0, {
-          'id': newId,
-          'fullName': targetUser?.fullName ?? 'Lead #$i',
-          'phone': targetUser?.phone ?? '0912 000 000$i',
-          'status': isScheduled ? 'Upcoming' : 'Queued',
-          'assignee': 'AI Bot #${i + 1}',
-          'duration': '0:00',
-          'createdAt': AppDateTime.apiDateTime(now),
-          if (isScheduled)
-            'scheduledFor': AppDateTime.apiDateTime(_scheduledFor()!),
-          'notes':
-              'Batch: ${_groupTargetMode == _GroupTargetMode.manual ? "Manual List" : _selectedGroupSegment} (${_selectedScenario.title})',
-          'leadPriority': 'Hot',
-          'statusColor': buildContext.colors.queuedColor.toARGB32(),
-        });
+      final launched = await callsCubit.launchBatch(
+        name: '${scenario.title} Campaign',
+        scenarioId: scenario.id,
+        customerIds: targets.map((user) => user.id).toList(growable: false),
+        concurrentLines: _concurrencyLines,
+      );
+      if (!launched) {
+        if (mounted) setState(() => _isCalling = false);
+        return;
       }
-
-      await preferences.saveCalls(calls);
 
       if (buildContext.mounted) {
         setState(() => _isCalling = false);
@@ -338,11 +287,9 @@ class _CallActionDialogState extends State<CallActionDialog> {
 
         AppUtils.showSnackBar(
           context: buildContext,
-          title: isScheduled
-              ? 'Batch Campaign Scheduled ($count Leads)'
-              : 'Batch Campaign Launched ($count Leads)',
+          title: 'Batch Campaign Launched (${targets.length} Leads)',
           extraMessage:
-              'Scenario: ${_selectedScenario.title} across $_concurrencyLines concurrent lines.',
+              'Scenario: ${scenario.title} across $_concurrencyLines concurrent lines.',
           toastificationType: ToastificationType.success,
         );
       }
@@ -393,7 +340,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Scenario: ${_selectedScenario.title}',
+              'Scenario: ${_selectedScenario?.title ?? "Loading..."}',
               style: TextStyle(
                 fontSize: 13,
                 color: Theme.of(context).colorScheme.primary,
@@ -548,8 +495,10 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () =>
-                              setState(() => _callType = _CallType.group),
+                          onTap: () => setState(() {
+                            _callType = _CallType.group;
+                            _timingMode = _TimingMode.callNow;
+                          }),
                           child: Container(
                             decoration: BoxDecoration(
                               color: _callType == _CallType.group
@@ -689,6 +638,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                 AppDropdownWidget<ConversationScenario>(
                   value: _selectedScenario,
                   items: _scenarios,
+                  hint: _scenarioError ?? 'Loading scenarios...',
                   customItemBuilder: (s) => _buildScenarioItem(s, isDark),
                   onChanged: (val) {
                     if (val != null) setState(() => _selectedScenario = val);
@@ -752,8 +702,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       child: SizedBox(
                         height: 44,
                         child: OutlinedButton(
-                          onPressed: () => setState(
-                              () => _timingMode = _TimingMode.schedule),
+                          onPressed: null,
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
                               color: _timingMode == _TimingMode.schedule
@@ -823,8 +772,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                             context,
                             initial: _customDate,
                             first: DateTime.now(),
-                            last: DateTime.now()
-                                .add(const Duration(days: 365)),
+                            last: DateTime.now().add(const Duration(days: 365)),
                           );
                           if (picked != null) {
                             setState(() {
@@ -1218,6 +1166,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                 AppDropdownWidget<ConversationScenario>(
                   value: _selectedScenario,
                   items: _scenarios,
+                  hint: _scenarioError ?? 'Loading scenarios...',
                   customItemBuilder: (s) => _buildScenarioItem(s, isDark),
                   onChanged: (val) {
                     if (val != null) setState(() => _selectedScenario = val);
@@ -1367,7 +1316,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                             ),
                           ),
                           child: Text(
-                            'SCHEDULE BATCH',
+                            'SCHEDULE UNAVAILABLE',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
@@ -1416,8 +1365,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                             context,
                             initial: _customDate,
                             first: DateTime.now(),
-                            last: DateTime.now()
-                                .add(const Duration(days: 365)),
+                            last: DateTime.now().add(const Duration(days: 365)),
                           );
                           if (picked != null) {
                             setState(() {
@@ -1439,11 +1387,10 @@ class _CallActionDialogState extends State<CallActionDialog> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: (_callType == _CallType.single &&
+                  onPressed: _selectedScenario == null ||
+                          (_callType == _CallType.single &&
                               _selectedUser == null) ||
-                          (_callType == _CallType.group &&
-                              _groupTargetMode == _GroupTargetMode.manual &&
-                              _manualSelectedUserIds.isEmpty)
+                          (_callType == _CallType.group && targetCount == 0)
                       ? null
                       : _triggerCall,
                   style: ElevatedButton.styleFrom(

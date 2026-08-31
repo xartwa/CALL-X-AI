@@ -356,8 +356,7 @@ class _CallsTableWidgetState extends State<CallsTableWidget> {
               AppDateTime.displayDateOrDateTime(call.nextFollowUpDate),
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: call.nextFollowUpDate != null &&
-                        call.nextFollowUpDate!.isNotEmpty
+                fontWeight: call.nextFollowUpDate != null
                     ? FontWeight.w600
                     : FontWeight.normal,
               ),

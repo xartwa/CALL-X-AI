@@ -32,7 +32,8 @@ class ScenarioModel {
       category: category ?? this.category,
       openingGreeting: openingGreeting ?? this.openingGreeting,
       pitchSummary: pitchSummary ?? this.pitchSummary,
-      qualifyingQuestions: qualifyingQuestions ?? List.from(this.qualifyingQuestions),
+      qualifyingQuestions:
+          qualifyingQuestions ?? List.from(this.qualifyingQuestions),
       actionOnInterest: actionOnInterest ?? this.actionOnInterest,
     );
   }
@@ -53,7 +54,9 @@ class ScenarioModel {
         category: json['category'] ?? 'Sales',
         openingGreeting: json['openingGreeting'] ?? '',
         pitchSummary: json['pitchSummary'] ?? '',
-        qualifyingQuestions: List<String>.from(json['qualifyingQuestions'] ?? []),
-        actionOnInterest: json['actionOnInterest'] ?? 'Send Follow-up Email & Tag as Hot Lead',
+        qualifyingQuestions:
+            List<String>.from(json['qualifyingQuestions'] ?? []),
+        actionOnInterest: json['actionOnInterest'] ??
+            'Send Follow-up Email & Tag as Hot Lead',
       );
 }

@@ -18,7 +18,8 @@ class TagModel {
   String get colorHex =>
       '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
 
-  static Color hexToColor(dynamic value, [Color fallback = const Color(0xFF3B82F6)]) {
+  static Color hexToColor(dynamic value,
+      [Color fallback = const Color(0xFF3B82F6)]) {
     if (value == null) return fallback;
     if (value is int) return Color(value);
     if (value is Color) return value;

@@ -20,7 +20,7 @@ enum _BatchTargetMode { segment, manual }
 class SendEmailDialog extends StatefulWidget {
   final Map<String, dynamic>? preloadedTemplate;
   final List<Map<String, dynamic>> allTemplates;
-  final Function(Map<String, dynamic> newEmail) onSendEmail;
+  final Future<bool> Function(Map<String, dynamic> email) onSendEmail;
   final bool startInGroupMode;
 
   const SendEmailDialog({
@@ -139,22 +139,32 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   }
 
   int _getBatchTargetCount(List<User> customers) {
+    return _batchTargets(customers).length;
+  }
+
+  List<User> _batchTargets(List<User> customers) {
     if (_batchTargetMode == _BatchTargetMode.manual) {
-      return _manualSelectedUserIds.length;
+      return customers
+          .where((user) => _manualSelectedUserIds.contains(user.id))
+          .toList(growable: false);
     }
-    switch (_selectedBatchSegment) {
-      case 'All Hot Leads':
-        return customers
-            .where((u) => u.leadPriority.toLowerCase() == 'hot')
-            .length
-            .clamp(1, 999);
-      case 'All Active Customers':
-        return customers.length;
-      case 'Pending Follow-ups':
-        return 7;
-      default:
-        return customers.length;
-    }
+    return switch (_selectedBatchSegment) {
+      'All Hot Leads' => customers
+          .where((u) => u.leadPriority.toLowerCase() == 'hot')
+          .toList(growable: false),
+      'All Active Customers' => customers
+          .where((u) => u.status.toLowerCase() == 'active')
+          .toList(growable: false),
+      'Pending Follow-ups' => customers
+          .where((u) => u.nextFollowUpDate != null)
+          .toList(growable: false),
+      'Recent Contacts (7 Days)' => customers.where((u) {
+          final lastContact = u.lastContact;
+          return lastContact != null &&
+              DateTime.now().difference(lastContact).inDays <= 7;
+        }).toList(growable: false),
+      _ => List<User>.from(customers),
+    };
   }
 
   Future<void> _pickAttachments() async {
@@ -189,6 +199,19 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
+  String _renderContent(
+    String value, {
+    required String name,
+    required String company,
+    required String phone,
+  }) =>
+      value
+          .replaceAll('{name}', name)
+          .replaceAll('{company}', company)
+          .replaceAll('{phone}', phone)
+          .replaceAll('{date}', AppDateTime.displayDate(DateTime.now()))
+          .replaceAll('{agent}', _resolvedSender);
+
   void _applyTemplate(Map<String, dynamic> temp) {
     setState(() {
       _selectedTemplate = temp;
@@ -216,13 +239,17 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       return;
     }
 
+    if (_attachments.isNotEmpty) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage:
+            'The email API does not support attachments yet. Remove them before sending.',
+        toastificationType: ToastificationType.warning,
+      );
+      return;
+    }
+
     setState(() => _isSending = true);
-    await Future.delayed(const Duration(milliseconds: 1000));
-
-    if (!mounted) return;
-
-    final now = DateTime.now();
-    final sentAt = AppDateTime.apiDateTime(now);
 
     final customers = context.read<CustomersCubit>().state.users;
 
@@ -235,23 +262,48 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
           (_customRecipientCtrl.text.isNotEmpty
               ? _customRecipientCtrl.text
               : 'client@example.com');
+      final renderedSubject = _renderContent(
+        subject,
+        name: recipientName,
+        company: _selectedUser?.companyName ?? 'Your Company',
+        phone: _selectedUser?.phone ?? '',
+      );
+      final renderedBody = _renderContent(
+        body,
+        name: recipientName,
+        company: _selectedUser?.companyName ?? 'Your Company',
+        phone: _selectedUser?.phone ?? '',
+      );
 
-      final newEmail = {
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'senderEmail': _resolvedSender,
+      if (!recipientEmail.contains('@')) {
+        setState(() => _isSending = false);
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'Select a customer with a valid email address.',
+          toastificationType: ToastificationType.warning,
+        );
+        return;
+      }
+
+      final sent = await widget.onSendEmail({
+        if (_selectedUser != null) 'customerId': _selectedUser!.id,
+        if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
+        'senderAlias': _resolvedSender,
         'recipientName': recipientName,
         'recipientEmail': recipientEmail,
-        'subject': subject,
-        'body': body,
-        'templateName': _selectedTemplate != null
-            ? _selectedTemplate!['name']
-            : 'Custom Email',
-        'attachments': _attachments.map((f) => f.name).toList(),
-        'sentAt': sentAt,
-        'status': 'Delivered',
-      };
-
-      widget.onSendEmail(newEmail);
+        'subject': renderedSubject,
+        'body': renderedBody,
+      });
+      if (!mounted) return;
+      setState(() => _isSending = false);
+      if (!sent) {
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'The server could not send this email.',
+          toastificationType: ToastificationType.error,
+        );
+        return;
+      }
       Navigator.pop(context);
 
       AppUtils.showSnackBar(
@@ -262,38 +314,52 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       );
     } else {
       // Group Batch Email
-      List<User> targetList = [];
-      if (_batchTargetMode == _BatchTargetMode.manual) {
-        targetList = customers
-            .where((u) => _manualSelectedUserIds.contains(u.id))
-            .toList();
-      } else {
-        targetList = customers;
+      final targetList = _batchTargets(customers)
+          .where((user) => user.email.contains('@'))
+          .toList(growable: false);
+      if (targetList.isEmpty) {
+        setState(() => _isSending = false);
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'No selected customer has a valid email address.',
+          toastificationType: ToastificationType.warning,
+        );
+        return;
       }
 
-      final count = targetList.isEmpty ? 5 : targetList.length;
+      var sentCount = 0;
+      for (final targetUser in targetList) {
+        final sent = await widget.onSendEmail({
+          'customerId': targetUser.id,
+          if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
+          'senderAlias': _resolvedSender,
+          'recipientName': targetUser.fullName,
+          'recipientEmail': targetUser.email,
+          'subject': _renderContent(
+            subject,
+            name: targetUser.fullName,
+            company: targetUser.companyName,
+            phone: targetUser.phone,
+          ),
+          'body': _renderContent(
+            body,
+            name: targetUser.fullName,
+            company: targetUser.companyName,
+            phone: targetUser.phone,
+          ),
+        });
+        if (sent) sentCount++;
+      }
+      if (!mounted) return;
+      setState(() => _isSending = false);
 
-      for (int i = 0; i < count.clamp(1, 10); i++) {
-        final targetUser = i < targetList.length ? targetList[i] : null;
-        final targetName = targetUser?.fullName ?? 'Lead #${i + 1}';
-        final targetEmail = targetUser?.email ?? 'lead$i@example.com';
-
-        final newEmail = {
-          'id': '${DateTime.now().millisecondsSinceEpoch}_$i',
-          'senderEmail': _resolvedSender,
-          'recipientName': targetName,
-          'recipientEmail': targetEmail,
-          'subject': subject.replaceAll('{name}', targetName),
-          'body': body.replaceAll('{name}', targetName),
-          'templateName': _selectedTemplate != null
-              ? _selectedTemplate!['name']
-              : 'Batch Campaign',
-          'attachments': _attachments.map((f) => f.name).toList(),
-          'sentAt': sentAt,
-          'status': 'Delivered',
-        };
-
-        widget.onSendEmail(newEmail);
+      if (sentCount == 0) {
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'The batch could not be sent.',
+          toastificationType: ToastificationType.error,
+        );
+        return;
       }
 
       Navigator.pop(context);
@@ -301,8 +367,11 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       AppUtils.showSnackBar(
         context: context,
         title: 'Batch Email Campaign Dispatched',
-        extraMessage: 'Sent to $count recipients from $_resolvedSender',
-        toastificationType: ToastificationType.success,
+        extraMessage:
+            'Sent to $sentCount of ${targetList.length} recipients from $_resolvedSender',
+        toastificationType: sentCount == targetList.length
+            ? ToastificationType.success
+            : ToastificationType.warning,
       );
     }
   }

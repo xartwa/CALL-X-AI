@@ -123,7 +123,7 @@ class _AiSettingsPageState extends State<AiSettingsPage>
           ),
         ),
         const SizedBox(height: 20),
-        
+
         // Header Toolbar with Save/Reset
         AiSettingsHeaders(
           hasUnsavedChanges: _hasUnsavedChanges,
@@ -132,7 +132,7 @@ class _AiSettingsPageState extends State<AiSettingsPage>
           onReset: _resetDefaults,
         ),
         const SizedBox(height: 20),
-        
+
         // Main Tabs Card
         Expanded(
           child: Container(
@@ -200,7 +200,7 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                   ),
                 ),
                 const Divider(height: 1, thickness: 0.5),
-        
+
                 // TabBar Views
                 Expanded(
                   child: Padding(
@@ -211,10 +211,10 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                       children: [
                         // 1. AI Voice & Tone
                         VoicePersonalityTab(onDataChanged: _onDataChanged),
-        
+
                         // 2. Outbound Cold Calls (Outcome)
                         OutboundCampaignsTab(onDataChanged: _onDataChanged),
-        
+
                         // 3. Inbound Reception (Income)
                         InboundReceptionTab(onDataChanged: _onDataChanged),
                       ],

@@ -40,9 +40,7 @@ class CallsPage extends StatelessWidget {
                 .where((c) => c.status.toLowerCase() == 'completed')
                 .length;
         final failedCalls = state.kpi?.failedCalls ??
-            state.calls
-                .where((c) => c.status.toLowerCase() == 'failed')
-                .length;
+            state.calls.where((c) => c.status.toLowerCase() == 'failed').length;
         final pendingCalls = state.kpi?.pendingUpcoming ??
             state.calls
                 .where((c) =>
@@ -101,8 +99,8 @@ class CallsPage extends StatelessWidget {
                           value: '$failedCalls',
                           icon: CupertinoIcons.clear_thick_circled,
                           iconColor: context.colors.errorColor,
-                          iconBgColor: context.colors.errorColor
-                              .withValues(alpha: 0.12),
+                          iconBgColor:
+                              context.colors.errorColor.withValues(alpha: 0.12),
                         ),
                         StatCardWidget(
                           label: AppStrings.current.callsPendingUpcoming,
@@ -217,12 +215,6 @@ class CallsPage extends StatelessWidget {
                           },
                           onCallAdded: () =>
                               context.read<CallsCubit>().refresh(),
-                          onCallUpdated: (updated) {
-                            context.read<CallsCubit>().scheduleFollowUp(
-                                  updated.id,
-                                  updated.nextFollowUpDate ?? '',
-                                );
-                          },
                           onDelete: () => context
                               .read<CallsCubit>()
                               .deleteCall(selectedCall.id),

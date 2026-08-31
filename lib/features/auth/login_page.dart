@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -106,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                                 height: 300,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.05),
+                                  color: Colors.white.withValues(alpha: 0.05),
                                 ),
                               ),
                             ),
@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                                 height: 200,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.05),
+                                  color: Colors.white.withValues(alpha: 0.05),
                                 ),
                               ),
                             ),
@@ -132,7 +132,8 @@ class _LoginPageState extends State<LoginPage> {
                                   Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Image.asset(
@@ -179,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: context.colors.primaryLightColor
-                                        .withOpacity(0.1),
+                                        .withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Image.asset(

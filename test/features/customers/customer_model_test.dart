@@ -62,6 +62,9 @@ void main() {
     expect(customer.nextFollowUpDate, DateTime(2026, 1, 17));
     final expected = AppDateTime.apiDateTime(DateTime(2026, 1, 17));
     expect(customer.toApiJson()['nextFollowUpDate'], expected);
-    expect(customer.toApiJson()['next_follow_up_date'], expected);
+    expect(customer.toApiJson(), isNot(contains('next_follow_up_date')));
+    expect(customer.copyWith(companyName: 'Acme').nextFollowUpDate,
+        DateTime(2026, 1, 17));
+    expect(customer.copyWith(nextFollowUpDate: null).nextFollowUpDate, isNull);
   });
 }

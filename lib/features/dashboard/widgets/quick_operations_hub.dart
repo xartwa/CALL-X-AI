@@ -7,10 +7,10 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/widgets/spaced_text.dart';
-import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
+import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.dart';
 import 'package:callx_ai/features/customers/widgets/add_customer_dialog.dart';
 
 class QuickOperationsHub extends StatelessWidget {
@@ -27,26 +27,17 @@ class QuickOperationsHub extends StatelessWidget {
   }
 
   void _openSendMassEmail(BuildContext context) {
-    final prefs = context.read<PreferencesService>();
-    final templates = prefs.loadTemplates();
+    final emailCubit = context.read<EmailFollowUpsCubit>();
+    final templates = emailCubit.state.templates
+        .map((template) => template.toViewMap())
+        .toList(growable: false);
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => SendEmailDialog(
         allTemplates: templates,
         startInGroupMode: true,
-        onSendEmail: (newEmail) {
-          final existing = prefs.loadEmails();
-          existing.insert(0, newEmail);
-          prefs.saveEmails(existing);
-          AppUtils.showSnackBar(
-            context: context,
-            title: 'Email Campaign Queued',
-            extraMessage:
-                'Your follow-up email batch has been successfully queued.',
-            toastificationType: ToastificationType.success,
-          );
-        },
+        onSendEmail: emailCubit.send,
       ),
     );
   }

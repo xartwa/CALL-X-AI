@@ -64,8 +64,9 @@ void main() {
       );
 
       cubit.selectCall(call);
-      cubit.updateFollowUpDate('2026/09/10');
-      expect(cubit.state?.nextFollowUpDate, '2026/09/10');
+      final followUp = DateTime.utc(2026, 9, 10, 7);
+      cubit.updateFollowUpDate(followUp);
+      expect(cubit.state?.nextFollowUpDate, followUp);
     });
 
     test('clearSelection emits null', () {

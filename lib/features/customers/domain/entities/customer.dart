@@ -1,6 +1,8 @@
 import '../../../../core/utils/app_date_time.dart';
 
 class Customer {
+  static const Object _unset = Object();
+
   Customer({
     required Object id,
     required this.fullName,
@@ -20,7 +22,7 @@ class Customer {
     this.leadStatus = 'New',
     this.leadQuality = 'Good',
     this.leadPriority = 'Warm',
-    Object? nextFollowUpDate,
+    Object? nextFollowUpDate = _unset,
     Object? lastContact,
     this.lastContactResult = 'Interested',
     this.reasonForContact = '',
@@ -111,36 +113,23 @@ class Customer {
 
   Map<String, dynamic> toApiJson() {
     final Map<String, dynamic> data = {
-      // Primary fields in both camelCase and snake_case for Django backend compatibility
       'fullName': fullName,
-      'full_name': fullName,
-      'name': fullName,
       'phoneNumber': phoneNumber,
-      'phone_number': phoneNumber,
-      'phone': phoneNumber,
       'companyName': companyName,
-      'company_name': companyName,
       'jobTitle': jobTitle,
-      'job_title': jobTitle,
       'streetAddress': streetAddress,
-      'street_address': streetAddress,
-      'address': streetAddress,
       'city': city,
       'provinceState': provinceState,
-      'province_state': provinceState,
-      'state': provinceState,
       'country': country,
       'companyType': companyType,
-      'company_type': companyType,
       'leadStatus': leadStatus,
-      'lead_status': leadStatus,
       'leadQuality': leadQuality,
-      'lead_quality': leadQuality,
       'leadPriority': leadPriority,
-      'lead_priority': leadPriority,
       'status': status == 'Inactive' ? 'Deactive' : status,
       'reasonForContact': reasonForContact,
-      'reason_for_contact': reasonForContact,
+      'nextFollowUpDate': nextFollowUpDate == null
+          ? null
+          : AppDateTime.apiDateTime(nextFollowUpDate!),
     };
 
     if (tags.isNotEmpty) {
@@ -152,13 +141,6 @@ class Customer {
     }
     if (website.trim().isNotEmpty) {
       data['website'] = website.trim();
-    }
-
-    if (nextFollowUpDate != null) {
-      final formattedDate = AppDateTime.apiDateTime(nextFollowUpDate!);
-      data['nextFollowUpDate'] = formattedDate;
-      data['next_follow_up_date'] = formattedDate;
-      data['follow_up_date'] = formattedDate;
     }
 
     return data;
@@ -185,7 +167,7 @@ class Customer {
     String? leadStatus,
     String? leadQuality,
     String? leadPriority,
-    Object? nextFollowUpDate,
+    Object? nextFollowUpDate = _unset,
     Object? lastContact,
     String? lastContactResult,
     String? reasonForContact,
@@ -216,7 +198,9 @@ class Customer {
         leadStatus: leadStatus ?? this.leadStatus,
         leadQuality: leadQuality ?? this.leadQuality,
         leadPriority: leadPriority ?? this.leadPriority,
-        nextFollowUpDate: nextFollowUpDate ?? this.nextFollowUpDate,
+        nextFollowUpDate: identical(nextFollowUpDate, _unset)
+            ? this.nextFollowUpDate
+            : nextFollowUpDate,
         lastContact: lastContact ?? this.lastContact,
         lastContactResult: lastContactResult ?? this.lastContactResult,
         reasonForContact: reasonForContact ?? this.reasonForContact,

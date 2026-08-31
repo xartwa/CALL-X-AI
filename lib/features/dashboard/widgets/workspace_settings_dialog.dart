@@ -111,7 +111,9 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
                         ),
                         const Spacer(),
                         InkWell(
-                          onTap: isSaving ? null : () => Navigator.of(context).pop(),
+                          onTap: isSaving
+                              ? null
+                              : () => Navigator.of(context).pop(),
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
                             padding: const EdgeInsets.all(4),
@@ -209,10 +211,7 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
                                     onAdd: (tag) {
                                       _isUserEdited = true;
                                       setState(() {
-                                        _draftCustomTags = [
-                                          ...customTags,
-                                          tag
-                                        ];
+                                        _draftCustomTags = [...customTags, tag];
                                       });
                                     },
                                     onRemove: (tag) {
@@ -242,7 +241,8 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: context.colors.primaryLightColor,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: context.colors.primaryLightColor.withAlpha(120),
+                          disabledBackgroundColor:
+                              context.colors.primaryLightColor.withAlpha(120),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 24),
                           shape: RoundedRectangleBorder(
@@ -254,8 +254,8 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
                                 ),
                               )
                             : const Text(
@@ -323,9 +323,8 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: tags
-              .map((tag) => _buildReadOnlyTagChip(context, tag))
-              .toList(),
+          children:
+              tags.map((tag) => _buildReadOnlyTagChip(context, tag)).toList(),
         ),
         if (tags.isEmpty)
           Padding(
@@ -429,7 +428,8 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
           spacing: 10,
           runSpacing: 10,
           children: tags
-              .map((tag) => _buildEditableTagChip(context, tag, () => onRemove(tag)))
+              .map((tag) =>
+                  _buildEditableTagChip(context, tag, () => onRemove(tag)))
               .toList(),
         ),
         if (tags.isEmpty)
@@ -487,11 +487,10 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
   void _showAddTagDialog(
       BuildContext context, String sectionTitle, ValueChanged<TagModel> onAdd) {
     String label = '';
-    final currentTags =
-        _draftCustomTags ?? context.read<WorkspaceSettingsCubit>().state.customTags;
+    final currentTags = _draftCustomTags ??
+        context.read<WorkspaceSettingsCubit>().state.customTags;
 
-    final serverColors =
-        context.read<WorkspaceSettingsCubit>().state.tagColors;
+    final serverColors = context.read<WorkspaceSettingsCubit>().state.tagColors;
     final defaultColors = const [
       Color(0xFFEF4444), // Red
       Color(0xFFF97316), // Orange

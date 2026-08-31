@@ -23,18 +23,14 @@ class CallsKpiDto {
     }
 
     return CallsKpiDto(
-      totalCalls: json['total_calls'] ??
-          json['totalCalls'] ??
-          json['total'] ??
-          0,
+      totalCalls:
+          json['total_calls'] ?? json['totalCalls'] ?? json['total'] ?? 0,
       completedCalls: json['completed_calls'] ??
           json['completedCalls'] ??
           json['completed'] ??
           0,
-      failedCalls: json['failed_calls'] ??
-          json['failedCalls'] ??
-          json['failed'] ??
-          0,
+      failedCalls:
+          json['failed_calls'] ?? json['failedCalls'] ?? json['failed'] ?? 0,
       pendingUpcoming: json['pending_and_upcoming'] ??
           json['pending_upcoming'] ??
           json['pendingAndUpcoming'] ??

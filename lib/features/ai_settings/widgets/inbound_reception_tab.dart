@@ -102,7 +102,8 @@ class _InboundReceptionTabState extends State<InboundReceptionTab> {
               hintText: 'Spoken immediately when a customer calls...',
               contentPadding: const EdgeInsets.all(16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                borderRadius:
+                    BorderRadius.circular(ThemeConstants.buttonRadius),
                 borderSide: BorderSide(
                     color: isDark
                         ? Colors.white12
@@ -130,10 +131,12 @@ class _InboundReceptionTabState extends State<InboundReceptionTab> {
             style: const TextStyle(fontSize: 13, height: 1.4),
             decoration: InputDecoration(
               isDense: true,
-              hintText: 'Enter company pricing, services, and frequently asked questions...',
+              hintText:
+                  'Enter company pricing, services, and frequently asked questions...',
               contentPadding: const EdgeInsets.all(16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                borderRadius:
+                    BorderRadius.circular(ThemeConstants.buttonRadius),
                 borderSide: BorderSide(
                     color: isDark
                         ? Colors.white12
@@ -181,8 +184,8 @@ class _InboundReceptionTabState extends State<InboundReceptionTab> {
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
                 onChanged: (_) => widget.onDataChanged(),
               ),

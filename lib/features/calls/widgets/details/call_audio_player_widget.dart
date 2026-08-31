@@ -140,8 +140,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       setState(() {
         if (_currentSeconds < _totalSeconds) {
           _currentSeconds++;
-          _playbackProgress =
-              (_currentSeconds / _totalSeconds).clamp(0.0, 1.0);
+          _playbackProgress = (_currentSeconds / _totalSeconds).clamp(0.0, 1.0);
         } else {
           _stopPlayback();
           _currentSeconds = 0;
@@ -203,7 +202,8 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
   Future<void> _handleDownload() async {
     if (_isDownloading) return;
 
-    final isAlready = AudioDownloadService.instance.isDownloaded(widget.call.id);
+    final isAlready =
+        AudioDownloadService.instance.isDownloaded(widget.call.id);
     if (isAlready) {
       final opened = await AudioDownloadService.instance.openDownloadedFile(
         callId: widget.call.id,
@@ -310,7 +310,6 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                   ],
                 ),
                 shape: BoxShape.circle,
-                
               ),
               child: Center(
                 child: Icon(
@@ -348,9 +347,8 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
                 ),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                 activeTrackColor: context.colors.primaryLightColor,
-                inactiveTrackColor: isDark
-                    ? const Color(0xFF334155)
-                    : const Color(0xFFCBD5E1),
+                inactiveTrackColor:
+                    isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
                 thumbColor: context.colors.primaryLightColor,
                 overlayColor:
                     context.colors.primaryLightColor.withValues(alpha: 0.2),
@@ -392,10 +390,13 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
               width: 44,
               height: 28,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                color:
+                    isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFCBD5E1),
                   width: 1,
                 ),
               ),
@@ -443,4 +444,3 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
     );
   }
 }
-

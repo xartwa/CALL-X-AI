@@ -25,6 +25,10 @@ import 'package:callx_ai/features/calls/data/repositories/calls_repository_impl.
 import 'package:callx_ai/features/calls/domain/repositories/calls_repository.dart';
 import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
+import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.dart';
+import 'package:callx_ai/features/email_follow_ups/data/email_remote_data_source.dart';
+import 'package:callx_ai/features/email_follow_ups/data/email_repository_impl.dart';
+import 'package:callx_ai/features/email_follow_ups/domain/email_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +52,9 @@ Future<void> main() async {
   final callsRepository = CallsRepositoryImpl(
     CallsRemoteDataSource(dioClient),
   );
+  final emailRepository = EmailRepositoryImpl(
+    EmailRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -62,6 +69,7 @@ Future<void> main() async {
         RepositoryProvider<WorkspaceRepository>.value(
             value: workspaceRepository),
         RepositoryProvider<CallsRepository>.value(value: callsRepository),
+        RepositoryProvider<EmailRepository>.value(value: emailRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -78,6 +86,9 @@ Future<void> main() async {
           ),
           BlocProvider(create: (_) => SelectedCallCubit()),
           BlocProvider(
+            create: (_) => EmailFollowUpsCubit(emailRepository),
+          ),
+          BlocProvider(
             create: (_) => WorkspaceSettingsCubit(
               workspaceRepository: workspaceRepository,
               preferencesService: preferencesService,
@@ -89,4 +100,3 @@ Future<void> main() async {
     ),
   );
 }
-

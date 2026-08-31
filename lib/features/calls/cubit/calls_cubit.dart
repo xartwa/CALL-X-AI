@@ -237,6 +237,29 @@ class CallsCubit extends Cubit<CallsState> {
     }
   }
 
+  Future<bool> launchBatch({
+    required String name,
+    required String scenarioId,
+    required List<String> customerIds,
+    required int concurrentLines,
+  }) async {
+    try {
+      await repository.launchBatch(
+        name: name,
+        scenarioId: scenarioId,
+        customerIds: customerIds,
+        concurrentLines: concurrentLines,
+      );
+      await refresh();
+      return true;
+    } catch (_) {
+      if (!isClosed) {
+        emit(state.copyWith(errorMessage: 'Failed to launch batch campaign.'));
+      }
+      return false;
+    }
+  }
+
   Future<void> deleteCall(String callId) async {
     try {
       await repository.deleteCall(callId);

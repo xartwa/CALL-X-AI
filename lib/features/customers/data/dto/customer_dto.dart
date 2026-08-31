@@ -12,10 +12,8 @@ class PaginatedCustomersDto {
   final Map<String, dynamic> json;
 
   List<Customer> get customers {
-    final rawList = json['results'] ??
-        json['customers'] ??
-        json['items'] ??
-        json['data'];
+    final rawList =
+        json['results'] ?? json['customers'] ?? json['items'] ?? json['data'];
     final list = rawList is List ? rawList : const [];
     return list
         .whereType<Map>()

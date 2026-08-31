@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/core/errors/app_exception.dart';
 import 'package:callx_ai/core/models/tag_model.dart';
-import 'package:callx_ai/core/models/workspace_configuration_model.dart';
 import 'package:callx_ai/core/repositories/workspace_repository.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 
@@ -90,9 +89,8 @@ class WorkspaceSettingsCubit extends Cubit<WorkspaceSettingsState> {
       // One-time migration for legacy local tags
       if (!preferencesService.isWorkspaceTagsMigratedV1()) {
         final localTags = preferencesService.loadCustomTags();
-        final serverLabels = config.customTags
-            .map((t) => t.label.trim().toLowerCase())
-            .toSet();
+        final serverLabels =
+            config.customTags.map((t) => t.label.trim().toLowerCase()).toSet();
 
         final tagsToMigrate = <TagModel>[];
         for (final local in localTags) {
@@ -188,4 +186,3 @@ class WorkspaceSettingsCubit extends Cubit<WorkspaceSettingsState> {
     emit(state.copyWith(callStatuses: list));
   }
 }
-

@@ -90,7 +90,8 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     _selectedCountry = initial.country;
     _selectedProvince = initial.province;
     _selectedCity = initial.city;
-    _selectedPriority = initial.priority == 'All Priorities' ? 'All' : initial.priority;
+    _selectedPriority =
+        initial.priority == 'All Priorities' ? 'All' : initial.priority;
   }
 
   final List<String> _countries = const [

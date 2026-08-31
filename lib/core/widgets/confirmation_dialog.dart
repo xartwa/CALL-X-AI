@@ -73,7 +73,7 @@ class ConfirmationDialog extends StatelessWidget {
 
     // Default background color for circle icon is 10% opacity of iconColor
     final finalIconBgColor =
-        iconBackgroundColor ?? resolvedIconColor.withOpacity(0.1);
+        iconBackgroundColor ?? resolvedIconColor.withValues(alpha: 0.1);
 
     return Dialog(
       backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,

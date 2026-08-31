@@ -193,8 +193,8 @@ class _CustomersPageState extends State<CustomersPage> {
                     value: '$totalUsers',
                     icon: CupertinoIcons.group_solid,
                     iconColor: context.colors.primaryLightColor,
-                    iconBgColor:
-                        context.colors.primaryLightColor.withValues(alpha: 0.12),
+                    iconBgColor: context.colors.primaryLightColor
+                        .withValues(alpha: 0.12),
                   ),
                   StatCardWidget(
                     label: AppStrings.current.customersActiveAccounts,
@@ -305,7 +305,8 @@ class _CustomersPageState extends State<CustomersPage> {
                   side: BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? const Color(0xFF1E293B)
-                        : context.colors.mediumGreyColor.withValues(alpha: 0.35),
+                        : context.colors.mediumGreyColor
+                            .withValues(alpha: 0.35),
                     width: 1,
                   ),
                 ),
@@ -320,7 +321,7 @@ class _CustomersPageState extends State<CustomersPage> {
                                   CupertinoIcons.search,
                                   size: 48,
                                   color: context.colors.darkGreyColor
-                                      .withOpacity(0.4),
+                                      .withValues(alpha: 0.4),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(

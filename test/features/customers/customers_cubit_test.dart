@@ -118,7 +118,8 @@ void main() {
     await cubit.close();
   });
 
-  test('loadInitial fetches customers list, KPI metrics, and filter options on page entry',
+  test(
+      'loadInitial fetches customers list, KPI metrics, and filter options on page entry',
       () async {
     final repository = _FakeCustomerRepository();
     repository.pageItems = [

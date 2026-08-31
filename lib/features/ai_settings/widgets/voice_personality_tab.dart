@@ -158,7 +158,8 @@ class _VoicePersonalityTabState extends State<VoicePersonalityTab> {
                         ),
                         child: Icon(
                           v['gender'] == 'Female'
-                              ? CupertinoIcons.person_crop_circle_fill_badge_checkmark
+                              ? CupertinoIcons
+                                  .person_crop_circle_fill_badge_checkmark
                               : CupertinoIcons.person_crop_circle_fill,
                           size: 20,
                           color: Theme.of(context).colorScheme.primary,

@@ -2,6 +2,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import 'email_editor_toolbar.dart';
 
 class ManageTemplateDialog extends StatefulWidget {
   final Map<String, dynamic>? templateToEdit;
-  final Function(Map<String, dynamic> template) onSaveTemplate;
+  final Future<bool> Function(Map<String, dynamic> template) onSaveTemplate;
 
   const ManageTemplateDialog({
     super.key,
@@ -32,9 +33,9 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
   final List<String> _categories = const [
     'Sales & Outreach',
     'Follow-Up & Closing',
-    'Client Care & Support',
     'Billing & Contracts',
   ];
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -78,7 +79,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
     super.dispose();
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
     final name = nameController.text.trim();
     final subject = subjectController.text.trim();
     final body = bodyController.text.trim();
@@ -102,7 +103,18 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
       'category': _selectedCategory,
     };
 
-    widget.onSaveTemplate(newTemp);
+    setState(() => _isSaving = true);
+    final saved = await widget.onSaveTemplate(newTemp);
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+    if (!saved) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'Unable to save the template. Please try again.',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
     Navigator.pop(context);
 
     AppUtils.showSnackBar(
@@ -493,7 +505,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _onSave,
+                onPressed: _isSaving ? null : _onSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   elevation: 0,
@@ -502,17 +514,19 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                         BorderRadius.circular(ThemeConstants.buttonRadius),
                   ),
                 ),
-                child: Text(
-                  widget.templateToEdit != null
-                      ? 'SAVE TEMPLATE CHANGES'
-                      : 'CREATE TEMPLATE',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.8,
-                  ),
-                ),
+                child: _isSaving
+                    ? const AppLoadingIndicator(color: Colors.white)
+                    : Text(
+                        widget.templateToEdit != null
+                            ? 'SAVE TEMPLATE CHANGES'
+                            : 'CREATE TEMPLATE',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
               ),
             ),
           ],

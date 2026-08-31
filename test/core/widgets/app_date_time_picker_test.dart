@@ -24,8 +24,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('pickDate confirms the tapped day at midnight',
-      (tester) async {
+  testWidgets('pickDate confirms the tapped day at midnight', (tester) async {
     DateTime? result;
     await openPicker(tester, AppDateTimePicker.pickDate, (v) => result = v);
 
@@ -47,8 +46,8 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(
-              onPressed: () async => result =
-                  await AppDateTimePicker.pickDateTime(
+              onPressed: () async =>
+                  result = await AppDateTimePicker.pickDateTime(
                 context,
                 initial: DateTime(now.year, now.month, 10, 8, 15),
               ),
@@ -64,7 +63,7 @@ void main() {
     await tester.tap(find.text('CONTINUE'));
     await tester.pumpAndSettle();
 
-    // Hour wheel up 2 items (08 -> 10), minute wheel down 1 item (15 -> 16).
+    // Dragging upward advances each wheel (08 -> 10 and 15 -> 16).
     await tester.drag(
       find.byType(ListWheelScrollView).at(0),
       const Offset(0, -88),
@@ -72,7 +71,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(
       find.byType(ListWheelScrollView).at(1),
-      const Offset(0, 44),
+      const Offset(0, -44),
     );
     await tester.pumpAndSettle();
 

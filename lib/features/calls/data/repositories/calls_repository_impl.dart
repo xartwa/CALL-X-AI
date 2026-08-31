@@ -193,6 +193,22 @@ class CallsRepositoryImpl implements CallsRepository {
       });
 
   @override
+  Future<void> launchBatch({
+    required String name,
+    required String scenarioId,
+    required List<String> customerIds,
+    required int concurrentLines,
+  }) =>
+      _request(() async {
+        await remote.launchBatch(
+          name: name,
+          scenarioId: scenarioId,
+          customerIds: customerIds,
+          concurrentLines: concurrentLines,
+        );
+      });
+
+  @override
   Future<void> deleteCall(String id) => _request(() async {
         await remote.delete(id);
       });

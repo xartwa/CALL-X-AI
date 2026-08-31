@@ -76,8 +76,7 @@ class CustomersCubit extends Cubit<CustomersState> {
     _cancelToken?.cancel();
     _cancelToken = CancelToken();
 
-    final nextFilters =
-        resetFilters ? const CustomerFilters() : state.filters;
+    final nextFilters = resetFilters ? const CustomerFilters() : state.filters;
     emit(state.copyWith(
       filters: nextFilters,
       isInitialLoading: true,
@@ -158,8 +157,8 @@ class CustomersCubit extends Cubit<CustomersState> {
 
   Future<void> loadOptions({String? country, String? stateValue}) async {
     try {
-      final options = await repository.getOptions(
-          country: country, state: stateValue);
+      final options =
+          await repository.getOptions(country: country, state: stateValue);
       if (!isClosed) {
         emit(state.copyWith(options: options));
       }

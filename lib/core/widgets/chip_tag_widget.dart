@@ -10,7 +10,7 @@ Widget tagChipWidget({
     alignment: AlignmentDirectional.center,
     height: 24,
     decoration: BoxDecoration(
-      color: customColor.withOpacity(.10),
+      color: customColor.withValues(alpha: .10),
       borderRadius: BorderRadius.circular(20.0),
       border: Border.all(color: customColor, width: 1.0),
     ),

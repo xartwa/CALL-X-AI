@@ -6,7 +6,6 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
-import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
 import 'package:callx_ai/features/calls/widgets/details/call_audio_player_widget.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
 import 'package:callx_ai/theme/app_colors.dart';
@@ -374,7 +373,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: context.colors.primaryLightColor.withOpacity(0.12),
+                color: context.colors.primaryLightColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -407,7 +406,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   hintText: 'Search calls...',
                   hintStyle: TextStyle(
                     fontSize: 11,
-                    color: context.colors.darkGreyColor.withOpacity(0.7),
+                    color: context.colors.darkGreyColor.withValues(alpha: 0.7),
                   ),
                   prefixIcon: Icon(
                     CupertinoIcons.search,

@@ -5,7 +5,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('AudioDownloadService Tests', () {
-    test('tracks downloaded state and prevents duplicate download requests', () async {
+    test('tracks downloaded state and prevents duplicate download requests',
+        () async {
       final service = AudioDownloadService.instance;
       const callId = 'test_call_101';
       const fullName = 'Alex Morgan';

@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/theme/app_colors.dart';
-import 'package:callx_ai/theme/theme_cubit.dart';
 
 import '../constants/app_strings.dart';
 import 'custom_menu_item.dart';
@@ -126,7 +125,8 @@ class AppMenu extends StatelessWidget {
                               Icon(
                                 Icons.logout_rounded,
                                 color: isDark
-                                    ? context.colors.blackColor.withOpacity(0.8)
+                                    ? context.colors.blackColor
+                                        .withValues(alpha: 0.8)
                                     : Colors.white,
                                 size: 16,
                               ),
@@ -136,7 +136,7 @@ class AppMenu extends StatelessWidget {
                                 style: TextStyle(
                                   color: isDark
                                       ? context.colors.blackColor
-                                          .withOpacity(0.8)
+                                          .withValues(alpha: 0.8)
                                       : Colors.white,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 11,
@@ -156,7 +156,7 @@ class AppMenu extends StatelessWidget {
                       fontSize: 8,
                       color: isDark
                           ? context.colors.darkGreyColor
-                          : Colors.white.withOpacity(0.7),
+                          : Colors.white.withValues(alpha: 0.7),
                     ),
                   ],
                 ),
@@ -192,7 +192,7 @@ class AppMenu extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: context.colors.errorColor.withOpacity(0.1),
+                  color: context.colors.errorColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

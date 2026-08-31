@@ -16,6 +16,7 @@ class MockCallsRepository implements CallsRepository {
   String? lastScheduledFollowUp;
   bool deleteCalled = false;
   bool callAgainCalled = false;
+  bool batchLaunched = false;
 
   @override
   Future<PaginatedCallsDto> getCalls({
@@ -136,6 +137,16 @@ class MockCallsRepository implements CallsRepository {
   }
 
   @override
+  Future<void> launchBatch({
+    required String name,
+    required String scenarioId,
+    required List<String> customerIds,
+    required int concurrentLines,
+  }) async {
+    batchLaunched = true;
+  }
+
+  @override
   Future<void> deleteCall(String id) async {
     deleteCalled = true;
   }
@@ -155,7 +166,8 @@ void main() {
       await cubit.close();
     });
 
-    test('loadInitial fetches calls list and KPI metrics from server', () async {
+    test('loadInitial fetches calls list and KPI metrics from server',
+        () async {
       await cubit.loadInitial();
 
       expect(cubit.state.calls.length, 2);
@@ -168,7 +180,8 @@ void main() {
       expect(cubit.state.isRefreshing, false);
     });
 
-    test('setStatus updates filter and requests page one from server', () async {
+    test('setStatus updates filter and requests page one from server',
+        () async {
       await cubit.loadInitial();
       await cubit.setStatus('Completed');
 
@@ -189,7 +202,7 @@ void main() {
       await cubit.scheduleFollowUp('1', '2026-08-30');
 
       expect(repository.lastScheduledFollowUp, '2026-08-30');
-      expect(cubit.state.calls.first.nextFollowUpDate, '2026-08-30');
+      expect(cubit.state.calls.first.nextFollowUpDate, DateTime(2026, 8, 30));
     });
 
     test('callAgain triggers online call queueing', () async {
@@ -197,6 +210,19 @@ void main() {
       await cubit.callAgain('1');
 
       expect(repository.callAgainCalled, true);
+    });
+
+    test('launchBatch dispatches campaign and refreshes calls', () async {
+      final launched = await cubit.launchBatch(
+        name: 'Sales Campaign',
+        scenarioId: 'scenario-1',
+        customerIds: const ['customer-1'],
+        concurrentLines: 3,
+      );
+
+      expect(launched, true);
+      expect(repository.batchLaunched, true);
+      expect(repository.getCallsCallCount, 1);
     });
 
     test('deleteCall calls remote delete and refreshes list', () async {
@@ -259,7 +285,8 @@ void main() {
       expect(page.results.first.leadPriority, 'Hot');
     });
 
-    test('PaginatedCallsDto handles in-memory slicing when full list returned', () {
+    test('PaginatedCallsDto handles in-memory slicing when full list returned',
+        () {
       final json = {
         'count': 15,
         'results': List.generate(
@@ -276,13 +303,15 @@ void main() {
         ),
       };
 
-      final page1 = PaginatedCallsDto.fromJson(json, page: 1, requestedPageSize: 10);
+      final page1 =
+          PaginatedCallsDto.fromJson(json, page: 1, requestedPageSize: 10);
       expect(page1.count, 15);
       expect(page1.totalPages, 2);
       expect(page1.results.length, 10);
       expect(page1.results.first.fullName, 'Person 0');
 
-      final page2 = PaginatedCallsDto.fromJson(json, page: 2, requestedPageSize: 10);
+      final page2 =
+          PaginatedCallsDto.fromJson(json, page: 2, requestedPageSize: 10);
       expect(page2.count, 15);
       expect(page2.totalPages, 2);
       expect(page2.results.length, 5);

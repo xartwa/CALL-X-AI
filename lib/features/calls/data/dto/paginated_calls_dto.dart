@@ -51,7 +51,8 @@ class PaginatedCallsDto {
 
     List<CallHistoryModel> finalResults = rawResults;
     if (rawResults.length > validPageSize && rawResults.length >= parsedCount) {
-      final startIndex = ((page - 1) * validPageSize).clamp(0, rawResults.length);
+      final startIndex =
+          ((page - 1) * validPageSize).clamp(0, rawResults.length);
       final endIndex = (startIndex + validPageSize).clamp(0, rawResults.length);
       finalResults = rawResults.sublist(startIndex, endIndex);
     }
