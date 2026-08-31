@@ -298,4 +298,28 @@ class PreferencesService {
     final list = todos.map((item) => jsonEncode(item)).toList();
     await _preferences.setStringList(_todosKey, list);
   }
+
+  static const _savedSenderEmailsKey = 'saved_sender_emails';
+
+  List<String> loadSavedSenderEmails() {
+    return _preferences.getStringList(_savedSenderEmailsKey) ?? [];
+  }
+
+  Future<void> saveSenderEmail(String email) async {
+    final clean = email.trim();
+    if (clean.isEmpty) return;
+    final current = List<String>.from(loadSavedSenderEmails());
+    if (!current.contains(clean)) {
+      current.insert(0, clean);
+      await _preferences.setStringList(_savedSenderEmailsKey, current);
+    }
+  }
+
+  Future<void> removeSenderEmail(String email) async {
+    final clean = email.trim();
+    final current = List<String>.from(loadSavedSenderEmails());
+    current.remove(clean);
+    await _preferences.setStringList(_savedSenderEmailsKey, current);
+  }
 }
+

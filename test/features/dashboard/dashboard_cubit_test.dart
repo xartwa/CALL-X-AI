@@ -6,12 +6,38 @@ import 'package:callx_ai/features/dashboard/domain/repositories/dashboard_reposi
 import 'package:callx_ai/features/dashboard/domain/usecases/get_dashboard_snapshot.dart';
 import 'package:callx_ai/core/errors/app_exception.dart';
 
+import 'package:callx_ai/features/dashboard/models/todo_item_model.dart';
+
 class _FakeRepository implements DashboardRepository {
   _FakeRepository(this.result);
   final Future<DashboardSnapshot> Function() result;
   @override
   Future<DashboardSnapshot> getSnapshot() => result();
+
+  @override
+  Future<List<TodoItemModel>> getTodos() async => [];
+
+  @override
+  Future<TodoItemModel> createTodo(String text) async => TodoItemModel(
+        id: '1',
+        text: text,
+        createdAt: DateTime.now(),
+      );
+
+  @override
+  Future<TodoItemModel> updateTodo(String id,
+          {bool? isCompleted, String? text}) async =>
+      TodoItemModel(
+        id: id,
+        text: text ?? 'Updated',
+        isCompleted: isCompleted ?? true,
+        createdAt: DateTime.now(),
+      );
+
+  @override
+  Future<void> deleteTodo(String id) async {}
 }
+
 
 DashboardSnapshot _snapshot() => DashboardSnapshot(
       generatedAt: DateTime.utc(2026, 8, 26),

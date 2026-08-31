@@ -23,7 +23,7 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => TodoCubit(context.read<PreferencesService>()),
+      create: (context) => TodoCubit(context.read<DashboardRepository>()),
       child: BlocProvider(
         create: (context) => DashboardCubit(
           GetDashboardSnapshot(context.read<DashboardRepository>()),
@@ -33,6 +33,7 @@ class DashboardPage extends StatelessWidget {
     );
   }
 }
+
 
 class _DashboardView extends StatelessWidget {
   const _DashboardView();

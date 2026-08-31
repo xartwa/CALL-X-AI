@@ -430,18 +430,23 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       dataRowHeight: 70,
       showCheckboxColumn: false,
       dividerThickness: 0.5,
-      headingRowColor: WidgetStatePropertyAll(context.colors.skyBlueColor),
+      headingRowColor: WidgetStatePropertyAll(
+        isDark
+            ? const Color(0xFF1E293B).withValues(alpha: 0.5)
+            : const Color(0xFFF1F5F9),
+      ),
       headingTextStyle: TextStyle(
         fontWeight: FontWeight.w700,
-        color: context.colors.darkGreyColor,
+        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
         fontSize: 11.5,
         letterSpacing: 0.6,
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: Colors.white,
+        color: isDark ? Colors.white : const Color(0xFF0F172A),
         fontWeight: FontWeight.w500,
       ),
+
       columns: const [
         DataColumn2(label: Text('RECIPIENT CONTACT'), size: ColumnSize.L),
         DataColumn2(label: Text('SENDER'), size: ColumnSize.M),

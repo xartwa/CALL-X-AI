@@ -2,6 +2,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
+import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
 import 'email_editor_toolbar.dart';
+
 
 enum _EmailSendMode { single, group }
 
@@ -40,13 +42,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   _BatchTargetMode _batchTargetMode = _BatchTargetMode.segment;
 
   // Sender Email
-  final List<String> _senderPresets = const [
-    'support@callx.ai (Customer Support)',
-    'sales@callx.ai (Sales & Growth)',
-    'alex.morgan@callx.ai (Account Executive)',
-    'notifications@callx.ai (Automated Bot)',
-    'Custom Sender...',
-  ];
+  static const String _newSenderOption = '+ Enter New Sender...';
+  List<String> _savedSenders = [];
   late String _selectedSender;
   final TextEditingController _customSenderCtrl = TextEditingController();
 
@@ -83,7 +80,20 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     super.initState();
     _mode =
         widget.startInGroupMode ? _EmailSendMode.group : _EmailSendMode.single;
-    _selectedSender = _senderPresets.first;
+
+    try {
+      final prefs = context.read<PreferencesService>();
+      _savedSenders = prefs.loadSavedSenderEmails();
+    } catch (_) {
+      _savedSenders = [];
+    }
+
+    if (_savedSenders.isNotEmpty) {
+      _selectedSender = _savedSenders.first;
+    } else {
+      _selectedSender = _newSenderOption;
+    }
+
 
     final customers = context.read<CustomersCubit>().state.users;
     _selectedUser = customers.isNotEmpty ? customers.first : null;
@@ -130,13 +140,12 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   }
 
   String get _resolvedSender {
-    if (_selectedSender == 'Custom Sender...') {
-      return _customSenderCtrl.text.trim().isNotEmpty
-          ? _customSenderCtrl.text.trim()
-          : 'custom@callx.ai';
+    if (_selectedSender == _newSenderOption || _savedSenders.isEmpty) {
+      return _customSenderCtrl.text.trim();
     }
-    return _selectedSender.split(' ').first;
+    return _selectedSender.trim();
   }
+
 
   int _getBatchTargetCount(List<User> customers) {
     return _batchTargets(customers).length;
@@ -249,9 +258,23 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       return;
     }
 
-    setState(() => _isSending = true);
+    final sender = _resolvedSender;
+    if (sender.isEmpty) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'Please enter your sender email address or alias.',
+        toastificationType: ToastificationType.warning,
+      );
+      return;
+    }
 
     final customers = context.read<CustomersCubit>().state.users;
+    try {
+      context.read<PreferencesService>().saveSenderEmail(sender);
+    } catch (_) {}
+
+    setState(() => _isSending = true);
+
 
     if (_mode == _EmailSendMode.single) {
       final recipientName = _selectedUser?.fullName ??
@@ -547,17 +570,118 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    AppDropdownWidget<String>(
-                                      value: _selectedSender,
-                                      items: _senderPresets,
-                                      height: 46,
-                                      itemBuilder: (item) => item,
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          setState(() => _selectedSender = val);
-                                        }
-                                      },
-                                    ),
+                                    if (_savedSenders.isEmpty)
+                                      Container(
+                                        height: 46,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                              ThemeConstants.buttonRadius),
+                                          border: Border.all(
+                                            color: isDark
+                                                ? Colors.white12
+                                                : context.colors.lightGreyColor,
+                                          ),
+                                          color: isDark
+                                              ? Colors.white
+                                                  .withValues(alpha: 0.03)
+                                              : Colors.black
+                                                  .withValues(alpha: 0.02),
+                                        ),
+                                        child: TextField(
+                                          controller: _customSenderCtrl,
+                                          style: const TextStyle(
+                                              fontSize: 12.5,
+                                              fontWeight: FontWeight.w600),
+                                          textAlignVertical:
+                                              TextAlignVertical.center,
+                                          decoration: InputDecoration(
+                                            isDense: true,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 14),
+                                            hintText:
+                                                'Enter sender email (e.g. you@company.com)',
+                                            hintStyle: TextStyle(
+                                                fontSize: 12.5,
+                                                color: context
+                                                    .colors.darkGreyColor),
+                                            border: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            focusedBorder: InputBorder.none,
+                                          ),
+                                        ),
+                                      )
+                                    else
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: AppDropdownWidget<String>(
+                                              value: _selectedSender,
+                                              items: [
+                                                ..._savedSenders,
+                                                _newSenderOption
+                                              ],
+                                              height: 46,
+                                              itemBuilder: (item) =>
+                                                  item == _newSenderOption
+                                                      ? '+ Enter New Sender...'
+                                                      : item,
+                                              onChanged: (val) {
+                                                if (val != null) {
+                                                  setState(() =>
+                                                      _selectedSender = val);
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          if (_selectedSender !=
+                                              _newSenderOption) ...[
+                                            const SizedBox(width: 6),
+                                            InkWell(
+                                              onTap: () async {
+                                                final toRemove =
+                                                    _selectedSender;
+                                                await context
+                                                    .read<PreferencesService>()
+                                                    .removeSenderEmail(
+                                                        toRemove);
+                                                setState(() {
+                                                  _savedSenders = context
+                                                      .read<
+                                                          PreferencesService>()
+                                                      .loadSavedSenderEmails();
+                                                  if (_savedSenders
+                                                      .isNotEmpty) {
+                                                    _selectedSender =
+                                                        _savedSenders.first;
+                                                  } else {
+                                                    _selectedSender =
+                                                        _newSenderOption;
+                                                  }
+                                                });
+                                              },
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.redAccent
+                                                      .withValues(alpha: 0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: const Icon(
+                                                  CupertinoIcons.trash,
+                                                  size: 16,
+                                                  color: Colors.redAccent,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                   ],
                                 ),
                               ),
@@ -596,7 +720,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                               ),
                             ],
                           ),
-                          if (_selectedSender == 'Custom Sender...') ...[
+                          if (_savedSenders.isNotEmpty &&
+                              _selectedSender == _newSenderOption) ...[
                             const SizedBox(height: 12),
                             Container(
                               height: 46,
@@ -624,7 +749,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                   contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 14),
                                   hintText:
-                                      'Enter custom sender email (e.g. hello@mycompany.com)',
+                                      'Enter sender email or alias (e.g. Sales Team <sales@company.com>)',
                                   hintStyle: TextStyle(
                                       fontSize: 12.5,
                                       color: context.colors.darkGreyColor),
@@ -636,6 +761,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                             ),
                           ],
                           const SizedBox(height: 20),
+
 
                           // RECIPIENT ROW
                           if (_mode == _EmailSendMode.single) ...[
