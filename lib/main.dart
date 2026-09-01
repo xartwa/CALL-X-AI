@@ -29,6 +29,10 @@ import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.
 import 'package:callx_ai/features/email_follow_ups/data/email_remote_data_source.dart';
 import 'package:callx_ai/features/email_follow_ups/data/email_repository_impl.dart';
 import 'package:callx_ai/features/email_follow_ups/domain/email_repository.dart';
+import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
+import 'package:callx_ai/features/ai_settings/data/datasources/ai_settings_remote_data_source.dart';
+import 'package:callx_ai/features/ai_settings/data/repositories/ai_settings_repository_impl.dart';
+import 'package:callx_ai/features/ai_settings/domain/repositories/ai_settings_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +59,9 @@ Future<void> main() async {
   final emailRepository = EmailRepositoryImpl(
     EmailRemoteDataSource(dioClient),
   );
+  final aiSettingsRepository = AiSettingsRepositoryImpl(
+    AiSettingsRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -70,6 +77,9 @@ Future<void> main() async {
             value: workspaceRepository),
         RepositoryProvider<CallsRepository>.value(value: callsRepository),
         RepositoryProvider<EmailRepository>.value(value: emailRepository),
+        RepositoryProvider<AiSettingsRepository>.value(
+          value: aiSettingsRepository,
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -79,7 +89,6 @@ Future<void> main() async {
               context.read<CustomerRepository>(),
             )..loadInitial(resetFilters: true),
           ),
-
           BlocProvider(
             create: (context) => CallsCubit(
               context.read<CallsRepository>(),
@@ -88,6 +97,9 @@ Future<void> main() async {
           BlocProvider(create: (_) => SelectedCallCubit()),
           BlocProvider(
             create: (_) => EmailFollowUpsCubit(emailRepository),
+          ),
+          BlocProvider(
+            create: (_) => AiSettingsCubit(aiSettingsRepository)..load(),
           ),
           BlocProvider(
             create: (_) => WorkspaceSettingsCubit(
