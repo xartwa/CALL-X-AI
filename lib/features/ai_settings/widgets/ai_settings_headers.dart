@@ -14,6 +14,7 @@ class AiSettingsHeaders extends StatelessWidget {
     required this.onSave,
     required this.onReset,
     required this.onRefresh,
+    this.onNewScenario,
   });
 
   final bool hasUnsavedChanges;
@@ -23,85 +24,210 @@ class AiSettingsHeaders extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onReset;
   final VoidCallback onRefresh;
+  final VoidCallback? onNewScenario;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final color =
-        isConfigured ? const Color(0xFF10B981) : context.colors.errorColor;
+    final statusColor =
+        isConfigured ? const Color(0xFF10B981) : AppColors.errorColor;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-        border: Border.all(
-          color: isDark ? Colors.white10 : context.colors.lightGreyColor,
-        ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            isConfigured ? 'VOICE ENGINE ONLINE' : 'VOICE ENGINE OFFLINE',
-            style: TextStyle(
-              color: color,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: .6,
-            ),
-          ),
-          if (engineLabel.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                '• $engineLabel',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: context.colors.darkGreyColor,
-                  fontSize: 11.5,
+          // Left: Save & Go Live + Reset Draft + New Scenario
+          Row(
+            children: [
+              SizedBox(
+                height: 36,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: hasUnsavedChanges
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.4),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                    ),
+                  ),
+                  onPressed: hasUnsavedChanges && !isSaving ? onSave : null,
+                  icon: isSaving
+                      ? const AppLoadingIndicator(size: 14, color: Colors.white)
+                      : const Icon(
+                          CupertinoIcons.cloud_upload_fill,
+                          size: 15,
+                          color: Colors.white,
+                        ),
+                  label: Text(
+                    isSaving ? 'SAVING...' : 'SAVE & GO LIVE',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
-          const Spacer(),
-          IconButton(
-            tooltip: 'Refresh from server',
-            onPressed: isSaving ? null : onRefresh,
-            icon: const Icon(CupertinoIcons.refresh, size: 16),
-          ),
-          OutlinedButton.icon(
-            onPressed: hasUnsavedChanges && !isSaving ? onReset : null,
-            icon: const Icon(CupertinoIcons.arrow_counterclockwise, size: 14),
-            label: const Text('RESET'),
-          ),
-          const SizedBox(width: 10),
-          ElevatedButton.icon(
-            onPressed: hasUnsavedChanges && !isSaving ? onSave : null,
-            icon: isSaving
-                ? const AppLoadingIndicator(size: 15, color: Colors.white)
-                : const Icon(
-                    CupertinoIcons.cloud_upload_fill,
-                    size: 14,
-                    color: Colors.white,
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 36,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: isDark
+                          ? Colors.white24
+                          : context.colors.lightGreyColor,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                    ),
                   ),
-            label: Text(isSaving ? 'SAVING...' : 'SAVE & GO LIVE'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              textStyle: const TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
+                  onPressed: hasUnsavedChanges && !isSaving ? onReset : null,
+                  icon: Icon(
+                    CupertinoIcons.arrow_counterclockwise,
+                    size: 14,
+                    color: hasUnsavedChanges
+                        ? context.colors.warningColor
+                        : context.colors.darkGreyColor,
+                  ),
+                  label: Text(
+                    'RESET DRAFT',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: hasUnsavedChanges
+                          ? (isDark ? Colors.white : Colors.black87)
+                          : context.colors.darkGreyColor,
+                    ),
+                  ),
+                ),
               ),
-            ),
+              if (onNewScenario != null) ...[
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: 36,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: isDark
+                            ? Colors.white24
+                            : context.colors.lightGreyColor,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
+                      ),
+                    ),
+                    onPressed: isSaving ? null : onNewScenario,
+                    icon: Icon(
+                      CupertinoIcons.plus,
+                      size: 15,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    label: Text(
+                      'NEW SCENARIO',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          // Right: Voice Engine Online status badge + Refresh Button
+          Row(
+            children: [
+              Container(
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.08),
+                  border: Border.all(
+                    color: statusColor.withValues(alpha: 0.25),
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      isConfigured
+                          ? 'VOICE ENGINE ONLINE'
+                          : 'VOICE ENGINE OFFLINE',
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    if (engineLabel.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        '• $engineLabel',
+                        style: TextStyle(
+                          color: context.colors.darkGreyColor,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              InkWell(
+                onTap: isSaving ? null : onRefresh,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 36,
+                  width: 36,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white10
+                          : context.colors.lightGreyColor,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.refresh,
+                      size: 15,
+                      color: context.colors.darkGreyColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+

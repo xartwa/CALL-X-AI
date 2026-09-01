@@ -1,9 +1,11 @@
+import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
 import 'package:callx_ai/theme/app_colors.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,21 +52,32 @@ class VoiceSettingsTab extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               SizedBox(
-                height: 44,
+                height: 36,
                 child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                    ),
+                  ),
                   onPressed: voice == null || state.previewingVoiceId != null
                       ? null
                       : () => cubit.previewVoice(voice.id),
                   icon: state.previewingVoiceId != null
-                      ? const AppLoadingIndicator(size: 15)
+                      ? const AppLoadingIndicator(size: 14)
                       : const Icon(CupertinoIcons.play_arrow_solid, size: 14),
                   label: Text(
                     state.previewingVoiceId != null
                         ? 'GENERATING...'
                         : 'LISTEN SAMPLE',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
+
             ],
           ),
         if (voice != null &&

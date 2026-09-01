@@ -43,33 +43,34 @@ class DraftTextField extends StatefulWidget {
 
 class _DraftTextFieldState extends State<DraftTextField> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
+    _focusNode = FocusNode();
   }
 
   @override
   void didUpdateWidget(covariant DraftTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != _controller.text) {
-      _controller.value = TextEditingValue(
-        text: widget.value,
-        selection: TextSelection.collapsed(offset: widget.value.length),
-      );
+    if (widget.value != _controller.text && !_focusNode.hasFocus) {
+      _controller.text = widget.value;
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => TextField(
         controller: _controller,
+        focusNode: _focusNode,
         minLines: widget.minLines,
         maxLines: widget.maxLines,
         onChanged: widget.onChanged,
@@ -83,6 +84,7 @@ class _DraftTextFieldState extends State<DraftTextField> {
         ),
       );
 }
+
 
 class SettingsBanner extends StatelessWidget {
   const SettingsBanner({

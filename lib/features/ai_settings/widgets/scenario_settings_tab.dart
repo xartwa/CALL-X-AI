@@ -1,8 +1,12 @@
+import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
+import 'package:callx_ai/features/ai_settings/widgets/create_scenario_dialog.dart';
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
 import 'package:callx_ai/theme/app_colors.dart';
+
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,19 +38,38 @@ class ScenarioSettingsTab extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            OutlinedButton.icon(
-              onPressed: state.isBusy ? null : () => _create(context),
-              icon: const Icon(CupertinoIcons.plus, size: 14),
-              label: const Text('NEW'),
+            SizedBox(
+              height: 36,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                  ),
+                ),
+                onPressed: state.isBusy ? null : () => _create(context),
+                icon: const Icon(CupertinoIcons.plus, size: 14),
+                label: const Text('NEW'),
+              ),
             ),
             const SizedBox(width: 8),
-            OutlinedButton.icon(
-              onPressed: state.isBusy || draft.isDefaultInbound
-                  ? null
-                  : () => _delete(context, draft.name),
-              icon: const Icon(CupertinoIcons.delete, size: 14),
-              label: const Text('DELETE'),
+            SizedBox(
+              height: 36,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                  ),
+                ),
+                onPressed: state.isBusy || draft.isDefaultInbound
+                    ? null
+                    : () => _delete(context, draft.name),
+                icon: const Icon(CupertinoIcons.delete, size: 14),
+                label: const Text('DELETE'),
+              ),
             ),
+
           ],
         ),
         if (state.hasUnsavedChanges) ...[
@@ -218,60 +241,7 @@ class ScenarioSettingsTab extends StatelessWidget {
   }
 
   Future<void> _create(BuildContext context) async {
-    final controller = TextEditingController();
-    var category = AiSettingsCubit.categories.first;
-    final result = await showDialog<(String, String)>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Create AI scenario'),
-          content: SizedBox(
-            width: 440,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: controller,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Scenario name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                AppDropdownWidget<String>(
-                  value: category,
-                  items: AiSettingsCubit.categories,
-                  itemBuilder: (item) => item,
-                  onChanged: (value) {
-                    if (value != null) setState(() => category = value);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (controller.text.trim().length >= 3) {
-                  Navigator.pop(
-                    dialogContext,
-                    (controller.text.trim(), category),
-                  );
-                }
-              },
-              child: const Text('Create'),
-            ),
-          ],
-        ),
-      ),
-    );
-    controller.dispose();
+    final result = await CreateScenarioDialog.show(context);
     if (result != null && context.mounted) {
       await context
           .read<AiSettingsCubit>()
@@ -281,33 +251,155 @@ class ScenarioSettingsTab extends StatelessWidget {
 
   Future<void> _addQuestion(BuildContext context) async {
     final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final result = await showDialog<String>(
+      barrierDismissible: false,
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Add qualifying question'),
-        content: SizedBox(
-          width: 440,
-          child: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              hintText: 'What should the AI ask?',
-              border: OutlineInputBorder(),
-            ),
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+        ),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        child: Container(
+          width: 480,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'ADD QUALIFYING QUESTION',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    splashRadius: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(CupertinoIcons.clear, size: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'QUESTION TEXT',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                  color: isDark ? Colors.grey[400] : Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white12
+                        : context.colors.lightGreyColor,
+                  ),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.03)
+                      : Colors.black.withValues(alpha: 0.02),
+                ),
+                child: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  maxLines: 3,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(14),
+                    hintText:
+                        'e.g. How many service calls does your team handle per week?',
+                    hintStyle: TextStyle(
+                      fontSize: 12.5,
+                      color: context.colors.darkGreyColor,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 42,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius,
+                            ),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      height: 42,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius,
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          final text = controller.text.trim();
+                          if (text.isNotEmpty) {
+                            Navigator.pop(dialogContext, text);
+                          }
+                        },
+                        icon: const Icon(
+                          CupertinoIcons.plus_circle_fill,
+                          size: 15,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'ADD QUESTION',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.pop(dialogContext, controller.text.trim()),
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
     controller.dispose();
@@ -321,27 +413,130 @@ class ScenarioSettingsTab extends StatelessWidget {
   }
 
   Future<void> _delete(BuildContext context, String name) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete scenario?'),
-        content: Text('“$name” will be permanently removed.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+        ),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        child: Container(
+          width: 440,
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color:
+                              AppColors.errorColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.trash_fill,
+                          size: 16,
+                          color: AppColors.errorColor,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'DELETE SCENARIO',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(dialogContext, false),
+                    splashRadius: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(CupertinoIcons.clear, size: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                'Are you sure you want to permanently delete "$name"? This action cannot be undone.',
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.5,
+                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 42,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius,
+                            ),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: Text(
+                          'CANCEL',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 42,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.errorColor,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius,
+                            ),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        child: const Text(
+                          'DELETE',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          FilledButton(
-            style:
-                FilledButton.styleFrom(backgroundColor: AppColors.errorColor),
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Delete'),
-          ),
-        ],
+        ),
       ),
     );
     if (confirmed == true && context.mounted) {
       await context.read<AiSettingsCubit>().deleteSelected();
     }
   }
+
 }

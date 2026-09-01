@@ -25,7 +25,7 @@ class CustomTagWidget extends StatelessWidget {
         ),
       ),
       child: Text(
-        label,
+        label.toUpperCase(),
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w600,

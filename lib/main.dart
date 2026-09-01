@@ -99,8 +99,9 @@ Future<void> main() async {
             create: (_) => EmailFollowUpsCubit(emailRepository),
           ),
           BlocProvider(
-            create: (_) => AiSettingsCubit(aiSettingsRepository)..load(),
+            create: (_) => AiSettingsCubit(aiSettingsRepository),
           ),
+
           BlocProvider(
             create: (_) => WorkspaceSettingsCubit(
               workspaceRepository: workspaceRepository,

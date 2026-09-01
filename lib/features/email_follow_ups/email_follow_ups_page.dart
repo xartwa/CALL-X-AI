@@ -1,6 +1,6 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
-import 'package:callx_ai/core/widgets/chip_tag_widget.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
+import 'package:callx_ai/core/widgets/custom_tag_widget.dart';
 import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/core/widgets/app_action_button.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
@@ -529,10 +529,9 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
 
             // Template Used Tag
             DataCell(
-              tagChipWidget(
-                context: context,
-                tagName: email['templateName'] ?? 'Custom Email',
-                customColor: Theme.of(context).colorScheme.primary,
+              CustomTagWidget(
+                label: email['templateName'] ?? '-',
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
 

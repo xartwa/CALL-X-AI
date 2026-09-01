@@ -26,12 +26,12 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
   ];
 
   Future<void> load() async {
-    if (state.status == AiSettingsStatus.loading) return;
     emit(state.copyWith(
       status: AiSettingsStatus.loading,
       clearError: true,
       clearFeedback: true,
     ));
+
     try {
       final bundle = await repository.loadSettings();
       final selected = _preferredScenario(bundle.scenarios);
@@ -48,8 +48,14 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
         status: AiSettingsStatus.failure,
         errorMessage: _message(error),
       ));
+    } catch (error) {
+      emit(state.copyWith(
+        status: AiSettingsStatus.failure,
+        errorMessage: 'Unable to load AI settings. Please check your connection and try again.',
+      ));
     }
   }
+
 
   AiScenario? _preferredScenario(List<AiScenario> scenarios) {
     if (scenarios.isEmpty) return null;
@@ -81,12 +87,15 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
   void updateDraft(AiScenario Function(AiScenario current) update) {
     final current = state.draft;
     if (current == null || state.isBusy) return;
+    final updated = update(current);
+    if (current.sameContent(updated)) return;
     emit(state.copyWith(
-      draft: update(current),
+      draft: updated,
       clearError: true,
       clearFeedback: true,
     ));
   }
+
 
   void resetDraft() {
     final saved = state.savedScenario;

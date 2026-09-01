@@ -33,13 +33,65 @@ class AiSettingsRepositoryImpl implements AiSettingsRepository {
         final responses =
             await Future.wait([remote.config(), remote.scenarios()]);
         final configJson = responses[0] as Map<String, dynamic>;
-        final scenarioJson = responses[1] as List<Map<String, dynamic>>;
-        final voices = (configJson['availableVoices'] as List? ?? const [])
+        final scenarioJson = (responses[1] as List)
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList();
+        final rawVoices =
+            (configJson['availableVoices'] as List? ?? const []);
+
+        var voices = rawVoices
             .whereType<Map>()
             .map((item) =>
                 AiVoiceDto(Map<String, dynamic>.from(item)).toEntity())
             .where((voice) => voice.id.isNotEmpty)
             .toList(growable: false);
+        if (voices.isEmpty) {
+          voices = const [
+            AiVoice(
+              id: '01fd7d67-d2a0-4e4e-8c48-42611c71a926',
+              name: 'Skyler',
+              language: 'en',
+              locale: 'en-US',
+              gender: 'feminine',
+              accent: 'American',
+              tagline: 'Easygoing & Approachable',
+              description:
+                  'Natural, effortless, friendly conversational cadence.',
+            ),
+            AiVoice(
+              id: '694f9389-aac1-45b6-b726-9d9369183238',
+              name: 'Sarah',
+              language: 'en',
+              locale: 'en-US',
+              gender: 'feminine',
+              accent: 'American',
+              tagline: 'Soothing & Warm',
+              description: 'Calm, natural, and friendly conversational tone.',
+            ),
+            AiVoice(
+              id: 'f6ff7c0c-e396-40a9-a70b-f7607edb6937',
+              name: 'Emma',
+              language: 'en',
+              locale: 'en-US',
+              gender: 'feminine',
+              accent: 'American',
+              tagline: 'Casual & Relatable',
+              description:
+                  'Approachable and natural voice for customer support.',
+            ),
+            AiVoice(
+              id: 'f786b574-daa5-4673-aa0c-cbe3e8534c02',
+              name: 'Katie',
+              language: 'en',
+              locale: 'en-US',
+              gender: 'feminine',
+              accent: 'American',
+              tagline: 'Upbeat & Enunciating',
+              description:
+                  'Clear, enthusiastic, and articulate young adult female.',
+            ),
+          ];
+        }
         return AiSettingsBundle(
           config: AiEngineConfigDto(configJson).toEntity(),
           voices: voices,
@@ -48,6 +100,7 @@ class AiSettingsRepositoryImpl implements AiSettingsRepository {
               .toList(growable: false),
         );
       });
+
 
   @override
   Future<AiScenario> createScenario(AiScenario scenario) => _request(() async {
