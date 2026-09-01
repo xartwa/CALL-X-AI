@@ -79,10 +79,14 @@ class _CallActionDialogState extends State<CallActionDialog> {
   _TimingMode _timingMode = _TimingMode.callNow;
   _GroupTargetMode _groupTargetMode = _GroupTargetMode.segment;
   User? _selectedUser;
+  bool _isDirectPhone = false;
+  final TextEditingController _customPhoneCtrl = TextEditingController();
+  final TextEditingController _customNameCtrl = TextEditingController();
 
   // Manual Customer Selection
   final Set<String> _manualSelectedUserIds = {};
   final TextEditingController _searchCustomerCtrl = TextEditingController();
+
   String _customerSearchQuery = '';
 
   // Conversation Scenarios
@@ -181,8 +185,11 @@ class _CallActionDialogState extends State<CallActionDialog> {
   @override
   void dispose() {
     _searchCustomerCtrl.dispose();
+    _customPhoneCtrl.dispose();
+    _customNameCtrl.dispose();
     super.dispose();
   }
+
 
   int _getGroupTargetCount(List<User> customers) {
     return _groupTargets(customers).length;
@@ -238,16 +245,47 @@ class _CallActionDialogState extends State<CallActionDialog> {
     final callsCubit = context.read<CallsCubit>();
 
     if (_callType == _CallType.single) {
-      if (_selectedUser == null) {
+      final String phone;
+      final String name;
+      final String? customerId;
+
+      if (_isDirectPhone && widget.fullName == null) {
+        phone = _customPhoneCtrl.text.trim();
+        name = _customNameCtrl.text.trim().isNotEmpty
+            ? _customNameCtrl.text.trim()
+            : 'Direct Contact';
+        customerId = null;
+      } else {
+        if (_selectedUser == null) {
+          setState(() => _isCalling = false);
+          AppUtils.showSnackBar(
+            context: context,
+            extraMessage: 'Please select a recipient customer or enter a phone number.',
+            toastificationType: ToastificationType.warning,
+          );
+          return;
+        }
+        phone = _selectedUser!.phone;
+        name = _selectedUser!.fullName;
+        customerId =
+            _selectedUser!.id != '-1' ? _selectedUser!.id.toString() : null;
+      }
+
+      if (phone.isEmpty || phone.length < 5) {
         setState(() => _isCalling = false);
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'Please enter a valid destination phone number.',
+          toastificationType: ToastificationType.warning,
+        );
         return;
       }
 
       final dispatched = await customersCubit.dispatchCall(
-        customerId: _selectedUser!.id != '-1' ? _selectedUser!.id.toString() : null,
+        customerId: customerId,
         scenarioId: scenario.id,
-        phone: _selectedUser!.phone,
-        fullName: _selectedUser!.fullName,
+        phone: phone,
+        fullName: name,
         scheduledFor: _scheduledFor(),
       );
       if (!dispatched) {
@@ -265,7 +303,6 @@ class _CallActionDialogState extends State<CallActionDialog> {
       }
       await callsCubit.refresh();
 
-
       if (buildContext.mounted) {
         setState(() => _isCalling = false);
         navigator.pop();
@@ -274,12 +311,13 @@ class _CallActionDialogState extends State<CallActionDialog> {
           context: buildContext,
           title: isScheduled
               ? 'Call Scheduled Successfully'
-              : 'Call Initiated with ${_selectedUser!.fullName}',
+              : 'Call Initiated with $name',
           extraMessage: 'Scenario: ${scenario.title}',
           toastificationType: ToastificationType.success,
         );
       }
-    } else {
+    }
+ else {
       final customers = customersCubit.state.users;
       final targets = _groupTargets(customers);
       if (targets.isEmpty) {
@@ -571,29 +609,180 @@ class _CallActionDialogState extends State<CallActionDialog> {
               // ----------------------------------------------------
               if (_callType == _CallType.single) ...[
                 if (widget.fullName == null) ...[
-                  Text(
-                    'SELECT RECIPIENT',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                      color: isDark ? Colors.grey[400] : Colors.grey[700],
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'SELECT RECIPIENT',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                          color: isDark ? Colors.grey[400] : Colors.grey[700],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => setState(() => _isDirectPhone = false),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: !_isDirectPhone
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withValues(alpha: 0.12)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'CUSTOMER',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: !_isDirectPhone
+                                      ? Theme.of(context).colorScheme.primary
+                                      : (isDark
+                                          ? Colors.grey[500]
+                                          : Colors.grey[600]),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          GestureDetector(
+                            onTap: () => setState(() => _isDirectPhone = true),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _isDirectPhone
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withValues(alpha: 0.12)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'DIRECT PHONE',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: _isDirectPhone
+                                      ? Theme.of(context).colorScheme.primary
+                                      : (isDark
+                                          ? Colors.grey[500]
+                                          : Colors.grey[600]),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
-                  AppDropdownWidget<User>(
-                    value: _selectedUser,
-                    hint: isCustomersLoading
-                        ? 'Loading customers...'
-                        : (customers.isEmpty ? 'No customers found' : 'Choose customer or enter phone number'),
-                    items: customers,
-                    itemBuilder: (user) =>
-                        '${user.fullName} (${user.companyName.isNotEmpty ? user.companyName : user.phone})',
-                    onChanged: (user) => setState(() => _selectedUser = user),
-                  ),
-
+                  if (!_isDirectPhone)
+                    AppDropdownWidget<User>(
+                      value: _selectedUser,
+                      hint: isCustomersLoading
+                          ? 'Loading customers...'
+                          : (customers.isEmpty
+                              ? 'No customers found'
+                              : 'Choose customer'),
+                      items: customers,
+                      itemBuilder: (user) =>
+                          '${user.fullName} (${user.companyName.isNotEmpty ? user.companyName : user.phone})',
+                      onChanged: (user) =>
+                          setState(() => _selectedUser = user),
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            height: 46,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white12
+                                    : context.colors.lightGreyColor,
+                              ),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.03)
+                                  : Colors.black.withValues(alpha: 0.02),
+                            ),
+                            child: TextField(
+                              controller: _customPhoneCtrl,
+                              style: const TextStyle(
+                                  fontSize: 12.5, fontWeight: FontWeight.w600),
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14),
+                                hintText:
+                                    'Phone Number (e.g. +1 604 262 2563)',
+                                hintStyle: TextStyle(
+                                    fontSize: 12.5,
+                                    color: context.colors.darkGreyColor),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            height: 46,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white12
+                                    : context.colors.lightGreyColor,
+                              ),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.03)
+                                  : Colors.black.withValues(alpha: 0.02),
+                            ),
+                            child: TextField(
+                              controller: _customNameCtrl,
+                              style: const TextStyle(
+                                  fontSize: 12.5, fontWeight: FontWeight.w600),
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14),
+                                hintText: 'Name (optional)',
+                                hintStyle: TextStyle(
+                                    fontSize: 12.5,
+                                    color: context.colors.darkGreyColor),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 22),
                 ] else ...[
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 14),
