@@ -1,10 +1,33 @@
 import 'ai_scenario.dart';
 
+class AiVoiceEmotion {
+  const AiVoiceEmotion({
+    required this.id,
+    required this.label,
+    required this.emoji,
+  });
+
+  final String id;
+  final String label;
+  final String emoji;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AiVoiceEmotion &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
 class AiAgentProfile {
   const AiAgentProfile({
     required this.name,
     required this.rolePrompt,
     required this.voiceId,
+    this.voiceEmotion = 'calm',
     required this.voiceSpeed,
     required this.knowledgeText,
     this.knowledgePdfUrl,
@@ -16,11 +39,13 @@ class AiAgentProfile {
     required this.is247,
     required this.isAiEnabled,
     this.availableVoices = const [],
+    this.availableEmotions = const [],
   });
 
   final String name;
   final String rolePrompt;
   final String voiceId;
+  final String voiceEmotion;
   final double voiceSpeed;
   final String knowledgeText;
   final String? knowledgePdfUrl;
@@ -32,11 +57,13 @@ class AiAgentProfile {
   final bool is247;
   final bool isAiEnabled;
   final List<AiVoice> availableVoices;
+  final List<AiVoiceEmotion> availableEmotions;
 
   AiAgentProfile copyWith({
     String? name,
     String? rolePrompt,
     String? voiceId,
+    String? voiceEmotion,
     double? voiceSpeed,
     String? knowledgeText,
     String? knowledgePdfUrl,
@@ -48,11 +75,13 @@ class AiAgentProfile {
     bool? is247,
     bool? isAiEnabled,
     List<AiVoice>? availableVoices,
+    List<AiVoiceEmotion>? availableEmotions,
   }) =>
       AiAgentProfile(
         name: name ?? this.name,
         rolePrompt: rolePrompt ?? this.rolePrompt,
         voiceId: voiceId ?? this.voiceId,
+        voiceEmotion: voiceEmotion ?? this.voiceEmotion,
         voiceSpeed: voiceSpeed ?? this.voiceSpeed,
         knowledgeText: knowledgeText ?? this.knowledgeText,
         knowledgePdfUrl: knowledgePdfUrl ?? this.knowledgePdfUrl,
@@ -64,12 +93,14 @@ class AiAgentProfile {
         is247: is247 ?? this.is247,
         isAiEnabled: isAiEnabled ?? this.isAiEnabled,
         availableVoices: availableVoices ?? this.availableVoices,
+        availableEmotions: availableEmotions ?? this.availableEmotions,
       );
 
   bool sameContent(AiAgentProfile other) =>
       name == other.name &&
       rolePrompt == other.rolePrompt &&
       voiceId == other.voiceId &&
+      voiceEmotion == other.voiceEmotion &&
       voiceSpeed == other.voiceSpeed &&
       knowledgeText == other.knowledgeText &&
       knowledgePdfUrl == other.knowledgePdfUrl &&
@@ -88,6 +119,7 @@ class AiAgentProfile {
           name == other.name &&
           rolePrompt == other.rolePrompt &&
           voiceId == other.voiceId &&
+          voiceEmotion == other.voiceEmotion &&
           voiceSpeed == other.voiceSpeed &&
           knowledgeText == other.knowledgeText &&
           knowledgePdfUrl == other.knowledgePdfUrl &&
@@ -104,6 +136,7 @@ class AiAgentProfile {
         name,
         rolePrompt,
         voiceId,
+        voiceEmotion,
         voiceSpeed,
         knowledgeText,
         knowledgePdfUrl,
@@ -116,3 +149,4 @@ class AiAgentProfile {
         isAiEnabled,
       );
 }
+

@@ -13,6 +13,7 @@ abstract class AiSettingsRepository {
   Future<AiAgentProfile> uploadKnowledgePdf({
     required Uint8List bytes,
     required String fileName,
+    void Function(double progress)? onProgress,
   });
 
   Future<AiAgentProfile> removeKnowledgePdf();
@@ -29,6 +30,8 @@ abstract class AiSettingsRepository {
     required String voiceId,
     required double speed,
     required String text,
+    String? emotion,
   });
 }
+
 

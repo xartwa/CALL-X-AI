@@ -25,6 +25,7 @@ class AiSettingsRemoteDataSource {
   Future<Map<String, dynamic>> uploadKnowledgePdf({
     required Uint8List bytes,
     required String fileName,
+    ProgressCallback? onSendProgress,
   }) async {
     final formData = FormData.fromMap({
       'pdf': MultipartFile.fromBytes(bytes, filename: fileName),
@@ -32,15 +33,16 @@ class AiSettingsRemoteDataSource {
     final response = await client.http.post(
       '/cartesia/agent/upload-knowledge-pdf/',
       data: formData,
+      onSendProgress: onSendProgress,
     );
     return Map<String, dynamic>.from(response.data as Map);
   }
 
   Future<Map<String, dynamic>> removeKnowledgePdf() async {
-    final response =
-        await client.http.delete('/cartesia/agent/upload-knowledge-pdf/');
+    final response = await client.http.delete('/cartesia/agent/');
     return Map<String, dynamic>.from(response.data as Map);
   }
+
 
   Future<bool> toggleAiStatus([bool? explicit]) async {
     final response = await client.http.post(

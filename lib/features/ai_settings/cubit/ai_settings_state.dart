@@ -18,6 +18,7 @@ class AiSettingsState {
     this.isSaving = false,
     this.isDeleting = false,
     this.isUploadingPdf = false,
+    this.uploadProgress,
     this.previewingVoiceId,
     this.previewAudio,
     this.previewRevision = 0,
@@ -37,9 +38,11 @@ class AiSettingsState {
   final bool isSaving;
   final bool isDeleting;
   final bool isUploadingPdf;
+  final double? uploadProgress;
   final String? previewingVoiceId;
   final Uint8List? previewAudio;
   final int previewRevision;
+
   final String? errorMessage;
   final String? feedbackMessage;
   final int feedbackRevision;
@@ -77,6 +80,7 @@ class AiSettingsState {
     bool? isSaving,
     bool? isDeleting,
     bool? isUploadingPdf,
+    double? uploadProgress,
     String? previewingVoiceId,
     Uint8List? previewAudio,
     int? previewRevision,
@@ -88,6 +92,7 @@ class AiSettingsState {
     bool clearPreviewAudio = false,
     bool clearError = false,
     bool clearFeedback = false,
+    bool clearUploadProgress = false,
   }) =>
       AiSettingsState(
         status: status ?? this.status,
@@ -102,6 +107,7 @@ class AiSettingsState {
         isSaving: isSaving ?? this.isSaving,
         isDeleting: isDeleting ?? this.isDeleting,
         isUploadingPdf: isUploadingPdf ?? this.isUploadingPdf,
+        uploadProgress: clearUploadProgress ? null : uploadProgress ?? this.uploadProgress,
         previewingVoiceId: clearPreviewingVoice
             ? null
             : previewingVoiceId ?? this.previewingVoiceId,
@@ -113,5 +119,6 @@ class AiSettingsState {
             clearFeedback ? null : feedbackMessage ?? this.feedbackMessage,
         feedbackRevision: feedbackRevision ?? this.feedbackRevision,
       );
+
 }
 

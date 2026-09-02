@@ -77,22 +77,7 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        CupertinoIcons.waveform,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
+                  
                     const Text(
                       'CREATE OUTBOUND SCENARIO',
                       style: TextStyle(
@@ -225,36 +210,7 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
             // Action Buttons
             Row(
               children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 42,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: isDark
-                              ? Colors.white24
-                              : context.colors.lightGreyColor,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            ThemeConstants.buttonRadius,
-                          ),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'CANCEL',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: isDark ? Colors.white70 : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
+          
                 Expanded(
                   child: SizedBox(
                     height: 42,

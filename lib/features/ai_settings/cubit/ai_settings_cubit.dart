@@ -260,10 +260,12 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
           ? state.agentDraft!.inboundGreeting
           : 'Hi, this is Skylar. How can I help you today?';
       final speed = state.agentDraft?.voiceSpeed ?? state.draft?.voiceSpeed ?? 1.05;
+      final emotion = state.agentDraft?.voiceEmotion ?? 'calm';
       final audio = await repository.previewVoice(
         voiceId: voiceId,
         speed: speed,
         text: sampleText.replaceAll('{name}', 'there'),
+        emotion: emotion,
       );
       emit(state.copyWith(
         previewAudio: audio,
@@ -316,6 +318,7 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
     if (state.isBusy) return false;
     emit(state.copyWith(
       isUploadingPdf: true,
+      uploadProgress: 0.1,
       clearError: true,
       clearFeedback: true,
     ));
@@ -323,9 +326,15 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
       final updated = await repository.uploadKnowledgePdf(
         bytes: bytes,
         fileName: fileName,
+        onProgress: (p) {
+          if (!isClosed) {
+            emit(state.copyWith(uploadProgress: p.clamp(0.0, 1.0)));
+          }
+        },
       );
       emit(state.copyWith(
         isUploadingPdf: false,
+        clearUploadProgress: true,
         agentProfile: updated,
         agentDraft: updated.copyWith(),
         feedbackMessage: 'Knowledge PDF processed successfully.',
@@ -333,16 +342,22 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
       ));
       return true;
     } on AppException catch (error) {
-      emit(state.copyWith(isUploadingPdf: false, errorMessage: _message(error)));
+      emit(state.copyWith(
+        isUploadingPdf: false,
+        clearUploadProgress: true,
+        errorMessage: _message(error),
+      ));
       return false;
     } catch (_) {
       emit(state.copyWith(
         isUploadingPdf: false,
+        clearUploadProgress: true,
         errorMessage: 'Failed to upload knowledge PDF.',
       ));
       return false;
     }
   }
+
 
   Future<bool> removeKnowledgePdf() async {
     if (state.isBusy) return false;

@@ -1,7 +1,6 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
-import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
-import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
+
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
 import 'package:callx_ai/features/ai_settings/widgets/create_scenario_dialog.dart';
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
@@ -25,290 +24,449 @@ class ScenarioSettingsTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cubit = context.read<AiSettingsCubit>();
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final cardBgColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 40),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Scenario Selector & Actions
-        Row(
-          children: [
-            Expanded(
-              child: AppDropdownWidget<AiScenario>(
-                value: state.savedScenario,
-                items: state.scenarios,
-                itemBuilder: (scenario) => scenario.name,
-                onChanged: state.hasUnsavedChanges
-                    ? null
-                    : (scenario) {
-                        if (scenario != null) cubit.selectScenario(scenario.id);
-                      },
-              ),
+        // 1. LEFT PANEL: SCENARIOS LIST (width 260)
+        Container(
+          width: 260,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF0F172A) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
             ),
-            const SizedBox(width: 10),
-            SizedBox(
-              height: 36,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(ThemeConstants.buttonRadius),
-                  ),
-                ),
-                onPressed: state.isBusy ? null : () => _create(context),
-                icon: const Icon(CupertinoIcons.plus, size: 14),
-                label: const Text('NEW SCENARIO'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            SizedBox(
-              height: 36,
-              child: OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: context.colors.errorColor,
-                  side: BorderSide(
-                    color: context.colors.errorColor.withValues(alpha: 0.4),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(ThemeConstants.buttonRadius),
-                  ),
-                ),
-                onPressed: state.isBusy || draft.isDefaultInbound
-                    ? null
-                    : () => _delete(context, draft.name),
-                icon: const Icon(CupertinoIcons.delete, size: 14),
-                label: const Text('DELETE'),
-              ),
-            ),
-          ],
-        ),
-        if (state.hasUnsavedChanges) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Save or reset changes before switching scenarios.',
-            style:
-                TextStyle(fontSize: 11.5, color: context.colors.warningColor),
           ),
-        ],
-
-        const SizedBox(height: 26),
-
-        // 2. Scenario Name & Active Switch
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SettingsLabel('SCENARIO NAME'),
-                  const SizedBox(height: 8),
-                  DraftTextField(
-                    value: draft.name,
-                    hintText: 'e.g. Website Inquiry Follow-Up',
-                    onChanged: (value) => cubit.updateDraft(
-                      (current) => current.copyWith(name: value),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Sidebar Header
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Scenarios',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            Column(
-              children: [
-                const SettingsLabel('ACTIVE'),
-                const SizedBox(height: 4),
-                Switch.adaptive(
-                  value: draft.isActive,
-                  onChanged: draft.isDefaultInbound
-                      ? null
-                      : (value) => cubit.updateDraft(
-                            (current) => current.copyWith(isActive: value),
-                          ),
+                    InkWell(
+                      onTap: state.isBusy ? null : () => _create(context),
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          CupertinoIcons.plus,
+                          size: 16,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const Divider(height: 1),
+              // Scenarios List
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: state.scenarios.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final item = state.scenarios[index];
+                    final isSelected = item.id == draft.id;
 
-        const SizedBox(height: 24),
-
-        // 3. Opening Hook / Greeting
-        const SettingsLabel('OPENING GREETING & HOOK'),
-        const SizedBox(height: 6),
-        Text(
-          'The first sentence the AI speaks as soon as the recipient answers this outbound call.',
-          style: TextStyle(fontSize: 12, color: context.colors.darkGreyColor),
-        ),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.openingGreeting,
-          minLines: 2,
-          maxLines: 4,
-          hintText:
-              'e.g. Hi there! This is Skylar from CallX AI. I noticed you checked out our service yesterday...',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(openingGreeting: value),
+                    return InkWell(
+                      onTap: state.hasUnsavedChanges
+                          ? null
+                          : () => cubit.selectScenario(item.id),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primaryColor.withValues(alpha: 0.08)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected
+                                ? primaryColor
+                                : (isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFE2E8F0)),
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: item.isActive
+                                    ? const Color(0xFF10B981)
+                                    : Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.name,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
+                                      color: isSelected
+                                          ? primaryColor
+                                          : (isDark
+                                              ? Colors.white
+                                              : Colors.black87),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.isActive ? 'Active' : 'Paused',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: context.colors.darkGreyColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
+        const SizedBox(width: 16),
 
-        const SizedBox(height: 28),
-
-        // 4. Qualifying Questions List
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        // 2. RIGHT PANEL: SCENARIO EDITOR (Expanded)
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF0F172A) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color:
+                    isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            child: ListView(
+              padding: EdgeInsets.zero,
               children: [
-                SettingsLabel(
-                  'QUALIFYING QUESTIONS (${draft.qualifyingQuestions.length})',
+                // Editor Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            draft.name,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Scenario-specific instructions for outbound calls.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: context.colors.darkGreyColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                          ),
+                          onPressed: state.isBusy
+                              ? null
+                              : () => _duplicate(context, draft),
+                          child: const Text('Duplicate',
+                              style: TextStyle(fontSize: 12)),
+                        ),
+                        const SizedBox(width: 8),
+                        OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.colors.errorColor,
+                            side: BorderSide(
+                              color: context.colors.errorColor
+                                  .withValues(alpha: 0.4),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                          ),
+                          onPressed: state.isBusy || draft.isDefaultInbound
+                              ? null
+                              : () => _delete(context, draft.name),
+                          child: const Text('Delete',
+                              style: TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 18),
+                const Divider(height: 1),
+                const SizedBox(height: 18),
+
+                // SCENARIO NAME + ACTIVE TOGGLE
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SettingsLabel('SCENARIO NAME'),
+                          const SizedBox(height: 8),
+                          DraftTextField(
+                            value: draft.name,
+                            hintText: 'e.g. Warm lead follow-up',
+                            onChanged: (value) => cubit.updateDraft(
+                              (current) => current.copyWith(name: value),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: draft.isActive
+                                    ? const Color(0xFF10B981)
+                                    : Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              draft.isActive ? 'Active' : 'Paused',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: draft.isActive
+                                    ? const Color(0xFF10B981)
+                                    : Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Switch.adaptive(
+                          value: draft.isActive,
+                          onChanged: draft.isDefaultInbound
+                              ? null
+                              : (value) => cubit.updateDraft(
+                                    (current) =>
+                                        current.copyWith(isActive: value),
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // OPENING GREETING & HOOK
+                const SettingsLabel('OPENING GREETING & HOOK'),
+                const SizedBox(height: 4),
                 Text(
-                  'Questions the AI will naturally ask during the conversation.',
+                  'The first sentence the AI speaks as soon as the recipient answers.',
                   style: TextStyle(
                     fontSize: 11.5,
                     color: context.colors.darkGreyColor,
                   ),
                 ),
+                const SizedBox(height: 8),
+                DraftTextField(
+                  value: draft.openingGreeting,
+                  minLines: 3,
+                  maxLines: 5,
+                  hintText:
+                      'e.g. Hi there! This is Maria calling from Dynamica Design. How are you today?',
+                  onChanged: (value) => cubit.updateDraft(
+                    (current) => current.copyWith(openingGreeting: value),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // QUALIFYING QUESTIONS
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SettingsLabel(
+                      'QUALIFYING QUESTIONS · ${draft.qualifyingQuestions.length}',
+                    ),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                      ),
+                      onPressed: () => _addQuestion(context),
+                      icon: const Icon(CupertinoIcons.plus, size: 12),
+                      label: const Text('Add question',
+                          style: TextStyle(fontSize: 11)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                if (draft.qualifyingQuestions.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF131C2E)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'No qualifying questions added yet.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.colors.darkGreyColor,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  for (var i = 0; i < draft.qualifyingQuestions.length; i++)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF131C2E)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: primaryColor.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '${i + 1}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: primaryColor,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              draft.qualifyingQuestions[i],
+                              style: const TextStyle(fontSize: 12.5),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              CupertinoIcons.trash,
+                              size: 15,
+                              color: context.colors.errorColor,
+                            ),
+                            onPressed: () {
+                              final list = List<String>.from(
+                                draft.qualifyingQuestions,
+                              )..removeAt(i);
+                              cubit.updateDraft(
+                                (c) => c.copyWith(qualifyingQuestions: list),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(CupertinoIcons.sparkles,
+                        size: 13, color: primaryColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      '✦ Questions run in this order, but the AI may adapt naturally to the conversation.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.colors.darkGreyColor,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-            TextButton.icon(
-              onPressed: draft.qualifyingQuestions.length >= 20
-                  ? null
-                  : () => _addQuestion(context),
-              icon: const Icon(CupertinoIcons.plus_circle, size: 14),
-              label: const Text('ADD QUESTION'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        if (draft.qualifyingQuestions.isEmpty)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cardBgColor,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: context.colors.darkGreyColor.withValues(alpha: 0.15),
-              ),
-            ),
-            child: Text(
-              'No qualifying questions added. Click "+ ADD QUESTION" to specify what information the AI should collect.',
-              style: TextStyle(
-                fontSize: 12,
-                color: context.colors.darkGreyColor,
-              ),
-            ),
-          )
-        else
-          ...draft.qualifyingQuestions.asMap().entries.map(
-                (entry) => Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: cardBgColor,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color:
-                          context.colors.darkGreyColor.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 22,
-                        height: 22,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: primaryColor.withValues(alpha: 0.12),
-                        ),
-                        child: Text(
-                          '${entry.key + 1}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: primaryColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          entry.value,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: 'Remove question',
-                        icon: const Icon(CupertinoIcons.trash, size: 15),
-                        onPressed: () {
-                          final questions = List<String>.from(
-                            draft.qualifyingQuestions,
-                          )..removeAt(entry.key);
-                          cubit.updateDraft(
-                            (current) => current.copyWith(
-                              qualifyingQuestions: questions,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-        const SizedBox(height: 32),
-
-        // 5. Action Buttons (Save & Reset)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (state.hasUnsavedChanges) ...[
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(ThemeConstants.buttonRadius),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                ),
-                onPressed: state.isBusy ? null : () => cubit.resetDraft(),
-                child: const Text('RESET', style: TextStyle(fontSize: 12)),
-              ),
-              const SizedBox(width: 12),
-            ],
-            SizedBox(
-              height: 42,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(ThemeConstants.buttonRadius),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                ),
-                onPressed: state.isBusy ? null : () => cubit.saveDraft(),
-                icon: state.isSaving
-                    ? const AppLoadingIndicator(size: 14)
-                    : const Icon(CupertinoIcons.check_mark, size: 16),
-                label: Text(
-                  state.isSaving ? 'SAVING...' : 'SAVE SCENARIO',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ],
     );
@@ -329,6 +487,45 @@ class ScenarioSettingsTab extends StatelessWidget {
         'Engage prospective customers, introduce services, and qualify needs.',
         defaultVoiceId,
       );
+    }
+  }
+
+  Future<void> _duplicate(BuildContext context, AiScenario scenario) async {
+    final cubit = context.read<AiSettingsCubit>();
+    await cubit.createScenario(
+      '${scenario.name} (Copy)',
+      scenario.category,
+      scenario.openingGreeting,
+      scenario.pitchSummary,
+      scenario.voiceId,
+    );
+
+  }
+
+  Future<void> _delete(BuildContext context, String name) async {
+    final cubit = context.read<AiSettingsCubit>();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Scenario?'),
+        content: Text('Are you sure you want to delete "$name"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('DELETE'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await cubit.deleteScenario();
     }
   }
 
@@ -398,54 +595,46 @@ class ScenarioSettingsTab extends StatelessWidget {
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         hintText: 'e.g. What is your estimated monthly budget?',
-                        hintStyle: TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF64748B),
-                        ),
+                        hintStyle:
+                            TextStyle(fontSize: 12, color: Colors.white38),
                       ),
                       onSubmitted: (val) {
-                        final text = val.trim();
-                        if (text.isNotEmpty) {
-                          Navigator.of(dialogContext).pop(text);
+                        if (val.trim().isNotEmpty) {
+                          Navigator.of(dialogContext).pop(val.trim());
                         }
                       },
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
+                      TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(),
                         child: const Text('CANCEL',
-                            style: TextStyle(fontSize: 11)),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.white70)),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       FilledButton(
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4F46E5),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 10),
                         ),
                         onPressed: () {
-                          final text = controller.text.trim();
-                          if (text.isNotEmpty) {
-                            Navigator.of(dialogContext).pop(text);
+                          if (controller.text.trim().isNotEmpty) {
+                            Navigator.of(dialogContext)
+                                .pop(controller.text.trim());
                           }
                         },
                         child: const Text('ADD QUESTION',
                             style: TextStyle(
-                                fontSize: 11, fontWeight: FontWeight.w700)),
+                                fontSize: 12, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
@@ -456,99 +645,13 @@ class ScenarioSettingsTab extends StatelessWidget {
         );
       },
     );
-    if (question != null && question.trim().isNotEmpty) {
-      final currentQuestions = cubit.state.draft?.qualifyingQuestions ?? [];
-      cubit.updateDraft(
-        (current) => current.copyWith(
-          qualifyingQuestions: [...currentQuestions, question.trim()],
-        ),
-      );
-    }
-  }
-
-  Future<void> _delete(BuildContext context, String name) async {
-    final cubit = context.read<AiSettingsCubit>();
-    final confirm = await showDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.7),
-      builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Container(
-            width: 400,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.08),
-                width: 1,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(22),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'DELETE SCENARIO',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Are you sure you want to permanently delete "$name"? This action cannot be undone.',
-                    style:
-                        const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () =>
-                            Navigator.of(dialogContext).pop(false),
-                        child: const Text('CANCEL',
-                            style: TextStyle(fontSize: 11)),
-                      ),
-                      const SizedBox(width: 10),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFDC2626),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: const Text('DELETE',
-                            style: TextStyle(
-                                fontSize: 11, fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    if (confirm == true) {
-      await cubit.deleteScenario();
+    if (question != null && question.isNotEmpty) {
+      final current = cubit.state.draft;
+      if (current != null) {
+        final list = List<String>.from(current.qualifyingQuestions)
+          ..add(question);
+        cubit.updateDraft((c) => c.copyWith(qualifyingQuestions: list));
+      }
     }
   }
 }

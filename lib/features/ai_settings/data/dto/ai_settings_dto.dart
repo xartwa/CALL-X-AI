@@ -98,6 +98,30 @@ class AiAgentProfileDto {
         .map((m) => AiVoiceDto(Map<String, dynamic>.from(m)).toEntity())
         .toList(growable: false);
 
+    final rawEmotions = json['availableEmotions'] ?? json['available_emotions'];
+    final List emotionsJson = rawEmotions is List ? rawEmotions : const [];
+    var emotions = emotionsJson
+        .whereType<Map>()
+        .map((m) => AiVoiceEmotion(
+              id: _string(m['id']),
+              label: _string(m['label']),
+              emoji: _string(m['emoji']),
+            ))
+        .where((e) => e.id.isNotEmpty)
+        .toList(growable: false);
+
+    if (emotions.isEmpty) {
+      emotions = const [
+        AiVoiceEmotion(id: 'neutral', label: 'Neutral', emoji: '😐'),
+        AiVoiceEmotion(id: 'calm', label: 'Calm', emoji: '😌'),
+        AiVoiceEmotion(id: 'content', label: 'Content', emoji: '😊'),
+        AiVoiceEmotion(id: 'excited', label: 'Excited', emoji: '🤩'),
+        AiVoiceEmotion(id: 'sad', label: 'Sad', emoji: '😢'),
+        AiVoiceEmotion(id: 'angry', label: 'Angry', emoji: '😡'),
+        AiVoiceEmotion(id: 'scared', label: 'Scared', emoji: '😨'),
+      ];
+    }
+
     return AiAgentProfile(
       name: _string(json['name'], 'Maria'),
       rolePrompt: _string(
@@ -107,6 +131,10 @@ class AiAgentProfileDto {
       voiceId: _string(
         json['voiceId'] ?? json['voice_id'],
         'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4',
+      ),
+      voiceEmotion: _string(
+        json['voiceEmotion'] ?? json['voice_emotion'],
+        'calm',
       ),
       voiceSpeed: _double(json['voiceSpeed'] ?? json['voice_speed'], 1.05),
       knowledgeText: _string(json['knowledgeText'] ?? json['knowledge_text']),
@@ -118,11 +146,11 @@ class AiAgentProfileDto {
         "Hello! You've reached Dynamica Design & Advertising, this is Maria. How may I help you today?",
       ),
       operatingHoursStart: _string(json['operatingHoursStart'] ?? json['operating_hours_start'], '09:00'),
-
       operatingHoursEnd: _string(json['operatingHoursEnd'] ?? json['operating_hours_end'], '18:00'),
       is247: _bool(json['is247'] ?? json['is_24_7'], true),
       isAiEnabled: _bool(json['isAiEnabled'] ?? json['is_ai_enabled'], true),
       availableVoices: voices,
+      availableEmotions: emotions,
     );
   }
 
@@ -130,6 +158,7 @@ class AiAgentProfileDto {
         'name': profile.name.trim(),
         'rolePrompt': profile.rolePrompt.trim(),
         'voiceId': profile.voiceId,
+        'voiceEmotion': profile.voiceEmotion,
         'voiceSpeed': profile.voiceSpeed,
         'knowledgeText': profile.knowledgeText.trim(),
         'inboundGreeting': profile.inboundGreeting.trim(),
@@ -138,6 +167,7 @@ class AiAgentProfileDto {
         'is247': profile.is247,
         'isAiEnabled': profile.isAiEnabled,
       };
+
 }
 
 String _string(Object? value, [String fallback = '']) {

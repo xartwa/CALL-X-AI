@@ -156,11 +156,19 @@ class AiSettingsRepositoryImpl implements AiSettingsRepository {
   Future<AiAgentProfile> uploadKnowledgePdf({
     required Uint8List bytes,
     required String fileName,
+    void Function(double progress)? onProgress,
   }) =>
       _request(() async {
         final result = await remote.uploadKnowledgePdf(
           bytes: bytes,
           fileName: fileName,
+          onSendProgress: onProgress != null
+              ? (sent, total) {
+                  if (total > 0) {
+                    onProgress(sent / total);
+                  }
+                }
+              : null,
         );
         return AiAgentProfileDto(result).toEntity();
       });
@@ -199,14 +207,17 @@ class AiSettingsRepositoryImpl implements AiSettingsRepository {
     required String voiceId,
     required double speed,
     required String text,
+    String? emotion,
   }) =>
       _request(() async {
         final encoded = await remote.previewVoice({
           'voiceId': voiceId,
           'voiceSpeed': speed,
           'text': text,
+          if (emotion != null && emotion.isNotEmpty) 'voiceEmotion': emotion,
         });
         return base64Decode(encoded);
       });
 }
+
 

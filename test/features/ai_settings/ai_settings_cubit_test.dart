@@ -188,8 +188,11 @@ class _FakeAiSettingsRepository implements AiSettingsRepository {
   Future<AiAgentProfile> uploadKnowledgePdf({
     required Uint8List bytes,
     required String fileName,
-  }) async =>
-      defaultProfile.copyWith(knowledgePdfName: fileName);
+    void Function(double)? onProgress,
+  }) async {
+    onProgress?.call(1.0);
+    return defaultProfile.copyWith(knowledgePdfName: fileName);
+  }
 
   @override
   Future<AiAgentProfile> removeKnowledgePdf() async =>
@@ -209,8 +212,10 @@ class _FakeAiSettingsRepository implements AiSettingsRepository {
     required String voiceId,
     required double speed,
     required String text,
+    String? emotion,
   }) async =>
       Uint8List.fromList([1, 2, 3]);
+
 
   @override
   Future<AiScenario> createScenario(AiScenario scenario) async => scenario;
