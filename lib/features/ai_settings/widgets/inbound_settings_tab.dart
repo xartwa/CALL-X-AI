@@ -122,29 +122,32 @@ class InboundSettingsTab extends StatelessWidget {
                 title: 'OPENING GREETING',
                 subtitle:
                     'The first sentence spoken when a customer calls your company.',
-                headerAction: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                headerAction: SizedBox(
+                  height: 38,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
+                      ),
+                      side: BorderSide(
+                        color: primaryColor.withValues(alpha: 0.5),
+                      ),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     ),
-                    side: BorderSide(
-                      color: primaryColor.withValues(alpha: 0.5),
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  ),
-                  onPressed: state.previewingVoiceId != null
-                      ? null
-                      : () => cubit.previewVoice(profile.voiceId),
-                  icon: state.previewingVoiceId != null
-                      ? const AppLoadingIndicator(size: 13)
-                      : const Icon(CupertinoIcons.play_arrow_solid, size: 13),
-                  label: Text(
-                    state.previewingVoiceId != null ? 'Generating...' : 'Preview',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                    onPressed: state.previewingVoiceId != null
+                        ? null
+                        : () => cubit.previewVoice(profile.voiceId),
+                    icon: state.previewingVoiceId != null
+                        ? const AppLoadingIndicator(size: 13)
+                        : const Icon(CupertinoIcons.play_arrow_solid, size: 13),
+                    label: Text(
+                      state.previewingVoiceId != null ? 'Generating...' : 'Preview',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
