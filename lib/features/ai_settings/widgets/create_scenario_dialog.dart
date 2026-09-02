@@ -210,14 +210,41 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
             // Action Buttons
             Row(
               children: [
-          
                 Expanded(
                   child: SizedBox(
-                    height: 42,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
+                    height: 46,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFCBD5E1),
+                        ),
+                        foregroundColor: isDark ? Colors.white : Colors.black87,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            ThemeConstants.buttonRadius,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 46,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-
                         disabledBackgroundColor: isDark
                             ? Colors.white10
                             : context.colors.lightGreyColor,
@@ -226,14 +253,14 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
                             ThemeConstants.buttonRadius,
                           ),
                         ),
+                        elevation: 0,
                       ),
                       onPressed: _isDirty ? _submit : null,
                       child: const Text(
-                        'CREATE SCENARIO',
+                        'Create scenario',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
                           color: Colors.white,
                         ),
                       ),
@@ -242,6 +269,7 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
                 ),
               ],
             ),
+
           ],
         ),
       ),

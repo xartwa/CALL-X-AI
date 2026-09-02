@@ -47,8 +47,6 @@ class _DashboardView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _DashboardStatusBanner(),
-          SizedBox(height: 16),
-          // 1. Header (Overview + AI Engine Pill + Workspace Settings + Theme Mode)
           DashboardHeader(),
           SizedBox(height: 28),
 
@@ -122,6 +120,7 @@ class _DashboardStatusBanner extends StatelessWidget {
             ? 'Your session has expired. Please sign in again.'
             : 'We could not refresh dashboard data. Check your connection and retry.';
         return Container(
+          margin: EdgeInsets.only(bottom: 20),
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(

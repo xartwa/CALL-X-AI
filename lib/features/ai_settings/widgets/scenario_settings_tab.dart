@@ -2,7 +2,10 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
+import 'package:callx_ai/features/ai_settings/widgets/ai_delete_dialog.dart';
 import 'package:callx_ai/features/ai_settings/widgets/create_scenario_dialog.dart';
+
+
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -206,44 +209,70 @@ class ScenarioSettingsTab extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
+                        SizedBox(
+                          height: 38,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor:
+                                  isDark ? Colors.white : Colors.black87,
+                              side: BorderSide(
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFCBD5E1),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    ThemeConstants.buttonRadius),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 22),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
+                            onPressed: state.isBusy
+                                ? null
+                                : () => _duplicate(context, draft),
+                            child: const Text(
+                              'Duplicate',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                          onPressed: state.isBusy
-                              ? null
-                              : () => _duplicate(context, draft),
-                          child: const Text('Duplicate',
-                              style: TextStyle(fontSize: 12)),
                         ),
-                        const SizedBox(width: 8),
-                        OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.colors.errorColor,
-                            side: BorderSide(
-                              color: context.colors.errorColor
-                                  .withValues(alpha: 0.4),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          height: 38,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFF87171),
+                              backgroundColor: const Color(0xFFF87171)
+                                  .withValues(alpha: 0.06),
+                              side: BorderSide(
+                                color: const Color(0xFFF87171)
+                                    .withValues(alpha: 0.45),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    ThemeConstants.buttonRadius),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 26),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
+                            onPressed: state.isBusy || draft.isDefaultInbound
+                                ? null
+                                : () => _delete(context, draft.name),
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 8),
                           ),
-                          onPressed: state.isBusy || draft.isDefaultInbound
-                              ? null
-                              : () => _delete(context, draft.name),
-                          child: const Text('Delete',
-                              style: TextStyle(fontSize: 12)),
                         ),
                       ],
                     ),
+
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -345,20 +374,41 @@ class ScenarioSettingsTab extends StatelessWidget {
                     SettingsLabel(
                       'QUALIFYING QUESTIONS · ${draft.qualifyingQuestions.length}',
                     ),
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
+                    SizedBox(
+                      height: 38,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.45),
+                          ),
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.08),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                        onPressed: () => _addQuestion(context),
+                        icon: const Icon(CupertinoIcons.plus, size: 14),
+                        label: const Text(
+                          'Add question',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                      onPressed: () => _addQuestion(context),
-                      icon: const Icon(CupertinoIcons.plus, size: 12),
-                      label: const Text('Add question',
-                          style: TextStyle(fontSize: 11)),
                     ),
+
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -436,15 +486,26 @@ class ScenarioSettingsTab extends StatelessWidget {
                               size: 15,
                               color: context.colors.errorColor,
                             ),
-                            onPressed: () {
-                              final list = List<String>.from(
-                                draft.qualifyingQuestions,
-                              )..removeAt(i);
-                              cubit.updateDraft(
-                                (c) => c.copyWith(qualifyingQuestions: list),
+                            onPressed: () async {
+                              final confirm = await AiDeleteDialog.show(
+                                context,
+                                title: 'Delete Question',
+                                message:
+                                    'Are you sure you want to delete this question? This action cannot be undone.',
+                                confirmLabel: 'Delete',
+                                cancelLabel: 'Cancel',
                               );
+                              if (confirm == true && context.mounted) {
+                                final list = List<String>.from(
+                                  draft.qualifyingQuestions,
+                                )..removeAt(i);
+                                cubit.updateDraft(
+                                  (c) => c.copyWith(qualifyingQuestions: list),
+                                );
+                              }
                             },
                           ),
+
                         ],
                       ),
                     ),
@@ -504,30 +565,19 @@ class ScenarioSettingsTab extends StatelessWidget {
 
   Future<void> _delete(BuildContext context, String name) async {
     final cubit = context.read<AiSettingsCubit>();
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Scenario?'),
-        content: Text('Are you sure you want to delete "$name"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('CANCEL'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('DELETE'),
-          ),
-        ],
-      ),
+    final confirm = await AiDeleteDialog.show(
+      context,
+      title: 'Delete Scenario',
+      message:
+          'Are you sure you want to delete "$name"? This action cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
     );
-    if (confirm == true) {
+    if (confirm == true && context.mounted) {
       await cubit.deleteScenario();
     }
   }
+
 
   Future<void> _addQuestion(BuildContext context) async {
     final cubit = context.read<AiSettingsCubit>();
@@ -607,37 +657,65 @@ class ScenarioSettingsTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        child: const Text('CANCEL',
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.white70)),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF334155)),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    ThemeConstants.buttonRadius),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 10),
                         ),
-                        onPressed: () {
-                          if (controller.text.trim().isNotEmpty) {
-                            Navigator.of(dialogContext)
-                                .pop(controller.text.trim());
-                          }
-                        },
-                        child: const Text('ADD QUESTION',
-                            style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    ThemeConstants.buttonRadius),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (controller.text.trim().isNotEmpty) {
+                                Navigator.of(dialogContext)
+                                    .pop(controller.text.trim());
+                              }
+                            },
+                            child: const Text(
+                              'Add question',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
+
                 ],
               ),
             ),

@@ -5,7 +5,10 @@ import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_agent_profile.dart';
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
+import 'package:callx_ai/features/ai_settings/widgets/ai_delete_dialog.dart';
+
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
+
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -420,7 +423,20 @@ class AgentKnowledgeTab extends StatelessWidget {
                               size: 18,
                               color: context.colors.errorColor,
                             ),
-                            onPressed: () => cubit.removeKnowledgePdf(),
+                            onPressed: () async {
+                              final confirm = await AiDeleteDialog.show(
+                                context,
+                                title: 'Delete Document',
+                                message:
+                                    'Are you sure you want to remove the uploaded knowledge document? This action cannot be undone.',
+                                confirmLabel: 'Delete',
+                                cancelLabel: 'Cancel',
+                              );
+                              if (confirm == true) {
+                                await cubit.removeKnowledgePdf();
+                              }
+                            },
+
                           ),
                         ],
                       ),

@@ -96,6 +96,10 @@ class ConfirmationDialog extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: finalIconBgColor,
                   shape: BoxShape.circle,
+                   border: Border.all(
+                    color: finalIconBgColor.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
                 ),
                 child: Icon(
                   icon,
