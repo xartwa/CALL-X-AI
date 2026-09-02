@@ -1,9 +1,23 @@
 import 'dart:typed_data';
 
+import '../entities/ai_agent_profile.dart';
 import '../entities/ai_scenario.dart';
 
 abstract class AiSettingsRepository {
   Future<AiSettingsBundle> loadSettings();
+
+  Future<AiAgentProfile> getAgentProfile();
+
+  Future<AiAgentProfile> updateAgentProfile(AiAgentProfile profile);
+
+  Future<AiAgentProfile> uploadKnowledgePdf({
+    required Uint8List bytes,
+    required String fileName,
+  });
+
+  Future<AiAgentProfile> removeKnowledgePdf();
+
+  Future<bool> toggleAiStatus([bool? explicit]);
 
   Future<AiScenario> createScenario(AiScenario scenario);
 
@@ -17,3 +31,4 @@ abstract class AiSettingsRepository {
     required String text,
   });
 }
+

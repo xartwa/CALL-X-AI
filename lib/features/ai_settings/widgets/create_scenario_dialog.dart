@@ -1,6 +1,4 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
-import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
-import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +6,8 @@ import 'package:flutter/material.dart';
 class CreateScenarioDialog extends StatefulWidget {
   const CreateScenarioDialog({super.key});
 
-  static Future<(String, String)?> show(BuildContext context) =>
-      showDialog<(String, String)>(
+  static Future<Map<String, String>?> show(BuildContext context) =>
+      showDialog<Map<String, String>>(
         barrierDismissible: false,
         context: context,
         builder: (context) => const CreateScenarioDialog(),
@@ -21,31 +19,39 @@ class CreateScenarioDialog extends StatefulWidget {
 
 class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
   late final TextEditingController _nameCtrl;
-  String _selectedCategory = AiSettingsCubit.categories.first;
+  late final TextEditingController _greetingCtrl;
   bool _isDirty = false;
 
   @override
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController();
-    _nameCtrl.addListener(() {
-      final isNotEmpty = _nameCtrl.text.trim().length >= 3;
-      if (isNotEmpty != _isDirty) {
-        setState(() => _isDirty = isNotEmpty);
-      }
-    });
+    _greetingCtrl = TextEditingController(
+      text:
+          'Hi there! This is Skylar from CallX AI. I wanted to quickly follow up on your recent request.',
+    );
+    _nameCtrl.addListener(_onChanged);
+  }
+
+  void _onChanged() {
+    final isNotEmpty = _nameCtrl.text.trim().length >= 3;
+    if (isNotEmpty != _isDirty) {
+      setState(() => _isDirty = isNotEmpty);
+    }
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _greetingCtrl.dispose();
     super.dispose();
   }
 
   void _submit() {
     final name = _nameCtrl.text.trim();
+    final greeting = _greetingCtrl.text.trim();
     if (name.length >= 3) {
-      Navigator.pop(context, (name, _selectedCategory));
+      Navigator.pop(context, {'name': name, 'greeting': greeting});
     }
   }
 
@@ -88,7 +94,7 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
                     ),
                     const SizedBox(width: 10),
                     const Text(
-                      'CREATE AI SCENARIO',
+                      'CREATE OUTBOUND SCENARIO',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -149,7 +155,7 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
                       horizontal: 14,
                       vertical: 12,
                     ),
-                    hintText: 'e.g. Inbound Support & Appointment Triage',
+                    hintText: 'e.g. Cold Lead Outreach & Booking',
                     hintStyle: TextStyle(
                       fontSize: 12.5,
                       color: context.colors.darkGreyColor,
@@ -164,9 +170,9 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
             ),
             const SizedBox(height: 18),
 
-            // Field: Category
+            // Field: Opening Greeting
             Text(
-              'SCENARIO CATEGORY',
+              'OPENING GREETING / HOOK',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -175,14 +181,44 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
               ),
             ),
             const SizedBox(height: 8),
-            AppDropdownWidget<String>(
-              value: _selectedCategory,
-              items: AiSettingsCubit.categories,
-              height: 46,
-              itemBuilder: (category) => category,
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedCategory = val);
-              },
+            Container(
+              height: 70,
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(ThemeConstants.buttonRadius),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white12
+                      : context.colors.lightGreyColor,
+                ),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.black.withValues(alpha: 0.02),
+              ),
+              child: TextField(
+                controller: _greetingCtrl,
+                maxLines: 2,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  hintText: 'The phrase spoken when call connects...',
+                  hintStyle: TextStyle(
+                    fontSize: 12.5,
+                    color: context.colors.darkGreyColor,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+              ),
             ),
             const SizedBox(height: 26),
 
@@ -211,26 +247,24 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
                           color: isDark ? Colors.white70 : Colors.black87,
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Expanded(
-                  flex: 2,
                   child: SizedBox(
                     height: 42,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isDirty
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withValues(alpha: 0.4),
-                        elevation: 0,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+
+                        disabledBackgroundColor: isDark
+                            ? Colors.white10
+                            : context.colors.lightGreyColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
                             ThemeConstants.buttonRadius,
@@ -238,16 +272,12 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
                         ),
                       ),
                       onPressed: _isDirty ? _submit : null,
-                      icon: const Icon(
-                        CupertinoIcons.plus_circle_fill,
-                        size: 15,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
+                      child: const Text(
                         'CREATE SCENARIO',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
                           color: Colors.white,
                         ),
                       ),

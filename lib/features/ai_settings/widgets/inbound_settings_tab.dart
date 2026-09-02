@@ -1,3 +1,5 @@
+import 'package:callx_ai/core/constants/theme_constants.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
 import 'package:callx_ai/theme/app_colors.dart';
@@ -12,111 +14,191 @@ class InboundSettingsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final draft = state.draft!;
-    final cubit = context.read<AiSettingsCubit>();
+    final profile = state.agentDraft;
+    if (profile == null) {
+      return const Center(child: AppLoadingIndicator());
+    }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cubit = context.read<AiSettingsCubit>();
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final cardBgColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
 
     return ListView(
+      padding: const EdgeInsets.only(bottom: 40),
       children: [
         SettingsBanner(
-          icon: draft.isDefaultInbound
+          icon: profile.isAiEnabled
               ? CupertinoIcons.check_mark_circled_solid
-              : CupertinoIcons.phone_arrow_down_left,
-          text: draft.isDefaultInbound
-              ? 'This scenario is currently active for all incoming telephone calls on +1 256-602-2144.'
-              : 'Select this scenario as the default inbound receptionist to answer incoming calls.',
-          warning: !draft.isDefaultInbound,
+              : CupertinoIcons.pause_circle_fill,
+          text: profile.isAiEnabled
+              ? 'Inbound AI Receptionist is ACTIVE on dedicated line +1 256-602-2144. It uses your Global Agent Personality and Knowledge Base.'
+              : 'AI Engine is currently PAUSED. Incoming calls will route directly to the admin phone number.',
+          warning: !profile.isAiEnabled,
         ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Set as Default Inbound Receptionist',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-                ),
-                subtitle: const Text(
-                  'Routes all incoming phone calls on the dedicated Twilio number to this AI persona.',
-                  style: TextStyle(fontSize: 12),
-                ),
-                value: draft.isDefaultInbound,
-                onChanged: draft.isDefaultInbound
-                    ? null
-                    : (value) => cubit.updateDraft(
-                          (current) => current.copyWith(
-                            isDefaultInbound: value,
-                            isActive: value ? true : current.isActive,
-                          ),
+        const SizedBox(height: 24),
+
+        // 1. Inbound Greeting
+        const SettingsLabel('INBOUND OPENING GREETING'),
+        const SizedBox(height: 6),
+        Text(
+          'The first sentence spoken immediately when a customer calls your company phone number.',
+          style: TextStyle(fontSize: 12, color: context.colors.darkGreyColor),
+        ),
+        const SizedBox(height: 10),
+        DraftTextField(
+          value: profile.inboundGreeting,
+          minLines: 2,
+          maxLines: 4,
+          hintText:
+              'e.g. Thank you for calling CallX AI Headquarters. How can I help you today?',
+          onChanged: (value) => cubit.updateAgentDraft(
+            (current) => current.copyWith(inboundGreeting: value),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+        const Divider(height: 1, thickness: 1),
+        const SizedBox(height: 24),
+
+        // 2. Operating Hours & Schedule
+        const SettingsLabel('OPERATING HOURS & AVAILABILITY'),
+        const SizedBox(height: 6),
+        Text(
+          'Configure when the AI answers inbound calls. Outside these hours, calls route to the human admin line.',
+          style: TextStyle(fontSize: 12, color: context.colors.darkGreyColor),
+        ),
+        const SizedBox(height: 16),
+
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: cardBgColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: context.colors.darkGreyColor.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '24/7 Continuous Availability',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
                         ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'AI answers all calls around the clock, every day.',
+                        style: TextStyle(fontSize: 11.5, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  Switch.adaptive(
+                    value: profile.is247,
+                    onChanged: (val) => cubit.updateAgentDraft(
+                      (current) => current.copyWith(is247: val),
+                    ),
+                  ),
+                ],
+              ),
+              if (!profile.is247) ...[
+                const SizedBox(height: 20),
+                const Divider(height: 1, thickness: 1),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SettingsLabel('START TIME (HH:MM)'),
+                          const SizedBox(height: 8),
+                          DraftTextField(
+                            value: profile.operatingHoursStart,
+                            hintText: '09:00',
+                            onChanged: (value) => cubit.updateAgentDraft(
+                              (current) =>
+                                  current.copyWith(operatingHoursStart: value),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SettingsLabel('END TIME (HH:MM)'),
+                          const SizedBox(height: 8),
+                          DraftTextField(
+                            value: profile.operatingHoursEnd,
+                            hintText: '18:00',
+                            onChanged: (value) => cubit.updateAgentDraft(
+                              (current) =>
+                                  current.copyWith(operatingHoursEnd: value),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Outside ${profile.operatingHoursStart} - ${profile.operatingHoursEnd}, callers will be connected to the human office line.',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // 3. Save Button
+        Align(
+          alignment: Alignment.centerRight,
+          child: SizedBox(
+            height: 42,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+              ),
+              onPressed: state.isBusy ? null : () => cubit.saveAgentProfile(),
+              icon: state.isSaving
+                  ? const AppLoadingIndicator(size: 14)
+                  : const Icon(CupertinoIcons.check_mark, size: 16),
+              label: Text(
+                state.isSaving ? 'SAVING...' : 'SAVE INBOUND SETTINGS',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
-          ],
-        ),
-        const Divider(height: 28),
-        const SettingsLabel('INBOUND OPENING GREETING'),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.openingGreeting,
-          minLines: 2,
-          maxLines: 3,
-          hintText:
-              'e.g. Thanks for calling CallX AI! This is Skyler, how can I help you today?',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(openingGreeting: value),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'The first sentence spoken as soon as a customer connects to the AI phone number.',
-          style: TextStyle(fontSize: 11.5, color: context.colors.darkGreyColor),
-        ),
-        const SizedBox(height: 24),
-        const SettingsLabel('INBOUND RECEPTIONIST PERSONALITY & INSTRUCTIONS'),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.personalityPrompt,
-          minLines: 4,
-          maxLines: 8,
-          hintText:
-              'Describe how the AI should introduce itself, actively listen, answer inbound questions, triage calls, and handle customer inquiries...',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(personalityPrompt: value),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Defines the tone, conversational pacing, active backchanneling (e.g. "Mm-hmm", "Totally hear you!"), and customer service guidelines.',
-          style: TextStyle(fontSize: 11.5, color: context.colors.darkGreyColor),
-        ),
-        const SizedBox(height: 24),
-        const SettingsLabel('INBOUND BUSINESS OBJECTIVE & COMPANY KNOWLEDGE'),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.pitchSummary,
-          minLines: 3,
-          maxLines: 6,
-          hintText:
-              'Explain what services or products the company provides, key FAQ answers, and desired call conclusion...',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(pitchSummary: value),
-          ),
-        ),
-        const SizedBox(height: 24),
-        const SettingsLabel('DESIRED ACTION WHEN CALLER IS INTERESTED'),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.actionOnInterest,
-          hintText:
-              'e.g. Confirm caller phone/email and schedule a demo appointment',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(actionOnInterest: value),
-          ),
-        ),
-        const SizedBox(height: 28),
       ],
     );
   }
 }
-

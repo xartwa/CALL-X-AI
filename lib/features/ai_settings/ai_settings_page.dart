@@ -5,14 +5,12 @@ import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
+import 'package:callx_ai/features/ai_settings/widgets/agent_knowledge_tab.dart';
 import 'package:callx_ai/features/ai_settings/widgets/ai_settings_headers.dart';
 import 'package:callx_ai/features/ai_settings/widgets/create_scenario_dialog.dart';
 import 'package:callx_ai/features/ai_settings/widgets/inbound_settings_tab.dart';
 import 'package:callx_ai/features/ai_settings/widgets/scenario_settings_tab.dart';
-import 'package:callx_ai/features/ai_settings/widgets/voice_settings_tab.dart';
 import 'package:callx_ai/theme/app_colors.dart';
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,7 +39,6 @@ class _AiSettingsPageState extends State<AiSettingsPage>
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -84,10 +81,10 @@ class _AiSettingsPageState extends State<AiSettingsPage>
               onRetry: context.read<AiSettingsCubit>().load,
             );
           }
-          if (state.draft == null) {
+          if (state.agentDraft == null) {
             return const AppEmptyView(
-              title: 'No AI scenarios found',
-              description: 'Create a scenario in the Backend to get started.',
+              title: 'No AI configuration found',
+              description: 'Setting up default AI configuration...',
               icon: CupertinoIcons.waveform,
             );
           }
@@ -98,22 +95,28 @@ class _AiSettingsPageState extends State<AiSettingsPage>
   Widget _content(BuildContext context, AiSettingsState state) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cubit = context.read<AiSettingsCubit>();
-    final inbound = state.scenarios
-        .where((scenario) => scenario.isDefaultInbound)
-        .firstOrNull;
+    final profile = state.agentDraft;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Stat Cards Row matching EmailFollowUpsPage
+        // Stat Cards Row
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               StatCardWidget(
-                label: 'ACTIVE SCENARIOS',
+                label: 'GLOBAL VOICE',
+                value: state.selectedVoice?.name ?? 'Skylar',
+                icon: CupertinoIcons.mic_circle_fill,
+                iconColor: const Color(0xFF10B981),
+                iconBgColor: const Color(0xFF10B981).withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 14),
+              StatCardWidget(
+                label: 'OUTBOUND SCENARIOS',
                 value:
-                    '${state.scenarios.where((item) => item.isActive).length}',
+                    '${state.scenarios.where((item) => item.isActive).length} Active',
                 icon: CupertinoIcons.waveform,
                 iconColor: context.colors.primaryLightColor,
                 iconBgColor:
@@ -121,50 +124,58 @@ class _AiSettingsPageState extends State<AiSettingsPage>
               ),
               const SizedBox(width: 14),
               StatCardWidget(
-                label: 'SELECTED VOICE',
-                value: state.selectedVoice?.name ?? 'Not selected',
-                icon: CupertinoIcons.mic_circle_fill,
-                iconColor: const Color(0xFF10B981),
-                iconBgColor: const Color(0xFF10B981).withValues(alpha: 0.1),
-              ),
-              const SizedBox(width: 14),
-              StatCardWidget(
-                label: 'INBOUND AI',
-                value: inbound?.name ?? 'Not configured',
+                label: 'INBOUND STATUS',
+                value: profile?.isAiEnabled == true
+                    ? (profile?.is247 == true ? '24/7 Online' : '${profile?.operatingHoursStart}-${profile?.operatingHoursEnd}')
+                    : 'Paused',
                 icon: CupertinoIcons.phone_arrow_down_left,
-                iconColor: context.colors.warningColor,
-                iconBgColor: context.colors.warningColor.withValues(alpha: 0.1),
+                iconColor: profile?.isAiEnabled == true
+                    ? const Color(0xFF10B981)
+                    : context.colors.warningColor,
+                iconBgColor: (profile?.isAiEnabled == true
+                        ? const Color(0xFF10B981)
+                        : context.colors.warningColor)
+                    .withValues(alpha: 0.1),
               ),
               const SizedBox(width: 14),
               StatCardWidget(
-                label: 'VOICE ENGINE',
-                value:
-                    state.config?.isConfigured == true ? 'Online' : 'Offline',
-                icon: CupertinoIcons.cloud_fill,
-                iconColor: state.config?.isConfigured == true
-                    ? const Color(0xFF10B981)
-                    : AppColors.errorColor,
-                iconBgColor: (state.config?.isConfigured == true
-                        ? const Color(0xFF10B981)
-                        : AppColors.errorColor)
-                    .withValues(alpha: 0.1),
+                label: 'KNOWLEDGE BASE',
+                value: profile?.knowledgePdfName != null &&
+                        profile!.knowledgePdfName!.isNotEmpty
+                    ? 'PDF Document'
+                    : (profile?.knowledgeText.isNotEmpty == true
+                        ? 'Custom Text'
+                        : 'Default'),
+                icon: CupertinoIcons.doc_text_fill,
+                iconColor: const Color(0xFF6366F1),
+                iconBgColor: const Color(0xFF6366F1).withValues(alpha: 0.1),
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
 
-        // Headers / Action Toolbar matching EmailFollowUpsPage
+        // Headers / Action Toolbar
         AiSettingsHeaders(
-          hasUnsavedChanges: state.hasUnsavedChanges,
+          hasUnsavedChanges:
+              state.hasUnsavedChanges || state.hasAgentUnsavedChanges,
           isSaving: state.isSaving,
           isConfigured: state.config?.isConfigured == true,
           engineLabel: [
-            state.config?.defaultModel ?? '',
-            state.config?.transport ?? '',
+            state.config?.defaultModel ?? 'Sonic 3.5',
+            state.config?.transport ?? 'Cartesia Line',
           ].where((item) => item.isNotEmpty).join(' • '),
-          onSave: cubit.save,
-          onReset: cubit.resetDraft,
+          onSave: () async {
+            if (state.hasAgentUnsavedChanges) {
+              await cubit.saveAgentProfile();
+            }
+            if (state.hasUnsavedChanges) {
+              await cubit.saveDraft();
+            }
+          },
+          onReset: () {
+            cubit.load();
+          },
           onRefresh: cubit.load,
           onNewScenario: () => _showCreateScenarioDialog(context),
         ),
@@ -208,18 +219,19 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                           Tab(
                             child: Row(
                               children: [
-                                Icon(CupertinoIcons.mic_circle_fill, size: 14),
-                                SizedBox(width: 6),
-                                Text('VOICE & PERSONALITY'),
+                                Icon(CupertinoIcons.person_crop_circle_fill,
+                                    size: 15),
+                                SizedBox(width: 8),
+                                Text('AGENT & KNOWLEDGE'),
                               ],
                             ),
                           ),
                           Tab(
                             child: Row(
                               children: [
-                                Icon(CupertinoIcons.waveform, size: 14),
-                                SizedBox(width: 6),
-                                Text('SCENARIO & CONVERSATION'),
+                                Icon(CupertinoIcons.waveform, size: 15),
+                                SizedBox(width: 8),
+                                Text('OUTBOUND SCENARIOS'),
                               ],
                             ),
                           ),
@@ -227,9 +239,9 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                             child: Row(
                               children: [
                                 Icon(CupertinoIcons.phone_arrow_down_left,
-                                    size: 14),
-                                SizedBox(width: 6),
-                                Text('INBOUND RECEPTION'),
+                                    size: 15),
+                                SizedBox(width: 8),
+                                Text('INBOUND & HOURS'),
                               ],
                             ),
                           ),
@@ -248,7 +260,7 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                     child: TabBarView(
                       controller: _tabs,
                       children: [
-                        VoiceSettingsTab(state: state),
+                        AgentKnowledgeTab(state: state),
                         ScenarioSettingsTab(state: state),
                         InboundSettingsTab(state: state),
                       ],
@@ -266,18 +278,23 @@ class _AiSettingsPageState extends State<AiSettingsPage>
   Future<void> _showCreateScenarioDialog(BuildContext context) async {
     final result = await CreateScenarioDialog.show(context);
     if (result != null && context.mounted) {
-      await context
-          .read<AiSettingsCubit>()
-          .createScenario(result.$1, result.$2);
+      final name = result['name'] ?? '';
+      final greeting = result['greeting'] ?? '';
+      final defaultVoiceId = context
+              .read<AiSettingsCubit>()
+              .state
+              .agentDraft
+              ?.voiceId ??
+          'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4';
+      await context.read<AiSettingsCubit>().createScenario(
+            name,
+            'Sales & Outreach',
+            greeting,
+            'Engage prospective customers, introduce services, and qualify needs.',
+            defaultVoiceId,
+          );
     }
   }
 }
 
-
-extension<T> on Iterable<T> {
-  T? get firstOrNull {
-    final value = iterator;
-    return value.moveNext() ? value.current : null;
-  }
-}
 

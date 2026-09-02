@@ -1,6 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../domain/entities/ai_agent_profile.dart';
 import '../domain/entities/ai_scenario.dart';
 import '../domain/repositories/ai_settings_repository.dart';
 import 'ai_settings_state.dart';
@@ -42,6 +44,8 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
         scenarios: bundle.scenarios,
         savedScenario: selected,
         draft: selected?.copyWith(),
+        agentProfile: bundle.profile,
+        agentDraft: bundle.profile?.copyWith(),
       ));
     } on AppException catch (error) {
       emit(state.copyWith(
@@ -55,6 +59,7 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
       ));
     }
   }
+
 
 
   AiScenario? _preferredScenario(List<AiScenario> scenarios) {
@@ -143,24 +148,39 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
     }
   }
 
-  Future<void> createScenario(String name, String category) async {
+  Future<void> saveDraft() => save();
+
+  Future<void> createScenario(
+    String name, [
+    String category = 'Sales & Outreach',
+    String? greeting,
+    String? pitch,
+    String? voiceId,
+  ]) async {
     if (state.isBusy || name.trim().length < 3) return;
-    final voiceId = state.config?.defaultVoice.isNotEmpty == true
-        ? state.config!.defaultVoice
-        : (state.voices.isNotEmpty ? state.voices.first.id : '');
+    final effectiveVoiceId = (voiceId != null && voiceId.isNotEmpty)
+        ? voiceId
+        : (state.agentDraft?.voiceId.isNotEmpty == true
+            ? state.agentDraft!.voiceId
+            : (state.config?.defaultVoice.isNotEmpty == true
+                ? state.config!.defaultVoice
+                : (state.voices.isNotEmpty ? state.voices.first.id : 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4')));
     final scenario = AiScenario(
       id: 'scenario-${DateTime.now().microsecondsSinceEpoch}',
       name: name.trim(),
       category: category,
-      openingGreeting: 'Hi {name}, this is Skyler. Is now a good time to talk?',
-      pitchSummary:
-          'Understand the caller\'s needs and offer the next helpful step.',
+      openingGreeting: greeting?.trim().isNotEmpty == true
+          ? greeting!.trim()
+          : 'Hi {name}, this is Skylar. Is now a good time to talk?',
+      pitchSummary: pitch?.trim().isNotEmpty == true
+          ? pitch!.trim()
+          : 'Understand the caller\'s needs and offer the next helpful step.',
       personalityPrompt:
           'Be warm, concise, attentive, and natural. Listen fully before responding.',
       qualifyingQuestions: const [],
       actionOnInterest: 'Offer a discovery appointment',
-      voiceId: voiceId,
-      voiceSpeed: 1.0,
+      voiceId: effectiveVoiceId,
+      voiceSpeed: 1.05,
       voiceTone: tones.first,
       isActive: true,
       isDefaultInbound: false,
@@ -224,23 +244,26 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
     }
   }
 
-  Future<void> previewVoice(String voiceId) async {
-    final draft = state.draft;
-    if (draft == null || voiceId.isEmpty || state.previewingVoiceId != null) {
-      return;
-    }
+  Future<void> deleteScenario() => deleteSelected();
+
+
+  Future<void> previewVoice(String? explicitVoiceId) async {
+    final voiceId = explicitVoiceId ?? state.agentDraft?.voiceId ?? state.draft?.voiceId;
+    if (voiceId == null || state.previewingVoiceId != null) return;
     emit(state.copyWith(
       previewingVoiceId: voiceId,
       clearPreviewAudio: true,
       clearError: true,
     ));
     try {
+      final sampleText = state.agentDraft?.inboundGreeting.isNotEmpty == true
+          ? state.agentDraft!.inboundGreeting
+          : 'Hi, this is Skylar. How can I help you today?';
+      final speed = state.agentDraft?.voiceSpeed ?? state.draft?.voiceSpeed ?? 1.05;
       final audio = await repository.previewVoice(
         voiceId: voiceId,
-        speed: draft.voiceSpeed,
-        text: draft.openingGreeting.isEmpty
-            ? 'Hi, this is Skyler. How can I help you today?'
-            : draft.openingGreeting.replaceAll('{name}', 'there'),
+        speed: speed,
+        text: sampleText.replaceAll('{name}', 'there'),
       );
       emit(state.copyWith(
         previewAudio: audio,
@@ -256,6 +279,118 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
       ));
     }
   }
+
+  void updateAgentDraft(AiAgentProfile Function(AiAgentProfile current) update) {
+    final current = state.agentDraft;
+    if (current == null || state.isBusy) return;
+    emit(state.copyWith(agentDraft: update(current), clearFeedback: true));
+  }
+
+  Future<bool> saveAgentProfile() async {
+    final draft = state.agentDraft;
+    if (draft == null || state.isBusy) return false;
+    emit(state.copyWith(isSaving: true, clearError: true, clearFeedback: true));
+    try {
+      final updated = await repository.updateAgentProfile(draft);
+      emit(state.copyWith(
+        isSaving: false,
+        agentProfile: updated,
+        agentDraft: updated.copyWith(),
+        feedbackMessage: 'AI Agent settings saved successfully.',
+        feedbackRevision: state.feedbackRevision + 1,
+      ));
+      return true;
+    } on AppException catch (error) {
+      emit(state.copyWith(isSaving: false, errorMessage: _message(error)));
+      return false;
+    } catch (_) {
+      emit(state.copyWith(
+        isSaving: false,
+        errorMessage: 'Failed to save AI Agent settings.',
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> uploadKnowledgePdf(Uint8List bytes, String fileName) async {
+    if (state.isBusy) return false;
+    emit(state.copyWith(
+      isUploadingPdf: true,
+      clearError: true,
+      clearFeedback: true,
+    ));
+    try {
+      final updated = await repository.uploadKnowledgePdf(
+        bytes: bytes,
+        fileName: fileName,
+      );
+      emit(state.copyWith(
+        isUploadingPdf: false,
+        agentProfile: updated,
+        agentDraft: updated.copyWith(),
+        feedbackMessage: 'Knowledge PDF processed successfully.',
+        feedbackRevision: state.feedbackRevision + 1,
+      ));
+      return true;
+    } on AppException catch (error) {
+      emit(state.copyWith(isUploadingPdf: false, errorMessage: _message(error)));
+      return false;
+    } catch (_) {
+      emit(state.copyWith(
+        isUploadingPdf: false,
+        errorMessage: 'Failed to upload knowledge PDF.',
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> removeKnowledgePdf() async {
+    if (state.isBusy) return false;
+    emit(state.copyWith(
+      isSaving: true,
+      clearError: true,
+      clearFeedback: true,
+    ));
+    try {
+      final updated = await repository.removeKnowledgePdf();
+      emit(state.copyWith(
+        isSaving: false,
+        agentProfile: updated,
+        agentDraft: updated.copyWith(),
+        feedbackMessage: 'Knowledge document removed.',
+        feedbackRevision: state.feedbackRevision + 1,
+      ));
+      return true;
+    } on AppException catch (error) {
+      emit(state.copyWith(isSaving: false, errorMessage: _message(error)));
+      return false;
+    } catch (_) {
+      emit(state.copyWith(
+        isSaving: false,
+        errorMessage: 'Failed to remove document.',
+      ));
+      return false;
+    }
+  }
+
+  Future<bool> toggleAiStatus([bool? explicit]) async {
+    try {
+      final newState = await repository.toggleAiStatus(explicit);
+      if (state.agentProfile != null) {
+        final updatedProfile =
+            state.agentProfile!.copyWith(isAiEnabled: newState);
+        emit(state.copyWith(
+          agentProfile: updatedProfile,
+          agentDraft:
+              (state.agentDraft ?? updatedProfile).copyWith(isAiEnabled: newState),
+        ));
+      }
+      return newState;
+    } catch (_) {
+      return state.agentProfile?.isAiEnabled ?? true;
+    }
+  }
+
 
   void _feedback(String message) {
     emit(state.copyWith(

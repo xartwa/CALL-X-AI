@@ -1,12 +1,11 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
+import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
 import 'package:callx_ai/features/ai_settings/widgets/create_scenario_dialog.dart';
 import 'package:callx_ai/features/ai_settings/widgets/settings_form_widgets.dart';
 import 'package:callx_ai/theme/app_colors.dart';
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,18 +17,27 @@ class ScenarioSettingsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final draft = state.draft!;
+    final draft = state.draft;
+    if (draft == null) {
+      return const Center(child: Text('No scenario selected.'));
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cubit = context.read<AiSettingsCubit>();
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final cardBgColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+
     return ListView(
+      padding: const EdgeInsets.only(bottom: 40),
       children: [
+        // 1. Scenario Selector & Actions
         Row(
           children: [
             Expanded(
               child: AppDropdownWidget<AiScenario>(
                 value: state.savedScenario,
                 items: state.scenarios,
-                itemBuilder: (scenario) =>
-                    '${scenario.name} (${scenario.category})',
+                itemBuilder: (scenario) => scenario.name,
                 onChanged: state.hasUnsavedChanges
                     ? null
                     : (scenario) {
@@ -49,7 +57,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                 ),
                 onPressed: state.isBusy ? null : () => _create(context),
                 icon: const Icon(CupertinoIcons.plus, size: 14),
-                label: const Text('NEW'),
+                label: const Text('NEW SCENARIO'),
               ),
             ),
             const SizedBox(width: 8),
@@ -57,6 +65,10 @@ class ScenarioSettingsTab extends StatelessWidget {
               height: 36,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
+                  foregroundColor: context.colors.errorColor,
+                  side: BorderSide(
+                    color: context.colors.errorColor.withValues(alpha: 0.4),
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.circular(ThemeConstants.buttonRadius),
@@ -69,7 +81,6 @@ class ScenarioSettingsTab extends StatelessWidget {
                 label: const Text('DELETE'),
               ),
             ),
-
           ],
         ),
         if (state.hasUnsavedChanges) ...[
@@ -80,12 +91,14 @@ class ScenarioSettingsTab extends StatelessWidget {
                 TextStyle(fontSize: 11.5, color: context.colors.warningColor),
           ),
         ],
-        const SizedBox(height: 28),
+
+        const SizedBox(height: 26),
+
+        // 2. Scenario Name & Active Switch
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -93,6 +106,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                   const SizedBox(height: 8),
                   DraftTextField(
                     value: draft.name,
+                    hintText: 'e.g. Website Inquiry Follow-Up',
                     onChanged: (value) => cubit.updateDraft(
                       (current) => current.copyWith(name: value),
                     ),
@@ -100,34 +114,12 @@ class ScenarioSettingsTab extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 18),
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SettingsLabel('CATEGORY'),
-                  const SizedBox(height: 8),
-                  AppDropdownWidget<String>(
-                    value: draft.category,
-                    items: AiSettingsCubit.categories,
-                    itemBuilder: (item) => item,
-                    onChanged: (value) {
-                      if (value != null) {
-                        cubit.updateDraft(
-                          (current) => current.copyWith(category: value),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 18),
+            const SizedBox(width: 20),
             Column(
               children: [
                 const SettingsLabel('ACTIVE'),
-                Switch(
+                const SizedBox(height: 4),
+                Switch.adaptive(
                   value: draft.isActive,
                   onChanged: draft.isDefaultInbound
                       ? null
@@ -139,37 +131,49 @@ class ScenarioSettingsTab extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 26),
-        const SettingsLabel('OPENING GREETING'),
+
+        const SizedBox(height: 24),
+
+        // 3. Opening Hook / Greeting
+        const SettingsLabel('OPENING GREETING & HOOK'),
+        const SizedBox(height: 6),
+        Text(
+          'The first sentence the AI speaks as soon as the recipient answers this outbound call.',
+          style: TextStyle(fontSize: 12, color: context.colors.darkGreyColor),
+        ),
         const SizedBox(height: 8),
         DraftTextField(
           value: draft.openingGreeting,
           minLines: 2,
-          maxLines: 3,
-          hintText: 'The first sentence spoken when the call connects...',
+          maxLines: 4,
+          hintText:
+              'e.g. Hi there! This is Skylar from CallX AI. I noticed you checked out our service yesterday...',
           onChanged: (value) => cubit.updateDraft(
             (current) => current.copyWith(openingGreeting: value),
           ),
         ),
-        const SizedBox(height: 26),
-        const SettingsLabel('BUSINESS OBJECTIVE & KNOWLEDGE'),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.pitchSummary,
-          minLines: 3,
-          maxLines: 6,
-          hintText:
-              'Describe the offer, facts the AI can use, and the desired outcome...',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(pitchSummary: value),
-          ),
-        ),
-        const SizedBox(height: 26),
+
+        const SizedBox(height: 28),
+
+        // 4. Qualifying Questions List
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SettingsLabel(
-              'QUALIFYING QUESTIONS (${draft.qualifyingQuestions.length})',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SettingsLabel(
+                  'QUALIFYING QUESTIONS (${draft.qualifyingQuestions.length})',
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Questions the AI will naturally ask during the conversation.',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: context.colors.darkGreyColor,
+                  ),
+                ),
+              ],
             ),
             TextButton.icon(
               onPressed: draft.qualifyingQuestions.length >= 20
@@ -180,363 +184,371 @@ class ScenarioSettingsTab extends StatelessWidget {
             ),
           ],
         ),
-        ...draft.qualifyingQuestions.asMap().entries.map(
-              (entry) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: .04),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      '${entry.key + 1}.',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
+        const SizedBox(height: 12),
+
+        if (draft.qualifyingQuestions.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardBgColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: context.colors.darkGreyColor.withValues(alpha: 0.15),
+              ),
+            ),
+            child: Text(
+              'No qualifying questions added. Click "+ ADD QUESTION" to specify what information the AI should collect.',
+              style: TextStyle(
+                fontSize: 12,
+                color: context.colors.darkGreyColor,
+              ),
+            ),
+          )
+        else
+          ...draft.qualifyingQuestions.asMap().entries.map(
+                (entry) => Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cardBgColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color:
+                          context.colors.darkGreyColor.withValues(alpha: 0.15),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        entry.value,
-                        style: const TextStyle(fontSize: 12.5),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Remove question',
-                      icon: const Icon(CupertinoIcons.delete, size: 15),
-                      onPressed: () {
-                        final questions = List<String>.from(
-                          draft.qualifyingQuestions,
-                        )..removeAt(entry.key);
-                        cubit.updateDraft(
-                          (current) => current.copyWith(
-                            qualifyingQuestions: questions,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 22,
+                        height: 22,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: primaryColor.withValues(alpha: 0.12),
+                        ),
+                        child: Text(
+                          '${entry.key + 1}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: primaryColor,
                           ),
-                        );
-                      },
-                    ),
-                  ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          entry.value,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Remove question',
+                        icon: const Icon(CupertinoIcons.trash, size: 15),
+                        onPressed: () {
+                          final questions = List<String>.from(
+                            draft.qualifyingQuestions,
+                          )..removeAt(entry.key);
+                          cubit.updateDraft(
+                            (current) => current.copyWith(
+                              qualifyingQuestions: questions,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+        const SizedBox(height: 32),
+
+        // 5. Action Buttons (Save & Reset)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (state.hasUnsavedChanges) ...[
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                ),
+                onPressed: state.isBusy ? null : () => cubit.resetDraft(),
+                child: const Text('RESET', style: TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 12),
+            ],
+            SizedBox(
+              height: 42,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                ),
+                onPressed: state.isBusy ? null : () => cubit.saveDraft(),
+                icon: state.isSaving
+                    ? const AppLoadingIndicator(size: 14)
+                    : const Icon(CupertinoIcons.check_mark, size: 16),
+                label: Text(
+                  state.isSaving ? 'SAVING...' : 'SAVE SCENARIO',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ),
-        const SizedBox(height: 22),
-        const SettingsLabel('ACTION WHEN INTERESTED'),
-        const SizedBox(height: 8),
-        DraftTextField(
-          value: draft.actionOnInterest,
-          hintText: 'e.g. Offer an appointment and confirm contact details',
-          onChanged: (value) => cubit.updateDraft(
-            (current) => current.copyWith(actionOnInterest: value),
-          ),
+          ],
         ),
       ],
     );
   }
 
   Future<void> _create(BuildContext context) async {
+    final cubit = context.read<AiSettingsCubit>();
     final result = await CreateScenarioDialog.show(context);
-    if (result != null && context.mounted) {
-      await context
-          .read<AiSettingsCubit>()
-          .createScenario(result.$1, result.$2);
+    if (result != null) {
+      final name = result['name'] ?? '';
+      final greeting = result['greeting'] ?? '';
+      final defaultVoiceId = cubit.state.agentDraft?.voiceId ??
+          'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4';
+      await cubit.createScenario(
+        name,
+        'Sales & Outreach',
+        greeting,
+        'Engage prospective customers, introduce services, and qualify needs.',
+        defaultVoiceId,
+      );
     }
   }
 
   Future<void> _addQuestion(BuildContext context) async {
+    final cubit = context.read<AiSettingsCubit>();
     final controller = TextEditingController();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final result = await showDialog<String>(
-      barrierDismissible: false,
+    final question = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-        ),
-        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-        child: Container(
-          width: 480,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: 440,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'ADD QUALIFYING QUESTION',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    splashRadius: 18,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(CupertinoIcons.clear, size: 16),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'QUESTION TEXT',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
-                  color: isDark ? Colors.grey[400] : Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(ThemeConstants.buttonRadius),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white12
-                        : context.colors.lightGreyColor,
-                  ),
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.03)
-                      : Colors.black.withValues(alpha: 0.02),
-                ),
-                child: TextField(
-                  controller: controller,
-                  autofocus: true,
-                  maxLines: 3,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(14),
-                    hintText:
-                        'e.g. How many service calls does your team handle per week?',
-                    hintStyle: TextStyle(
-                      fontSize: 12.5,
-                      color: context.colors.darkGreyColor,
-                    ),
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius,
-                            ),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(dialogContext),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'ADD QUALIFYING QUESTION',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                          color: Colors.white,
                         ),
                       ),
+                      IconButton(
+                        icon: const Icon(CupertinoIcons.clear,
+                            size: 18, color: Colors.white70),
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        width: 1,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: TextField(
+                      controller: controller,
+                      autofocus: true,
+                      style: const TextStyle(fontSize: 13, color: Colors.white),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'e.g. What is your estimated monthly budget?',
+                        hintStyle: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      onSubmitted: (val) {
+                        final text = val.trim();
+                        if (text.isNotEmpty) {
+                          Navigator.of(dialogContext).pop(text);
+                        }
+                      },
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: SizedBox(
-                      height: 42,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          elevation: 0,
+                  const SizedBox(height: 22),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white70,
+                          side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.15),
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius,
-                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        child: const Text('CANCEL',
+                            style: TextStyle(fontSize: 11)),
+                      ),
+                      const SizedBox(width: 10),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF4F46E5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         onPressed: () {
                           final text = controller.text.trim();
                           if (text.isNotEmpty) {
-                            Navigator.pop(dialogContext, text);
+                            Navigator.of(dialogContext).pop(text);
                           }
                         },
-                        icon: const Icon(
-                          CupertinoIcons.plus_circle_fill,
-                          size: 15,
-                          color: Colors.white,
-                        ),
-                        label: const Text(
-                          'ADD QUESTION',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: const Text('ADD QUESTION',
+                            style: TextStyle(
+                                fontSize: 11, fontWeight: FontWeight.w700)),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-    controller.dispose();
-    if (result != null && result.isNotEmpty && context.mounted) {
-      context.read<AiSettingsCubit>().updateDraft(
-            (current) => current.copyWith(
-              qualifyingQuestions: [...current.qualifyingQuestions, result],
             ),
-          );
+          ),
+        );
+      },
+    );
+    if (question != null && question.trim().isNotEmpty) {
+      final currentQuestions = cubit.state.draft?.qualifyingQuestions ?? [];
+      cubit.updateDraft(
+        (current) => current.copyWith(
+          qualifyingQuestions: [...currentQuestions, question.trim()],
+        ),
+      );
     }
   }
 
   Future<void> _delete(BuildContext context, String name) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final confirmed = await showDialog<bool>(
+    final cubit = context.read<AiSettingsCubit>();
+    final confirm = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-        ),
-        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-        child: Container(
-          width: 440,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: 400,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text(
+                    'DELETE SCENARIO',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Are you sure you want to permanently delete "$name"? This action cannot be undone.',
+                    style:
+                        const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                  ),
+                  const SizedBox(height: 22),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color:
-                              AppColors.errorColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white70,
+                          side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.15),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        child: const Icon(
-                          CupertinoIcons.trash_fill,
-                          size: 16,
-                          color: AppColors.errorColor,
-                        ),
+                        onPressed: () =>
+                            Navigator.of(dialogContext).pop(false),
+                        child: const Text('CANCEL',
+                            style: TextStyle(fontSize: 11)),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'DELETE SCENARIO',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFDC2626),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text('DELETE',
+                            style: TextStyle(
+                                fontSize: 11, fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(dialogContext, false),
-                    splashRadius: 18,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(CupertinoIcons.clear, size: 16),
-                  ),
                 ],
               ),
-              const SizedBox(height: 18),
-              Text(
-                'Are you sure you want to permanently delete "$name"? This action cannot be undone.',
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.5,
-                  color: isDark ? Colors.grey[300] : Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius,
-                            ),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(dialogContext, false),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.errorColor,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius,
-                            ),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(dialogContext, true),
-                        child: const Text(
-                          'DELETE',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
-    if (confirmed == true && context.mounted) {
-      await context.read<AiSettingsCubit>().deleteSelected();
+    if (confirm == true) {
+      await cubit.deleteScenario();
     }
   }
-
 }

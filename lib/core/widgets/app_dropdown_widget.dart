@@ -64,7 +64,8 @@ class AppDropdownWidget<T> extends StatelessWidget {
                         ),
                 ))
             .toList(),
-        value: value,
+        value: (value != null && items.contains(value)) ? value : null,
+
         onChanged: onChanged,
         buttonStyleData: ButtonStyleData(
           padding: const EdgeInsets.symmetric(horizontal: 14),

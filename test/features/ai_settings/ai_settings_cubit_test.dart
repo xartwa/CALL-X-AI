@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
+import 'package:callx_ai/features/ai_settings/domain/entities/ai_agent_profile.dart';
 import 'package:callx_ai/features/ai_settings/domain/entities/ai_scenario.dart';
+
 import 'package:callx_ai/features/ai_settings/domain/repositories/ai_settings_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,8 +58,53 @@ void main() {
       expect(cubit.state.previewRevision, 1);
       expect(cubit.state.previewingVoiceId, isNull);
     });
+
+    test('updates and saves agent profile successfully', () async {
+      await cubit.load();
+      expect(cubit.state.agentProfile?.name, 'CallX Assistant');
+
+      cubit.updateAgentDraft(
+        (current) => current.copyWith(
+          rolePrompt: 'You are Nova, luxury receptionist.',
+          knowledgeText: 'We build high-end AI assistants.',
+          is247: false,
+        ),
+      );
+
+      expect(cubit.state.hasAgentUnsavedChanges, isTrue);
+      final saved = await cubit.saveAgentProfile();
+
+      expect(saved, isTrue);
+      expect(cubit.state.agentProfile?.rolePrompt,
+          'You are Nova, luxury receptionist.');
+      expect(cubit.state.hasAgentUnsavedChanges, isFalse);
+    });
+
+    test('uploads and removes knowledge PDF', () async {
+      await cubit.load();
+      final uploaded = await cubit.uploadKnowledgePdf(
+        Uint8List.fromList([1, 2, 3, 4]),
+        'company_handbook.pdf',
+      );
+
+      expect(uploaded, isTrue);
+      expect(cubit.state.agentProfile?.knowledgePdfName,
+          'company_handbook.pdf');
+
+      final removed = await cubit.removeKnowledgePdf();
+      expect(removed, isTrue);
+      expect(cubit.state.agentProfile?.knowledgePdfName, '');
+    });
+
+    test('toggles AI live status', () async {
+      await cubit.load();
+      final status = await cubit.toggleAiStatus(false);
+      expect(status, isFalse);
+      expect(cubit.state.agentProfile?.isAiEnabled, isFalse);
+    });
   });
 }
+
 
 class _FakeAiSettingsRepository implements AiSettingsRepository {
   AiScenario? updated;
@@ -112,7 +159,44 @@ class _FakeAiSettingsRepository implements AiSettingsRepository {
         ),
         voices: voices,
         scenarios: [inbound],
+        profile: defaultProfile,
       );
+
+  static const defaultProfile = AiAgentProfile(
+    name: 'CallX Assistant',
+    rolePrompt: 'You are a polite, helpful receptionist.',
+    voiceId: 'voice-skyler',
+    voiceSpeed: 1.05,
+    knowledgeText: 'CallX AI builds custom voice solutions.',
+    knowledgeExtracted: '',
+    inboundGreeting: 'Thank you for calling CallX AI Headquarters.',
+    operatingHoursStart: '09:00',
+    operatingHoursEnd: '18:00',
+    is247: true,
+
+    isAiEnabled: true,
+  );
+
+  @override
+  Future<AiAgentProfile> getAgentProfile() async => defaultProfile;
+
+  @override
+  Future<AiAgentProfile> updateAgentProfile(AiAgentProfile profile) async =>
+      profile;
+
+  @override
+  Future<AiAgentProfile> uploadKnowledgePdf({
+    required Uint8List bytes,
+    required String fileName,
+  }) async =>
+      defaultProfile.copyWith(knowledgePdfName: fileName);
+
+  @override
+  Future<AiAgentProfile> removeKnowledgePdf() async =>
+      defaultProfile.copyWith(knowledgePdfName: '');
+
+  @override
+  Future<bool> toggleAiStatus([bool? explicit]) async => explicit ?? false;
 
   @override
   Future<AiScenario> updateScenario(AiScenario scenario) async {
@@ -134,3 +218,4 @@ class _FakeAiSettingsRepository implements AiSettingsRepository {
   @override
   Future<void> deleteScenario(String id) async {}
 }
+

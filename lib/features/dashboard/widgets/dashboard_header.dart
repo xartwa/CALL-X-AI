@@ -6,6 +6,7 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/theme/theme_cubit.dart';
 import 'package:callx_ai/core/widgets/spaced_text.dart';
+import 'package:callx_ai/features/ai_settings/domain/repositories/ai_settings_repository.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'workspace_settings_dialog.dart';
 
@@ -29,6 +30,19 @@ class _DashboardHeaderState extends State<DashboardHeader>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final repo = context.read<AiSettingsRepository>();
+        final profile = await repo.getAgentProfile();
+        if (mounted && profile.isAiEnabled != _aiEnabled) {
+          setState(() {
+            _aiEnabled = profile.isAiEnabled;
+          });
+          context.read<PreferencesService>().setAiEnabled(profile.isAiEnabled);
+        }
+      } catch (_) {}
+    });
   }
 
   @override
@@ -38,21 +52,33 @@ class _DashboardHeaderState extends State<DashboardHeader>
   }
 
   Future<void> _toggleAi() async {
+    final prefs = context.read<PreferencesService>();
+    final repo = context.read<AiSettingsRepository>();
     final newValue = !_aiEnabled;
-    await context.read<PreferencesService>().setAiEnabled(newValue);
     setState(() {
       _aiEnabled = newValue;
     });
+    await prefs.setAiEnabled(newValue);
+
+    try {
+      final realState = await repo.toggleAiStatus(newValue);
+      if (mounted && realState != _aiEnabled) {
+        setState(() {
+          _aiEnabled = realState;
+        });
+      }
+    } catch (_) {}
 
     if (mounted) {
       AppUtils.showSnackBar(
         context: context,
         title: _aiEnabled
+
             ? 'AI Calling Engine Resumed'
             : 'AI Calling Engine Paused',
         extraMessage: _aiEnabled
             ? 'The AI agent is actively handling live calls.'
-            : 'Outbound and inbound AI lines are currently paused.',
+            : 'Outbound and inbound AI lines are currently paused and routing to admin.',
         toastificationType: _aiEnabled
             ? ToastificationType.success
             : ToastificationType.warning,

@@ -1,4 +1,7 @@
+import 'ai_agent_profile.dart';
+
 class AiScenario {
+
   const AiScenario({
     required this.id,
     required this.name,
@@ -76,6 +79,14 @@ class AiScenario {
       isActive == other.isActive &&
       isDefaultInbound == other.isDefaultInbound;
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AiScenario && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   static bool _sameList(List<String> a, List<String> b) {
     if (a.length != b.length) return false;
     for (var index = 0; index < a.length; index++) {
@@ -114,7 +125,16 @@ class AiVoice {
     ];
     return parts.join(' • ');
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AiVoice && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
+
 
 class AiEngineConfig {
   const AiEngineConfig({
@@ -133,13 +153,18 @@ class AiEngineConfig {
 }
 
 class AiSettingsBundle {
+
+
   const AiSettingsBundle({
     required this.config,
     required this.voices,
     required this.scenarios,
+    this.profile,
   });
 
   final AiEngineConfig config;
   final List<AiVoice> voices;
   final List<AiScenario> scenarios;
+  final AiAgentProfile? profile;
 }
+

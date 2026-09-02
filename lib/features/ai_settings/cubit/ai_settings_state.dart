@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../domain/entities/ai_agent_profile.dart';
 import '../domain/entities/ai_scenario.dart';
 
 enum AiSettingsStatus { initial, loading, success, failure }
@@ -12,8 +13,11 @@ class AiSettingsState {
     this.scenarios = const [],
     this.savedScenario,
     this.draft,
+    this.agentProfile,
+    this.agentDraft,
     this.isSaving = false,
     this.isDeleting = false,
+    this.isUploadingPdf = false,
     this.previewingVoiceId,
     this.previewAudio,
     this.previewRevision = 0,
@@ -28,8 +32,11 @@ class AiSettingsState {
   final List<AiScenario> scenarios;
   final AiScenario? savedScenario;
   final AiScenario? draft;
+  final AiAgentProfile? agentProfile;
+  final AiAgentProfile? agentDraft;
   final bool isSaving;
   final bool isDeleting;
+  final bool isUploadingPdf;
   final String? previewingVoiceId;
   final Uint8List? previewAudio;
   final int previewRevision;
@@ -42,10 +49,16 @@ class AiSettingsState {
       savedScenario != null &&
       !draft!.sameContent(savedScenario!);
 
-  bool get isBusy => isSaving || isDeleting;
+  bool get hasAgentUnsavedChanges =>
+      agentDraft != null &&
+      agentProfile != null &&
+      !agentDraft!.sameContent(agentProfile!);
+
+  bool get isBusy => isSaving || isDeleting || isUploadingPdf;
+
 
   AiVoice? get selectedVoice {
-    final id = draft?.voiceId;
+    final id = agentDraft?.voiceId ?? draft?.voiceId;
     for (final voice in voices) {
       if (voice.id == id) return voice;
     }
@@ -59,8 +72,11 @@ class AiSettingsState {
     List<AiScenario>? scenarios,
     AiScenario? savedScenario,
     AiScenario? draft,
+    AiAgentProfile? agentProfile,
+    AiAgentProfile? agentDraft,
     bool? isSaving,
     bool? isDeleting,
+    bool? isUploadingPdf,
     String? previewingVoiceId,
     Uint8List? previewAudio,
     int? previewRevision,
@@ -81,8 +97,11 @@ class AiSettingsState {
         savedScenario:
             clearSelection ? null : savedScenario ?? this.savedScenario,
         draft: clearSelection ? null : draft ?? this.draft,
+        agentProfile: agentProfile ?? this.agentProfile,
+        agentDraft: agentDraft ?? this.agentDraft,
         isSaving: isSaving ?? this.isSaving,
         isDeleting: isDeleting ?? this.isDeleting,
+        isUploadingPdf: isUploadingPdf ?? this.isUploadingPdf,
         previewingVoiceId: clearPreviewingVoice
             ? null
             : previewingVoiceId ?? this.previewingVoiceId,
@@ -95,3 +114,4 @@ class AiSettingsState {
         feedbackRevision: feedbackRevision ?? this.feedbackRevision,
       );
 }
+
