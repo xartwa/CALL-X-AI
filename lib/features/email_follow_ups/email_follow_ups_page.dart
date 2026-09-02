@@ -27,22 +27,17 @@ class EmailFollowUpsPage extends StatefulWidget {
   State<EmailFollowUpsPage> createState() => _EmailFollowUpsPageState();
 }
 
-class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
+  int _selectedTabIndex = 0; // 0 = Sent History, 1 = Email Templates
   String _searchQuery = '';
   String _selectedStatus = 'All';
+  String _selectedCategory = 'All';
   String _selectedSort = 'Default';
   DateTimeRange? _selectedDateRange;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) setState(() {});
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<EmailFollowUpsCubit>().loadInitial();
@@ -58,7 +53,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     ]);
   }
 
-
   List<Map<String, dynamic>> get _allTemplates => context
       .read<EmailFollowUpsCubit>()
       .state
@@ -72,12 +66,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     return state.logs
         .map((log) => log.toViewMap(templates))
         .toList(growable: false);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Map<String, int> get _statusCounts {
@@ -99,37 +87,52 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     return _allEmails.where((email) {
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
-        final recipient =
-            (email['recipientName'] ?? '').toString().toLowerCase();
-        final emailAddress =
-            (email['recipientEmail'] ?? '').toString().toLowerCase();
-        final subject = (email['subject'] ?? '').toString().toLowerCase();
-        final template = (email['templateName'] ?? '').toString().toLowerCase();
         final query = _searchQuery.toLowerCase();
-        final matches = recipient.contains(query) ||
-            emailAddress.contains(query) ||
+        final name = (email['recipientName'] ?? '').toString().toLowerCase();
+        final recipient =
+            (email['recipientEmail'] ?? '').toString().toLowerCase();
+        final sender = (email['senderEmail'] ?? '').toString().toLowerCase();
+        final subject = (email['subject'] ?? '').toString().toLowerCase();
+        final template =
+            (email['templateName'] ?? '').toString().toLowerCase();
+
+        final matches = name.contains(query) ||
+            recipient.contains(query) ||
+            sender.contains(query) ||
             subject.contains(query) ||
             template.contains(query);
+
         if (!matches) return false;
       }
 
       // 2. Status Filter
       if (_selectedStatus != 'All') {
-        final emailStatus = (email['status'] ?? '').toString().toLowerCase();
-        if (emailStatus != _selectedStatus.toLowerCase()) return false;
+        final status = (email['status'] ?? 'Delivered').toString();
+        if (status.toLowerCase() != _selectedStatus.toLowerCase()) {
+          return false;
+        }
       }
 
       // 3. Date Range Filter
       if (_selectedDateRange != null) {
-        final sentAt = _sentAt(email);
-        if (sentAt == null ||
-            !AppDateTime.isWithinDateRange(
-              sentAt,
-              _selectedDateRange!.start,
-              _selectedDateRange!.end,
-            )) {
-          return false;
-        }
+        final date = _sentAt(email);
+        if (date == null) return false;
+
+        final start = DateTime(
+          _selectedDateRange!.start.year,
+          _selectedDateRange!.start.month,
+          _selectedDateRange!.start.day,
+        );
+        final end = DateTime(
+          _selectedDateRange!.end.year,
+          _selectedDateRange!.end.month,
+          _selectedDateRange!.end.day,
+          23,
+          59,
+          59,
+        );
+
+        if (date.isBefore(start) || date.isAfter(end)) return false;
       }
 
       return true;
@@ -164,18 +167,43 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
   }
 
   List<Map<String, dynamic>> get _filteredTemplates {
-    if (_searchQuery.isEmpty) return _allTemplates;
-    return _allTemplates.where((template) {
-      final name = (template['name'] ?? '').toString().toLowerCase();
-      final subject = (template['subject'] ?? '').toString().toLowerCase();
-      final body = (template['body'] ?? '').toString().toLowerCase();
-      final category = (template['category'] ?? '').toString().toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      return name.contains(query) ||
-          subject.contains(query) ||
-          body.contains(query) ||
-          category.contains(query);
-    }).toList();
+    var list = _allTemplates;
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      list = list.where((template) {
+        final name = (template['name'] ?? '').toString().toLowerCase();
+        final subject = (template['subject'] ?? '').toString().toLowerCase();
+        final body = (template['body'] ?? '').toString().toLowerCase();
+        return name.contains(q) || subject.contains(q) || body.contains(q);
+      }).toList();
+    }
+    if (_selectedCategory != 'All') {
+      final c = _selectedCategory.toLowerCase();
+      list = list.where((template) {
+        final cat = (template['category'] ?? '').toString().toLowerCase();
+        return cat.contains(c);
+      }).toList();
+    }
+    if (_selectedSort == 'Name (A-Z)') {
+      list = List<Map<String, dynamic>>.from(list)
+        ..sort((a, b) => (a['name'] ?? '')
+            .toString()
+            .toLowerCase()
+            .compareTo((b['name'] ?? '').toString().toLowerCase()));
+    } else if (_selectedSort == 'Name (Z-A)') {
+      list = List<Map<String, dynamic>>.from(list)
+        ..sort((a, b) => (b['name'] ?? '')
+            .toString()
+            .toLowerCase()
+            .compareTo((a['name'] ?? '').toString().toLowerCase()));
+    } else if (_selectedSort == 'Subject (A-Z)') {
+      list = List<Map<String, dynamic>>.from(list)
+        ..sort((a, b) => (a['subject'] ?? '')
+            .toString()
+            .toLowerCase()
+            .compareTo((b['subject'] ?? '').toString().toLowerCase()));
+    }
+    return list;
   }
 
   void _showSendEmailDialog({
@@ -188,9 +216,10 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
       builder: (context) {
         return SendEmailDialog(
           preloadedTemplate: preloadedTemplate,
-          allTemplates: _allTemplates,
           startInGroupMode: startInGroupMode,
-          onSendEmail: context.read<EmailFollowUpsCubit>().send,
+          allTemplates: _allTemplates,
+          onSendEmail: (email) =>
+              context.read<EmailFollowUpsCubit>().send(email),
         );
       },
     );
@@ -262,7 +291,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Stat Cards Row
+        // 1. Stat Cards Row
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -306,13 +335,19 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         ),
         const SizedBox(height: 16),
 
-        // Headers / Toolbar
+        // 2. Toolbar & Segmented Tabs Bar (Completely separate from table!)
         EmailFollowUpsHeaders(
+          selectedTab: _selectedTabIndex,
+          onTabChanged: (idx) => setState(() => _selectedTabIndex = idx),
+          sentCount: _filteredEmails.length,
+          templatesCount: _filteredTemplates.length,
           selectedStatus: _selectedStatus,
+          selectedCategory: _selectedCategory,
           selectedSort: _selectedSort,
           selectedDateRange: _selectedDateRange,
           statusCounts: _statusCounts,
           onStatusChanged: (status) => setState(() => _selectedStatus = status),
+          onCategoryChanged: (cat) => setState(() => _selectedCategory = cat),
           onSortChanged: (sort) => setState(() => _selectedSort = sort),
           onDateRangeChanged: (range) =>
               setState(() => _selectedDateRange = range),
@@ -324,85 +359,25 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         ),
         const SizedBox(height: 16),
 
-        // Main Card with Tabs
+        // 3. Main Content Area
         Expanded(
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary,
-              borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-              border: Border.all(
-                color: isDark
-                    ? const Color(0xFF1E293B)
-                    : context.colors.mediumGreyColor.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Column(
-              children: [
-                // Tab Switcher Header
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TabBar(
-                        controller: _tabController,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        indicatorColor: Theme.of(context).colorScheme.primary,
-                        labelColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor: context.colors.darkGreyColor,
-                        labelStyle: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12.5,
-                          letterSpacing: 0.5,
-                        ),
-                        tabs: [
-                          Tab(
-                            child: Row(
-                              children: [
-                                const Icon(CupertinoIcons.clock_fill, size: 14),
-                                const SizedBox(width: 6),
-                                Text(
-                                    'SENT HISTORY (${_filteredEmails.length})'),
-                              ],
-                            ),
-                          ),
-                          Tab(
-                            child: Row(
-                              children: [
-                                const Icon(CupertinoIcons.doc_plaintext,
-                                    size: 14),
-                                const SizedBox(width: 6),
-                                Text(
-                                    'EMAIL TEMPLATES (${_filteredTemplates.length})'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+          child: _selectedTabIndex == 0
+              ? Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.boxRadius),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF1E293B)
+                          : context.colors.mediumGreyColor
+                              .withValues(alpha: 0.35),
+                    ),
                   ),
-                ),
-                const Divider(height: 1, thickness: 0.5),
-
-                // Tab Views
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      // 1. Sent History DataTable2
-                      _buildSentHistoryTable(emailsList, isDark),
-
-                      // 2. Email Templates Grid
-                      _buildTemplatesGrid(templatesList, isDark),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+                  child: _buildSentHistoryTable(emailsList, isDark),
+                )
+              : _buildTemplatesView(templatesList, isDark),
         ),
       ],
     ).withPullToRefresh(
@@ -457,7 +432,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
         color: isDark ? Colors.white : const Color(0xFF0F172A),
         fontWeight: FontWeight.w500,
       ),
-
       columns: const [
         DataColumn2(label: Text('RECIPIENT CONTACT'), size: ColumnSize.L),
         DataColumn2(label: Text('SENDER'), size: ColumnSize.M),
@@ -594,7 +568,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
                         context,
                         title: 'Delete Email Record',
                         message:
-                            'Are you sure you want to delete this email from history?',
+                            'Are you sure you want to delete this email activity record?',
                         confirmLabel: 'DELETE',
                         onConfirm: () => context
                             .read<EmailFollowUpsCubit>()
@@ -611,182 +585,342 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage>
     );
   }
 
-  Widget _buildTemplatesGrid(
+  Widget _buildTemplatesView(
       List<Map<String, dynamic>> templates, bool isDark) {
-    if (templates.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(CupertinoIcons.square_stack_3d_up,
-                size: 44, color: context.colors.darkGreyColor),
-            const SizedBox(height: 14),
-            Text(
-              'No email templates found.',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: context.colors.darkGreyColor,
-              ),
-            ),
-          ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 1100
+            ? 3
+            : (constraints.maxWidth > 700 ? 2 : 1);
+        final childAspectRatio = constraints.maxWidth > 1100
+            ? 2.1
+            : (constraints.maxWidth > 700 ? 2.3 : 1.85);
+
+        return GridView.builder(
+          padding: const EdgeInsets.only(top: 2, bottom: 20),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemCount: templates.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return _buildCreateTemplateCard(isDark);
+            }
+            final temp = templates[index - 1];
+            return _buildMinimalTemplateCard(temp, isDark);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCreateTemplateCard(bool isDark) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return InkWell(
+      onTap: () => _showManageTemplateDialog(),
+      borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF131C2E).withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+          border: Border.all(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            width: 1.2,
+          ),
         ),
-      );
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: primary.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Icon(
+                  CupertinoIcons.plus,
+                  size: 18,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Create New Template',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                'Add a reusable follow-up template',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMinimalTemplateCard(Map<String, dynamic> temp, bool isDark) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final category = (temp['category'] ?? 'Outreach').toString();
+    final subject = (temp['subject'] ?? '').toString();
+    final rawBody = (temp['body'] ?? '').toString();
+    final cleanBody = rawBody
+        .replaceAll(RegExp(r'<[^>]*>'), ' ')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    // Extract dynamic variables like {name}, {company}
+    final variableMatches = RegExp(r'\{([a-zA-Z0-9_]+)\}')
+        .allMatches(rawBody)
+        .map((m) => m.group(0)!)
+        .toSet()
+        .toList();
+
+    Color categoryColor;
+    switch (category.toLowerCase()) {
+      case 'follow-up & closing':
+      case 'follow-up':
+        categoryColor = const Color(0xFF10B981); // Emerald
+        break;
+      case 'outreach':
+      case 'sales':
+      case 'sales & outreach':
+        categoryColor = const Color(0xFF818CF8); // Indigo
+        break;
+      case 'meeting':
+      case 'consultation':
+        categoryColor = const Color(0xFFF59E0B); // Amber
+        break;
+      default:
+        categoryColor = const Color(0xFF38BDF8); // Cyan
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(18),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.35,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF131C2E) : Colors.white,
+        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+        ),
       ),
-      itemCount: templates.length,
-      itemBuilder: (context, index) {
-        final temp = templates[index];
-        final category = temp['category'] ?? 'Outreach';
-
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color:
-                isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey[50],
-            borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-            border: Border.all(
-              color: isDark ? Colors.white12 : context.colors.lightGreyColor,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Row 1: Category Tag + Action Icons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Category badge + Action icons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(4),
+              // Category Tag
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: categoryColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: categoryColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                    child: Text(
-                      category.toString().toUpperCase(),
+                    const SizedBox(width: 5),
+                    Text(
+                      category.toUpperCase(),
                       style: TextStyle(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w800,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: categoryColor,
+                        letterSpacing: 0.4,
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              // Action Buttons: Edit & Delete
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppActionButton(
+                    type: AppActionType.edit,
+                    onTap: () => _showManageTemplateDialog(templateToEdit: temp),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppActionButton(
-                        type: AppActionType.edit,
-                        onTap: () =>
-                            _showManageTemplateDialog(templateToEdit: temp),
-                      ),
-                      const SizedBox(width: 6),
-                      AppActionButton(
-                        type: AppActionType.delete,
-                        onTap: () {
-                          ConfirmationDialog.show(
-                            context,
-                            title: 'Delete Template',
-                            message:
-                                'Are you sure you want to delete template "${temp['name']}"?',
-                            confirmLabel: 'DELETE',
-                            onConfirm: () => context
-                                .read<EmailFollowUpsCubit>()
-                                .deleteTemplate(temp['id'].toString()),
-                          );
-                        },
-                      ),
-                    ],
+                  const SizedBox(width: 6),
+                  AppActionButton(
+                    type: AppActionType.delete,
+                    onTap: () {
+                      ConfirmationDialog.show(
+                        context,
+                        title: 'Delete Template',
+                        message:
+                            'Are you sure you want to delete template "${temp['name']}"?',
+                        confirmLabel: 'DELETE',
+                        onConfirm: () => context
+                            .read<EmailFollowUpsCubit>()
+                            .deleteTemplate(temp['id'].toString()),
+                      );
+                    },
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+            ],
+          ),
+          const SizedBox(height: 10),
 
-              // Title
-              Text(
-                temp['name'] ?? 'Template',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          // Row 2: Template Name
+          Text(
+            temp['name'] ?? 'Untitled Template',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14.5,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 3),
+
+          // Row 3: Subject line preview
+          Row(
+            children: [
+              Icon(
+                CupertinoIcons.mail,
+                size: 11.5,
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
-              const SizedBox(height: 4),
-
-              // Subject preview
-              Text(
-                'Subject: ${temp['subject'] ?? ''}',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11.5,
-                  color: context.colors.darkGreyColor,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 6),
-
-              // Body preview
+              const SizedBox(width: 5),
               Expanded(
                 child: Text(
-                  (temp['body'] ?? '')
-                      .replaceAll(RegExp(r'<[^>]*>'), '')
-                      .replaceAll('&nbsp;', ' '),
+                  subject.isNotEmpty ? subject : 'No subject line',
                   style: TextStyle(
-                    fontSize: 11,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                    height: 1.4,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(height: 10),
+            ],
+          ),
+          const SizedBox(height: 8),
 
-              // Use Template Button
-              SizedBox(
-                width: double.infinity,
-                height: 38,
-                child: ElevatedButton.icon(
-                  onPressed: () =>
-                      _showSendEmailDialog(preloadedTemplate: temp),
-                  icon: const Icon(CupertinoIcons.paperplane_fill,
-                      size: 13, color: Colors.white),
-                  label: const Text(
-                    'USE TEMPLATE',
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
+          // Row 4: Clean Body Snippet
+          Expanded(
+            child: Text(
+              cleanBody,
+              style: TextStyle(
+                fontSize: 11.5,
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF64748B),
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Row 5: Footer (Variable Chips on left + Minimal "USE" button on right)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Dynamic Variable Chips
+              Expanded(
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: variableMatches.take(3).map((v) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: primary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Text(
+                        v,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFF818CF8) : primary,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+              // Minimal USE Button
+              InkWell(
+                onTap: () => _showSendEmailDialog(preloadedTemplate: temp),
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: primary,
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
-                    ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.paperplane_fill,
+                          size: 15.5, color: Colors.white),
+                      SizedBox(width: 5),
+                      Text(
+                        'USE',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
