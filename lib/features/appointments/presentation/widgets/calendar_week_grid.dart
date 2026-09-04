@@ -303,48 +303,49 @@ class CalendarWeekGrid extends StatelessWidget {
                   Text(
                     '${DateFormat('HH:mm').format(localStart)} – ${DateFormat('HH:mm').format(localEnd)}',
                     style: TextStyle(
-                      fontSize: 9.5,
+                      fontSize: 9,
                       fontWeight: FontWeight.w600,
                       color: textAccent,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 1),
                   Text(
                     appt.customerName,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 10.5,
                       fontWeight: FontWeight.w700,
                       color: isDark ? Colors.white : const Color(0xFF0F172A),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Icon(
-                        isOnline
-                            ? CupertinoIcons.video_camera
-                            : CupertinoIcons.location_solid,
-                        size: 10,
-                        color: isDark ? Colors.white70 : const Color(0xFF475569),
-                      ),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          isOnline ? 'Online' : 'In-Person',
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            color: isDark ? Colors.white70 : const Color(0xFF475569),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  if (height >= 58) ...[
+                    const SizedBox(height: 1),
+                    Row(
+                      children: [
+                        Icon(
+                          isOnline
+                              ? CupertinoIcons.video_camera
+                              : CupertinoIcons.location_solid,
+                          size: 9.5,
+                          color: isDark ? Colors.white70 : const Color(0xFF475569),
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            isOnline ? 'Online' : 'In-Person',
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: isDark ? Colors.white70 : const Color(0xFF475569),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
