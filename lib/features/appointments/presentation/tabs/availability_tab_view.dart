@@ -111,33 +111,17 @@ class AvailabilityTabView extends StatelessWidget {
                     color: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    CupertinoIcons.calendar,
-                    size: 20,
-                    color: Color(0xFF8B5CF6),
-                  ),
+                  child: Icon(CupertinoIcons.calendar,
+                      size: 20, color: Theme.of(context).colorScheme.primary),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Weekly Availability',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: context.colors.blackColor,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Set standard booking hours for each day of the week',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Weekly Availability'.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.blackColor,
+                  ),
                 ),
               ],
             ),
@@ -278,26 +262,13 @@ class AvailabilityTabView extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Booking Settings & Buffers',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.blackColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Slot durations, padding buffers, and minimum notice',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.colors.darkGreyColor,
-                    ),
-                  ),
-                ],
+              Text(
+                'Booking Settings & Buffers',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: context.colors.blackColor,
+                ),
               ),
             ],
           ),
@@ -503,26 +474,13 @@ class AvailabilityTabView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Exceptions & Time Off',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: context.colors.blackColor,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Holidays and specific dates with custom availability',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.colors.darkGreyColor,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'Exceptions & Time Off'.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.blackColor,
+                      ),
                     ),
                   ],
                 ),
