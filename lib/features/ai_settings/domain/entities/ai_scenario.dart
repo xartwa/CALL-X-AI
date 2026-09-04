@@ -16,6 +16,7 @@ class AiScenario {
     required this.voiceTone,
     required this.isActive,
     required this.isDefaultInbound,
+    this.cartesiaAgentId = '',
   });
 
   final String id;
@@ -31,6 +32,9 @@ class AiScenario {
   final String voiceTone;
   final bool isActive;
   final bool isDefaultInbound;
+  final String cartesiaAgentId;
+
+  bool get isCartesiaSynced => cartesiaAgentId.isNotEmpty;
 
   AiScenario copyWith({
     String? id,
@@ -46,6 +50,7 @@ class AiScenario {
     String? voiceTone,
     bool? isActive,
     bool? isDefaultInbound,
+    String? cartesiaAgentId,
   }) =>
       AiScenario(
         id: id ?? this.id,
@@ -62,6 +67,7 @@ class AiScenario {
         voiceTone: voiceTone ?? this.voiceTone,
         isActive: isActive ?? this.isActive,
         isDefaultInbound: isDefaultInbound ?? this.isDefaultInbound,
+        cartesiaAgentId: cartesiaAgentId ?? this.cartesiaAgentId,
       );
 
   bool sameContent(AiScenario other) =>
@@ -77,7 +83,8 @@ class AiScenario {
       voiceSpeed == other.voiceSpeed &&
       voiceTone == other.voiceTone &&
       isActive == other.isActive &&
-      isDefaultInbound == other.isDefaultInbound;
+      isDefaultInbound == other.isDefaultInbound &&
+      cartesiaAgentId == other.cartesiaAgentId;
 
   @override
   bool operator ==(Object other) =>

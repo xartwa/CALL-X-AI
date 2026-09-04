@@ -114,7 +114,7 @@ class AiSettingsStatusBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'sonic-3.5 · cartesia-line',
+                  'sonic-3.5 · managed-agents',
                   style: TextStyle(
                     fontSize: 10,
                     color: isDark ? Colors.white54 : Colors.black45,

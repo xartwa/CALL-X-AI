@@ -32,6 +32,8 @@ abstract class AiSettingsRepository {
     required String text,
     String? emotion,
   });
+
+  Future<AiScenario> syncManagedAgent(String id);
 }
 
 

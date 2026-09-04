@@ -218,6 +218,15 @@ class AiSettingsRepositoryImpl implements AiSettingsRepository {
         });
         return base64Decode(encoded);
       });
+
+  @override
+  Future<AiScenario> syncManagedAgent(String id) => _request(() async {
+        final result = await remote.syncManagedAgent(id);
+        final scenarioJson = result['scenario'] is Map
+            ? Map<String, dynamic>.from(result['scenario'] as Map)
+            : result;
+        return AiScenarioDto(scenarioJson).toEntity();
+      });
 }
 
 

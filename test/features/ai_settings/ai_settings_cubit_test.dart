@@ -102,6 +102,13 @@ void main() {
       expect(status, isFalse);
       expect(cubit.state.agentProfile?.isAiEnabled, isFalse);
     });
+
+    test('syncs managed agent and updates scenario state', () async {
+      await cubit.load();
+      await cubit.syncManagedAgent('inbound');
+      expect(cubit.state.draft?.cartesiaAgentId, 'agent_FakeSynced');
+      expect(cubit.state.draft?.isCartesiaSynced, isTrue);
+    });
   });
 }
 
@@ -222,5 +229,9 @@ class _FakeAiSettingsRepository implements AiSettingsRepository {
 
   @override
   Future<void> deleteScenario(String id) async {}
+
+  @override
+  Future<AiScenario> syncManagedAgent(String id) async =>
+      inbound.copyWith(cartesiaAgentId: 'agent_FakeSynced');
 }
 

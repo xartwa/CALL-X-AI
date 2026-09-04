@@ -17,16 +17,20 @@ void main() {
       'voiceTone': 'Friendly & Warm',
       'isActive': true,
       'isDefaultInbound': true,
+      'cartesiaAgentId': 'agent_Test123',
     }).toEntity();
 
     expect(entity.personalityPrompt, 'Be thoughtful and concise.');
     expect(entity.voiceSpeed, 1.15);
     expect(entity.voiceId, 'voice-1');
     expect(entity.isDefaultInbound, isTrue);
+    expect(entity.cartesiaAgentId, 'agent_Test123');
+    expect(entity.isCartesiaSynced, isTrue);
 
     final json = AiScenarioDto.fromEntity(entity);
     expect(json['personalityPrompt'], 'Be thoughtful and concise.');
     expect(json['voiceSpeed'], 1.15);
     expect(json['isDefaultInbound'], isTrue);
+    expect(json['cartesiaAgentId'], 'agent_Test123');
   });
 }

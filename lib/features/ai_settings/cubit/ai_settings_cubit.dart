@@ -246,6 +246,34 @@ class AiSettingsCubit extends Cubit<AiSettingsState> {
 
   Future<void> deleteScenario() => deleteSelected();
 
+  Future<void> syncManagedAgent([String? scenarioId]) async {
+    final targetId = scenarioId ?? state.draft?.id;
+    if (targetId == null || state.isBusy) return;
+    emit(state.copyWith(isSaving: true, clearError: true, clearFeedback: true));
+    try {
+      final updated = await repository.syncManagedAgent(targetId);
+      final scenarios = state.scenarios.map((s) {
+        if (s.id == updated.id) return updated;
+        return s;
+      }).toList(growable: false);
+      emit(state.copyWith(
+        scenarios: scenarios,
+        savedScenario: state.savedScenario?.id == updated.id ? updated : state.savedScenario,
+        draft: state.draft?.id == updated.id ? updated.copyWith() : state.draft,
+        isSaving: false,
+        feedbackMessage: 'Scenario synced with Cartesia Managed Agents.',
+        feedbackRevision: state.feedbackRevision + 1,
+      ));
+    } on AppException catch (error) {
+      emit(state.copyWith(
+        isSaving: false,
+        errorMessage: _message(error),
+        feedbackMessage: _message(error),
+        feedbackRevision: state.feedbackRevision + 1,
+      ));
+    }
+  }
+
 
   Future<void> previewVoice(String? explicitVoiceId) async {
     final voiceId = explicitVoiceId ?? state.agentDraft?.voiceId ?? state.draft?.voiceId;

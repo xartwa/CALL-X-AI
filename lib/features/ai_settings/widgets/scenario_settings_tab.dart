@@ -143,13 +143,27 @@ class ScenarioSettingsTab extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.isActive ? 'Active' : 'Paused',
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      color: context.colors.darkGreyColor,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        item.isActive ? 'Active' : 'Paused',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          color: context.colors.darkGreyColor,
+                                        ),
+                                      ),
+                                      if (item.isCartesiaSynced) ...[
+                                        const SizedBox(width: 5),
+                                        const Text(
+                                          '• Synced',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Color(0xFF10B981),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ],
                               ),
@@ -197,18 +211,80 @@ class ScenarioSettingsTab extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            'Scenario-specific instructions for outbound calls.',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: context.colors.darkGreyColor,
-                            ),
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Text(
+                                'Scenario-specific instructions for outbound calls.',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: context.colors.darkGreyColor,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: draft.isCartesiaSynced
+                                      ? const Color(0xFF10B981)
+                                          .withValues(alpha: 0.12)
+                                      : Colors.amber.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  draft.isCartesiaSynced
+                                      ? 'Managed Agent: ${draft.cartesiaAgentId}'
+                                      : 'Auto-syncs on save',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: draft.isCartesiaSynced
+                                        ? const Color(0xFF10B981)
+                                        : Colors.amber[800],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                     Row(
                       children: [
+                        if (!draft.isCartesiaSynced) ...[
+                          SizedBox(
+                            height: 38,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF10B981),
+                                side: const BorderSide(
+                                    color: Color(0xFF10B981)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      ThemeConstants.buttonRadius),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14),
+                              ),
+                              onPressed: state.isBusy
+                                  ? null
+                                  : () => cubit.syncManagedAgent(draft.id),
+                              icon: const Icon(
+                                  CupertinoIcons.arrow_2_circlepath,
+                                  size: 14),
+                              label: const Text(
+                                'Sync Agent',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
                         SizedBox(
                           height: 38,
                           child: OutlinedButton(

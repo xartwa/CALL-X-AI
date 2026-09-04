@@ -29,6 +29,9 @@ class AiScenarioDto {
         voiceTone: _string(json['voiceTone'] ?? json['voice_tone'], 'Professional & Confident'),
         isActive: _bool(json['isActive'] ?? json['is_active'], true),
         isDefaultInbound: _bool(json['isDefaultInbound'] ?? json['is_default_inbound'], false),
+        cartesiaAgentId: _string(
+          json['cartesiaAgentId'] ?? json['cartesia_agent_id'],
+        ),
       );
 
   static Map<String, dynamic> fromEntity(AiScenario scenario) => {
@@ -44,6 +47,8 @@ class AiScenarioDto {
             .toList(growable: false),
         'actionOnInterest': scenario.actionOnInterest.trim(),
         'cartesiaVoiceId': scenario.voiceId,
+        if (scenario.cartesiaAgentId.isNotEmpty)
+          'cartesiaAgentId': scenario.cartesiaAgentId,
         'voiceSpeed': scenario.voiceSpeed,
         'voiceTone': scenario.voiceTone,
         'isActive': scenario.isActive,

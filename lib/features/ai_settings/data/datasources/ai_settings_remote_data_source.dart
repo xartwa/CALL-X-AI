@@ -95,4 +95,10 @@ class AiSettingsRemoteDataSource {
     if (audio.isEmpty) throw const FormatException('Missing preview audio');
     return audio;
   }
+
+  Future<Map<String, dynamic>> syncManagedAgent(String id) async =>
+      Map<String, dynamic>.from(
+        (await client.http.post('/scenarios/$id/sync-managed-agent/')).data
+            as Map,
+      );
 }
