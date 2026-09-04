@@ -41,21 +41,27 @@ class _RequestsTabViewState extends State<RequestsTabView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical:2),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onPrimary,
                 borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFE2E8F0),
                 ),
               ),
               child: Row(
                 children: [
                   // Search Input
-                  Expanded(
+                  SizedBox(
+                    width: 300,
+                    height: 20,
                     child: AppTextFieldWidget(
+                      padding: EdgeInsets.zero,
                       controller: _searchCtrl,
-                      hintText: 'Search requests by customer name, company, or notes...',
+                      hintText:
+                          'Search requests by customer name, company, or notes...',
                       prefixIcon: Icon(
                         CupertinoIcons.search,
                         size: 18,
@@ -64,6 +70,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                       onChanged: (val) => cubit.setSearchQuery(val),
                     ),
                   ),
+                  Spacer(),
                   const SizedBox(width: 14),
 
                   // Filter Menu
@@ -74,7 +81,9 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     itemBuilder: (ctx) => [
@@ -85,12 +94,15 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                       _buildMenuItem('Cancelled', state.selectedStatusFilter),
                     ],
                     child: Container(
-                      height: 44,
+                      height: 38,
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          color: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
                       child: Row(
@@ -124,8 +136,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-
+            const SizedBox(height: 14),
             // Table Card
             Expanded(
               child: Container(
@@ -134,7 +145,9 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   color: Theme.of(context).colorScheme.onPrimary,
                   borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: ClipRRect(
@@ -166,7 +179,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             ),
           ),
           if (isSelected)
-            const Icon(CupertinoIcons.checkmark, size: 14, color: Color(0xFF8B5CF6)),
+            const Icon(CupertinoIcons.checkmark,
+                size: 14, color: Color(0xFF8B5CF6)),
         ],
       ),
     );
@@ -252,7 +266,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
         DataColumn2(label: Text('TYPE'), size: ColumnSize.S, fixedWidth: 120),
         DataColumn2(label: Text('STATUS'), size: ColumnSize.S, fixedWidth: 120),
         DataColumn2(label: Text('NOTES / AI INTENT'), size: ColumnSize.L),
-        DataColumn2(label: Text('ACTIONS'), size: ColumnSize.M, fixedWidth: 180),
+        DataColumn2(
+            label: Text('ACTIONS'), size: ColumnSize.M, fixedWidth: 180),
       ],
       rows: requests.map((req) {
         final isPending = req.status.toLowerCase() == 'pending';
@@ -287,7 +302,9 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   Text(
                     req.companyName.isNotEmpty
                         ? req.companyName
-                        : (req.customerPhone.isNotEmpty ? req.customerPhone : req.customerEmail),
+                        : (req.customerPhone.isNotEmpty
+                            ? req.customerPhone
+                            : req.customerEmail),
                     style: TextStyle(
                       fontSize: 11.5,
                       color: context.colors.darkGreyColor,
@@ -328,7 +345,9 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             DataCell(
               CustomTagWidget(
                 label: req.isOnline ? 'Online' : 'In-Person',
-                color: req.isOnline ? context.colors.infoColor : context.colors.successColor,
+                color: req.isOnline
+                    ? context.colors.infoColor
+                    : context.colors.successColor,
               ),
             ),
 
@@ -365,17 +384,23 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                         onPressed: () {
                           ScheduleRequestDrawer.show(context, req);
                         },
-                        icon: const Icon(CupertinoIcons.calendar_badge_plus, size: 14, color: Colors.white),
+                        icon: const Icon(CupertinoIcons.calendar_badge_plus,
+                            size: 14, color: Colors.white),
                         label: const Text(
                           'Schedule',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B5CF6),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                            borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius),
                           ),
                         ),
                       ),
@@ -430,7 +455,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         title: const Text('Cancel Request?'),
-        content: Text('Are you sure you want to cancel the appointment request for ${req.customerName}?'),
+        content: Text(
+            'Are you sure you want to cancel the appointment request for ${req.customerName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
@@ -444,7 +470,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               Navigator.of(dialogCtx).pop();
               cubit.cancelRequest(req.id);
             },
-            child: const Text('Cancel Request', style: TextStyle(color: Colors.white)),
+            child: const Text('Cancel Request',
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

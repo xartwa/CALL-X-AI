@@ -498,7 +498,7 @@ class AvailabilityTabView extends StatelessWidget {
                           color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: 
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       shape: RoundedRectangleBorder(

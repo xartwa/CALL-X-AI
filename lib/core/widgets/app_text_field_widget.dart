@@ -22,6 +22,7 @@ class AppTextFieldWidget extends StatelessWidget {
     this.borderColor,
     this.validator,
     this.isObscure = false,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
   });
   final TextEditingController controller;
   final String? labelText;
@@ -40,7 +41,7 @@ class AppTextFieldWidget extends StatelessWidget {
   final bool? showBorder;
   final Color? borderColor;
   final bool? isObscure;
-
+  final EdgeInsets? padding;
   @override
   Widget build(BuildContext context) {
     final resolvedBorderColor = borderColor ?? context.colors.lightGreyColor;
@@ -64,8 +65,7 @@ class AppTextFieldWidget extends StatelessWidget {
               color: context.colors.darkGreyColor,
               fontWeight: FontWeight.w400),
           prefixIcon: prefixIcon,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          contentPadding: padding,
           labelText: labelText,
           fillColor: fillColor,
           filled: fillColor != null,
