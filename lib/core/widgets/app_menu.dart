@@ -39,6 +39,11 @@ class AppMenu extends StatelessWidget {
         icon: CupertinoIcons.phone,
       ),
       _NavItem(
+        path: AppRoutesPath.appointments,
+        label: 'Calendar',
+        icon: CupertinoIcons.calendar,
+      ),
+      _NavItem(
         path: AppRoutesPath.emailFollowUps,
         label: text.emailFollowupNavLabel,
         icon: CupertinoIcons.mail,

@@ -89,8 +89,8 @@ void main() {
     expect(find.text('Outgoing Call'), findsWidgets);
     expect(find.text('28 Aug 2026 • 14:00'), findsOneWidget);
     expect(find.text('03:12'), findsOneWidget);
-    expect(find.text('Completed'), findsOneWidget);
-    expect(find.text('No Answer'), findsOneWidget);
+    expect(find.text('COMPLETED'), findsOneWidget);
+    expect(find.text('NO ANSWER'), findsOneWidget);
     expect(find.text('2 of 2 calls'), findsOneWidget);
 
     // 2. Click on the first completed call to open details
@@ -116,8 +116,8 @@ void main() {
     // Detail view should be closed
     expect(find.text('AI Summary'), findsNothing);
 
-    // 4. Click on the unanswered call ("No Answer") -> should not open details
-    await tester.tap(find.text('No Answer'));
+    // 4. Click on the unanswered call ("NO ANSWER") -> should not open details
+    await tester.tap(find.text('NO ANSWER'));
     await tester.pump();
     expect(find.text('AI Summary'), findsNothing);
 

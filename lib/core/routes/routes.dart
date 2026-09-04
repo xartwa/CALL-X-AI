@@ -11,6 +11,7 @@ import '../../features/auth/login_page.dart';
 import '../../features/email_follow_ups/email_follow_ups_page.dart';
 
 import '../../features/ai_settings/ai_settings_page.dart';
+import '../../features/appointments/presentation/appointments_page.dart';
 import '../widgets/app_menu.dart';
 import 'app_routes_path.dart';
 
@@ -77,6 +78,15 @@ class AppRouter {
             name: AppRoutesPath.callsName,
             pageBuilder: (context, state) => const NoTransitionPage(
               child: CallsPage(),
+            ),
+          ),
+
+          //! CALENDAR & APPOINTMENTS
+          GoRoute(
+            path: AppRoutesPath.appointments,
+            name: AppRoutesPath.appointmentsName,
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: AppointmentsPage(),
             ),
           ),
 

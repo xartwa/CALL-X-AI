@@ -86,7 +86,7 @@ void main() {
 
     // 1. Verify Header Elements & Customer Name
     expect(find.text('John Smith'), findsWidgets);
-    expect(find.text('Completed'), findsWidgets);
+    expect(find.text('COMPLETED'), findsWidgets);
     expect(find.text('5:32'), findsWidgets);
 
     // 2. Verify Action buttons
@@ -98,7 +98,7 @@ void main() {
 
     // 4. Verify AI Summary Section
     expect(find.text('AI Summary'), findsOneWidget);
-    expect(find.text('Interested'), findsOneWidget);
+    expect(find.text('INTERESTED'), findsOneWidget);
 
     // 5. Verify Transcript Section
     expect(find.text('Call Transcript'), findsOneWidget);

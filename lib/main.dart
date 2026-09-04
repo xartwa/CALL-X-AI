@@ -33,6 +33,10 @@ import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/data/datasources/ai_settings_remote_data_source.dart';
 import 'package:callx_ai/features/ai_settings/data/repositories/ai_settings_repository_impl.dart';
 import 'package:callx_ai/features/ai_settings/domain/repositories/ai_settings_repository.dart';
+import 'package:callx_ai/features/appointments/cubit/appointments_cubit.dart';
+import 'package:callx_ai/features/appointments/data/datasources/appointments_remote_data_source.dart';
+import 'package:callx_ai/features/appointments/data/repositories/appointments_repository_impl.dart';
+import 'package:callx_ai/features/appointments/domain/repositories/appointments_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +66,9 @@ Future<void> main() async {
   final aiSettingsRepository = AiSettingsRepositoryImpl(
     AiSettingsRemoteDataSource(dioClient),
   );
+  final appointmentsRepository = AppointmentsRepositoryImpl(
+    AppointmentsRemoteDataSource(dioClient),
+  );
   final appRouter = AppRouter(preferencesService);
 
   runApp(
@@ -79,6 +86,9 @@ Future<void> main() async {
         RepositoryProvider<EmailRepository>.value(value: emailRepository),
         RepositoryProvider<AiSettingsRepository>.value(
           value: aiSettingsRepository,
+        ),
+        RepositoryProvider<AppointmentsRepository>.value(
+          value: appointmentsRepository,
         ),
       ],
       child: MultiBlocProvider(
@@ -100,6 +110,9 @@ Future<void> main() async {
           ),
           BlocProvider(
             create: (_) => AiSettingsCubit(aiSettingsRepository),
+          ),
+          BlocProvider(
+            create: (_) => AppointmentsCubit(appointmentsRepository),
           ),
 
           BlocProvider(

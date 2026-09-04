@@ -202,7 +202,7 @@ packages:
     source: hosted
     version: "2.3.9"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
@@ -489,7 +489,7 @@ packages:
     source: hosted
     version: "1.1.0"
   path_provider:
-ص    dependency: "direct main"
+    dependency: "direct main"
     description:
       name: path_provider
       sha256: "50c5dd5b6e1aaf6fb3a78b33f6aa3afca52bf903a8a5298f53101fdaee55bbcd"

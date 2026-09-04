@@ -13,6 +13,9 @@ class AppRoutesPath {
   static const String calls = '/calls';
   static const String callsName = 'calls';
 
+  static const String appointments = '/appointments';
+  static const String appointmentsName = 'appointments';
+
   static const String emailFollowUps = '/email-follow-ups';
   static const String emailFollowUpsName = 'email-follow-ups';
 
