@@ -7,9 +7,6 @@ import 'package:callx_ai/core/utils/app_date_time.dart';
 
 class EmailFollowUpsHeaders extends StatefulWidget {
   final int selectedTab;
-  final ValueChanged<int> onTabChanged;
-  final int sentCount;
-  final int templatesCount;
   final String selectedStatus;
   final String selectedCategory;
   final String selectedSort;
@@ -27,9 +24,6 @@ class EmailFollowUpsHeaders extends StatefulWidget {
   const EmailFollowUpsHeaders({
     super.key,
     required this.selectedTab,
-    required this.onTabChanged,
-    required this.sentCount,
-    required this.templatesCount,
     required this.selectedStatus,
     this.selectedCategory = 'All',
     this.selectedSort = 'Default',
@@ -78,82 +72,27 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-        border: Border.all(
-          color: isDark
-              ? const Color(0xFF1E293B)
-              : context.colors.mediumGreyColor.withValues(alpha: 0.35),
-        ),
+  
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isNarrow = constraints.maxWidth < 1050;
 
-          final tabSwitcherAndActions = Row(
-            mainAxisSize: isNarrow ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment:
-                isNarrow ? MainAxisAlignment.spaceBetween : MainAxisAlignment.start,
-            children: [
-              // Segmented Tab Switcher
-              Container(
-                height: 38,
-                padding: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF131C2E) : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildSegmentTab(
-                      index: 0,
-                      label: 'Sent History',
-                      count: widget.sentCount,
-                      icon: CupertinoIcons.clock_fill,
-                      isSelected: widget.selectedTab == 0,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(width: 4),
-                    _buildSegmentTab(
-                      index: 1,
-                      label: 'Email Templates',
-                      count: widget.templatesCount,
-                      icon: CupertinoIcons.doc_plaintext,
-                      isSelected: widget.selectedTab == 1,
-                      isDark: isDark,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 14),
-
-              // Divider
-              if (!isNarrow) ...[
-                Container(
-                  height: 22,
-                  width: 1,
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-                ),
-                const SizedBox(width: 14),
-              ],
-
-              // Contextual Action Buttons
-              if (widget.selectedTab == 0) ...[
-                Row(
+          // Contextual Action Buttons on the Left
+          final actionButtons = widget.selectedTab == 0
+              ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
                       height: 36,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           shape: RoundedRectangleBorder(
@@ -207,9 +146,8 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                       ),
                     ),
                   ],
-                ),
-              ] else ...[
-                SizedBox(
+                )
+              : SizedBox(
                   height: 36,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
@@ -234,10 +172,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                       ),
                     ),
                   ),
-                ),
-              ],
-            ],
-          );
+                );
 
           final filterControls = Row(
             mainAxisSize: MainAxisSize.min,
@@ -319,16 +254,14 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                     : InkWell(
                         onTap: () {
                           setState(() => _isSearchExpanded = true);
-                          Future.delayed(const Duration(milliseconds: 80), () {
-                            _searchFocusNode.requestFocus();
-                          });
+                          _searchFocusNode.requestFocus();
                         },
                         borderRadius: BorderRadius.circular(8),
                         child: Center(
                           child: Icon(
                             CupertinoIcons.search,
                             size: 14,
-                            color: context.colors.darkGreyColor,
+                            color: isDark ? Colors.white70 : Colors.black54,
                           ),
                         ),
                       ),
@@ -342,7 +275,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                 _buildStatusDropdown(context, isDark),
                 const SizedBox(width: 8),
 
-                // Date Range
+                // Date Range Picker
                 _buildDateRangePicker(context, isDark),
                 const SizedBox(width: 8),
 
@@ -363,7 +296,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                tabSwitcherAndActions,
+                actionButtons,
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -376,91 +309,11 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              tabSwitcherAndActions,
+              actionButtons,
               filterControls,
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildSegmentTab({
-    required int index,
-    required String label,
-    required int count,
-    required IconData icon,
-    required bool isSelected,
-    required bool isDark,
-  }) {
-    final activeColor = Theme.of(context).colorScheme.primary;
-
-    return InkWell(
-      onTap: () => widget.onTabChanged(index),
-      borderRadius: BorderRadius.circular(6),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? const Color(0xFF1E293B) : Colors.white)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 13,
-              color: isSelected
-                  ? activeColor
-                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-            ),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected
-                    ? (isDark ? Colors.white : const Color(0xFF0F172A))
-                    : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-              ),
-            ),
-            const SizedBox(width: 7),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? activeColor.withValues(alpha: 0.15)
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : Colors.black.withValues(alpha: 0.05)),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                count.toString(),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: isSelected
-                      ? activeColor
-                      : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -492,8 +345,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                   status,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight:
-                        isSelected ? FontWeight.w800 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
                         : (isDark ? Colors.white : Colors.black87),
@@ -540,7 +392,9 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
           border: Border.all(
             color: widget.selectedStatus != 'All'
                 ? Theme.of(context).colorScheme.primary
-                : (isDark ? const Color(0xFF1E293B) : context.colors.lightGreyColor),
+                : (isDark
+                    ? const Color(0xFF1E293B)
+                    : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -555,9 +409,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
             ),
             const SizedBox(width: 5),
             Text(
-              widget.selectedStatus == 'All'
-                  ? 'Status'
-                  : widget.selectedStatus,
+              widget.selectedStatus == 'All' ? 'Status' : widget.selectedStatus,
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w700,
@@ -598,8 +450,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                   cat,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight:
-                        isSelected ? FontWeight.w800 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
                         : (isDark ? Colors.white : Colors.black87),
@@ -629,7 +480,9 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
           border: Border.all(
             color: widget.selectedCategory != 'All'
                 ? Theme.of(context).colorScheme.primary
-                : (isDark ? const Color(0xFF1E293B) : context.colors.lightGreyColor),
+                : (isDark
+                    ? const Color(0xFF1E293B)
+                    : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -689,7 +542,9 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
           border: Border.all(
             color: widget.selectedDateRange != null
                 ? Theme.of(context).colorScheme.primary
-                : (isDark ? const Color(0xFF1E293B) : context.colors.lightGreyColor),
+                : (isDark
+                    ? const Color(0xFF1E293B)
+                    : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -735,7 +590,8 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
     );
   }
 
-  Widget _buildSortDropdown(BuildContext context, bool isDark, bool isTemplate) {
+  Widget _buildSortDropdown(
+      BuildContext context, bool isDark, bool isTemplate) {
     final options = isTemplate
         ? const [
             'Default',
@@ -770,8 +626,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                   opt == 'Default' ? 'Default' : opt,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight:
-                        isSelected ? FontWeight.w800 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
                         : (isDark ? Colors.white : Colors.black87),
@@ -801,7 +656,9 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
           border: Border.all(
             color: isSortActive
                 ? Theme.of(context).colorScheme.primary
-                : (isDark ? const Color(0xFF1E293B) : context.colors.lightGreyColor),
+                : (isDark
+                    ? const Color(0xFF1E293B)
+                    : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),
         ),

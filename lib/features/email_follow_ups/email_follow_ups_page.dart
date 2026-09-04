@@ -6,6 +6,7 @@ import 'package:callx_ai/core/widgets/app_action_button.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/email_follow_ups_headers.dart';
+import 'package:callx_ai/features/email_follow_ups/widgets/email_follow_ups_tabs.dart';
 
 import 'package:callx_ai/features/email_follow_ups/widgets/email_preview_dialog.dart';
 import 'package:callx_ai/features/email_follow_ups/widgets/manage_template_dialog.dart';
@@ -335,12 +336,9 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
         ),
         const SizedBox(height: 16),
 
-        // 2. Toolbar & Segmented Tabs Bar (Completely separate from table!)
+        // 2. Toolbar & Action Buttons
         EmailFollowUpsHeaders(
           selectedTab: _selectedTabIndex,
-          onTabChanged: (idx) => setState(() => _selectedTabIndex = idx),
-          sentCount: _filteredEmails.length,
-          templatesCount: _filteredTemplates.length,
           selectedStatus: _selectedStatus,
           selectedCategory: _selectedCategory,
           selectedSort: _selectedSort,
@@ -357,9 +355,18 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
               _showSendEmailDialog(startInGroupMode: true),
           onNewTemplatePressed: () => _showManageTemplateDialog(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
 
-        // 3. Main Content Area
+        // 3. Dedicated Tab Bar (Between Header and Table/Templates!)
+        EmailFollowUpsTabs(
+          selectedTab: _selectedTabIndex,
+          onTabChanged: (idx) => setState(() => _selectedTabIndex = idx),
+          sentCount: _filteredEmails.length,
+          templatesCount: _filteredTemplates.length,
+        ),
+        const SizedBox(height: 14),
+
+        // 4. Main Content Area
         Expanded(
           child: _selectedTabIndex == 0
               ? Container(

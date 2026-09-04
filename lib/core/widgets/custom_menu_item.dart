@@ -42,7 +42,7 @@ class CustomMenuItem extends StatelessWidget {
               height: isCurrentIndex ? 10 : 0,
               margin: EdgeInsets.only(right: isCurrentIndex ? 7 : 0),
               decoration: BoxDecoration(
-                color: context.colors.primaryLightColor,
+                color:isDark ?   context.colors.primaryLightColor : Colors.white,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
