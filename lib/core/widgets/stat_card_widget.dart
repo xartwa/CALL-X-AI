@@ -31,9 +31,7 @@ class StatCardWidget extends StatelessWidget {
           color: Theme.of(context).colorScheme.onPrimary,
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
           border: Border.all(
-            color: isDark
-                ? const Color(0xFF1E293B)
-                : context.colors.mediumGreyColor.withValues(alpha: 0.35),
+            color: context.colors.mediumGreyColor.withValues(alpha: 0.35),
             width: 1,
           ),
           boxShadow: [

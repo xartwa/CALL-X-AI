@@ -166,7 +166,7 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
                     border: Border.all(
                       color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
@@ -254,7 +254,7 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
                                 border: Border.all(
                                   color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
@@ -304,7 +304,7 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
                                 border: Border.all(
                                   color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
@@ -449,7 +449,7 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
         decoration: BoxDecoration(
           color: selected
               ? color.withValues(alpha: 0.15)
-              : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
+              : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
           border: Border.all(
             color: selected

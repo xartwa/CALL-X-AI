@@ -94,8 +94,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
             (email['recipientEmail'] ?? '').toString().toLowerCase();
         final sender = (email['senderEmail'] ?? '').toString().toLowerCase();
         final subject = (email['subject'] ?? '').toString().toLowerCase();
-        final template =
-            (email['templateName'] ?? '').toString().toLowerCase();
+        final template = (email['templateName'] ?? '').toString().toLowerCase();
 
         final matches = name.contains(query) ||
             recipient.contains(query) ||
@@ -336,7 +335,15 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
         ),
         const SizedBox(height: 16),
 
-        // 2. Toolbar & Action Buttons
+        // 3. Dedicated Tab Bar (Between Header and Table/Templates!)
+        EmailFollowUpsTabs(
+          selectedTab: _selectedTabIndex,
+          onTabChanged: (idx) => setState(() => _selectedTabIndex = idx),
+          sentCount: _filteredEmails.length,
+          templatesCount: _filteredTemplates.length,
+        ),
+        const SizedBox(height: 16),
+
         EmailFollowUpsHeaders(
           selectedTab: _selectedTabIndex,
           selectedStatus: _selectedStatus,
@@ -354,15 +361,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
           onBatchEmailPressed: () =>
               _showSendEmailDialog(startInGroupMode: true),
           onNewTemplatePressed: () => _showManageTemplateDialog(),
-        ),
-        const SizedBox(height: 14),
-
-        // 3. Dedicated Tab Bar (Between Header and Table/Templates!)
-        EmailFollowUpsTabs(
-          selectedTab: _selectedTabIndex,
-          onTabChanged: (idx) => setState(() => _selectedTabIndex = idx),
-          sentCount: _filteredEmails.length,
-          templatesCount: _filteredTemplates.length,
         ),
         const SizedBox(height: 14),
 
@@ -778,7 +776,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
                 children: [
                   AppActionButton(
                     type: AppActionType.edit,
-                    onTap: () => _showManageTemplateDialog(templateToEdit: temp),
+                    onTap: () =>
+                        _showManageTemplateDialog(templateToEdit: temp),
                   ),
                   const SizedBox(width: 6),
                   AppActionButton(
@@ -821,9 +820,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
               Icon(
                 CupertinoIcons.mail,
                 size: 11.5,
-                color: isDark
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFF94A3B8),
+                color:
+                    isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
               ),
               const SizedBox(width: 5),
               Expanded(
@@ -850,9 +848,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
               cleanBody,
               style: TextStyle(
                 fontSize: 11.5,
-                color: isDark
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFF64748B),
+                color:
+                    isDark ? const Color(0xFF64748B) : const Color(0xFF64748B),
                 height: 1.4,
               ),
               maxLines: 2,

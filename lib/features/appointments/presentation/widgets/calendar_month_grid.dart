@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../theme/app_colors.dart';
 import '../../domain/entities/appointment_entity.dart';
 
 class CalendarMonthGrid extends StatelessWidget {
@@ -20,7 +21,7 @@ class CalendarMonthGrid extends StatelessWidget {
     final now = DateTime.now();
 
     final borderColor = isDark
-        ? const Color(0xFF1E293B)
+        ? context.colors.mediumGreyColor.withValues(alpha: 0.35)
         : const Color(0xFFE2E8F0);
 
     // Compute month calendar days (Sunday - Saturday)
@@ -262,9 +263,11 @@ class CalendarMonthGrid extends StatelessWidget {
       border = const Color(0xFF10B981);
       textCol = isDark ? const Color(0xFF34D399) : const Color(0xFF047857);
     } else {
-      bg = isDark ? const Color(0xFF1E3A8A) : const Color(0xFFDBEAFE);
-      border = const Color(0xFF3B82F6);
-      textCol = isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8);
+      bg = isDark
+          ? const Color(0xFF8B5CF6).withValues(alpha: 0.18)
+          : const Color(0xFFEDE9FE);
+      border = const Color(0xFF8B5CF6);
+      textCol = isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9);
     }
 
     return Padding(

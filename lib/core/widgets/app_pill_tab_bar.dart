@@ -137,9 +137,7 @@ class _AppPillTabBarState extends State<AppPillTabBar> {
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(50),
         border: Border.all(
-          color: isDark
-              ? const Color(0xFF1E293B)
-              : context.colors.mediumGreyColor.withValues(alpha: 0.35),
+          color: context.colors.mediumGreyColor.withValues(alpha: 0.35),
         ),
       ),
       child: content,

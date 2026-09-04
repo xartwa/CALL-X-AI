@@ -76,7 +76,7 @@ class ConfirmationDialog extends StatelessWidget {
         iconBackgroundColor ?? resolvedIconColor.withValues(alpha: 0.1);
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: context.colors.whiteColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),

@@ -40,9 +40,8 @@ class CalendarTabView extends StatelessWidget {
                       borderRadius:
                           BorderRadius.circular(ThemeConstants.boxRadius),
                       border: Border.all(
-                        color: isDark
-                            ? const Color(0xFF1E293B)
-                            : const Color(0xFFE2E8F0),
+                        color: context.colors.mediumGreyColor
+                            .withValues(alpha: isDark ? 0.35 : 1.0),
                       ),
                     ),
                     child: ClipRRect(
@@ -126,7 +125,8 @@ class CalendarTabView extends StatelessWidget {
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: context.colors.mediumGreyColor
+              .withValues(alpha: isDark ? 0.35 : 1.0),
         ),
       ),
       child: Row(
@@ -148,6 +148,7 @@ class CalendarTabView extends StatelessWidget {
                 child: Row(
                   children: [
                     _buildModePill(
+                      context: context,
                       label: 'Week',
                       selected: state.calendarViewMode == CalendarViewMode.week,
                       isDark: isDark,
@@ -156,6 +157,7 @@ class CalendarTabView extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     _buildModePill(
+                      context: context,
                       label: 'Month',
                       selected:
                           state.calendarViewMode == CalendarViewMode.month,
@@ -276,7 +278,7 @@ class CalendarTabView extends StatelessWidget {
               PopupMenuButton<String>(
                 tooltip: 'Filter by Status',
                 onSelected: (val) => cubit.setStatusFilter(val),
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                color: context.colors.whiteColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                   side: BorderSide(
@@ -362,6 +364,7 @@ class CalendarTabView extends StatelessWidget {
   }
 
   Widget _buildModePill({
+    required BuildContext context,
     required String label,
     required bool selected,
     required bool isDark,
@@ -374,7 +377,7 @@ class CalendarTabView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? (isDark ? const Color(0xFF1E293B) : Colors.white)
+              ? context.colors.whiteColor
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           boxShadow: selected

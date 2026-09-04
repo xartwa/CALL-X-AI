@@ -47,9 +47,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                 color: Theme.of(context).colorScheme.onPrimary,
                 borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
                 border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFFE2E8F0),
+                  color: context.colors.mediumGreyColor
+                      .withValues(alpha: isDark ? 0.35 : 1.0),
                 ),
               ),
               child: Row(
@@ -78,7 +77,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   PopupMenuButton<String>(
                     tooltip: 'Filter Status',
                     onSelected: (val) => cubit.setStatusFilter(val),
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    color: context.colors.whiteColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
@@ -146,9 +145,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   color: Theme.of(context).colorScheme.onPrimary,
                   borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
                   border: Border.all(
-                    color: isDark
-                        ? const Color(0xFF1E293B)
-                        : const Color(0xFFE2E8F0),
+                    color: context.colors.mediumGreyColor
+                        .withValues(alpha: isDark ? 0.35 : 1.0),
                   ),
                 ),
                 child: ClipRRect(
@@ -247,7 +245,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       dividerThickness: 0.5,
       headingRowColor: WidgetStatePropertyAll(
         isDark
-            ? const Color(0xFF1E293B).withValues(alpha: 0.5)
+            ? const Color(0xFF0F172A)
             : const Color(0xFFF1F5F9),
       ),
       headingTextStyle: TextStyle(

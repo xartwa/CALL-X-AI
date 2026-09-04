@@ -67,10 +67,11 @@ class AppointmentDetailsDrawer extends StatelessWidget {
         width: 440,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF131C2E) : Colors.white,
+          color: context.colors.whiteColor,
           border: Border(
             left: BorderSide(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              color: context.colors.mediumGreyColor
+                  .withValues(alpha: isDark ? 0.35 : 1.0),
             ),
           ),
           boxShadow: [
@@ -89,7 +90,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    color: context.colors.mediumGreyColor
+                        .withValues(alpha: isDark ? 0.35 : 1.0),
                   ),
                 ),
               ),
@@ -220,7 +222,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                           color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            color: context.colors.mediumGreyColor
+                                .withValues(alpha: isDark ? 0.35 : 1.0),
                           ),
                         ),
                         child: Text(
@@ -245,7 +248,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    color: context.colors.mediumGreyColor
+                        .withValues(alpha: isDark ? 0.35 : 1.0),
                   ),
                 ),
               ),
@@ -452,7 +456,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
         color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: context.colors.mediumGreyColor
+              .withValues(alpha: isDark ? 0.35 : 1.0),
         ),
       ),
       child: Column(

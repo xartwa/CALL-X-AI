@@ -149,7 +149,7 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? const Color(0xFF1E293B)
+                      ? const Color(0xFF0F172A)
                       : const Color(0xFFF8FAFC),
                   borderRadius:
                       BorderRadius.circular(ThemeConstants.buttonRadius),
@@ -221,7 +221,7 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                                   horizontal: 12, vertical: 11),
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? const Color(0xFF1E293B)
+                                    ? const Color(0xFF0F172A)
                                     : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(
                                     ThemeConstants.buttonRadius),
@@ -278,7 +278,7 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                                   horizontal: 12, vertical: 11),
                               decoration: BoxDecoration(
                                 color: isDark
-                                    ? const Color(0xFF1E293B)
+                                    ? const Color(0xFF0F172A)
                                     : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(
                                     ThemeConstants.buttonRadius),
@@ -436,7 +436,7 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
         decoration: BoxDecoration(
           color: isSelected
               ? context.colors.primaryLightColor.withValues(alpha: 0.12)
-              : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
+              : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
           border: Border.all(
             color: isSelected

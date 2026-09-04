@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../../theme/app_colors.dart';
 import '../../domain/entities/appointment_entity.dart';
 
 class CalendarWeekGrid extends StatelessWidget {
@@ -25,7 +26,7 @@ class CalendarWeekGrid extends StatelessWidget {
     final now = DateTime.now();
 
     final borderColor =
-        isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+        context.colors.mediumGreyColor.withValues(alpha: isDark ? 0.35 : 1.0);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -269,7 +270,7 @@ class CalendarWeekGrid extends StatelessWidget {
       Color textAccent;
 
       if (isPending) {
-        bg = isDark ? const Color(0xFF1E293B) : const Color(0xFFFEF3C7);
+        bg = isDark ? const Color(0xFF332A15) : const Color(0xFFFEF3C7);
         border = const Color(0xFFF59E0B);
         textAccent = const Color(0xFFF59E0B);
       } else if (isOnline) {
@@ -280,12 +281,12 @@ class CalendarWeekGrid extends StatelessWidget {
         border = const Color(0xFF10B981);
         textAccent = const Color(0xFF10B981);
       } else {
-        // In person: Blue / Purple
+        // In person: Purple theme tint
         bg = isDark
-            ? const Color(0xFF1E3A8A).withValues(alpha: 0.6)
-            : const Color(0xFFDBEAFE);
-        border = const Color(0xFF3B82F6);
-        textAccent = const Color(0xFF3B82F6);
+            ? const Color(0xFF8B5CF6).withValues(alpha: 0.18)
+            : const Color(0xFFEDE9FE);
+        border = const Color(0xFF8B5CF6);
+        textAccent = const Color(0xFF8B5CF6);
       }
 
       widgets.add(

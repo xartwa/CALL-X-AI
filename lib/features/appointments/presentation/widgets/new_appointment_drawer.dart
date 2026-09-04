@@ -147,10 +147,11 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
         width: 460,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF131C2E) : Colors.white,
+          color: context.colors.whiteColor,
           border: Border(
             left: BorderSide(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              color: context.colors.mediumGreyColor
+                  .withValues(alpha: isDark ? 0.35 : 1.0),
             ),
           ),
           boxShadow: [
@@ -171,7 +172,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      color: context.colors.mediumGreyColor
+                          .withValues(alpha: isDark ? 0.35 : 1.0),
                     ),
                   ),
                 ),
@@ -372,7 +374,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      color: context.colors.mediumGreyColor
+                          .withValues(alpha: isDark ? 0.35 : 1.0),
                     ),
                   ),
                 ),
@@ -442,7 +445,9 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
           border: Border.all(
             color: isSelected
                 ? primary
-                : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+                : (isDark
+                    ? context.colors.mediumGreyColor.withValues(alpha: 0.35)
+                    : const Color(0xFFE2E8F0)),
           ),
         ),
         child: Row(

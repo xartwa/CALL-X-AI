@@ -62,9 +62,6 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-
-            // KPI Stat Cards Row
             IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

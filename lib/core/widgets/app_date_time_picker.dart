@@ -148,12 +148,12 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: context.colors.whiteColor,
       insetPadding: const EdgeInsets.all(24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
         side: BorderSide(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          color: context.colors.mediumGreyColor.withValues(alpha: isDark ? 0.35 : 1.0),
         ),
       ),
       child: SizedBox(

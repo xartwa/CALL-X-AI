@@ -49,7 +49,8 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: context.colors.mediumGreyColor
+              .withValues(alpha: isDark ? 0.35 : 1.0),
         ),
       ),
       child: Column(
