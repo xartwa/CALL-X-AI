@@ -417,37 +417,17 @@ class _CallActionDialogState extends State<CallActionDialog> {
   }
 
   Widget _buildScenarioItem(ConversationScenario s, bool isDark) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-          decoration: BoxDecoration(
-            color:
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            s.category.toUpperCase(),
-            style: TextStyle(
-              fontSize: 9.5,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: Text(
+        s.title,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white : Colors.black87,
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            s.title,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 
