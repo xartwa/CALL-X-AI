@@ -210,28 +210,16 @@ class ScenarioSettingsTab extends StatelessWidget {
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: [
-                              Text(
-                                'Scenario-specific instructions for outbound calls.',
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  color: context.colors.darkGreyColor,
-                                ),
-                              ),
-                              Container(
+                          const SizedBox(height: 12),
+                                Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                    horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: draft.isCartesiaSynced
                                       ? const Color(0xFF10B981)
                                           .withValues(alpha: 0.12)
                                       : Colors.amber.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   draft.isCartesiaSynced
@@ -246,8 +234,6 @@ class ScenarioSettingsTab extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
@@ -422,14 +408,7 @@ class ScenarioSettingsTab extends StatelessWidget {
 
                 // OPENING GREETING & HOOK
                 const SettingsLabel('OPENING GREETING & HOOK'),
-                const SizedBox(height: 4),
-                Text(
-                  'The first sentence the AI speaks as soon as the recipient answers.',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: context.colors.darkGreyColor,
-                  ),
-                ),
+             
                 const SizedBox(height: 8),
                 DraftTextField(
                   value: draft.openingGreeting,

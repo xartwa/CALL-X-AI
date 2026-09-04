@@ -74,8 +74,10 @@ class InboundSettingsTab extends StatelessWidget {
                               horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: profile.isAiEnabled
-                                ? const Color(0xFF10B981).withValues(alpha: 0.12)
-                                : const Color(0xFFF59E0B).withValues(alpha: 0.12),
+                                ? const Color(0xFF10B981)
+                                    .withValues(alpha: 0.12)
+                                : const Color(0xFFF59E0B)
+                                    .withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -133,8 +135,8 @@ class InboundSettingsTab extends StatelessWidget {
                       side: BorderSide(
                         color: primaryColor.withValues(alpha: 0.5),
                       ),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 8),
                     ),
                     onPressed: state.previewingVoiceId != null
                         ? null
@@ -143,7 +145,9 @@ class InboundSettingsTab extends StatelessWidget {
                         ? const AppLoadingIndicator(size: 13)
                         : const Icon(CupertinoIcons.play_arrow_solid, size: 13),
                     label: Text(
-                      state.previewingVoiceId != null ? 'Generating...' : 'Preview',
+                      state.previewingVoiceId != null
+                          ? 'Generating...'
+                          : 'Preview',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -271,7 +275,15 @@ class InboundSettingsTab extends StatelessWidget {
                           // Day chips: M, T, W, T, F, S, S
                           Row(
                             children: [
-                              for (final day in ['M', 'T', 'W', 'T', 'F', 'S', 'S'])
+                              for (final day in [
+                                'M',
+                                'T',
+                                'W',
+                                'T',
+                                'F',
+                                'S',
+                                'S'
+                              ])
                                 Container(
                                   width: 32,
                                   height: 32,
@@ -280,7 +292,8 @@ class InboundSettingsTab extends StatelessWidget {
                                     color: primaryColor.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: primaryColor.withValues(alpha: 0.4),
+                                      color:
+                                          primaryColor.withValues(alpha: 0.4),
                                     ),
                                   ),
                                   alignment: Alignment.center,
@@ -419,13 +432,10 @@ class _InboundCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+            Text(
                       title,
                       style: const TextStyle(
                         fontSize: 12.5,
@@ -433,17 +443,6 @@ class _InboundCard extends StatelessWidget {
                         letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               if (headerAction != null) headerAction!,
             ],
           ),

@@ -534,22 +534,15 @@ class _CardContainer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            title.toUpperCase(),
             style: const TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 11.5,
-              color: context.colors.darkGreyColor,
-            ),
-          ),
-          const SizedBox(height: 18),
+        
+          const SizedBox(height: 24),
           ...children,
         ],
       ),

@@ -245,7 +245,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       dividerThickness: 0.5,
       headingRowColor: WidgetStatePropertyAll(
         isDark
-            ? const Color(0xFF0F172A)
+            ? const Color(0xFF1E293B).withValues(alpha: 0.5)
             : const Color(0xFFF1F5F9),
       ),
       headingTextStyle: TextStyle(
