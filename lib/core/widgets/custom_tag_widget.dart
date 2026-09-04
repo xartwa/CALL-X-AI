@@ -20,16 +20,17 @@ class CustomTagWidget extends StatelessWidget {
         color: backgroundColor ?? color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: color,
+          color: color.withValues(alpha: 0.35),
           width: 1,
         ),
       ),
       child: Text(
-        label.toUpperCase(),
+        label.trim().toUpperCase(),
         style: TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: color,
+          letterSpacing: 0.4,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

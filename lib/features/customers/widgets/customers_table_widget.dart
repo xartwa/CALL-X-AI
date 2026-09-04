@@ -6,6 +6,7 @@ import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/widgets/custom_tag_widget.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/utils/app_status_helper.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
@@ -111,47 +112,13 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
 
   Color _getSemanticColor(BuildContext context, String value) {
     final state = context.read<WorkspaceSettingsCubit>().state;
-    final lower = value.toLowerCase();
+    final lower = value.toLowerCase().trim();
 
-    for (final tag in state.leadStatuses) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
-    }
-    for (final tag in state.leadPriorities) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
-    }
-    for (final tag in state.leadQualities) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
-    }
     for (final tag in state.customTags) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
-    }
-    for (final tag in state.callStatuses) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
+      if (tag.label.toLowerCase().trim() == lower) return tag.color;
     }
 
-    if (lower.contains('qualified') ||
-        lower.contains('won') ||
-        lower.contains('active') ||
-        lower.contains('excellent') ||
-        lower.contains('hot') ||
-        lower.contains('vip')) {
-      return const Color(0xFFEF4444);
-    }
-    if (lower.contains('warm') ||
-        lower.contains('callback') ||
-        lower.contains('pending') ||
-        lower.contains('branding')) {
-      return const Color(0xFFF59E0B);
-    }
-    if (lower.contains('lost') ||
-        lower.contains('cold') ||
-        lower.contains('inactive') ||
-        lower.contains('poor') ||
-        lower.contains('developer') ||
-        lower.contains('gc')) {
-      return const Color(0xFF10B981);
-    }
-    return const Color(0xFF3B82F6);
+    return AppStatusHelper.getStatusColor(value);
   }
 
   @override

@@ -8,6 +8,7 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/widgets/app_status_badge.dart';
 import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/features/calls/cubit/selected_call_cubit.dart';
@@ -52,16 +53,6 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     if (oldWidget.call.id != widget.call.id) {
       _followUpDate = widget.call.nextFollowUpDate;
     }
-  }
-
-  Color _getStatusColor(BuildContext context, String status) {
-    final lower = status.toLowerCase();
-    if (lower.contains('completed')) return context.colors.successColor;
-    if (lower.contains('failed')) return context.colors.errorColor;
-    if (lower.contains('queued') || lower.contains('upcoming')) {
-      return context.colors.queuedColor;
-    }
-    return context.colors.primaryLightColor;
   }
 
   String _getDynamicSummary() {
@@ -212,10 +203,6 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final panelWidth = (screenWidth * 0.34).clamp(460.0, 520.0);
-
-    final statusColor =
-        widget.call.statusColor ?? _getStatusColor(context, widget.call.status);
-
     final initials = widget.call.fullName.trim().isEmpty
         ? '?'
         : widget.call.fullName.trim()[0].toUpperCase();
@@ -310,26 +297,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               ),
                               const SizedBox(width: 8),
                               // Status Pill Badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: statusColor.withValues(alpha: 0.4),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  widget.call.status,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: statusColor,
-                                  ),
-                                ),
-                              ),
+                              AppStatusBadge(status: widget.call.status),
                             ],
                           ),
                           // Company name (only shown if not empty)
@@ -705,27 +673,8 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                             ),
                             if (widget.call.lastContactResult != null &&
                                 widget.call.lastContactResult!.isNotEmpty) ...[
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: context.colors.primaryLightColor
-                                      .withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: context.colors.primaryLightColor
-                                        .withValues(alpha: 0.35),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  widget.call.lastContactResult!,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: context.colors.primaryLightColor,
-                                  ),
-                                ),
+                              AppStatusBadge(
+                                status: widget.call.lastContactResult!,
                               ),
                             ],
                           ],

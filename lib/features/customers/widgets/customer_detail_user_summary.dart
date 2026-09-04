@@ -12,6 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/core/models/tag_model.dart';
 import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/utils/app_status_helper.dart';
+import 'package:callx_ai/core/widgets/app_status_badge.dart';
 import 'package:toastification/toastification.dart';
 
 class CustomerDetailUserSummary extends StatelessWidget {
@@ -26,34 +28,13 @@ class CustomerDetailUserSummary extends StatelessWidget {
 
   Color _getTagColor(BuildContext context, String text) {
     final state = context.read<WorkspaceSettingsCubit>().state;
-    final lower = text.toLowerCase();
+    final lower = text.toLowerCase().trim();
 
     for (final tag in state.customTags) {
-      if (tag.label.toLowerCase() == lower) return tag.color;
+      if (tag.label.toLowerCase().trim() == lower) return tag.color;
     }
 
-    if (lower.contains('hot') ||
-        lower.contains('vip') ||
-        lower.contains('namovafagh')) {
-      return const Color(0xFFEF4444); // Red
-    }
-    if (lower.contains('gc') ||
-        lower.contains('developer') ||
-        lower.contains('movafagh')) {
-      return const Color(0xFF10B981); // Emerald
-    }
-    if (lower.contains('branding') ||
-        lower.contains('warm') ||
-        lower.contains('paygiri')) {
-      return const Color(0xFFF59E0B); // Amber
-    }
-    if (lower.contains('agency') || lower.contains('vancouver')) {
-      return const Color(0xFF3B82F6); // Blue
-    }
-    if (lower.contains('proposal') || lower.contains('startup')) {
-      return const Color(0xFF8B5CF6); // Purple
-    }
-    return const Color(0xFF06B6D4); // Cyan
+    return AppStatusHelper.getStatusColor(text);
   }
 
   @override
@@ -162,13 +143,18 @@ class CustomerDetailUserSummary extends StatelessWidget {
           // Summary Key-Value Details
           _buildInfoRow(context,
               label: 'Company Type', value: user.companyType),
-          _buildInfoRow(context, label: 'Lead Status', value: user.leadStatus),
+          _buildInfoRow(context,
+              label: 'Lead Status',
+              value: user.leadStatus,
+              isBadge: true),
           _buildInfoRow(context,
               label: 'Lead Priority',
               value: user.leadPriority,
-              isPriority: true),
+              isBadge: true),
           _buildInfoRow(context,
-              label: 'Lead Quality', value: user.leadQuality),
+              label: 'Lead Quality',
+              value: user.leadQuality,
+              isBadge: true),
           if (user.nextFollowUpDate != null)
             _buildInfoRow(
               context,
@@ -177,7 +163,9 @@ class CustomerDetailUserSummary extends StatelessWidget {
               isHighlight: true,
             ),
           _buildInfoRow(context,
-              label: 'Last Contact Result', value: user.lastContactResult),
+              label: 'Last Contact Result',
+              value: user.lastContactResult,
+              isBadge: true),
           _buildInfoRow(context,
               label: text.createdAt,
               value: AppDateTime.displayDateTime(user.createdAt)),
@@ -298,7 +286,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  tag,
+                                  tag.toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -453,17 +441,20 @@ class CustomerDetailUserSummary extends StatelessWidget {
     required String value,
     bool isHighlight = false,
     bool isPriority = false,
+    bool isLeadStatus = false,
+    bool isBadge = false,
   }) {
-    Color? priorityColor;
-    if (isPriority) {
-      final p = value.toLowerCase();
-      if (p.contains('hot')) priorityColor = const Color(0xFFEF4444);
-      if (p.contains('warm')) priorityColor = const Color(0xFFF59E0B);
-      if (p.contains('cold')) priorityColor = const Color(0xFF3B82F6);
-    }
+    final cleanVal = value.trim();
+    final isInvalid = cleanVal.isEmpty ||
+        cleanVal.toUpperCase() == 'N/A' ||
+        cleanVal.toLowerCase() == 'unknown' ||
+        cleanVal == '-';
+
+    final shouldShowBadge =
+        (isBadge || isPriority || isLeadStatus) && !isInvalid;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.only(bottom: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -475,25 +466,14 @@ class CustomerDetailUserSummary extends StatelessWidget {
               color: context.colors.darkGreyColor,
             ),
           ),
-          if (isPriority && priorityColor != null)
-            Container(
+          if (shouldShowBadge)
+            AppStatusBadge(
+              status: cleanVal,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: priorityColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: priorityColor.withValues(alpha: 0.4)),
-              ),
-              child: Text(
-                value,
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    color: priorityColor),
-              ),
             )
           else
             Text(
-              value.isEmpty ? "N/A" : value,
+              cleanVal.isEmpty ? "N/A" : cleanVal,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,

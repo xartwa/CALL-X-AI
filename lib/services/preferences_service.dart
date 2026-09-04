@@ -240,7 +240,12 @@ class PreferencesService {
         TagModel(id: '1', label: 'Completed', color: const Color(0xFF10B981)),
         TagModel(id: '2', label: 'Failed', color: const Color(0xFFEF4444)),
         TagModel(id: '3', label: 'Queued', color: const Color(0xFFF59E0B)),
-        TagModel(id: '4', label: 'Upcoming', color: const Color(0xFF3B82F6)),
+        TagModel(id: '4', label: 'Upcoming', color: const Color(0xFFF59E0B)),
+        TagModel(id: '5', label: 'In Progress', color: const Color(0xFF3B82F6)),
+        TagModel(id: '6', label: 'Ringing', color: const Color(0xFF0284C7)),
+        TagModel(id: '7', label: 'Busy', color: const Color(0xFFF97316)),
+        TagModel(id: '8', label: 'No Answer', color: const Color(0xFF94A3B8)),
+        TagModel(id: '9', label: 'Canceled', color: const Color(0xFFEF4444)),
       ];
     }
     return list.map((item) => TagModel.fromJson(jsonDecode(item))).toList();

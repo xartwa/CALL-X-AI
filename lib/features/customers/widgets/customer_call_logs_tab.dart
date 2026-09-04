@@ -5,6 +5,7 @@ import 'package:toastification/toastification.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/widgets/app_status_badge.dart';
 import 'package:callx_ai/features/calls/models/call_history_model.dart';
 import 'package:callx_ai/features/calls/widgets/details/call_audio_player_widget.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
@@ -34,175 +35,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   }
 
   List<CustomerCallHistory> get _effectiveCalls {
-    if (widget.user.callLogs.isNotEmpty) {
-      return widget.user.callLogs;
-    }
-
-    // Default 8 clean call logs matching mockup
-    return [
-      const CustomerCallHistory(
-        id: 'call_1',
-        status: 'Completed',
-        direction: 'Outbound',
-        outcome: 'Completed',
-        duration: '02:15',
-        durationSeconds: 135,
-        callDate: '2026-08-29',
-        callTime: '19:44',
-        scenario: 'Sara (Sales)',
-        recordingUrl: 'https://example.com/recording_1.mp3',
-        summary:
-            'Discussed pricing plans and enterprise package. Customer is interested and requested a demo. Follow-up scheduled for next week.',
-        transcript: [
-          TranscriptTurn(
-            speaker: 'ai',
-            speakerName: 'AI',
-            timestamp: '',
-            text: 'Hi XARTA,',
-          ),
-          TranscriptTurn(
-            speaker: 'customer',
-            speakerName: 'Customer',
-            timestamp: '',
-            text: 'can you hear me?',
-          ),
-          TranscriptTurn(
-            speaker: 'ai',
-            speakerName: 'AI',
-            timestamp: '',
-            text: 'Yes, I can hear you. How can I help you today?',
-          ),
-          TranscriptTurn(
-            speaker: 'customer',
-            speakerName: 'Customer',
-            timestamp: '',
-            text:
-                'I\'m looking for more information about your enterprise plan.',
-          ),
-          TranscriptTurn(
-            speaker: 'ai',
-            speakerName: 'AI',
-            timestamp: '',
-            text:
-                'Sure! Our enterprise plan includes unlimited seats and priority support.',
-          ),
-        ],
-      ),
-      const CustomerCallHistory(
-        id: 'call_2',
-        status: 'Completed',
-        direction: 'Inbound',
-        outcome: 'Completed',
-        duration: '01:32',
-        durationSeconds: 92,
-        callDate: '2026-08-26',
-        callTime: '14:10',
-        scenario: 'Sara (Support)',
-        summary:
-            'Customer called to inquire about custom CRM integrations and API webhooks. Provided technical documentation.',
-        transcript: [
-          TranscriptTurn(
-            speaker: 'customer',
-            speakerName: 'Customer',
-            timestamp: '',
-            text: 'Hello, do you support custom webhooks for our backend CRM?',
-          ),
-          TranscriptTurn(
-            speaker: 'ai',
-            speakerName: 'AI',
-            timestamp: '',
-            text:
-                'Yes, we support realtime webhook notifications and REST endpoints for all call events.',
-          ),
-        ],
-      ),
-      const CustomerCallHistory(
-        id: 'call_3',
-        status: 'Completed',
-        direction: 'Outbound',
-        outcome: 'Completed',
-        duration: '03:45',
-        durationSeconds: 225,
-        callDate: '2026-08-22',
-        callTime: '11:03',
-        scenario: 'Sara (Sales)',
-        summary:
-            'Deep dive on onboarding process. Client confirmed team size of 15 members.',
-        transcript: [
-          TranscriptTurn(
-            speaker: 'ai',
-            speakerName: 'AI',
-            timestamp: '',
-            text: 'Hi, following up on your team onboarding request.',
-          ),
-        ],
-      ),
-      const CustomerCallHistory(
-        id: 'call_4',
-        status: 'Completed',
-        direction: 'Inbound',
-        outcome: 'Completed',
-        duration: '00:47',
-        durationSeconds: 47,
-        callDate: '2026-08-20',
-        callTime: '16:38',
-        scenario: 'Billing Agent',
-        summary:
-            'Quick check on billing cycles and invoice payment methods. Confirmed ACH and Credit Card.',
-      ),
-      const CustomerCallHistory(
-        id: 'call_5',
-        status: 'Completed',
-        direction: 'Outbound',
-        outcome: 'Completed',
-        duration: '02:15',
-        durationSeconds: 135,
-        callDate: '2026-08-17',
-        callTime: '10:22',
-        scenario: 'Sara (Sales)',
-        summary:
-            'Product walkthrough demo completed. Customer expressed high satisfaction with voice response speed.',
-      ),
-      const CustomerCallHistory(
-        id: 'call_6',
-        status: 'Interested',
-        direction: 'Inbound',
-        outcome: 'Interested',
-        duration: '01:05',
-        durationSeconds: 65,
-        callDate: '2026-08-15',
-        callTime: '09:15',
-        scenario: 'Sara (Sales)',
-        summary:
-            'Customer called to explore volume discounts for multiple branch locations.',
-      ),
-      const CustomerCallHistory(
-        id: 'call_7',
-        status: 'No Answer',
-        direction: 'Outbound',
-        outcome: 'No Answer',
-        duration: '00:58',
-        durationSeconds: 58,
-        callDate: '2026-08-12',
-        callTime: '17:50',
-        scenario: 'Outreach Bot',
-        summary:
-            'Call rang for 50 seconds without answer. System scheduled automatic retry.',
-      ),
-      const CustomerCallHistory(
-        id: 'call_8',
-        status: 'Completed',
-        direction: 'Inbound',
-        outcome: 'Completed',
-        duration: '02:40',
-        durationSeconds: 160,
-        callDate: '2026-08-10',
-        callTime: '13:08',
-        scenario: 'Sara (Sales)',
-        summary:
-            'Initial discovery call. Discussed AI voice agent requirements and target KPIs.',
-      ),
-    ];
+    return widget.user.callLogs;
   }
 
   List<CustomerCallHistory> get _filteredCalls {
@@ -252,17 +85,16 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   }
 
   void _copyTranscript(CustomerCallHistory call) {
-    final transcript = call.transcript.isNotEmpty
-        ? call.transcript
-        : const [
-            TranscriptTurn(
-              speaker: 'ai',
-              speakerName: 'AI',
-              timestamp: '',
-              text: 'Hi, how can I help you today?',
-            ),
-          ];
+    if (call.transcript.isEmpty) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'No transcript recorded for this call.',
+        toastificationType: ToastificationType.info,
+      );
+      return;
+    }
 
+    final transcript = call.transcript;
     final buffer = StringBuffer();
     buffer.writeln(
         '=== Call Transcript: ${widget.user.fullName} (${AppDateTime.displayDateTime(call.dateTime)}) ===');
@@ -869,37 +701,21 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                               ),
                             ],
                           ),
-                          if (call.outcome.isNotEmpty) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: context.colors.primaryLightColor
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: context.colors.primaryLightColor
-                                      .withValues(alpha: 0.35),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                call.outcome,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.colors.primaryLightColor,
-                                ),
-                              ),
-                            ),
-                          ],
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildStatusBadge(call.status),
+                              if (call.outcome.isNotEmpty) ...[
+                                const SizedBox(width: 6),
+                                AppStatusBadge(status: call.outcome),
+                              ],
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        call.summary != null && call.summary!.isNotEmpty
-                            ? call.summary!
-                            : 'Customer (${widget.user.fullName}) was contacted by AI (B2B Sales). Key project scope, budget estimation, and delivery terms were discussed. Customer expressed strong interest in proceeding.',
+                        _getDynamicSummary(call),
                         style: TextStyle(
                           fontSize: 12.5,
                           height: 1.45,
@@ -990,28 +806,42 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
   }
 
   Widget _buildTranscriptList(CustomerCallHistory call, bool isDark) {
-    final transcript = call.transcript.isNotEmpty
-        ? call.transcript
-        : const [
-            TranscriptTurn(
-              speaker: 'ai',
-              speakerName: 'AI',
-              timestamp: '',
-              text: 'Hi XARTA,',
-            ),
-            TranscriptTurn(
-              speaker: 'customer',
-              speakerName: 'AI Assistant',
-              timestamp: '',
-              text: 'can you hear me?',
-            ),
-            TranscriptTurn(
-              speaker: 'ai',
-              speakerName: 'AI',
-              timestamp: '',
-              text: 'Yes, I can hear you. How can I help you today?',
-            ),
-          ];
+    if (call.transcript.isEmpty) {
+      final message = call.status.toLowerCase().trim() == 'queued'
+          ? 'Call is queued. Transcript will appear once the call starts.'
+          : (call.status.toLowerCase().trim() == 'in progress' ||
+                  call.status.toLowerCase().trim() == 'ringing')
+              ? 'Call in progress. Transcript is being recorded...'
+              : 'No transcript recorded for this call.';
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                CupertinoIcons.chat_bubble_text,
+                size: 32,
+                color: context.colors.darkGreyColor.withValues(alpha: 0.4),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: context.colors.darkGreyColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final transcript = call.transcript;
 
     return ListView.separated(
       shrinkWrap: true,
@@ -1131,43 +961,40 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'won':
-        color = const Color(0xFF10B981);
-        break;
-      case 'interested':
-      case 'qualified':
-        color = const Color(0xFF8B5CF6);
-        break;
-      case 'no answer':
-      case 'failed':
-      case 'missed':
-        color = const Color(0xFF64748B);
-        break;
-      default:
-        color = const Color(0xFF10B981);
+  String _getDynamicSummary(CustomerCallHistory call) {
+    if (call.summary != null && call.summary!.trim().isNotEmpty) {
+      return call.summary!;
     }
+    switch (call.status.toLowerCase().trim()) {
+      case 'completed':
+        return 'Call completed. No summary recorded.';
+      case 'in progress':
+      case 'in-progress':
+      case 'ongoing':
+        return 'Call is currently in progress.';
+      case 'ringing':
+      case 'initiated':
+        return 'Call is ringing / initiating.';
+      case 'queued':
+      case 'pending':
+        return 'Call is queued and pending outbound dispatch.';
+      case 'failed':
+        return 'Call was not connected or was unanswered. No audio recording or transcript is available.';
+      case 'busy':
+        return 'The customer line was busy. Call could not be connected.';
+      case 'no answer':
+      case 'missed':
+      case 'unanswered':
+        return 'Call was not answered by recipient.';
+      case 'canceled':
+      case 'cancelled':
+        return 'Call was canceled.';
+      default:
+        return 'No AI summary available for this call.';
+    }
+  }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
-    );
+  Widget _buildStatusBadge(String status) {
+    return AppStatusBadge(status: status);
   }
 }
