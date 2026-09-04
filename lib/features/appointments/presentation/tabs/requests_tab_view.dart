@@ -125,20 +125,21 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             const SizedBox(height: 16),
 
             // Table Card
-            Container(
-              height: 600,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimary,
-                borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                child: requests.isEmpty
-                    ? _buildEmptyState(context, isDark)
-                    : _buildTable(context, requests, isDark, cubit),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                  child: requests.isEmpty
+                      ? _buildEmptyState(context, isDark)
+                      : _buildTable(context, requests, isDark, cubit),
+                ),
               ),
             ),
           ],

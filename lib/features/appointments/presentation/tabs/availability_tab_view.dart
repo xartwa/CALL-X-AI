@@ -21,49 +21,52 @@ class AvailabilityTabView extends StatelessWidget {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final cubit = context.read<AppointmentsCubit>();
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 960;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 32),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= 960;
 
-            final weeklyCard = _buildWeeklyCard(context, state, cubit, isDark);
-            final settingsCard = _buildSettingsCard(context, state, cubit, isDark);
-            final exceptionsCard = _buildExceptionsCard(context, state, cubit, isDark);
+              final weeklyCard = _buildWeeklyCard(context, state, cubit, isDark);
+              final settingsCard = _buildSettingsCard(context, state, cubit, isDark);
+              final exceptionsCard = _buildExceptionsCard(context, state, cubit, isDark);
 
-            if (isWide) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left: Weekly Availability (takes ~55% width)
-                  Expanded(
-                    flex: 6,
-                    child: weeklyCard,
-                  ),
-                  const SizedBox(width: 16),
-                  // Right: Settings & Exceptions (takes ~45% width)
-                  Expanded(
-                    flex: 5,
-                    child: Column(
-                      children: [
-                        settingsCard,
-                        const SizedBox(height: 16),
-                        exceptionsCard,
-                      ],
+              if (isWide) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left: Weekly Availability (takes ~55% width)
+                    Expanded(
+                      flex: 6,
+                      child: weeklyCard,
                     ),
-                  ),
-                ],
-              );
-            } else {
-              return Column(
-                children: [
-                  weeklyCard,
-                  const SizedBox(height: 16),
-                  settingsCard,
-                  const SizedBox(height: 16),
-                  exceptionsCard,
-                ],
-              );
-            }
-          },
+                    const SizedBox(width: 16),
+                    // Right: Settings & Exceptions (takes ~45% width)
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        children: [
+                          settingsCard,
+                          const SizedBox(height: 16),
+                          exceptionsCard,
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              } else {
+                return Column(
+                  children: [
+                    weeklyCard,
+                    const SizedBox(height: 16),
+                    settingsCard,
+                    const SizedBox(height: 16),
+                    exceptionsCard,
+                  ],
+                );
+              }
+            },
+          ),
         );
       },
     );

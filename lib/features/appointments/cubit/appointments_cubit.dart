@@ -13,17 +13,17 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     emit(state.copyWith(status: AppointmentsStatus.loading, clearError: true));
     try {
       final results = await Future.wait([
-        _repository.getAppointments(),
-        _repository.getUpcomingAppointments(),
-        _repository.getAppointmentRequests(),
-        _repository.getAvailabilityRules(),
-        _repository.getExceptions(),
-        _repository.getSettings(),
-        _repository.getCalendarConnection(),
+        _repository.getAppointments().catchError((_) => <AppointmentEntity>[]),
+        _repository.getUpcomingAppointments().catchError((_) => <AppointmentEntity>[]),
+        _repository.getAppointmentRequests().catchError((_) => <AppointmentRequestEntity>[]),
+        _repository.getAvailabilityRules().catchError((_) => <AvailabilityRuleEntity>[]),
+        _repository.getExceptions().catchError((_) => <AvailabilityExceptionEntity>[]),
+        _repository.getSettings().catchError((_) => const AppointmentSettingsEntity()),
+        _repository.getCalendarConnection().catchError((_) => const CalendarConnectionEntity()),
         _repository.getCalendarAppointments(
           year: state.selectedDate.year,
           month: state.selectedDate.month,
-        ),
+        ).catchError((_) => <AppointmentEntity>[]),
       ]);
 
       emit(state.copyWith(
@@ -51,13 +51,13 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
   Future<void> refresh() async {
     try {
       final results = await Future.wait([
-        _repository.getAppointments(),
-        _repository.getUpcomingAppointments(),
-        _repository.getAppointmentRequests(),
-        _repository.getAvailabilityRules(),
-        _repository.getExceptions(),
-        _repository.getSettings(),
-        _repository.getCalendarConnection(),
+        _repository.getAppointments().catchError((_) => <AppointmentEntity>[]),
+        _repository.getUpcomingAppointments().catchError((_) => <AppointmentEntity>[]),
+        _repository.getAppointmentRequests().catchError((_) => <AppointmentRequestEntity>[]),
+        _repository.getAvailabilityRules().catchError((_) => <AvailabilityRuleEntity>[]),
+        _repository.getExceptions().catchError((_) => <AvailabilityExceptionEntity>[]),
+        _repository.getSettings().catchError((_) => const AppointmentSettingsEntity()),
+        _repository.getCalendarConnection().catchError((_) => const CalendarConnectionEntity()),
       ]);
 
       emit(state.copyWith(

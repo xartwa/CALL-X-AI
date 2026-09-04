@@ -7,6 +7,7 @@ import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
 import '../../cubit/appointments_state.dart';
 import '../widgets/appointment_details_drawer.dart';
+import '../widgets/calendar_month_grid.dart';
 import '../widgets/calendar_week_grid.dart';
 import '../widgets/upcoming_appointments_panel.dart';
 
@@ -25,64 +26,83 @@ class CalendarTabView extends StatelessWidget {
           children: [
             // Calendar Sub-toolbar
             _buildToolbar(context, state, cubit, isDark),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // Main Content: Week Grid + Upcoming Panel
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth >= 1020;
+            // Main Content: Week/Month Grid + Upcoming Panel
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth >= 980;
 
-                final calendarCard = Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                    border: Border.all(
-                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                    child: CalendarWeekGrid(
-                      weekDays: state.currentWeekDays,
-                      appointments: state.filteredAppointments,
-                      onAppointmentTapped: (appt) {
-                        AppointmentDetailsDrawer.show(context, appt);
-                      },
-                    ),
-                  ),
-                );
-
-                final upcomingPanel = UpcomingAppointmentsPanel(
-                  appointments: state.upcomingAppointments,
-                  onAppointmentTapped: (appt) {
-                    AppointmentDetailsDrawer.show(context, appt);
-                  },
-                );
-
-                if (isWide) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: calendarCard,
+                  final calendarCard = Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                       ),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        width: 320,
-                        child: upcomingPanel,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                      child: state.calendarViewMode == CalendarViewMode.week
+                          ? CalendarWeekGrid(
+                              weekDays: state.currentWeekDays,
+                              appointments: state.filteredAppointments,
+                              onAppointmentTapped: (appt) {
+                                AppointmentDetailsDrawer.show(context, appt);
+                              },
+                            )
+                          : CalendarMonthGrid(
+                              focusedMonth: state.selectedDate,
+                              appointments: state.filteredAppointments,
+                              onAppointmentTapped: (appt) {
+                                AppointmentDetailsDrawer.show(context, appt);
+                              },
+                            ),
+                    ),
+                  );
+
+                  final upcomingPanel = UpcomingAppointmentsPanel(
+                    appointments: state.upcomingAppointments,
+                    onAppointmentTapped: (appt) {
+                      AppointmentDetailsDrawer.show(context, appt);
+                    },
+                    onViewAllTapped: () => cubit.setActiveTab(1),
+                  );
+
+                  if (isWide) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: calendarCard,
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: 310,
+                          child: upcomingPanel,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 600,
+                            child: calendarCard,
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 400,
+                            child: upcomingPanel,
+                          ),
+                        ],
                       ),
-                    ],
-                  );
-                } else {
-                  return Column(
-                    children: [
-                      calendarCard,
-                      const SizedBox(height: 20),
-                      upcomingPanel,
-                    ],
-                  );
-                }
-              },
+                    );
+                  }
+                },
+              ),
             ),
           ],
         );

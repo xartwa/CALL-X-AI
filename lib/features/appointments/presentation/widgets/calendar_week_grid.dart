@@ -32,103 +32,148 @@ class CalendarWeekGrid extends StatelessWidget {
       builder: (context, constraints) {
         const double timeGutterWidth = 56.0;
         final double gridWidth = constraints.maxWidth - timeGutterWidth;
-        final double colWidth = (gridWidth / 7).clamp(90.0, 300.0);
+        final double colWidth = gridWidth / 7;
 
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header Row: Days of week
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: borderColor, width: 1)),
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: timeGutterWidth),
-                    for (int i = 0; i < 7; i++) ...[
-                      SizedBox(
-                        width: colWidth,
-                        child: _buildDayHeader(weekDays[i], now, isDark),
-                      ),
-                    ],
-                  ],
-                ),
+        return Column(
+          children: [
+            // Header Row: Days of week (Pinned at top)
+            Container(
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: borderColor, width: 1)),
               ),
+              child: Row(
+                children: [
+                  const SizedBox(width: timeGutterWidth),
+                  for (int i = 0; i < 7; i++) ...[
+                    SizedBox(
+                      width: colWidth,
+                      child: _buildDayHeader(weekDays[i], now, isDark),
+                    ),
+                  ],
+                ],
+              ),
+            ),
 
-              // Hours Grid Body
-              SizedBox(
-                height: (_endHour - _startHour + 1) * _hourHeight,
-                child: Stack(
-                  children: [
-                    // Background horizontal grid lines
-                    Column(
-                      children: [
-                        for (int h = _startHour; h <= _endHour; h++) ...[
-                          Container(
-                            height: _hourHeight,
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: borderColor.withValues(alpha: 0.6),
-                                  width: 0.8,
+            // Hours Grid Body (Scrollable inside available height)
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: (_endHour - _startHour + 1) * _hourHeight,
+                  child: Stack(
+                    children: [
+                      // Background horizontal grid lines
+                      Column(
+                        children: [
+                          for (int h = _startHour; h <= _endHour; h++) ...[
+                            Container(
+                              height: _hourHeight,
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: borderColor.withValues(alpha: 0.6),
+                                    width: 0.8,
+                                  ),
                                 ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  width: timeGutterWidth,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 8, top: 2),
-                                    child: Text(
-                                      _formatHour(h),
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark
-                                            ? const Color(0xFF64748B)
-                                            : const Color(0xFF94A3B8),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: timeGutterWidth,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 8, top: 2),
+                                      child: Text(
+                                        _formatHour(h),
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? const Color(0xFF64748B)
+                                              : const Color(0xFF94A3B8),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      for (int d = 0; d < 7; d++) ...[
-                                        Container(
-                                          width: colWidth,
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              right: BorderSide(
-                                                color: borderColor.withValues(alpha: 0.5),
-                                                width: 0.5,
-                                              ),
-                                            ),
+                                  for (int d = 0; d < 7; d++) ...[
+                                    Container(
+                                      width: colWidth,
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          right: BorderSide(
+                                            color: borderColor.withValues(alpha: 0.5),
+                                            width: 0.5,
                                           ),
                                         ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
 
-                    // Render appointment blocks on top of grid
-                    ..._buildAppointmentCards(colWidth, timeGutterWidth, isDark),
-                  ],
+                      // Current time indicator line
+                      ..._buildCurrentTimeIndicator(colWidth, timeGutterWidth, now),
+
+                      // Render appointment blocks on top of grid
+                      ..._buildAppointmentCards(colWidth, timeGutterWidth, isDark),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
+  }
+
+  List<Widget> _buildCurrentTimeIndicator(
+    double colWidth,
+    double timeGutterWidth,
+    DateTime now,
+  ) {
+    int todayIndex = -1;
+    for (int i = 0; i < 7; i++) {
+      final d = weekDays[i];
+      if (d.year == now.year && d.month == now.month && d.day == now.day) {
+        todayIndex = i;
+        break;
+      }
+    }
+    if (todayIndex == -1) return [];
+
+    final nowHourFrac = now.hour + (now.minute / 60.0);
+    if (nowHourFrac < _startHour || nowHourFrac > _endHour + 1) return [];
+
+    final top = (nowHourFrac - _startHour) * _hourHeight;
+    final left = timeGutterWidth + (todayIndex * colWidth);
+
+    return [
+      Positioned(
+        top: top - 4,
+        left: left - 4,
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            color: Color(0xFFEF4444),
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+      Positioned(
+        top: top,
+        left: left,
+        width: colWidth,
+        child: Container(
+          height: 2,
+          color: const Color(0xFFEF4444),
+        ),
+      ),
+    ];
   }
 
   Widget _buildDayHeader(DateTime day, DateTime now, bool isDark) {

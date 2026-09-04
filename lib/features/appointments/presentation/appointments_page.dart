@@ -64,54 +64,64 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       builder: (context, state) {
         final cubit = context.read<AppointmentsCubit>();
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 24, bottom: 48),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Header Bar
-              _buildHeader(context, state, cubit, isDark),
-              const SizedBox(height: 20),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            // Top Header Bar
+            _buildHeader(context, state, cubit, isDark),
+            const SizedBox(height: 16),
 
-              // Navigation Tabs (Placed between Header and Content)
-              AppointmentsNavTabs(
-                activeTab: state.activeTab,
-                onTabChanged: (index) => cubit.setActiveTab(index),
-                pendingRequestsCount: state.pendingRequestsCount,
-              ),
-              const SizedBox(height: 20),
+            // Navigation Tabs (Placed between Header and Content)
+            AppointmentsNavTabs(
+              activeTab: state.activeTab,
+              onTabChanged: (index) => cubit.setActiveTab(index),
+              pendingRequestsCount: state.pendingRequestsCount,
+            ),
+            const SizedBox(height: 16),
 
-              // Main Body Content
-              if (state.status == AppointmentsStatus.loading &&
-                  state.appointments.isEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 80),
-                  child: AppLoadingView(message: 'Loading calendar & bookings...'),
-                ),
-              ] else if (state.status == AppointmentsStatus.failure &&
-                  state.appointments.isEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 60),
-                  child: AppErrorView(
-                    message: state.errorMessage ?? 'Failed to load appointments.',
-                    onRetry: () => cubit.loadInitial(),
-                  ),
-                ),
-              ] else ...[
-                IndexedStack(
-                  index: state.activeTab,
-                  children: const [
-                    CalendarTabView(),
-                    RequestsTabView(),
-                    AvailabilityTabView(),
-                  ],
-                ),
-              ],
-            ],
-          ),
+            // Main Body Content
+            Expanded(
+              child: _buildBody(context, state, cubit),
+            ),
+            const SizedBox(height: 20),
+          ],
         );
       },
     );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    AppointmentsState state,
+    AppointmentsCubit cubit,
+  ) {
+    if (state.status == AppointmentsStatus.loading &&
+        state.appointments.isEmpty) {
+      return const Center(
+        child: AppLoadingView(message: 'Loading calendar & bookings...'),
+      );
+    }
+    if (state.status == AppointmentsStatus.failure &&
+        state.appointments.isEmpty) {
+      return Center(
+        child: AppErrorView(
+          message: state.errorMessage ?? 'Failed to load appointments.',
+          onRetry: () => cubit.loadInitial(),
+        ),
+      );
+    }
+
+    switch (state.activeTab) {
+      case 0:
+        return const CalendarTabView();
+      case 1:
+        return const RequestsTabView();
+      case 2:
+        return const AvailabilityTabView();
+      default:
+        return const CalendarTabView();
+    }
   }
 
   Widget _buildHeader(
