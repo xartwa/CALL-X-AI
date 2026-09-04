@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/theme_constants.dart';
+import '../../../../core/widgets/app_date_time_picker.dart';
 import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
 import '../../domain/entities/appointment_entity.dart';
@@ -40,10 +41,13 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
   void initState() {
     super.initState();
     _enabled = widget.rule.enabled;
-    _startTime = _parseTime(widget.rule.startTime, const TimeOfDay(hour: 9, minute: 0));
-    _endTime = _parseTime(widget.rule.endTime, const TimeOfDay(hour: 18, minute: 0));
+    _startTime =
+        _parseTime(widget.rule.startTime, const TimeOfDay(hour: 9, minute: 0));
+    _endTime =
+        _parseTime(widget.rule.endTime, const TimeOfDay(hour: 18, minute: 0));
     _availabilityType = widget.rule.availabilityType.toLowerCase();
-    if (!['available', 'preferred', 'manual_approval'].contains(_availabilityType)) {
+    if (!['available', 'preferred', 'manual_approval']
+        .contains(_availabilityType)) {
       _availabilityType = 'available';
     }
   }
@@ -65,20 +69,9 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
 
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : _endTime;
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: context.colors.primaryLightColor,
-              surface: context.colors.whiteColor,
-            ),
-          ),
-          child: child!,
-        );
-      },
+    final picked = await AppDateTimePicker.pickTime(
+      context,
+      initial: initial,
     );
     if (picked != null) {
       setState(() {
@@ -131,30 +124,13 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: context.colors.primaryLightColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          CupertinoIcons.clock,
-                          color: context.colors.primaryLightColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${widget.rule.weekdayName} Hours',
-                        style: TextStyle(
-                          color: context.colors.blackColor,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '${widget.rule.weekdayName} Hours'.toUpperCase(),
+                    style: TextStyle(
+                      color: context.colors.blackColor,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   IconButton(
                     icon: Icon(
@@ -168,14 +144,18 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
               ),
               const SizedBox(height: 20),
 
-              // Active / Unavailable Toggle
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
                   border: Border.all(
-                    color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                    color:
+                        context.colors.mediumGreyColor.withValues(alpha: 0.4),
                   ),
                 ),
                 child: Row(
@@ -193,7 +173,9 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                           ),
                         ),
                         Text(
-                          _enabled ? 'Available for appointments' : 'Marked as closed / unavailable',
+                          _enabled
+                              ? 'Available for appointments'
+                              : 'Marked as closed / unavailable',
                           style: TextStyle(
                             fontSize: 12,
                             color: context.colors.darkGreyColor,
@@ -203,7 +185,7 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                     ),
                     CupertinoSwitch(
                       value: _enabled,
-                      activeTrackColor: context.colors.primaryLightColor,
+                      activeTrackColor: context.colors.successColor,
                       onChanged: (v) => setState(() => _enabled = v),
                     ),
                   ],
@@ -232,18 +214,25 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                           const SizedBox(height: 6),
                           InkWell(
                             onTap: () => _pickTime(isStart: true),
-                            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                            borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 11),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(
+                                    ThemeConstants.buttonRadius),
                                 border: Border.all(
-                                  color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                                  color: context.colors.mediumGreyColor
+                                      .withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     _startTime.format(context),
@@ -282,18 +271,25 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                           const SizedBox(height: 6),
                           InkWell(
                             onTap: () => _pickTime(isStart: false),
-                            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                            borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 11),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(
+                                    ThemeConstants.buttonRadius),
                                 border: Border.all(
-                                  color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                                  color: context.colors.mediumGreyColor
+                                      .withValues(alpha: 0.4),
                                 ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     _endTime.format(context),
@@ -347,7 +343,8 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                     _buildPreferenceRadio(
                       value: 'manual_approval',
                       label: 'Manual Approval',
-                      description: 'Creates a pending request requiring admin confirmation',
+                      description:
+                          'Creates a pending request requiring admin confirmation',
                     ),
                   ],
                 ),
@@ -355,51 +352,66 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
               const SizedBox(height: 24),
 
               // Actions
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: context.colors.mediumGreyColor.withValues(alpha: 0.5),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: context.colors.blackColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _onSave,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.colors.primaryLightColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Apply Window',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
+              SizedBox(
+                height: 44,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: context.colors.mediumGreyColor
+                                  .withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: context.colors.blackColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: ElevatedButton(
+                          onPressed: _onSave,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Apply Window',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -436,9 +448,13 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
         child: Row(
           children: [
             Icon(
-              isSelected ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.circle,
+              isSelected
+                  ? CupertinoIcons.checkmark_circle_fill
+                  : CupertinoIcons.circle,
               size: 18,
-              color: isSelected ? context.colors.primaryLightColor : context.colors.darkGreyColor,
+              color: isSelected
+                  ? context.colors.primaryLightColor
+                  : context.colors.darkGreyColor,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -449,7 +465,8 @@ class _TimeWindowsDialogState extends State<TimeWindowsDialog> {
                     label,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w600,
                       color: context.colors.blackColor,
                     ),
                   ),

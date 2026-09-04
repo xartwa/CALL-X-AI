@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/theme_constants.dart';
+import '../../../../core/widgets/app_date_time_picker.dart';
 import '../../../../core/widgets/app_text_field_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
@@ -41,22 +42,9 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 7)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: context.colors.primaryLightColor,
-              surface: context.colors.whiteColor,
-            ),
-          ),
-          child: child!,
-        );
-      },
+    final picked = await AppDateTimePicker.pickDate(
+      context,
+      initial: _selectedDate,
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
@@ -65,20 +53,9 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
 
   Future<void> _pickTime({required bool isStart}) async {
     final initial = isStart ? _startTime : _endTime;
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: context.colors.primaryLightColor,
-              surface: context.colors.whiteColor,
-            ),
-          ),
-          child: child!,
-        );
-      },
+    final picked = await AppDateTimePicker.pickTime(
+      context,
+      initial: initial,
     );
     if (picked != null) {
       setState(() {
@@ -150,11 +127,12 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        'Add Date Exception',
+                        'ADD DATE EXCEPTION',
                         style: TextStyle(
                           color: context.colors.blackColor,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.0,
                         ),
                       ),
                     ],
@@ -378,60 +356,75 @@ class _AddExceptionDialogState extends State<AddExceptionDialog> {
               const SizedBox(height: 24),
 
               // Actions
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: context.colors.mediumGreyColor.withValues(alpha: 0.5),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: context.colors.blackColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _isSubmitting ? null : _onSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.colors.primaryLightColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                      ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'Add Exception',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+              SizedBox(
+                height: 44,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: context.colors.mediumGreyColor
+                                  .withValues(alpha: 0.5),
                             ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: context.colors.blackColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: ElevatedButton(
+                          onPressed: _isSubmitting ? null : _onSubmit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            elevation: 0,
+                          ),
+                          child: _isSubmitting
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Add Exception',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

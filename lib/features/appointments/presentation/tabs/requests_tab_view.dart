@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/theme_constants.dart';
 import '../../../../core/widgets/app_action_button.dart';
 import '../../../../core/widgets/app_text_field_widget.dart';
+import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
@@ -451,30 +452,13 @@ class _RequestsTabViewState extends State<RequestsTabView> {
     AppointmentsCubit cubit,
     AppointmentRequestEntity req,
   ) {
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Cancel Request?'),
-        content: Text(
-            'Are you sure you want to cancel the appointment request for ${req.customerName}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('Keep'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-            ),
-            onPressed: () {
-              Navigator.of(dialogCtx).pop();
-              cubit.cancelRequest(req.id);
-            },
-            child: const Text('Cancel Request',
-                style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+    ConfirmationDialog.show(
+      context,
+      title: 'Delete Request',
+      message:
+          'Are you sure you want to cancel the appointment request for "${req.customerName}"?',
+      confirmLabel: 'DELETE',
+      onConfirm: () => cubit.cancelRequest(req.id),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/theme_constants.dart';
 import '../../../../core/widgets/app_action_button.dart';
 import '../../../../core/widgets/app_dropdown_widget.dart';
+import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
@@ -592,7 +593,16 @@ class AvailabilityTabView extends StatelessWidget {
                       AppActionButton(
                         type: AppActionType.delete,
                         tooltip: 'Remove Exception',
-                        onTap: () => cubit.deleteException(ex.id),
+                        onTap: () {
+                          ConfirmationDialog.show(
+                            context,
+                            title: 'Delete Exception',
+                            message:
+                                'Are you sure you want to delete the date override for ${DateFormat('MMM d, yyyy').format(ex.date)}?',
+                            confirmLabel: 'DELETE',
+                            onConfirm: () => cubit.deleteException(ex.id),
+                          );
+                        },
                       ),
                     ],
                   ),

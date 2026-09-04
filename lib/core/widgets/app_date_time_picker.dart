@@ -35,6 +35,28 @@ abstract final class AppDateTimePicker {
         last: last,
       );
 
+  static Future<TimeOfDay?> pickTime(
+    BuildContext context, {
+    TimeOfDay? initial,
+  }) async {
+    final now = DateTime.now();
+    final initDt = initial != null
+        ? DateTime(now.year, now.month, now.day, initial.hour, initial.minute)
+        : now;
+    final res = await showDialog<DateTime>(
+      context: context,
+      builder: (_) => _AppDateTimePickerDialog(
+        includeTime: true,
+        timeOnly: true,
+        initial: initDt,
+        first: _dateOnly(DateTime(now.year - 1, now.month, now.day)),
+        last: _dateOnly(DateTime(now.year + 2, now.month, now.day)),
+      ),
+    );
+    if (res == null) return null;
+    return TimeOfDay(hour: res.hour, minute: res.minute);
+  }
+
   static Future<DateTime?> _open(
     BuildContext context, {
     required bool includeTime,
@@ -60,12 +82,14 @@ abstract final class AppDateTimePicker {
 
 class _AppDateTimePickerDialog extends StatefulWidget {
   final bool includeTime;
+  final bool timeOnly;
   final DateTime? initial;
   final DateTime first;
   final DateTime last;
 
   const _AppDateTimePickerDialog({
     required this.includeTime,
+    this.timeOnly = false,
     required this.initial,
     required this.first,
     required this.last,
@@ -105,6 +129,9 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
     _minute = (initial ?? now).minute;
     _hourController = FixedExtentScrollController(initialItem: _hour);
     _minuteController = FixedExtentScrollController(initialItem: _minute);
+    if (widget.timeOnly) {
+      _showTimeStep = true;
+    }
   }
 
   @override
@@ -149,10 +176,12 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
               ),
               const SizedBox(height: 4),
               Text(
-                widget.includeTime
-                    ? AppDateTime.displayDateTime(
-                        _combine(_selectedDate, _hour, _minute))
-                    : AppDateTime.displayDate(_selectedDate),
+                widget.timeOnly
+                    ? '${_hour.toString().padLeft(2, '0')}:${_minute.toString().padLeft(2, '0')}'
+                    : widget.includeTime
+                        ? AppDateTime.displayDateTime(
+                            _combine(_selectedDate, _hour, _minute))
+                        : AppDateTime.displayDate(_selectedDate),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -177,7 +206,9 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
                       height: 42,
                       child: TextButton(
                         onPressed: () {
-                          if (_isTimeStep) {
+                          if (widget.timeOnly) {
+                            Navigator.of(context).pop();
+                          } else if (_isTimeStep) {
                             setState(() => _stepToDate());
                           } else {
                             Navigator.of(context).pop();
@@ -186,7 +217,9 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
                         style: TextButton.styleFrom(
                           foregroundColor: context.colors.darkGreyColor,
                         ),
-                        child: Text(_isTimeStep ? 'BACK' : 'CANCEL'),
+                        child: Text(widget.timeOnly || !_isTimeStep
+                            ? 'CANCEL'
+                            : 'BACK'),
                       ),
                     ),
                   ),
@@ -214,9 +247,9 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(widget.includeTime && !_isTimeStep
-                            ? 'CONTINUE'
-                            : 'CONFIRM'),
+                        child: Text(widget.timeOnly || _isTimeStep || !widget.includeTime
+                            ? 'CONFIRM'
+                            : 'CONTINUE'),
                       ),
                     ),
                   ),

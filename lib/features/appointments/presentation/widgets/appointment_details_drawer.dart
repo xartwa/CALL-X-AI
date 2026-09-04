@@ -325,20 +325,23 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                                 ),
                               ),
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) => ConfirmationDialog(
-                                    title: 'Cancel Appointment?',
-                                    message: 'Are you sure you want to cancel this appointment with ${appointment.customerName}?',
-                                    confirmLabel: 'Yes, Cancel',
-                                    onConfirm: () async {
-                                      await cubit.cancelAppointment(appointment.id);
-                                      onClose();
-                                    },
-                                  ),
+                                ConfirmationDialog.show(
+                                  context,
+                                  title: 'Delete Appointment',
+                                  message:
+                                      'Are you sure you want to delete this appointment with "${appointment.customerName}"?',
+                                  confirmLabel: 'DELETE',
+                                  onConfirm: () async {
+                                    await cubit
+                                        .cancelAppointment(appointment.id);
+                                    onClose();
+                                  },
                                 );
                               },
-                              child: const Text('Cancel', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                              child: const Text('Delete',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600)),
                             ),
                           ),
                         ),
