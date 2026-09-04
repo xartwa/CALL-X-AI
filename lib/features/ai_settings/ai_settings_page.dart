@@ -4,6 +4,7 @@ import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'package:callx_ai/core/widgets/spaced_text.dart';
+import 'package:callx_ai/core/widgets/app_pill_tab_bar.dart';
 import 'package:callx_ai/features/ai_settings/cubit/ai_settings_cubit.dart';
 import 'package:callx_ai/features/ai_settings/widgets/agent_knowledge_tab.dart';
 import 'package:callx_ai/features/ai_settings/widgets/ai_settings_status_bar.dart';
@@ -208,26 +209,27 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                 // Tab Switcher Header (Left Aligned with numbers)
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TabBar(
+                      AppPillTabBar(
                         controller: _tabs,
-                        isScrollable: true,
-                        tabAlignment: TabAlignment.start,
-                        indicatorColor: Theme.of(context).colorScheme.primary,
-                        labelColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor: context.colors.darkGreyColor,
-                        labelStyle: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 12.5,
-                          letterSpacing: 0.5,
-                        ),
                         tabs: const [
-                          Tab(text: '01  Agent & Knowledge'),
-                          Tab(text: '02  Outbound Scenarios'),
-                          Tab(text: '03  Inbound & Hours'),
+                          AppPillTabItem(
+                            label: 'Agent & Knowledge',
+                            icon: CupertinoIcons.sparkles,
+                            badgeText: '01',
+                          ),
+                          AppPillTabItem(
+                            label: 'Outbound Scenarios',
+                            icon: CupertinoIcons.phone_arrow_up_right,
+                            badgeText: '02',
+                          ),
+                          AppPillTabItem(
+                            label: 'Inbound & Hours',
+                            icon: CupertinoIcons.clock,
+                            badgeText: '03',
+                          ),
                         ],
                       ),
                     ],

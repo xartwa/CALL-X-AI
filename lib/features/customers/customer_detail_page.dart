@@ -17,6 +17,7 @@ import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
+import 'package:callx_ai/core/widgets/app_pill_tab_bar.dart';
 
 class CustomerDetailPage extends StatefulWidget {
   const CustomerDetailPage({super.key, required this.customerId});
@@ -464,98 +465,25 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   }
 
   Widget _buildTopTabs(User user) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      child: Row(
-        children: [
-          // Overview Tab
-          _buildTabItem(index: 0, label: 'Overview', isDark: isDark),
-          const SizedBox(width: 8),
-
-          // Call Logs Tab
-          _buildTabItem(
-            index: 1,
-            label: 'Call Logs',
-            isDark: isDark,
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: AppPillTabBar(
+        currentIndex: _selectedTabIndex,
+        onTabChanged: (index) => setState(() => _selectedTabIndex = index),
+        tabs: const [
+          AppPillTabItem(
+            label: 'Overview',
+            icon: CupertinoIcons.person,
           ),
-          const SizedBox(width: 8),
-
-          // Notes Tab
-          _buildTabItem(
-            index: 2,
+          AppPillTabItem(
+            label: 'Call Logs',
+            icon: CupertinoIcons.phone,
+          ),
+          AppPillTabItem(
             label: 'Notes',
-            isDark: isDark,
+            icon: CupertinoIcons.pencil_ellipsis_rectangle,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTabItem({
-    required int index,
-    required String label,
-    int? count,
-    required bool isDark,
-  }) {
-    final isSelected = _selectedTabIndex == index;
-    return InkWell(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? context.colors.primaryLightColor
-                        : context.colors.darkGreyColor,
-                  ),
-                ),
-                if (count != null) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white10 : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '$count',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? Colors.white70
-                            : context.colors.darkGreyColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 4),
-            Container(
-              height: 2,
-              width: count != null ? 55 : 45,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? context.colors.primaryLightColor
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
