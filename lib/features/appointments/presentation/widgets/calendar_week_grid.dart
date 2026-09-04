@@ -24,9 +24,8 @@ class CalendarWeekGrid extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
 
-    final borderColor = isDark
-        ? const Color(0xFF1E293B)
-        : const Color(0xFFE2E8F0);
+    final borderColor =
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -39,7 +38,8 @@ class CalendarWeekGrid extends StatelessWidget {
             // Header Row: Days of week (Pinned at top)
             Container(
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: borderColor, width: 1)),
+                border:
+                    Border(bottom: BorderSide(color: borderColor, width: 1)),
               ),
               child: Row(
                 children: [
@@ -47,7 +47,7 @@ class CalendarWeekGrid extends StatelessWidget {
                   for (int i = 0; i < 7; i++) ...[
                     SizedBox(
                       width: colWidth,
-                      child: _buildDayHeader(weekDays[i], now, isDark),
+                      child: _buildDayHeader(weekDays[i], now, isDark, context),
                     ),
                   ],
                 ],
@@ -81,7 +81,8 @@ class CalendarWeekGrid extends StatelessWidget {
                                   SizedBox(
                                     width: timeGutterWidth,
                                     child: Padding(
-                                      padding: const EdgeInsets.only(right: 8, top: 2),
+                                      padding: const EdgeInsets.only(
+                                          right: 8, top: 2),
                                       child: Text(
                                         _formatHour(h),
                                         textAlign: TextAlign.right,
@@ -101,7 +102,8 @@ class CalendarWeekGrid extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           right: BorderSide(
-                                            color: borderColor.withValues(alpha: 0.5),
+                                            color: borderColor.withValues(
+                                                alpha: 0.5),
                                             width: 0.5,
                                           ),
                                         ),
@@ -116,10 +118,12 @@ class CalendarWeekGrid extends StatelessWidget {
                       ),
 
                       // Current time indicator line
-                      ..._buildCurrentTimeIndicator(colWidth, timeGutterWidth, now),
+                      ..._buildCurrentTimeIndicator(
+                          colWidth, timeGutterWidth, now),
 
                       // Render appointment blocks on top of grid
-                      ..._buildAppointmentCards(colWidth, timeGutterWidth, isDark),
+                      ..._buildAppointmentCards(
+                          colWidth, timeGutterWidth, isDark),
                     ],
                   ),
                 ),
@@ -177,9 +181,11 @@ class CalendarWeekGrid extends StatelessWidget {
     ];
   }
 
-  Widget _buildDayHeader(DateTime day, DateTime now, bool isDark) {
-    final isToday = day.year == now.year && day.month == now.month && day.day == now.day;
-    final primary = const Color(0xFF8B5CF6);
+  Widget _buildDayHeader(
+      DateTime day, DateTime now, bool isDark, BuildContext context) {
+    final isToday =
+        day.year == now.year && day.month == now.month && day.day == now.day;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -198,7 +204,9 @@ class CalendarWeekGrid extends StatelessWidget {
               letterSpacing: 0.5,
               color: isToday
                   ? primary
-                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                  : (isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B)),
             ),
           ),
           const SizedBox(height: 2),
@@ -217,7 +225,8 @@ class CalendarWeekGrid extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildAppointmentCards(double colWidth, double timeGutterWidth, bool isDark) {
+  List<Widget> _buildAppointmentCards(
+      double colWidth, double timeGutterWidth, bool isDark) {
     final List<Widget> widgets = [];
 
     for (final appt in appointments) {
@@ -241,7 +250,8 @@ class CalendarWeekGrid extends StatelessWidget {
       if (dayIndex == -1) continue; // Outside this week
 
       final startHourFrac = localStart.hour + (localStart.minute / 60.0);
-      final durationHours = (localEnd.difference(localStart).inMinutes / 60.0).clamp(0.5, 3.0);
+      final durationHours =
+          (localEnd.difference(localStart).inMinutes / 60.0).clamp(0.5, 3.0);
 
       // Y position relative to _startHour
       final top = (startHourFrac - _startHour) * _hourHeight;
@@ -264,12 +274,16 @@ class CalendarWeekGrid extends StatelessWidget {
         textAccent = const Color(0xFFF59E0B);
       } else if (isOnline) {
         // Emerald / Green or Blue tint
-        bg = isDark ? const Color(0xFF064E3B).withValues(alpha: 0.6) : const Color(0xFFD1FAE5);
+        bg = isDark
+            ? const Color(0xFF064E3B).withValues(alpha: 0.6)
+            : const Color(0xFFD1FAE5);
         border = const Color(0xFF10B981);
         textAccent = const Color(0xFF10B981);
       } else {
         // In person: Blue / Purple
-        bg = isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.6) : const Color(0xFFDBEAFE);
+        bg = isDark
+            ? const Color(0xFF1E3A8A).withValues(alpha: 0.6)
+            : const Color(0xFFDBEAFE);
         border = const Color(0xFF3B82F6);
         textAccent = const Color(0xFF3B82F6);
       }
@@ -286,7 +300,8 @@ class CalendarWeekGrid extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
                 decoration: BoxDecoration(
                   color: bg,
                   borderRadius: BorderRadius.circular(6),
@@ -322,7 +337,8 @@ class CalendarWeekGrid extends StatelessWidget {
                           fontSize: 10,
                           height: 1.15,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color:
+                              isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -337,7 +353,9 @@ class CalendarWeekGrid extends StatelessWidget {
                                 ? CupertinoIcons.video_camera
                                 : CupertinoIcons.location_solid,
                             size: 9,
-                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                            color: isDark
+                                ? Colors.white70
+                                : const Color(0xFF475569),
                           ),
                           const SizedBox(width: 3),
                           Expanded(
@@ -346,7 +364,9 @@ class CalendarWeekGrid extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 8.5,
                                 height: 1.1,
-                                color: isDark ? Colors.white70 : const Color(0xFF475569),
+                                color: isDark
+                                    ? Colors.white70
+                                    : const Color(0xFF475569),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

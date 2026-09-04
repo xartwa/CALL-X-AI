@@ -158,7 +158,7 @@ class CalendarMonthGrid extends StatelessWidget {
     }).toList()
       ..sort((a, b) => a.startAt.compareTo(b.startAt));
 
-    final primary = const Color(0xFF8B5CF6);
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
       color: isToday
