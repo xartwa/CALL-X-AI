@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../../core/constants/theme_constants.dart';
+import '../../../core/utils/utils.dart';
 import '../../../core/widgets/app_feedback.dart';
 import '../../../core/widgets/spaced_text.dart';
 import '../../../theme/app_colors.dart';
@@ -41,23 +42,19 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
           curr.successMessage != prev.successMessage,
       listener: (context, state) {
         if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-          toastification.show(
+          AppUtils.showSnackBar(
             context: context,
-            type: ToastificationType.error,
-            style: ToastificationStyle.fillColored,
-            title: const Text('Error'),
-            description: Text(state.errorMessage!),
-            autoCloseDuration: const Duration(seconds: 4),
+            title: 'Error',
+            extraMessage: state.errorMessage,
+            toastificationType: ToastificationType.error,
           );
         } else if (state.successMessage != null &&
             state.successMessage!.isNotEmpty) {
-          toastification.show(
+          AppUtils.showSnackBar(
             context: context,
-            type: ToastificationType.success,
-            style: ToastificationStyle.fillColored,
-            title: const Text('Success'),
-            description: Text(state.successMessage!),
-            autoCloseDuration: const Duration(seconds: 3),
+            title: 'Success',
+            extraMessage: state.successMessage,
+            toastificationType: ToastificationType.success,
           );
         }
       },
@@ -136,15 +133,21 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Title (Spaced Uppercase, No Subtitle Description)
-        const SpacedText(text: 'CALENDAR & BOOKINGS'),
+        // Title (Spaced Uppercase, Matching Dashboard and AI Settings)
+        SpacedText(
+          text: 'CALENDAR & BOOKINGS',
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: context.colors.blackColor,
+        ),
 
-        // Right Controls: Google Calendar Pill + Settings + Dynamic Action Button
+        // Right Controls: Google Calendar Pill + Dynamic Action Button
         Row(
           children: [
             // Google Calendar Connection Pill
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onPrimary,
                 borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
@@ -205,89 +208,73 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
-
-            // Settings Button
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimary,
-                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFFE2E8F0),
-                ),
-              ),
-              child: IconButton(
-                icon: const Icon(CupertinoIcons.gear_alt, size: 16),
-                tooltip: 'Booking Settings',
-                color: context.colors.darkGreyColor,
-                onPressed: () => cubit.setActiveTab(2),
-              ),
-            ),
             const SizedBox(width: 12),
 
             // Dynamic Action Button (+ New Appointment or Save Changes)
             if (state.activeTab == 2)
-              ElevatedButton.icon(
-                onPressed: state.isActionLoading
-                    ? null
-                    : () => cubit.saveAvailabilityAndSettings(),
-                icon: state.isActionLoading
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+              SizedBox(
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: state.isActionLoading
+                      ? null
+                      : () => cubit.saveAvailabilityAndSettings(),
+                  icon: state.isActionLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(
+                          CupertinoIcons.checkmark,
+                          size: 16,
                           color: Colors.white,
                         ),
-                      )
-                    : const Icon(
-                        CupertinoIcons.checkmark,
-                        size: 15,
-                        color: Colors.white,
-                      ),
-                label: const Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                  label: const Text(
+                    'Save Changes',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B5CF6),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  minimumSize: const Size(0, 38),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                    ),
                   ),
                 ),
               )
             else
-              ElevatedButton.icon(
-                onPressed: () => NewAppointmentDrawer.show(context),
-                icon: const Icon(
-                  CupertinoIcons.plus,
-                  size: 15,
-                  color: Colors.white,
-                ),
-                label: const Text(
-                  'New Appointment',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+              SizedBox(
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: () => NewAppointmentDrawer.show(context),
+                  icon: const Icon(
+                    CupertinoIcons.plus,
+                    size: 16,
                     color: Colors.white,
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8B5CF6),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                  minimumSize: const Size(0, 38),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                  label: const Text(
+                    'New Appointment',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                    ),
                   ),
                 ),
               ),

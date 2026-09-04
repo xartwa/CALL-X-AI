@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/theme_constants.dart';
+import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../domain/entities/appointment_entity.dart';
 
@@ -220,35 +221,10 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
             ),
             const SizedBox(width: 8),
 
-            // Status Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: isConfirmed
-                    ? (isDark
-                        ? const Color(0xFF064E3B).withValues(alpha: 0.5)
-                        : const Color(0xFFD1FAE5))
-                    : (isDark
-                        ? const Color(0xFF78350F).withValues(alpha: 0.5)
-                        : const Color(0xFFFEF3C7)),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: isConfirmed
-                      ? const Color(0xFF10B981).withValues(alpha: 0.5)
-                      : const Color(0xFFF59E0B).withValues(alpha: 0.5),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                isConfirmed ? 'Confirmed' : 'Pending',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: isConfirmed
-                      ? const Color(0xFF10B981)
-                      : const Color(0xFFF59E0B),
-                ),
-              ),
+            // Status Badge (Using standard CustomTagWidget)
+            CustomTagWidget(
+              label: isConfirmed ? 'Confirmed' : 'Pending',
+              color: isConfirmed ? context.colors.successColor : context.colors.warningColor,
             ),
           ],
         ),

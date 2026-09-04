@@ -37,13 +37,17 @@ class CalendarTabView extends StatelessWidget {
                   final calendarCard = Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.onPrimary,
-                      borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.boxRadius),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                      borderRadius:
+                          BorderRadius.circular(ThemeConstants.boxRadius),
                       child: state.calendarViewMode == CalendarViewMode.week
                           ? CalendarWeekGrid(
                               weekDays: state.currentWeekDays,
@@ -133,9 +137,12 @@ class CalendarTabView extends StatelessWidget {
             children: [
               // Week / Month Toggle Pill
               Container(
+                height: 38,
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                  color: isDark
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -144,14 +151,17 @@ class CalendarTabView extends StatelessWidget {
                       label: 'Week',
                       selected: state.calendarViewMode == CalendarViewMode.week,
                       isDark: isDark,
-                      onTap: () => cubit.setCalendarViewMode(CalendarViewMode.week),
+                      onTap: () =>
+                          cubit.setCalendarViewMode(CalendarViewMode.week),
                     ),
                     const SizedBox(width: 4),
                     _buildModePill(
                       label: 'Month',
-                      selected: state.calendarViewMode == CalendarViewMode.month,
+                      selected:
+                          state.calendarViewMode == CalendarViewMode.month,
                       isDark: isDark,
-                      onTap: () => cubit.setCalendarViewMode(CalendarViewMode.month),
+                      onTap: () =>
+                          cubit.setCalendarViewMode(CalendarViewMode.month),
                     ),
                   ],
                 ),
@@ -159,24 +169,28 @@ class CalendarTabView extends StatelessWidget {
               const SizedBox(width: 12),
 
               // Today Button
-              OutlinedButton(
-                onPressed: () => cubit.goToToday(),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              SizedBox(
+                height: 38,
+                child: OutlinedButton(
+                  onPressed: () => cubit.goToToday(),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  minimumSize: const Size(0, 32),
-                ),
-                child: Text(
-                  'Today',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: context.colors.blackColor,
+                  child: Text(
+                    'Today',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.blackColor,
+                    ),
                   ),
                 ),
               ),
@@ -193,21 +207,26 @@ class CalendarTabView extends StatelessWidget {
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
-                  child: Icon(
-                    CupertinoIcons.chevron_left,
-                    size: 14,
-                    color: context.colors.blackColor,
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.chevron_left,
+                      size: 14,
+                      color: context.colors.blackColor,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 6),
               InkWell(
                 onTap: () {
                   if (state.calendarViewMode == CalendarViewMode.week) {
@@ -218,17 +237,22 @@ class CalendarTabView extends StatelessWidget {
                 },
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
-                  child: Icon(
-                    CupertinoIcons.chevron_right,
-                    size: 14,
-                    color: context.colors.blackColor,
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 14,
+                      color: context.colors.blackColor,
+                    ),
                   ),
                 ),
               ),
@@ -256,7 +280,9 @@ class CalendarTabView extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                   side: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 itemBuilder: (ctx) => [
@@ -267,11 +293,14 @@ class CalendarTabView extends StatelessWidget {
                   _buildFilterMenuItem('Cancelled', state.selectedStatusFilter),
                 ],
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  height: 38,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   child: Row(
@@ -309,7 +338,8 @@ class CalendarTabView extends StatelessWidget {
     );
   }
 
-  PopupMenuItem<String> _buildFilterMenuItem(String value, String currentSelected) {
+  PopupMenuItem<String> _buildFilterMenuItem(
+      String value, String currentSelected) {
     final isSelected = value.toLowerCase() == currentSelected.toLowerCase();
     return PopupMenuItem<String>(
       value: value,
@@ -324,7 +354,8 @@ class CalendarTabView extends StatelessWidget {
             ),
           ),
           if (isSelected)
-            const Icon(CupertinoIcons.checkmark, size: 14, color: Color(0xFF8B5CF6)),
+            const Icon(CupertinoIcons.checkmark,
+                size: 14, color: Color(0xFF8B5CF6)),
         ],
       ),
     );

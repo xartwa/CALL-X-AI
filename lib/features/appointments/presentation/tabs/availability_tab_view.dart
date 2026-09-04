@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/theme_constants.dart';
+import '../../../../core/widgets/app_action_button.dart';
+import '../../../../core/widgets/app_dropdown_widget.dart';
+import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
 import '../../cubit/appointments_state.dart';
@@ -27,9 +30,12 @@ class AvailabilityTabView extends StatelessWidget {
             builder: (context, constraints) {
               final isWide = constraints.maxWidth >= 960;
 
-              final weeklyCard = _buildWeeklyCard(context, state, cubit, isDark);
-              final settingsCard = _buildSettingsCard(context, state, cubit, isDark);
-              final exceptionsCard = _buildExceptionsCard(context, state, cubit, isDark);
+              final weeklyCard =
+                  _buildWeeklyCard(context, state, cubit, isDark);
+              final settingsCard =
+                  _buildSettingsCard(context, state, cubit, isDark);
+              final exceptionsCard =
+                  _buildExceptionsCard(context, state, cubit, isDark);
 
               if (isWide) {
                 return Row(
@@ -143,19 +149,21 @@ class AvailabilityTabView extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: rules.length,
-            separatorBuilder: (_, __) => const Divider(height: 1, thickness: 0.5),
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, thickness: 0.5),
             itemBuilder: (context, index) {
               final rule = rules[index];
               return InkWell(
                 onTap: () => TimeWindowsDialog.show(context, rule: rule),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                   child: Row(
                     children: [
                       // Toggle Switch
                       CupertinoSwitch(
                         value: rule.enabled,
-                        activeTrackColor: const Color(0xFF8B5CF6),
+                        activeTrackColor: context.colors.successColor,
                         onChanged: (val) {
                           cubit.toggleRuleEnabled(rule.weekday, val);
                         },
@@ -191,37 +199,17 @@ class AvailabilityTabView extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              if (rule.availabilityType.toLowerCase() == 'preferred')
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: const Text(
-                                    'Preferred',
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF10B981),
-                                    ),
-                                  ),
+                              if (rule.availabilityType.toLowerCase() ==
+                                  'preferred')
+                                CustomTagWidget(
+                                  label: 'Preferred',
+                                  color: context.colors.successColor,
                                 )
-                              else if (rule.availabilityType.toLowerCase() == 'manual_approval')
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: const Text(
-                                    'Manual Approval',
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFF59E0B),
-                                    ),
-                                  ),
+                              else if (rule.availabilityType.toLowerCase() ==
+                                  'manual_approval')
+                                CustomTagWidget(
+                                  label: 'Manual Approval',
+                                  color: context.colors.warningColor,
                                 ),
                             ] else ...[
                               Text(
@@ -319,39 +307,34 @@ class AvailabilityTabView extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildSettingDropdown(
-                  context,
+                child: _buildSettingDropdown<int>(
+                  context: context,
                   label: 'DEFAULT DURATION',
                   currentValue: settings.defaultDurationMinutes,
-                  items: const [
-                    DropdownMenuItem(value: 15, child: Text('15 minutes')),
-                    DropdownMenuItem(value: 30, child: Text('30 minutes')),
-                    DropdownMenuItem(value: 45, child: Text('45 minutes')),
-                    DropdownMenuItem(value: 60, child: Text('60 minutes')),
-                    DropdownMenuItem(value: 90, child: Text('90 minutes')),
-                  ],
+                  items: const [15, 30, 45, 60, 90],
+                  itemBuilder: (val) => '$val minutes',
                   onChanged: (val) {
                     if (val != null) {
-                      cubit.updateSettingsLocally(settings.copyWith(defaultDurationMinutes: val));
+                      cubit.updateSettingsLocally(
+                          settings.copyWith(defaultDurationMinutes: val));
                     }
                   },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildSettingDropdown(
-                  context,
+                child: _buildSettingDropdown<int>(
+                  context: context,
                   label: 'MINIMUM NOTICE',
                   currentValue: settings.minimumNoticeMinutes,
-                  items: const [
-                    DropdownMenuItem(value: 60, child: Text('1 hour')),
-                    DropdownMenuItem(value: 120, child: Text('2 hours')),
-                    DropdownMenuItem(value: 240, child: Text('4 hours')),
-                    DropdownMenuItem(value: 1440, child: Text('24 hours')),
-                  ],
+                  items: const [60, 120, 240, 1440],
+                  itemBuilder: (val) => val == 60
+                      ? '1 hour'
+                      : (val == 1440 ? '24 hours' : '${val ~/ 60} hours'),
                   onChanged: (val) {
                     if (val != null) {
-                      cubit.updateSettingsLocally(settings.copyWith(minimumNoticeMinutes: val));
+                      cubit.updateSettingsLocally(
+                          settings.copyWith(minimumNoticeMinutes: val));
                     }
                   },
                 ),
@@ -364,40 +347,32 @@ class AvailabilityTabView extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _buildSettingDropdown(
-                  context,
+                child: _buildSettingDropdown<int>(
+                  context: context,
                   label: 'BUFFER BEFORE',
                   currentValue: settings.bufferBeforeMinutes,
-                  items: const [
-                    DropdownMenuItem(value: 0, child: Text('None')),
-                    DropdownMenuItem(value: 5, child: Text('5 minutes')),
-                    DropdownMenuItem(value: 10, child: Text('10 minutes')),
-                    DropdownMenuItem(value: 15, child: Text('15 minutes')),
-                    DropdownMenuItem(value: 30, child: Text('30 minutes')),
-                  ],
+                  items: const [0, 5, 10, 15, 30],
+                  itemBuilder: (val) => val == 0 ? 'None' : '$val minutes',
                   onChanged: (val) {
                     if (val != null) {
-                      cubit.updateSettingsLocally(settings.copyWith(bufferBeforeMinutes: val));
+                      cubit.updateSettingsLocally(
+                          settings.copyWith(bufferBeforeMinutes: val));
                     }
                   },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildSettingDropdown(
-                  context,
+                child: _buildSettingDropdown<int>(
+                  context: context,
                   label: 'BUFFER AFTER',
                   currentValue: settings.bufferAfterMinutes,
-                  items: const [
-                    DropdownMenuItem(value: 0, child: Text('None')),
-                    DropdownMenuItem(value: 5, child: Text('5 minutes')),
-                    DropdownMenuItem(value: 10, child: Text('10 minutes')),
-                    DropdownMenuItem(value: 15, child: Text('15 minutes')),
-                    DropdownMenuItem(value: 30, child: Text('30 minutes')),
-                  ],
+                  items: const [0, 5, 10, 15, 30],
+                  itemBuilder: (val) => val == 0 ? 'None' : '$val minutes',
                   onChanged: (val) {
                     if (val != null) {
-                      cubit.updateSettingsLocally(settings.copyWith(bufferAfterMinutes: val));
+                      cubit.updateSettingsLocally(
+                          settings.copyWith(bufferAfterMinutes: val));
                     }
                   },
                 ),
@@ -428,7 +403,8 @@ class AvailabilityTabView extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(CupertinoIcons.globe, size: 16, color: Color(0xFF8B5CF6)),
+                const Icon(CupertinoIcons.globe,
+                    size: 16, color: Color(0xFF8B5CF6)),
                 const SizedBox(width: 10),
                 Text(
                   settings.timezone,
@@ -454,15 +430,14 @@ class AvailabilityTabView extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingDropdown<T>(
-    BuildContext context, {
+  Widget _buildSettingDropdown<T>({
+    required BuildContext context,
     required String label,
     required T currentValue,
-    required List<DropdownMenuItem<T>> items,
+    required List<T> items,
+    required String Function(T) itemBuilder,
     required ValueChanged<T?> onChanged,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -476,30 +451,12 @@ class AvailabilityTabView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-            border: Border.all(
-              color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              isExpanded: true,
-              value: currentValue,
-              items: items,
-              onChanged: onChanged,
-              icon: Icon(CupertinoIcons.chevron_down, size: 14, color: context.colors.darkGreyColor),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: context.colors.blackColor,
-              ),
-              dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-            ),
-          ),
+        AppDropdownWidget<T>(
+          value: currentValue,
+          items: items,
+          itemBuilder: itemBuilder,
+          onChanged: onChanged,
+          height: 44,
         ),
       ],
     );
@@ -569,19 +526,27 @@ class AvailabilityTabView extends StatelessWidget {
                     ),
                   ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: () => AddExceptionDialog.show(context),
-                  icon: const Icon(CupertinoIcons.plus, size: 14, color: Colors.white),
-                  label: const Text(
-                    'Add Exception',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF8B5CF6),
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                SizedBox(
+                  height: 42,
+                  child: ElevatedButton.icon(
+                    onPressed: () => AddExceptionDialog.show(context),
+                    icon: const Icon(CupertinoIcons.plus,
+                        size: 15, color: Colors.white),
+                    label: const Text(
+                      'Add Exception',
+                      style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8B5CF6),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
+                      ),
                     ),
                   ),
                 ),
@@ -609,18 +574,23 @@ class AvailabilityTabView extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: exceptions.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, thickness: 0.5),
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 1, thickness: 0.5),
               itemBuilder: (context, index) {
                 final ex = exceptions[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                   child: Row(
                     children: [
                       // Date label
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -634,23 +604,12 @@ class AvailabilityTabView extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
 
-                      // Availability Pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: ex.isAvailable
-                              ? const Color(0xFF10B981).withValues(alpha: 0.12)
-                              : const Color(0xFFEF4444).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          ex.isAvailable ? 'Custom Hours' : 'Unavailable',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: ex.isAvailable ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                          ),
-                        ),
+                      // Availability Pill (Using standard CustomTagWidget)
+                      CustomTagWidget(
+                        label: ex.isAvailable ? 'Custom Hours' : 'Unavailable',
+                        color: ex.isAvailable
+                            ? context.colors.successColor
+                            : context.colors.errorColor,
                       ),
                       const SizedBox(width: 12),
 
@@ -671,12 +630,11 @@ class AvailabilityTabView extends StatelessWidget {
                         ),
                       ),
 
-                      // Delete
-                      IconButton(
-                        icon: const Icon(CupertinoIcons.trash, size: 16),
-                        color: context.colors.errorColor,
-                        onPressed: () => cubit.deleteException(ex.id),
+                      // Delete action
+                      AppActionButton(
+                        type: AppActionType.delete,
                         tooltip: 'Remove Exception',
+                        onTap: () => cubit.deleteException(ex.id),
                       ),
                     ],
                   ),

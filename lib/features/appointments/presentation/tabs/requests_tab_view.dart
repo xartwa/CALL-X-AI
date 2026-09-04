@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/theme_constants.dart';
+import '../../../../core/widgets/app_action_button.dart';
 import '../../../../core/widgets/app_text_field_widget.dart';
+import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../cubit/appointments_cubit.dart';
 import '../../cubit/appointments_state.dart';
@@ -84,7 +86,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                       _buildMenuItem('Cancelled', state.selectedStatusFilter),
                     ],
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
                         border: Border.all(
@@ -246,10 +249,10 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       columns: const [
         DataColumn2(label: Text('PROSPECT / CUSTOMER'), size: ColumnSize.L),
         DataColumn2(label: Text('PREFERRED TIME'), size: ColumnSize.M),
-        DataColumn2(label: Text('TYPE'), size: ColumnSize.S, fixedWidth: 110),
+        DataColumn2(label: Text('TYPE'), size: ColumnSize.S, fixedWidth: 120),
         DataColumn2(label: Text('STATUS'), size: ColumnSize.S, fixedWidth: 120),
         DataColumn2(label: Text('NOTES / AI INTENT'), size: ColumnSize.L),
-        DataColumn2(label: Text('ACTIONS'), size: ColumnSize.S, fixedWidth: 130),
+        DataColumn2(label: Text('ACTIONS'), size: ColumnSize.M, fixedWidth: 180),
       ],
       rows: requests.map((req) {
         final isPending = req.status.toLowerCase() == 'pending';
@@ -265,57 +268,32 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             return null;
           }),
           cells: [
-            // Prospect / Customer
+            // Prospect / Customer (No avatar circle as requested)
             DataCell(
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
+                  Text(
+                    req.customerName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13.5,
+                      color: context.colors.blackColor,
                     ),
-                    child: Center(
-                      child: Text(
-                        req.customerName.isNotEmpty ? req.customerName[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          color: Color(0xFF8B5CF6),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          req.customerName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13.5,
-                            color: context.colors.blackColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          req.companyName.isNotEmpty
-                              ? req.companyName
-                              : (req.customerPhone.isNotEmpty ? req.customerPhone : req.customerEmail),
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            color: context.colors.darkGreyColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                  Text(
+                    req.companyName.isNotEmpty
+                        ? req.companyName
+                        : (req.customerPhone.isNotEmpty ? req.customerPhone : req.customerEmail),
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: context.colors.darkGreyColor,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -346,41 +324,20 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
             ),
 
-            // Type
+            // Type (Using CustomTagWidget)
             DataCell(
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: req.isOnline
-                      ? const Color(0xFF3B82F6).withValues(alpha: 0.12)
-                      : const Color(0xFF10B981).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      req.isOnline ? CupertinoIcons.videocam_fill : CupertinoIcons.person_2_fill,
-                      size: 12,
-                      color: req.isOnline ? const Color(0xFF3B82F6) : const Color(0xFF10B981),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      req.isOnline ? 'Online' : 'In-Person',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: req.isOnline ? const Color(0xFF3B82F6) : const Color(0xFF10B981),
-                      ),
-                    ),
-                  ],
-                ),
+              CustomTagWidget(
+                label: req.isOnline ? 'Online' : 'In-Person',
+                color: req.isOnline ? context.colors.infoColor : context.colors.successColor,
               ),
             ),
 
-            // Status
+            // Status (Using CustomTagWidget)
             DataCell(
-              _buildStatusBadge(req.status),
+              CustomTagWidget(
+                label: req.status,
+                color: _getStatusColor(context, req.status),
+              ),
             ),
 
             // Notes / AI Intent
@@ -396,59 +353,49 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
             ),
 
-            // Actions
+            // Actions (Standardized button height and AppActionButton)
             DataCell(
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isPending) ...[
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        ScheduleRequestDrawer.show(context, req);
-                      },
-                      icon: const Icon(CupertinoIcons.calendar_badge_plus, size: 13, color: Colors.white),
-                      label: const Text(
-                        'Schedule',
-                        style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8B5CF6),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        minimumSize: const Size(0, 30),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                    SizedBox(
+                      height: 36,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          ScheduleRequestDrawer.show(context, req);
+                        },
+                        icon: const Icon(CupertinoIcons.calendar_badge_plus, size: 14, color: Colors.white),
+                        label: const Text(
+                          'Schedule',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8B5CF6),
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.xmark, size: 14),
+                    const SizedBox(width: 8),
+                    AppActionButton(
+                      type: AppActionType.delete,
                       tooltip: 'Cancel Request',
-                      color: context.colors.errorColor,
-                      onPressed: () => _confirmCancelRequest(context, cubit, req),
+                      onTap: () => _confirmCancelRequest(context, cubit, req),
                     ),
                   ] else if (isScheduled) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'Booked',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF8B5CF6),
-                        ),
-                      ),
+                    CustomTagWidget(
+                      label: 'Booked',
+                      color: context.colors.primaryLightColor,
                     ),
                   ] else ...[
                     Text(
                       req.status,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 12,
                         color: context.colors.darkGreyColor,
                       ),
                     ),
@@ -462,55 +409,16 @@ class _RequestsTabViewState extends State<RequestsTabView> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color bg;
-    Color fg;
+  Color _getStatusColor(BuildContext context, String status) {
     final s = status.toLowerCase();
-
     if (s == 'pending') {
-      bg = const Color(0xFFF59E0B).withValues(alpha: 0.15);
-      fg = const Color(0xFFF59E0B);
-    } else if (s == 'scheduled') {
-      bg = const Color(0xFF8B5CF6).withValues(alpha: 0.15);
-      fg = const Color(0xFF8B5CF6);
-    } else if (s == 'closed') {
-      bg = const Color(0xFF64748B).withValues(alpha: 0.15);
-      fg = const Color(0xFF64748B);
-    } else {
-      bg = const Color(0xFFEF4444).withValues(alpha: 0.15);
-      fg = const Color(0xFFEF4444);
+      return context.colors.warningColor;
+    } else if (s == 'scheduled' || s == 'confirmed') {
+      return context.colors.primaryLightColor;
+    } else if (s == 'cancelled' || s == 'rejected') {
+      return context.colors.errorColor;
     }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: fg,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            status.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-              color: fg,
-            ),
-          ),
-        ],
-      ),
-    );
+    return context.colors.darkGreyColor;
   }
 
   void _confirmCancelRequest(

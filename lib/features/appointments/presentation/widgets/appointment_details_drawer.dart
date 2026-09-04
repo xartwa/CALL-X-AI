@@ -254,7 +254,7 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                   if (appointment.isOnline && appointment.meetingUrl != null && !appointment.isCancelled) ...[
                     SizedBox(
                       width: double.infinity,
-                      height: 40,
+                      height: 46,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primary,
@@ -275,7 +275,7 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                         icon: const Icon(CupertinoIcons.video_camera, size: 16),
                         label: const Text(
                           'Join / Copy Meeting Link',
-                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
@@ -286,56 +286,60 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                     children: [
                       if (!appointment.isCancelled && !appointment.isCompleted) ...[
                         Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                          child: SizedBox(
+                            height: 46,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                                ),
                               ),
-                            ),
-                            onPressed: () async {
-                              final picked = await AppDateTimePicker.pickDateTime(
-                                context,
-                                initial: appointment.startAt.toLocal(),
-                              );
-                              if (picked != null) {
-                                await cubit.rescheduleAppointment(
-                                  appointment.id,
-                                  picked,
-                                  reason: 'Rescheduled via admin drawer',
+                              onPressed: () async {
+                                final picked = await AppDateTimePicker.pickDateTime(
+                                  context,
+                                  initial: appointment.startAt.toLocal(),
                                 );
-                                onClose();
-                              }
-                            },
-                            child: const Text('Reschedule', style: TextStyle(fontSize: 12)),
+                                if (picked != null) {
+                                  await cubit.rescheduleAppointment(
+                                    appointment.id,
+                                    picked,
+                                    reason: 'Rescheduled via admin drawer',
+                                  );
+                                  onClose();
+                                }
+                              },
+                              child: const Text('Reschedule', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: context.colors.errorColor,
-                              side: BorderSide(color: context.colors.errorColor.withValues(alpha: 0.5)),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-                              ),
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (_) => ConfirmationDialog(
-                                  title: 'Cancel Appointment?',
-                                  message: 'Are you sure you want to cancel this appointment with ${appointment.customerName}?',
-                                  confirmLabel: 'Yes, Cancel',
-                                  onConfirm: () async {
-                                    await cubit.cancelAppointment(appointment.id);
-                                    onClose();
-                                  },
+                          child: SizedBox(
+                            height: 46,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: context.colors.errorColor,
+                                side: BorderSide(color: context.colors.errorColor.withValues(alpha: 0.5)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
                                 ),
-                              );
-                            },
-                            child: const Text('Cancel', style: TextStyle(fontSize: 12)),
+                              ),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => ConfirmationDialog(
+                                    title: 'Cancel Appointment?',
+                                    message: 'Are you sure you want to cancel this appointment with ${appointment.customerName}?',
+                                    confirmLabel: 'Yes, Cancel',
+                                    onConfirm: () async {
+                                      await cubit.cancelAppointment(appointment.id);
+                                      onClose();
+                                    },
+                                  ),
+                                );
+                              },
+                              child: const Text('Cancel', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            ),
                           ),
                         ),
                       ],

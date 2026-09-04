@@ -16,8 +16,8 @@ class CalendarWeekGrid extends StatelessWidget {
   });
 
   static const double _hourHeight = 60.0;
-  static const int _startHour = 9; // 9 AM
-  static const int _endHour = 20; // 8 PM (inclusive end)
+  static const int _startHour = 8; // 8 AM
+  static const int _endHour = 22; // 10 PM (inclusive end)
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +57,7 @@ class CalendarWeekGrid extends StatelessWidget {
             // Hours Grid Body (Scrollable inside available height)
             Expanded(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 60),
                 child: SizedBox(
                   height: (_endHour - _startHour + 1) * _hourHeight,
                   child: Stack(
@@ -275,78 +276,87 @@ class CalendarWeekGrid extends StatelessWidget {
 
       widgets.add(
         Positioned(
-          top: top + 2,
+          top: top + 1.5,
           left: left + 2,
           width: colWidth - 4,
-          height: height - 4,
+          height: height - 3,
           child: InkWell(
             onTap: () => onAppointmentTapped(appt),
             borderRadius: BorderRadius.circular(6),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: border, width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${DateFormat('HH:mm').format(localStart)} – ${DateFormat('HH:mm').format(localEnd)}',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w600,
-                      color: textAccent,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    appt.customerName,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (height >= 58) ...[
-                    const SizedBox(height: 1),
-                    Row(
-                      children: [
-                        Icon(
-                          isOnline
-                              ? CupertinoIcons.video_camera
-                              : CupertinoIcons.location_solid,
-                          size: 9.5,
-                          color: isDark ? Colors.white70 : const Color(0xFF475569),
-                        ),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            isOnline ? 'Online' : 'In-Person',
-                            style: TextStyle(
-                              fontSize: 9,
-                              color: isDark ? Colors.white70 : const Color(0xFF475569),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: border, width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
                   ],
-                ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${DateFormat('HH:mm').format(localStart)} – ${DateFormat('HH:mm').format(localEnd)}',
+                      style: TextStyle(
+                        fontSize: 9,
+                        height: 1.15,
+                        fontWeight: FontWeight.w600,
+                        color: textAccent,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (height >= 34) ...[
+                      const SizedBox(height: 1),
+                      Text(
+                        appt.customerName,
+                        style: TextStyle(
+                          fontSize: 10,
+                          height: 1.15,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (height >= 58) ...[
+                      const SizedBox(height: 1),
+                      Row(
+                        children: [
+                          Icon(
+                            isOnline
+                                ? CupertinoIcons.video_camera
+                                : CupertinoIcons.location_solid,
+                            size: 9,
+                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                          ),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(
+                              isOnline ? 'Online' : 'In-Person',
+                              style: TextStyle(
+                                fontSize: 8.5,
+                                height: 1.1,
+                                color: isDark ? Colors.white70 : const Color(0xFF475569),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
