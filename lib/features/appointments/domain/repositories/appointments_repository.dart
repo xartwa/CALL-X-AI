@@ -47,6 +47,8 @@ abstract class AppointmentsRepository {
     required int month,
   });
 
+  Future<AppointmentKPIStats> getKPIStats();
+
   // Appointment Requests
   Future<List<AppointmentRequestEntity>> getAppointmentRequests({
     String? status,

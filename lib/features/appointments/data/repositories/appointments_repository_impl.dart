@@ -113,6 +113,16 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
   }
 
   @override
+  Future<AppointmentKPIStats> getKPIStats() async {
+    try {
+      final raw = await _dataSource.getKPIStats();
+      return AppointmentKPIStats.fromJson(raw);
+    } catch (_) {
+      return const AppointmentKPIStats();
+    }
+  }
+
+  @override
   Future<List<AppointmentRequestEntity>> getAppointmentRequests({
     String? status,
     String? search,

@@ -24,6 +24,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
           year: state.selectedDate.year,
           month: state.selectedDate.month,
         ).catchError((_) => <AppointmentEntity>[]),
+        _repository.getKPIStats().catchError((_) => const AppointmentKPIStats()),
       ]);
 
       emit(state.copyWith(
@@ -36,6 +37,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         settings: results[5] as AppointmentSettingsEntity,
         calendarConnection: results[6] as CalendarConnectionEntity,
         calendarAppointments: results[7] as List<AppointmentEntity>,
+        kpi: results[8] as AppointmentKPIStats,
       ));
 
       // Also trigger a pre-load of available slots
@@ -58,6 +60,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         _repository.getExceptions().catchError((_) => <AvailabilityExceptionEntity>[]),
         _repository.getSettings().catchError((_) => const AppointmentSettingsEntity()),
         _repository.getCalendarConnection().catchError((_) => const CalendarConnectionEntity()),
+        _repository.getKPIStats().catchError((_) => const AppointmentKPIStats()),
       ]);
 
       emit(state.copyWith(
@@ -68,6 +71,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         exceptions: results[4] as List<AvailabilityExceptionEntity>,
         settings: results[5] as AppointmentSettingsEntity,
         calendarConnection: results[6] as CalendarConnectionEntity,
+        kpi: results[7] as AppointmentKPIStats,
       ));
     } catch (_) {}
   }

@@ -40,9 +40,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Toolbar: Search + Filter
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical:2),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onPrimary,
                 borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
@@ -130,6 +129,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             // Table Card
             Expanded(
               child: Container(
+                margin: EdgeInsets.symmetric(vertical: 5),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.onPrimary,
                   borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),

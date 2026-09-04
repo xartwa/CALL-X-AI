@@ -19,6 +19,7 @@ class AppointmentsState extends Equatable {
   final AppointmentSettingsEntity settings;
   final CalendarConnectionEntity calendarConnection;
   final List<AvailableSlotEntity> availableSlots;
+  final AppointmentKPIStats? kpi;
   final String selectedStatusFilter; // 'All', 'Confirmed', 'Pending', etc.
   final String selectedTypeFilter; // 'All', 'Online', 'In-Person'
   final String searchQuery;
@@ -40,6 +41,7 @@ class AppointmentsState extends Equatable {
     this.settings = const AppointmentSettingsEntity(),
     this.calendarConnection = const CalendarConnectionEntity(),
     this.availableSlots = const [],
+    this.kpi,
     this.selectedStatusFilter = 'All',
     this.selectedTypeFilter = 'All',
     this.searchQuery = '',
@@ -147,6 +149,7 @@ class AppointmentsState extends Equatable {
     AppointmentSettingsEntity? settings,
     CalendarConnectionEntity? calendarConnection,
     List<AvailableSlotEntity>? availableSlots,
+    AppointmentKPIStats? kpi,
     String? selectedStatusFilter,
     String? selectedTypeFilter,
     String? searchQuery,
@@ -170,6 +173,7 @@ class AppointmentsState extends Equatable {
       settings: settings ?? this.settings,
       calendarConnection: calendarConnection ?? this.calendarConnection,
       availableSlots: availableSlots ?? this.availableSlots,
+      kpi: kpi ?? this.kpi,
       selectedStatusFilter: selectedStatusFilter ?? this.selectedStatusFilter,
       selectedTypeFilter: selectedTypeFilter ?? this.selectedTypeFilter,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -194,6 +198,7 @@ class AppointmentsState extends Equatable {
         settings,
         calendarConnection,
         availableSlots,
+        kpi,
         selectedStatusFilter,
         selectedTypeFilter,
         searchQuery,

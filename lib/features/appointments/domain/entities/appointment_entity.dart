@@ -350,3 +350,48 @@ class AvailableSlotEntity extends Equatable {
   @override
   List<Object?> get props => [startAt, endAt, score];
 }
+
+class AppointmentKPIStats extends Equatable {
+  final int totalAppointments;
+  final int confirmedAppointments;
+  final int pendingRequests;
+  final int upcomingThisWeek;
+  final int completedAppointments;
+
+  const AppointmentKPIStats({
+    this.totalAppointments = 0,
+    this.confirmedAppointments = 0,
+    this.pendingRequests = 0,
+    this.upcomingThisWeek = 0,
+    this.completedAppointments = 0,
+  });
+
+  factory AppointmentKPIStats.fromJson(Map<String, dynamic> json) {
+    return AppointmentKPIStats(
+      totalAppointments: (json['totalAppointments'] as num?)?.toInt() ?? 0,
+      confirmedAppointments:
+          (json['confirmedAppointments'] as num?)?.toInt() ?? 0,
+      pendingRequests: (json['pendingRequests'] as num?)?.toInt() ?? 0,
+      upcomingThisWeek: (json['upcomingThisWeek'] as num?)?.toInt() ?? 0,
+      completedAppointments:
+          (json['completedAppointments'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'totalAppointments': totalAppointments,
+        'confirmedAppointments': confirmedAppointments,
+        'pendingRequests': pendingRequests,
+        'upcomingThisWeek': upcomingThisWeek,
+        'completedAppointments': completedAppointments,
+      };
+
+  @override
+  List<Object?> get props => [
+        totalAppointments,
+        confirmedAppointments,
+        pendingRequests,
+        upcomingThisWeek,
+        completedAppointments,
+      ];
+}

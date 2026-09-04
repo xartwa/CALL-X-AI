@@ -31,6 +31,9 @@ class _FakeAppointmentsRepository implements AppointmentsRepository {
   Future<List<AppointmentEntity>> getCalendarAppointments({required int year, required int month}) async => appts;
 
   @override
+  Future<AppointmentKPIStats> getKPIStats() async => const AppointmentKPIStats();
+
+  @override
   Future<AppointmentEntity> getAppointment(String id) async => appts.first;
 
   @override

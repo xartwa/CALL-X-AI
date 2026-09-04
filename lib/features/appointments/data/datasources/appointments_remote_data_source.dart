@@ -148,6 +148,11 @@ class AppointmentsRemoteDataSource {
     return Map<String, dynamic>.from(response.data as Map);
   }
 
+  Future<Map<String, dynamic>> getKPIStats() async {
+    final response = await _client.http.get('/appointments/kpi/');
+    return Map<String, dynamic>.from(response.data as Map);
+  }
+
   Future<Map<String, dynamic>> updateSettings(Map<String, dynamic> body) async {
     final response = await _client.http.patch('/appointment-settings/', data: body);
     return Map<String, dynamic>.from(response.data as Map);
