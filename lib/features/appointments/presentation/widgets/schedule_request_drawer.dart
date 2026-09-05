@@ -252,6 +252,13 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
                       controller: _emailCtrl,
                       hintText: 'e.g. client@company.com',
                       textInputType: TextInputType.emailAddress,
+                      showBorder: true,
+                      borderColor: isDark
+                          ? Colors.transparent
+                          : context.colors.lightGreyColor,
+                      fillColor: isDark
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFF8FAFC),
                       prefixIcon: Icon(
                         CupertinoIcons.mail,
                         size: 16,
@@ -371,7 +378,11 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
                         decoration: BoxDecoration(
                           color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: context.colors.lightGreyColor),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.transparent
+                                : context.colors.lightGreyColor,
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -403,8 +414,12 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
                         controller: _locationCtrl,
                         hintText: 'e.g. Downtown Office, Suite 400',
                         showBorder: true,
-                        borderColor: context.colors.lightGreyColor,
-                        fillColor: Colors.transparent,
+                        borderColor: isDark
+                            ? Colors.transparent
+                            : context.colors.lightGreyColor,
+                        fillColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF8FAFC),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -416,8 +431,12 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
                       hintText: 'Additional details or caller requirements...',
                       maxLines: 2,
                       showBorder: true,
-                      borderColor: context.colors.lightGreyColor,
-                      fillColor: Colors.transparent,
+                      borderColor: isDark
+                          ? Colors.transparent
+                          : context.colors.lightGreyColor,
+                      fillColor: isDark
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFF8FAFC),
                     ),
                   ],
                 ),

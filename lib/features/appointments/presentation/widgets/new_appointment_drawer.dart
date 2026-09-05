@@ -215,13 +215,17 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                     children: [
                       // 1. Select Customer
                       _buildLabel('CUSTOMER / LEAD *', isDark),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       AppDropdownWidget<User>(
                         value: _selectedCustomer,
                         items: customers,
                         hint: 'Select Lead or Customer',
-                        borderColor: Colors.transparent,
-                        backgroundColor: const Color(0xFF0F172A),
+                        borderColor: isDark
+                            ? Colors.transparent
+                            : context.colors.lightGreyColor,
+                        backgroundColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF8FAFC),
                         itemBuilder: (u) =>
                             '${u.fullName} (${u.companyName.isNotEmpty ? u.companyName : u.email})',
                         onChanged: (u) {
@@ -239,12 +243,18 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // Customer Email
                       _buildLabel('CUSTOMER EMAIL', isDark),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       AppTextFieldWidget(
                         controller: _emailCtrl,
                         hintText: 'e.g. client@company.com',
                         textInputType: TextInputType.emailAddress,
-                        fillColor: const Color(0xFF0F172A),
+                        showBorder: true,
+                        borderColor: isDark
+                            ? Colors.transparent
+                            : context.colors.lightGreyColor,
+                        fillColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF8FAFC),
                         prefixIcon: Icon(
                           CupertinoIcons.mail,
                           size: 16,
@@ -354,7 +364,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // 4. Date & Time Picker trigger
                       _buildLabel('SCHEDULED DATE & TIME *', isDark),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       InkWell(
                         onTap: _pickDateTime,
                         borderRadius: BorderRadius.circular(8),
@@ -366,6 +376,11 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                                 ? const Color(0xFF0F172A)
                                 : const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.transparent
+                                  : context.colors.lightGreyColor,
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -397,35 +412,53 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // 5. Consultation Topic / Title
                       _buildLabel('CONSULTATION TOPIC', isDark),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       AppTextFieldWidget(
                         controller: _titleCtrl,
                         hintText: 'e.g. Discovery Consultation',
-                        fillColor: const Color(0xFF0F172A),
+                        showBorder: true,
+                        borderColor: isDark
+                            ? Colors.transparent
+                            : context.colors.lightGreyColor,
+                        fillColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF8FAFC),
                       ),
                       const SizedBox(height: 16),
 
                       // 6. If in-person, location
                       if (_meetingType == 'in_person') ...[
                         _buildLabel('MEETING LOCATION / ADDRESS', isDark),
-                      const SizedBox(height: 10),
+                        const SizedBox(height: 6),
                         AppTextFieldWidget(
                           controller: _locationCtrl,
                           hintText: 'e.g. Toronto Office, Suite 400',
-                          fillColor: const Color(0xFF0F172A),
+                          showBorder: true,
+                          borderColor: isDark
+                              ? Colors.transparent
+                              : context.colors.lightGreyColor,
+                          fillColor: isDark
+                              ? const Color(0xFF0F172A)
+                              : const Color(0xFFF8FAFC),
                         ),
                         const SizedBox(height: 16),
                       ],
 
                       // 7. Notes
                       _buildLabel('AGENDA / NOTES', isDark),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       AppTextFieldWidget(
                         controller: _notesCtrl,
                         hintText:
                             'Review project scope, architectural feasibility, etc.',
                         maxLines: 2,
-                        fillColor: const Color(0xFF0F172A),
+                        showBorder: true,
+                        borderColor: isDark
+                            ? Colors.transparent
+                            : context.colors.lightGreyColor,
+                        fillColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF8FAFC),
                       ),
                     ],
                   ),
