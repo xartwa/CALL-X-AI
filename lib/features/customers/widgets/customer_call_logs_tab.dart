@@ -102,7 +102,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
       final isAi =
           t.speaker.toLowerCase() == 'ai' || t.speaker.toLowerCase() == 'agent';
       final speakerName = isAi ? 'AI' : (t.speakerName ?? 'Customer');
-      buffer.writeln('[$speakerName]: ${t.text}');
+      buffer.writeln('[${t.timestamp}] $speakerName: ${t.text}');
     }
 
     _copyToClipboard(buffer.toString(), 'Call transcript');

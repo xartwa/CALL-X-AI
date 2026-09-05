@@ -25,15 +25,41 @@ class CallTranscriptMessage {
     final rawSpeaker = (json['speaker'] as String? ?? 'ai').toLowerCase();
     final isAi = rawSpeaker == 'ai' || rawSpeaker == 'assistant' || rawSpeaker == 'agent';
     final defaultSpeakerName = isAi ? 'AI Assistant' : 'Customer';
-    final speakerName = json['speakerName'] as String? ??
+    final rawSpeakerName = json['speakerName'] as String? ??
         (json['speaker_name'] as String? ?? defaultSpeakerName);
+
+    String effectiveSpeakerName = rawSpeakerName;
+    if (!isAi) {
+      if (effectiveSpeakerName.isEmpty ||
+          effectiveSpeakerName == 'AI' ||
+          effectiveSpeakerName == 'AI Assistant' ||
+          effectiveSpeakerName == 'AI Agent') {
+        effectiveSpeakerName = 'Customer';
+      }
+    } else {
+      if (effectiveSpeakerName.isEmpty || effectiveSpeakerName == 'Customer') {
+        effectiveSpeakerName = 'AI Assistant';
+      }
+    }
+
+    String timestamp = (json['timestamp'] ?? json['time'])?.toString() ?? '';
+    if (timestamp.isEmpty || timestamp == '00:00') {
+      final rawStart = json['start_timestamp'] ?? json['startTimestamp'];
+      if (rawStart != null) {
+        final sec = (rawStart is num ? rawStart : double.tryParse('$rawStart') ?? 0).toInt();
+        final m = sec ~/ 60;
+        final s = sec % 60;
+        timestamp = '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+      } else {
+        timestamp = '00:00';
+      }
+    }
 
     return CallTranscriptMessage(
       speaker: isAi ? 'ai' : 'customer',
-      speakerName: speakerName,
+      speakerName: effectiveSpeakerName,
       text: json['text'] as String? ?? (json['content'] as String? ?? ''),
-      timestamp: json['timestamp'] as String? ??
-          (json['time'] as String? ?? '00:00'),
+      timestamp: timestamp,
     );
   }
 }

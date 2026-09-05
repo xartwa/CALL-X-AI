@@ -98,7 +98,11 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
     buffer.writeln(
         '=== Call Transcript: ${widget.call.fullName} (${AppDateTime.displayDateTime(widget.call.dateTime)}) ===');
     for (final t in widget.call.transcript) {
-      buffer.writeln('[${t.timestamp}] ${t.speakerName}: ${t.text}');
+      final isAi = t.speaker.toLowerCase() == 'ai' || t.speaker.toLowerCase() == 'agent';
+      final speaker = isAi
+          ? (t.speakerName.isNotEmpty && t.speakerName != 'Customer' ? t.speakerName : 'AI Assistant')
+          : (t.speakerName.isNotEmpty && !t.speakerName.startsWith('AI') ? t.speakerName : 'Customer');
+      buffer.writeln('[${t.timestamp}] $speaker: ${t.text}');
     }
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));

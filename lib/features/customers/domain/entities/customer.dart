@@ -379,12 +379,32 @@ List<CustomerCallHistory> _calls(Object? value) => value is List
             transcript: e['transcript'] is List
                 ? (e['transcript'] as List)
                     .whereType<Map>()
-                    .map((t) => TranscriptTurn(
-                        speaker: '${t['speaker'] ?? 'ai'}',
-                        speakerName: t['speakerName']?.toString() ??
-                            t['speaker_name']?.toString(),
-                        timestamp: '${t['timestamp'] ?? t['time'] ?? '00:00'}',
-                        text: '${t['text'] ?? t['content'] ?? ''}'))
+                    .map((t) {
+                        final rawSpeaker = '${t['speaker'] ?? 'ai'}'.toLowerCase();
+                        final isAi = rawSpeaker == 'ai' || rawSpeaker == 'assistant' || rawSpeaker == 'agent';
+                        String timeStr = '${t['timestamp'] ?? t['time'] ?? ''}';
+                        if (timeStr.isEmpty || timeStr == '00:00') {
+                          final rawStart = t['start_timestamp'] ?? t['startTimestamp'];
+                          if (rawStart != null) {
+                            final sec = (rawStart is num ? rawStart : double.tryParse('$rawStart') ?? 0).toInt();
+                            final m = sec ~/ 60;
+                            final s = sec % 60;
+                            timeStr = '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+                          } else {
+                            timeStr = '00:00';
+                          }
+                        }
+                        final rawName = t['speakerName']?.toString() ?? t['speaker_name']?.toString();
+                        final name = isAi
+                            ? (rawName != null && rawName.isNotEmpty && rawName != 'Customer' ? rawName : 'AI')
+                            : (rawName != null && rawName.isNotEmpty && !rawName.startsWith('AI') ? rawName : 'Customer');
+                        return TranscriptTurn(
+                          speaker: isAi ? 'ai' : 'customer',
+                          speakerName: name,
+                          timestamp: timeStr,
+                          text: '${t['text'] ?? t['content'] ?? ''}',
+                        );
+                    })
                     .toList()
                 : const [],
             notes: e['notes']?.toString(),
