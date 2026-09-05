@@ -17,13 +17,42 @@ class CalendarWeekGrid extends StatelessWidget {
   });
 
   static const double _hourHeight = 60.0;
-  static const int _startHour = 8; // 8 AM
-  static const int _endHour = 22; // 10 PM (inclusive end)
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
+
+    // Dynamically calculate startHour and endHour based on appointments this week
+    int startHour = 8;
+    int endHour = 21;
+
+    for (final appt in appointments) {
+      if (appt.isCancelled) continue;
+      final localStart = appt.startAt.toLocal();
+      final localEnd = appt.endAt.toLocal();
+
+      bool inThisWeek = false;
+      for (final d in weekDays) {
+        if (d.year == localStart.year &&
+            d.month == localStart.month &&
+            d.day == localStart.day) {
+          inThisWeek = true;
+          break;
+        }
+      }
+      if (!inThisWeek) continue;
+
+      if (localStart.hour < startHour) {
+        startHour = localStart.hour;
+      }
+      final endH = localEnd.minute > 0 ? localEnd.hour : (localEnd.hour - 1);
+      if (endH > endHour) {
+        endHour = endH.clamp(startHour, 23);
+      }
+    }
+    startHour = startHour.clamp(0, 8);
+    endHour = endHour.clamp(20, 23);
 
     final borderColor =
         context.colors.mediumGreyColor.withValues(alpha: isDark ? 0.35 : 1.0);
@@ -60,13 +89,13 @@ class CalendarWeekGrid extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 60),
                 child: SizedBox(
-                  height: (_endHour - _startHour + 1) * _hourHeight,
+                  height: (endHour - startHour + 1) * _hourHeight,
                   child: Stack(
                     children: [
                       // Background horizontal grid lines
                       Column(
                         children: [
-                          for (int h = _startHour; h <= _endHour; h++) ...[
+                          for (int h = startHour; h <= endHour; h++) ...[
                             Container(
                               height: _hourHeight,
                               decoration: BoxDecoration(
@@ -120,11 +149,11 @@ class CalendarWeekGrid extends StatelessWidget {
 
                       // Current time indicator line
                       ..._buildCurrentTimeIndicator(
-                          colWidth, timeGutterWidth, now),
+                          colWidth, timeGutterWidth, now, startHour, endHour),
 
                       // Render appointment blocks on top of grid
                       ..._buildAppointmentCards(
-                          colWidth, timeGutterWidth, isDark),
+                          colWidth, timeGutterWidth, isDark, startHour, endHour),
                     ],
                   ),
                 ),
@@ -140,6 +169,8 @@ class CalendarWeekGrid extends StatelessWidget {
     double colWidth,
     double timeGutterWidth,
     DateTime now,
+    int startHour,
+    int endHour,
   ) {
     int todayIndex = -1;
     for (int i = 0; i < 7; i++) {
@@ -152,9 +183,9 @@ class CalendarWeekGrid extends StatelessWidget {
     if (todayIndex == -1) return [];
 
     final nowHourFrac = now.hour + (now.minute / 60.0);
-    if (nowHourFrac < _startHour || nowHourFrac > _endHour + 1) return [];
+    if (nowHourFrac < startHour || nowHourFrac > endHour + 1) return [];
 
-    final top = (nowHourFrac - _startHour) * _hourHeight;
+    final top = (nowHourFrac - startHour) * _hourHeight;
     final left = timeGutterWidth + (todayIndex * colWidth);
 
     return [
@@ -227,162 +258,242 @@ class CalendarWeekGrid extends StatelessWidget {
   }
 
   List<Widget> _buildAppointmentCards(
-      double colWidth, double timeGutterWidth, bool isDark) {
+    double colWidth,
+    double timeGutterWidth,
+    bool isDark,
+    int startHour,
+    int endHour,
+  ) {
     final List<Widget> widgets = [];
 
-    for (final appt in appointments) {
-      if (appt.isCancelled) continue;
+    // Process each day column independently
+    for (int dayIndex = 0; dayIndex < 7; dayIndex++) {
+      final dayDate = weekDays[dayIndex];
 
-      final localStart = appt.startAt.toLocal();
-      final localEnd = appt.endAt.toLocal();
+      // 1. Gather all active appointments for this day
+      final dayAppts = appointments.where((appt) {
+        if (appt.isCancelled) return false;
+        final local = appt.startAt.toLocal();
+        return local.year == dayDate.year &&
+            local.month == dayDate.month &&
+            local.day == dayDate.day;
+      }).toList();
 
-      // Check which day index of current week (0 to 6)
-      int dayIndex = -1;
-      for (int i = 0; i < 7; i++) {
-        final d = weekDays[i];
-        if (d.year == localStart.year &&
-            d.month == localStart.month &&
-            d.day == localStart.day) {
-          dayIndex = i;
-          break;
+      if (dayAppts.isEmpty) continue;
+
+      // 2. Sort by start time ascending, then by duration descending
+      dayAppts.sort((a, b) {
+        final cmp = a.startAt.compareTo(b.startAt);
+        if (cmp != 0) return cmp;
+        final durA = a.endAt.difference(a.startAt);
+        final durB = b.endAt.difference(b.startAt);
+        return durB.compareTo(durA);
+      });
+
+      // 3. Cluster overlapping appointments
+      final List<List<AppointmentEntity>> clusters = [];
+      List<AppointmentEntity> currentCluster = [];
+      DateTime? currentClusterMaxEnd;
+
+      for (final appt in dayAppts) {
+        final start = appt.startAt.toLocal();
+        final end = appt.endAt.toLocal();
+
+        if (currentCluster.isEmpty) {
+          currentCluster.add(appt);
+          currentClusterMaxEnd = end;
+        } else {
+          // If this appointment starts before the latest end of the cluster, it overlaps!
+          if (start.isBefore(currentClusterMaxEnd!)) {
+            currentCluster.add(appt);
+            if (end.isAfter(currentClusterMaxEnd)) {
+              currentClusterMaxEnd = end;
+            }
+          } else {
+            clusters.add(currentCluster);
+            currentCluster = [appt];
+            currentClusterMaxEnd = end;
+          }
         }
       }
-
-      if (dayIndex == -1) continue; // Outside this week
-
-      final startHourFrac = localStart.hour + (localStart.minute / 60.0);
-      final durationHours =
-          (localEnd.difference(localStart).inMinutes / 60.0).clamp(0.5, 3.0);
-
-      // Y position relative to _startHour
-      final top = (startHourFrac - _startHour) * _hourHeight;
-      final height = (durationHours * _hourHeight).clamp(48.0, 160.0);
-      final left = timeGutterWidth + (dayIndex * colWidth);
-
-      if (top < 0 || top > (_endHour - _startHour + 1) * _hourHeight) continue;
-
-      // Card style colors
-      final isOnline = appt.isOnline;
-      final isPending = appt.isPending;
-
-      Color bg;
-      Color border;
-      Color textAccent;
-
-      if (isPending) {
-        bg = isDark ? const Color(0xFF332A15) : const Color(0xFFFEF3C7);
-        border = const Color(0xFFF59E0B);
-        textAccent = const Color(0xFFF59E0B);
-      } else if (isOnline) {
-        // Emerald / Green or Blue tint
-        bg = isDark
-            ? const Color(0xFF064E3B).withValues(alpha: 0.6)
-            : const Color(0xFFD1FAE5);
-        border = const Color(0xFF10B981);
-        textAccent = const Color(0xFF10B981);
-      } else {
-        // In person: Purple theme tint
-        bg = isDark
-            ? const Color(0xFF8B5CF6).withValues(alpha: 0.18)
-            : const Color(0xFFEDE9FE);
-        border = const Color(0xFF8B5CF6);
-        textAccent = const Color(0xFF8B5CF6);
+      if (currentCluster.isNotEmpty) {
+        clusters.add(currentCluster);
       }
 
-      widgets.add(
-        Positioned(
-          top: top + 1.5,
-          left: left + 2,
-          width: colWidth - 4,
-          height: height - 3,
-          child: InkWell(
-            onTap: () => onAppointmentTapped(appt),
-            borderRadius: BorderRadius.circular(6),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
-                decoration: BoxDecoration(
-                  color: bg,
+      // 4. For each cluster, assign columns greedily and render
+      final dayBaseLeft = timeGutterWidth + (dayIndex * colWidth);
+      final double totalDayWidth = colWidth - 4.0;
+
+      for (final cluster in clusters) {
+        final List<DateTime> columnEnds = [];
+        final Map<String, int> apptColumnMap = {};
+
+        for (final appt in cluster) {
+          final start = appt.startAt.toLocal();
+          final end = appt.endAt.toLocal();
+
+          int assignedCol = -1;
+          for (int c = 0; c < columnEnds.length; c++) {
+            if (!columnEnds[c].isAfter(start)) {
+              assignedCol = c;
+              columnEnds[c] = end;
+              break;
+            }
+          }
+          if (assignedCol == -1) {
+            assignedCol = columnEnds.length;
+            columnEnds.add(end);
+          }
+          apptColumnMap[appt.id] = assignedCol;
+        }
+
+        final int totalCols = columnEnds.length;
+        final double cardWidth = totalDayWidth / totalCols;
+
+        for (final appt in cluster) {
+          final localStart = appt.startAt.toLocal();
+          final localEnd = appt.endAt.toLocal();
+          final colIndex = apptColumnMap[appt.id] ?? 0;
+
+          final startHourFrac = localStart.hour + (localStart.minute / 60.0);
+          final durationHours =
+              (localEnd.difference(localStart).inMinutes / 60.0).clamp(0.4, 4.0);
+
+          final top = (startHourFrac - startHour) * _hourHeight;
+          final height = (durationHours * _hourHeight).clamp(40.0, 200.0);
+          final left = dayBaseLeft + 2.0 + (colIndex * cardWidth);
+          final itemWidth = (cardWidth - 2.0).clamp(24.0, totalDayWidth);
+
+          if (top < 0 || top > (endHour - startHour + 1) * _hourHeight) continue;
+
+          // Card style colors
+          final isOnline = appt.isOnline;
+          final isPending = appt.isPending;
+
+          Color bg;
+          Color border;
+          Color textAccent;
+
+          if (isPending) {
+            bg = isDark ? const Color(0xFF332A15) : const Color(0xFFFEF3C7);
+            border = const Color(0xFFF59E0B);
+            textAccent = const Color(0xFFF59E0B);
+          } else if (isOnline) {
+            bg = isDark
+                ? const Color(0xFF064E3B).withValues(alpha: 0.6)
+                : const Color(0xFFD1FAE5);
+            border = const Color(0xFF10B981);
+            textAccent = const Color(0xFF10B981);
+          } else {
+            bg = isDark
+                ? const Color(0xFF8B5CF6).withValues(alpha: 0.18)
+                : const Color(0xFFEDE9FE);
+            border = const Color(0xFF8B5CF6);
+            textAccent = const Color(0xFF8B5CF6);
+          }
+
+          final timeStr = itemWidth < 65
+              ? DateFormat('HH:mm').format(localStart)
+              : '${DateFormat('HH:mm').format(localStart)} – ${DateFormat('HH:mm').format(localEnd)}';
+
+          widgets.add(
+            Positioned(
+              top: top + 1.5,
+              left: left,
+              width: itemWidth,
+              height: height - 3.0,
+              child: InkWell(
+                onTap: () => onAppointmentTapped(appt),
+                borderRadius: BorderRadius.circular(6),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: border, width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${DateFormat('HH:mm').format(localStart)} – ${DateFormat('HH:mm').format(localEnd)}',
-                      style: TextStyle(
-                        fontSize: 9,
-                        height: 1.15,
-                        fontWeight: FontWeight.w600,
-                        color: textAccent,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (height >= 34) ...[
-                      const SizedBox(height: 1),
-                      Text(
-                        appt.customerName,
-                        style: TextStyle(
-                          fontSize: 10,
-                          height: 1.15,
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isDark ? Colors.white : const Color(0xFF0F172A),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: bg,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: border, width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (height >= 58) ...[
-                      const SizedBox(height: 1),
-                      Row(
-                        children: [
-                          Icon(
-                            isOnline
-                                ? CupertinoIcons.video_camera
-                                : CupertinoIcons.location_solid,
-                            size: 9,
-                            color: isDark
-                                ? Colors.white70
-                                : const Color(0xFF475569),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          timeStr,
+                          style: TextStyle(
+                            fontSize: 9,
+                            height: 1.15,
+                            fontWeight: FontWeight.w600,
+                            color: textAccent,
                           ),
-                          const SizedBox(width: 3),
-                          Expanded(
-                            child: Text(
-                              isOnline ? 'Online' : 'In-Person',
-                              style: TextStyle(
-                                fontSize: 8.5,
-                                height: 1.1,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (height >= 34) ...[
+                          const SizedBox(height: 1),
+                          Text(
+                            appt.customerName.isNotEmpty
+                                ? appt.customerName
+                                : appt.title,
+                            style: TextStyle(
+                              fontSize: itemWidth < 60 ? 9 : 10,
+                              height: 1.15,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (height >= 56 && itemWidth >= 65) ...[
+                          const SizedBox(height: 1),
+                          Row(
+                            children: [
+                              Icon(
+                                isOnline
+                                    ? CupertinoIcons.video_camera
+                                    : CupertinoIcons.location_solid,
+                                size: 9,
                                 color: isDark
                                     ? Colors.white70
                                     : const Color(0xFF475569),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                              const SizedBox(width: 3),
+                              Expanded(
+                                child: Text(
+                                  isOnline ? 'Online' : 'In-Person',
+                                  style: TextStyle(
+                                    fontSize: 8.5,
+                                    height: 1.1,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : const Color(0xFF475569),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
-                  ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      );
+          );
+        }
+      }
     }
 
     return widgets;

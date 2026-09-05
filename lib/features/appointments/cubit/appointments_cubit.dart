@@ -1,7 +1,45 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domain/entities/appointment_entity.dart';
 import '../domain/repositories/appointments_repository.dart';
 import 'appointments_state.dart';
+
+String _extractErrorMessage(dynamic e) {
+  if (e is DioException) {
+    final data = e.response?.data;
+    if (data is Map) {
+      if (data['detail'] != null) {
+        return data['detail'].toString();
+      }
+      if (data['error'] != null) {
+        return data['error'].toString();
+      }
+      if (data['message'] != null) {
+        return data['message'].toString();
+      }
+      if (data['non_field_errors'] != null) {
+        final errs = data['non_field_errors'];
+        if (errs is List && errs.isNotEmpty) {
+          return errs.first.toString();
+        }
+        return errs.toString();
+      }
+      if (data.isNotEmpty) {
+        final firstVal = data.values.first;
+        if (firstVal is List && firstVal.isNotEmpty) {
+          return '${data.keys.first}: ${firstVal.first}';
+        }
+        return '${data.keys.first}: $firstVal';
+      }
+    } else if (data is String && data.isNotEmpty) {
+      return data;
+    }
+    if (e.message != null && e.message!.isNotEmpty) {
+      return e.message!;
+    }
+  }
+  return e.toString();
+}
 
 class AppointmentsCubit extends Cubit<AppointmentsState> {
   final AppointmentsRepository _repository;
@@ -45,7 +83,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     } catch (e) {
       emit(state.copyWith(
         status: AppointmentsStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: _extractErrorMessage(e),
       ));
     }
   }
@@ -169,7 +207,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -195,7 +233,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -211,7 +249,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -227,7 +265,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -243,7 +281,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -279,7 +317,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -295,7 +333,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -346,7 +384,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -379,7 +417,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -396,7 +434,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -414,7 +452,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
@@ -430,7 +468,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       ));
       return true;
     } catch (e) {
-      emit(state.copyWith(isActionLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
       return false;
     }
   }
