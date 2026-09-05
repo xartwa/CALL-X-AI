@@ -354,12 +354,12 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
               height: 38,
               decoration: BoxDecoration(
                 gradient: _hasAudio
-                    ? const LinearGradient(
+                    ?  LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Color(0xFF6366F1),
-                          Color(0xFF4F46E5),
+                       Theme.of(context).colorScheme.primary,
+                       Theme.of(context).colorScheme.primary,
                         ],
                       )
                     : null,
