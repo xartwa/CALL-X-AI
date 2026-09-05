@@ -142,8 +142,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                               size: 16,
                               color: Colors.white,
                             ),
-                      label: const Text(
-                        'Save Changes',
+                      label:  Text(
+                        'Save Changes'.toUpperCase(),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -155,8 +155,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(ThemeConstants.buttonRadius),
+                          borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius),
                         ),
                       ),
                     ),
@@ -171,8 +171,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         size: 16,
                         color: Colors.white,
                       ),
-                      label: const Text(
-                        'New Appointment',
+                      label: Text(
+                        'New Appointment'.toUpperCase(),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -184,8 +184,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(ThemeConstants.buttonRadius),
+                          borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius),
                         ),
                       ),
                     ),

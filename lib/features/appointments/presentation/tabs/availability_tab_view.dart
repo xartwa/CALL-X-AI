@@ -498,8 +498,8 @@ class AvailabilityTabView extends StatelessWidget {
                     onPressed: () => AddExceptionDialog.show(context),
                     icon: const Icon(CupertinoIcons.plus,
                         size: 15, color: Colors.white),
-                    label: const Text(
-                      'Add Exception',
+                    label:  Text(
+                      'Add Exception'.toUpperCase(),
                       style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,

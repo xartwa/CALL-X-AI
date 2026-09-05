@@ -1017,8 +1017,8 @@ class ScenarioSettingsTab extends StatelessWidget {
                                     .pop(controller.text.trim());
                               }
                             },
-                            child: const Text(
-                              'Save Changes',
+                            child:  Text(
+                              'Save Changes'.toUpperCase(),
                               style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
