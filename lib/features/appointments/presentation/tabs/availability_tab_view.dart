@@ -369,10 +369,14 @@ class AvailabilityTabView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
               border: Border.all(
-                color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                color: isDark
+                    ? Colors.white12
+                    : context.colors.mediumGreyColor.withValues(alpha: 0.4),
               ),
             ),
             child: Row(
@@ -551,9 +555,14 @@ class AvailabilityTabView extends StatelessWidget {
                             horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF0F172A)
+                              ? Colors.white.withValues(alpha: 0.03)
                               : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white12
+                                : context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                          ),
                         ),
                         child: Text(
                           DateFormat('MMM d, yyyy').format(ex.date),
