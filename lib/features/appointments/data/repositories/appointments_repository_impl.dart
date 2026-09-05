@@ -34,6 +34,7 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
   @override
   Future<AppointmentEntity> createAppointment({
     required int customerId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     String meetingType = 'online',
@@ -46,6 +47,8 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
   }) async {
     final body = {
       'customerId': customerId,
+      if (customerEmail != null && customerEmail.isNotEmpty)
+        'customerEmail': customerEmail,
       'startAt': startAt.toUtc().toIso8601String(),
       if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
       'meetingType': meetingType,
@@ -134,6 +137,7 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
   @override
   Future<AppointmentEntity> scheduleRequest({
     required String requestId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     int? durationMinutes,
@@ -142,6 +146,8 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
     String notes = '',
   }) async {
     final body = {
+      if (customerEmail != null && customerEmail.isNotEmpty)
+        'customerEmail': customerEmail,
       'startAt': startAt.toUtc().toIso8601String(),
       if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
       if (durationMinutes != null) 'durationMinutes': durationMinutes,

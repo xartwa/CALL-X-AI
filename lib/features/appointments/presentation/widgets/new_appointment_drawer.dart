@@ -61,6 +61,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
   DateTime? _selectedEnd;
   String _meetingType = 'online'; // 'online' or 'in_person'
   final int _durationMinutes = 45;
+  final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _titleCtrl = TextEditingController(text: 'Discovery Consultation');
   final TextEditingController _locationCtrl = TextEditingController();
   final TextEditingController _notesCtrl = TextEditingController();
@@ -76,6 +77,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
   @override
   void dispose() {
+    _emailCtrl.dispose();
     _titleCtrl.dispose();
     _locationCtrl.dispose();
     _notesCtrl.dispose();
@@ -116,6 +118,9 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
     final cubit = context.read<AppointmentsCubit>();
     final ok = await cubit.createAppointment(
       customerId: int.tryParse(_selectedCustomer!.id) ?? 0,
+      customerEmail: _emailCtrl.text.trim().isNotEmpty
+          ? _emailCtrl.text.trim()
+          : null,
       startAt: _selectedStart!,
       endAt: _selectedEnd,
       meetingType: _meetingType,
@@ -212,8 +217,32 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                         items: customers,
                         hint: 'Select Lead or Customer',
                         itemBuilder: (u) => '${u.fullName} (${u.companyName.isNotEmpty ? u.companyName : u.email})',
-                        onChanged: (u) => setState(() => _selectedCustomer = u),
+                        onChanged: (u) {
+                          setState(() {
+                            _selectedCustomer = u;
+                            if (u != null && u.email.isNotEmpty) {
+                              _emailCtrl.text = u.email;
+                            } else {
+                              _emailCtrl.clear();
+                            }
+                          });
+                        },
                         borderColor: context.colors.lightGreyColor,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Customer Email
+                      _buildLabel('CUSTOMER EMAIL', isDark),
+                      const SizedBox(height: 6),
+                      AppTextFieldWidget(
+                        controller: _emailCtrl,
+                        hintText: 'e.g. client@company.com',
+                        textInputType: TextInputType.emailAddress,
+                        prefixIcon: Icon(
+                          CupertinoIcons.mail,
+                          size: 16,
+                          color: context.colors.darkGreyColor,
+                        ),
                       ),
                       const SizedBox(height: 16),
 

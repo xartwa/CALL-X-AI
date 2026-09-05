@@ -39,6 +39,7 @@ class _FakeAppointmentsRepository implements AppointmentsRepository {
   @override
   Future<AppointmentEntity> createAppointment({
     required int customerId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     String meetingType = 'online',
@@ -55,7 +56,7 @@ class _FakeAppointmentsRepository implements AppointmentsRepository {
       customerName: 'Test Client',
       companyName: 'Client Corp',
       customerPhone: '1234567890',
-      customerEmail: 'test@client.com',
+      customerEmail: customerEmail ?? 'test@client.com',
       meetingType: meetingType,
       status: 'confirmed',
       startAt: startAt,
@@ -86,6 +87,7 @@ class _FakeAppointmentsRepository implements AppointmentsRepository {
   @override
   Future<AppointmentEntity> scheduleRequest({
     required String requestId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     int? durationMinutes,
@@ -99,7 +101,7 @@ class _FakeAppointmentsRepository implements AppointmentsRepository {
       customerName: 'Requested Client',
       companyName: 'Requested Corp',
       customerPhone: '1234567890',
-      customerEmail: 'req@client.com',
+      customerEmail: customerEmail ?? 'req@client.com',
       meetingType: meetingType ?? 'online',
       status: 'confirmed',
       startAt: startAt,
@@ -274,10 +276,11 @@ void main() {
       expect(cubit.state.availabilityRules.first.enabled, false);
     });
 
-    test('createAppointment adds new appointment and refreshes state', () async {
+    test('createAppointment adds new appointment and refreshes state with customerEmail', () async {
       await cubit.loadInitial();
       final ok = await cubit.createAppointment(
         customerId: 42,
+        customerEmail: 'custom@client.com',
         startAt: DateTime(2026, 9, 10, 14, 0),
         durationMinutes: 45,
         title: 'Strategy Session',
@@ -286,6 +289,21 @@ void main() {
       expect(ok, true);
       expect(cubit.state.appointments.length, 1);
       expect(cubit.state.appointments.first.title, 'Strategy Session');
+      expect(cubit.state.appointments.first.customerEmail, 'custom@client.com');
+    });
+
+    test('scheduleRequest converts request to appointment with customerEmail', () async {
+      await cubit.loadInitial();
+      final ok = await cubit.scheduleRequest(
+        requestId: 'req-1',
+        customerEmail: 'custom_req@client.com',
+        startAt: DateTime(2026, 9, 11, 10, 0),
+        durationMinutes: 45,
+      );
+
+      expect(ok, true);
+      expect(cubit.state.appointments.length, 1);
+      expect(cubit.state.appointments.first.customerEmail, 'custom_req@client.com');
     });
 
     test('addException and deleteException update exceptions state', () async {

@@ -137,6 +137,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
   Future<bool> createAppointment({
     required int customerId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     String meetingType = 'online',
@@ -150,6 +151,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     try {
       await _repository.createAppointment(
         customerId: customerId,
+        customerEmail: customerEmail,
         startAt: startAt,
         endAt: endAt,
         meetingType: meetingType,
@@ -250,6 +252,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
   Future<bool> scheduleRequest({
     required String requestId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     int? durationMinutes,
@@ -261,6 +264,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     try {
       await _repository.scheduleRequest(
         requestId: requestId,
+        customerEmail: customerEmail,
         startAt: startAt,
         endAt: endAt,
         durationMinutes: durationMinutes,

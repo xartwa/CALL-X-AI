@@ -60,6 +60,7 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
   DateTime? _selectedEnd;
   late String _meetingType;
   final int _durationMinutes = 45;
+  late final TextEditingController _emailCtrl;
   final TextEditingController _locationCtrl = TextEditingController();
   final TextEditingController _notesCtrl = TextEditingController();
 
@@ -67,6 +68,7 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
   void initState() {
     super.initState();
     _meetingType = widget.request.meetingType;
+    _emailCtrl = TextEditingController(text: widget.request.customerEmail);
     _notesCtrl.text = widget.request.notes ?? '';
     // Auto-select initial slot
     final now = DateTime.now();
@@ -76,6 +78,7 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
 
   @override
   void dispose() {
+    _emailCtrl.dispose();
     _locationCtrl.dispose();
     _notesCtrl.dispose();
     super.dispose();
@@ -107,6 +110,9 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
     final cubit = context.read<AppointmentsCubit>();
     final ok = await cubit.scheduleRequest(
       requestId: widget.request.id,
+      customerEmail: _emailCtrl.text.trim().isNotEmpty
+          ? _emailCtrl.text.trim()
+          : null,
       startAt: _selectedStart!,
       endAt: _selectedEnd,
       durationMinutes: _durationMinutes,
@@ -235,6 +241,21 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
                             ],
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Customer Email
+                    _buildLabel('CUSTOMER EMAIL', isDark),
+                    const SizedBox(height: 6),
+                    AppTextFieldWidget(
+                      controller: _emailCtrl,
+                      hintText: 'e.g. client@company.com',
+                      textInputType: TextInputType.emailAddress,
+                      prefixIcon: Icon(
+                        CupertinoIcons.mail,
+                        size: 16,
+                        color: context.colors.darkGreyColor,
                       ),
                     ),
                     const SizedBox(height: 18),

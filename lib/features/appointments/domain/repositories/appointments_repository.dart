@@ -13,6 +13,7 @@ abstract class AppointmentsRepository {
 
   Future<AppointmentEntity> createAppointment({
     required int customerId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     String meetingType = 'online',
@@ -57,6 +58,7 @@ abstract class AppointmentsRepository {
 
   Future<AppointmentEntity> scheduleRequest({
     required String requestId,
+    String? customerEmail,
     required DateTime startAt,
     DateTime? endAt,
     int? durationMinutes,
