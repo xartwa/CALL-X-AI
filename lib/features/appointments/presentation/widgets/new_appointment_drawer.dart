@@ -62,7 +62,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
   String _meetingType = 'online'; // 'online' or 'in_person'
   final int _durationMinutes = 45;
   final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _titleCtrl = TextEditingController(text: 'Discovery Consultation');
+  final TextEditingController _titleCtrl =
+      TextEditingController(text: 'Discovery Consultation');
   final TextEditingController _locationCtrl = TextEditingController();
   final TextEditingController _notesCtrl = TextEditingController();
 
@@ -71,7 +72,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
     super.initState();
     // Default start time: tomorrow at 11:00 AM
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    _selectedStart = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 11, 0);
+    _selectedStart =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 11, 0);
     _selectedEnd = _selectedStart!.add(Duration(minutes: _durationMinutes));
   }
 
@@ -118,9 +120,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
     final cubit = context.read<AppointmentsCubit>();
     final ok = await cubit.createAppointment(
       customerId: int.tryParse(_selectedCustomer!.id) ?? 0,
-      customerEmail: _emailCtrl.text.trim().isNotEmpty
-          ? _emailCtrl.text.trim()
-          : null,
+      customerEmail:
+          _emailCtrl.text.trim().isNotEmpty ? _emailCtrl.text.trim() : null,
       startAt: _selectedStart!,
       endAt: _selectedEnd,
       meetingType: _meetingType,
@@ -143,7 +144,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
     final primary = Theme.of(context).colorScheme.primary;
     final customersState = context.watch<CustomersCubit>().state;
     final customers = customersState.users;
-    final availableSlots = context.watch<AppointmentsCubit>().state.availableSlots;
+    final availableSlots =
+        context.watch<AppointmentsCubit>().state.availableSlots;
     final isBusy = context.watch<AppointmentsCubit>().state.isActionLoading;
 
     return Material(
@@ -173,7 +175,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -195,7 +198,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(CupertinoIcons.clear, size: 18, color: context.colors.darkGreyColor),
+                      icon: Icon(CupertinoIcons.clear,
+                          size: 18, color: context.colors.darkGreyColor),
                       onPressed: widget.onClose,
                     ),
                   ],
@@ -211,12 +215,15 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                     children: [
                       // 1. Select Customer
                       _buildLabel('CUSTOMER / LEAD *', isDark),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       AppDropdownWidget<User>(
                         value: _selectedCustomer,
                         items: customers,
                         hint: 'Select Lead or Customer',
-                        itemBuilder: (u) => '${u.fullName} (${u.companyName.isNotEmpty ? u.companyName : u.email})',
+                        borderColor: Colors.transparent,
+                        backgroundColor: const Color(0xFF0F172A),
+                        itemBuilder: (u) =>
+                            '${u.fullName} (${u.companyName.isNotEmpty ? u.companyName : u.email})',
                         onChanged: (u) {
                           setState(() {
                             _selectedCustomer = u;
@@ -227,18 +234,17 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                             }
                           });
                         },
-                        borderColor: context.colors.lightGreyColor,
                       ),
                       const SizedBox(height: 12),
 
                       // Customer Email
                       _buildLabel('CUSTOMER EMAIL', isDark),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       AppTextFieldWidget(
                         controller: _emailCtrl,
                         hintText: 'e.g. client@company.com',
                         textInputType: TextInputType.emailAddress,
-                        bo
+                        fillColor: const Color(0xFF0F172A),
                         prefixIcon: Icon(
                           CupertinoIcons.mail,
                           size: 16,
@@ -249,7 +255,8 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // 2. Format: Online vs In-Person
                       _buildLabel('MEETING FORMAT', isDark),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
+
                       Row(
                         children: [
                           Expanded(
@@ -279,16 +286,18 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // 3. Recommended 1-Click Slots
                       if (availableSlots.isNotEmpty) ...[
-                        _buildLabel('RECOMMENDED AVAILABLE SLOTS (1-CLICK)', isDark),
-                        const SizedBox(height: 6),
+                        _buildLabel(
+                            'RECOMMENDED AVAILABLE SLOTS (1-CLICK)', isDark),
+                      const SizedBox(height: 10),
                         Wrap(
                           spacing: 6,
                           runSpacing: 6,
                           children: availableSlots.take(6).map((slot) {
                             final isSel = _selectedStart != null &&
                                 (_selectedStart == slot.startAt ||
-                                 _selectedStart == slot.startAt.toLocal() ||
-                                 _selectedStart!.isAtSameMomentAs(slot.startAt));
+                                    _selectedStart == slot.startAt.toLocal() ||
+                                    _selectedStart!
+                                        .isAtSameMomentAs(slot.startAt));
                             return InkWell(
                               onTap: () {
                                 setState(() {
@@ -299,42 +308,38 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                               borderRadius: BorderRadius.circular(8),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: isSel
                                       ? primary
-                                      : primary.withValues(alpha: isDark ? 0.16 : 0.08),
+                                      : primary.withValues(
+                                          alpha: isDark ? 0.16 : 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: isSel
                                         ? primary
-                                        : primary.withValues(alpha: isDark ? 0.55 : 0.40),
+                                        : primary.withValues(
+                                            alpha: isDark ? 0.55 : 0.40),
                                     width: isSel ? 1.5 : 1.0,
                                   ),
-                                  boxShadow: isSel
-                                      ? [
-                                          BoxShadow(
-                                            color: primary.withValues(alpha: 0.35),
-                                            blurRadius: 6,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                      : null,
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      isSel ? CupertinoIcons.checkmark_alt : CupertinoIcons.sparkles,
+                                      isSel
+                                          ? CupertinoIcons.checkmark_alt
+                                          : CupertinoIcons.sparkles,
                                       size: 11,
                                       color: isSel ? Colors.white : primary,
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
-                                      '${slot.weekdayName.substring(0, 3)} ${slot.dateStr.split(',')[0]} • ${slot.localStart}',
+                                      '${slot.dateStr.split(',')[0]} • ${slot.localStart}',
                                       style: TextStyle(
                                         fontSize: 11,
-                                        fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                                        fontWeight: FontWeight.w600,
                                         color: isSel ? Colors.white : primary,
                                       ),
                                     ),
@@ -349,20 +354,23 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // 4. Date & Time Picker trigger
                       _buildLabel('SCHEDULED DATE & TIME *', isDark),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       InkWell(
                         onTap: _pickDateTime,
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 12),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                            color: isDark
+                                ? const Color(0xFF0F172A)
+                                : const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: context.colors.lightGreyColor),
                           ),
                           child: Row(
                             children: [
-                              Icon(CupertinoIcons.calendar, size: 16, color: primary),
+                              Icon(CupertinoIcons.calendar,
+                                  size: 16, color: primary),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
@@ -372,11 +380,15 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                                   style: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ),
-                              Icon(CupertinoIcons.chevron_right, size: 14, color: context.colors.darkGreyColor),
+                              Icon(CupertinoIcons.chevron_right,
+                                  size: 14,
+                                  color: context.colors.darkGreyColor),
                             ],
                           ),
                         ),
@@ -385,40 +397,35 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
 
                       // 5. Consultation Topic / Title
                       _buildLabel('CONSULTATION TOPIC', isDark),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       AppTextFieldWidget(
                         controller: _titleCtrl,
                         hintText: 'e.g. Discovery Consultation',
-                        showBorder: true,
-                        borderColor: context.colors.lightGreyColor,
-                        fillColor: Colors.transparent,
+                        fillColor: const Color(0xFF0F172A),
                       ),
                       const SizedBox(height: 16),
 
                       // 6. If in-person, location
                       if (_meetingType == 'in_person') ...[
                         _buildLabel('MEETING LOCATION / ADDRESS', isDark),
-                        const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                         AppTextFieldWidget(
                           controller: _locationCtrl,
                           hintText: 'e.g. Toronto Office, Suite 400',
-                          showBorder: true,
-                          borderColor: context.colors.lightGreyColor,
-                          fillColor: Colors.transparent,
+                          fillColor: const Color(0xFF0F172A),
                         ),
                         const SizedBox(height: 16),
                       ],
 
                       // 7. Notes
                       _buildLabel('AGENDA / NOTES', isDark),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       AppTextFieldWidget(
                         controller: _notesCtrl,
-                        hintText: 'Review project scope, architectural feasibility, etc.',
+                        hintText:
+                            'Review project scope, architectural feasibility, etc.',
                         maxLines: 2,
-                        showBorder: true,
-                        borderColor: context.colors.lightGreyColor,
-                        fillColor: Colors.transparent,
+                        fillColor: const Color(0xFF0F172A),
                       ),
                     ],
                   ),
@@ -446,18 +453,23 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
                       ),
                     ),
                     child: isBusy
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
                           )
                         : const Text(
                             'CONFIRM & CREATE APPOINTMENT',
-                            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                            style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5),
                           ),
                   ),
                 ),
@@ -510,14 +522,18 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 15, color: isSelected ? primary : const Color(0xFF64748B)),
+            Icon(icon,
+                size: 15,
+                color: isSelected ? primary : const Color(0xFF64748B)),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? (isDark ? Colors.white : primary) : const Color(0xFF64748B),
+                color: isSelected
+                    ? (isDark ? Colors.white : primary)
+                    : const Color(0xFF64748B),
               ),
             ),
           ],
