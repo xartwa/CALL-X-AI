@@ -108,7 +108,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color:
+                                isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -125,7 +126,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(CupertinoIcons.clear, size: 18, color: context.colors.darkGreyColor),
+                    icon: Icon(CupertinoIcons.clear,
+                        size: 18, color: context.colors.darkGreyColor),
                     onPressed: onClose,
                   ),
                 ],
@@ -168,35 +170,48 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                       context,
                       isDark,
                       [
-                        _buildInfoRow('Date', DateFormat('EEEE, MMMM d, yyyy').format(localStart)),
+                        _buildInfoRow(
+                            'Date',
+                            DateFormat('EEEE, MMMM d, yyyy')
+                                .format(localStart)),
                         _buildInfoRow(
                           'Time',
                           '${DateFormat('HH:mm').format(localStart)} – ${DateFormat('HH:mm').format(localEnd)} (${appointment.durationMinutes} mins)',
                         ),
                         _buildInfoRow('Timezone', appointment.timezone),
-                        _buildInfoRow('Meeting Type', appointment.isOnline ? 'Online Meeting' : 'In-Person Meeting'),
-                        if (appointment.isOnline && appointment.meetingUrl != null)
+                        _buildInfoRow(
+                            'Meeting Type',
+                            appointment.isOnline
+                                ? 'Online Meeting'
+                                : 'In-Person Meeting'),
+                        if (appointment.isOnline &&
+                            appointment.meetingUrl != null)
                           _buildActionableRow(
                             'Meeting URL',
                             appointment.meetingUrl!,
                             icon: CupertinoIcons.doc_on_clipboard,
                             onAction: () {
-                              Clipboard.setData(ClipboardData(text: appointment.meetingUrl!));
+                              Clipboard.setData(
+                                  ClipboardData(text: appointment.meetingUrl!));
                               AppUtils.showSnackBar(
                                 context: context,
-                                extraMessage: 'Meeting link copied to clipboard.',
+                                extraMessage:
+                                    'Meeting link copied to clipboard.',
                                 toastificationType: ToastificationType.success,
                               );
                             },
                           ),
-                        if (appointment.isInPerson && appointment.location != null && appointment.location!.isNotEmpty)
+                        if (appointment.isInPerson &&
+                            appointment.location != null &&
+                            appointment.location!.isNotEmpty)
                           _buildInfoRow('Location', appointment.location!),
                       ],
                     ),
                     const SizedBox(height: 18),
 
                     // Call & Source Link
-                    if (appointment.sourceCallId != null || appointment.source == 'ai_call') ...[
+                    if (appointment.sourceCallId != null ||
+                        appointment.source == 'ai_call') ...[
                       _buildSectionHeader(context, 'AI CALL CONTEXT'),
                       const SizedBox(height: 8),
                       _buildInfoCard(
@@ -212,14 +227,17 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                     ],
 
                     // Notes
-                    if (appointment.notes != null && appointment.notes!.isNotEmpty) ...[
+                    if (appointment.notes != null &&
+                        appointment.notes!.isNotEmpty) ...[
                       _buildSectionHeader(context, 'AGENDA & NOTES'),
                       const SizedBox(height: 8),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          color: isDark
+                              ? const Color(0xFF0F172A)
+                              : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: context.colors.mediumGreyColor
@@ -230,7 +248,9 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                           appointment.notes!,
                           style: TextStyle(
                             fontSize: 12.5,
-                            color: isDark ? Colors.white70 : const Color(0xFF334155),
+                            color: isDark
+                                ? Colors.white70
+                                : const Color(0xFF334155),
                             height: 1.4,
                           ),
                         ),
@@ -255,7 +275,9 @@ class AppointmentDetailsDrawer extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  if (appointment.isOnline && appointment.meetingUrl != null && !appointment.isCancelled) ...[
+                  if (appointment.isOnline &&
+                      appointment.meetingUrl != null &&
+                      !appointment.isCancelled) ...[
                     SizedBox(
                       width: double.infinity,
                       height: 46,
@@ -265,41 +287,47 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                            borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius),
                           ),
                         ),
                         onPressed: () {
-                          Clipboard.setData(ClipboardData(text: appointment.meetingUrl!));
+                          Clipboard.setData(
+                              ClipboardData(text: appointment.meetingUrl!));
                           AppUtils.showSnackBar(
                             context: context,
-                            extraMessage: 'Meeting URL copied: ${appointment.meetingUrl}',
+                            extraMessage:
+                                'Meeting URL copied: ${appointment.meetingUrl}',
                             toastificationType: ToastificationType.success,
                           );
                         },
                         icon: const Icon(CupertinoIcons.video_camera, size: 16),
                         label: const Text(
                           'Join / Copy Meeting Link',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
                     const SizedBox(height: 10),
                   ],
-
                   Row(
                     children: [
-                      if (!appointment.isCancelled && !appointment.isCompleted) ...[
+                      if (!appointment.isCancelled &&
+                          !appointment.isCompleted) ...[
                         Expanded(
                           child: SizedBox(
                             height: 46,
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                                  borderRadius: BorderRadius.circular(
+                                      ThemeConstants.buttonRadius),
                                 ),
                               ),
                               onPressed: () async {
-                                final picked = await AppDateTimePicker.pickDateTime(
+                                final picked =
+                                    await AppDateTimePicker.pickDateTime(
                                   context,
                                   initial: appointment.startAt.toLocal(),
                                 );
@@ -312,7 +340,10 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                                   onClose();
                                 }
                               },
-                              child: const Text('Reschedule', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                              child: const Text('Reschedule',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600)),
                             ),
                           ),
                         ),
@@ -323,9 +354,12 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: context.colors.errorColor,
-                                side: BorderSide(color: context.colors.errorColor.withValues(alpha: 0.5)),
+                                side: BorderSide(
+                                    color: context.colors.errorColor
+                                        .withValues(alpha: 0.5)),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                                  borderRadius: BorderRadius.circular(
+                                      ThemeConstants.buttonRadius),
                                 ),
                               ),
                               onPressed: () {
@@ -361,21 +395,28 @@ class AppointmentDetailsDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBanner(BuildContext context, AppointmentEntity appt, bool isDark) {
+  Widget _buildStatusBanner(
+      BuildContext context, AppointmentEntity appt, bool isDark) {
     Color bg;
     Color border;
     Color text;
 
     if (appt.isConfirmed) {
-      bg = isDark ? const Color(0xFF064E3B).withValues(alpha: 0.5) : const Color(0xFFD1FAE5);
+      bg = isDark
+          ? const Color(0xFF064E3B).withValues(alpha: 0.5)
+          : const Color(0xFFD1FAE5);
       border = const Color(0xFF10B981);
       text = const Color(0xFF10B981);
     } else if (appt.isCancelled) {
-      bg = isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.5) : const Color(0xFFFEE2E2);
+      bg = isDark
+          ? const Color(0xFF7F1D1D).withValues(alpha: 0.5)
+          : const Color(0xFFFEE2E2);
       border = const Color(0xFFEF4444);
       text = const Color(0xFFEF4444);
     } else {
-      bg = isDark ? const Color(0xFF78350F).withValues(alpha: 0.5) : const Color(0xFFFEF3C7);
+      bg = isDark
+          ? const Color(0xFF78350F).withValues(alpha: 0.5)
+          : const Color(0xFFFEF3C7);
       border = const Color(0xFFF59E0B);
       text = const Color(0xFFF59E0B);
     }
@@ -416,13 +457,23 @@ class AppointmentDetailsDrawer extends StatelessWidget {
           ),
           if (appt.isPending)
             TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: text,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
+                ),
+              ),
               onPressed: () {
                 context.read<AppointmentsCubit>().createAppointment(
                       customerId: appt.customerId,
                       startAt: appt.startAt,
                     );
               },
-              child: const Text('Confirm Now', style: TextStyle(fontSize: 11)),
+              child: Text('Confirm Now'.toUpperCase(),
+                  style: TextStyle(fontSize: 11)),
             ),
         ],
       ),
@@ -448,7 +499,8 @@ class AppointmentDetailsDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, bool isDark, List<Widget> children) {
+  Widget _buildInfoCard(
+      BuildContext context, bool isDark, List<Widget> children) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),

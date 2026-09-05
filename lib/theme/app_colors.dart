@@ -105,7 +105,7 @@ class AppColors {
   const AppColors._();
 
   static const light = AppColorsExtension(
-    primaryLightColor: Color(0XFF4169E1),
+    primaryLightColor: Color(0XFF1d4ed8),
     lightBlueColor: Color(0XFF818CF8), // Softer Indigo
     skyBlueColor:
         Color(0XFFF8FAFC), // Slate 50 - Very light background for contrast
@@ -125,7 +125,7 @@ class AppColors {
   );
 
   static const dark = AppColorsExtension(
-    primaryLightColor: Color(0XFF6366F1), // Indigo 500 - Pops nicely on dark
+    primaryLightColor: Color(0XFF1d4ed8), // Indigo 500 - Pops nicely on dark
     lightBlueColor: Color(0XFFA5B4FC), // Indigo 300
     skyBlueColor: Color(0XFF1E293B), // Slate 800 - Good for headers
     queuedColor: Color(0XFF22D3EE), // Cyan 400
@@ -136,14 +136,14 @@ class AppColors {
     errorColor: Color(0XFFF87171), // Red 400
     darkGreyColor: Color(0XFF94A3B8), // Slate 400
     mediumGreyColor: Color(0XFF334155), // Slate 700 - Borders
-    milkyColor: Color(0XFF1E293B), // Slate 800
+    milkyColor: Color(0XFF1E293B), // Slate 800 
     lightGreyColor: Color(0XFF475569), // Slate 600
     successColor: Color(0XFF34D399), // Emerald 400
     warningColor: Color(0XFFFBBF24), // Amber 400
   );
 
   // Deprecated direct accessors - will be removed after full refactoring
-  static const Color primaryLightColor = Color(0XFF4169E1);
+  static const Color primaryLightColor = Color(0XFF1d4ed8);
   static const Color lightBlueColor = Color(0XFF678DFF);
   static const Color skyBlueColor = Color(0XFFEFF4FF);
   static const Color queuedColor = Color(0XFF00C9D3);

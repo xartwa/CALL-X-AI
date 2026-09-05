@@ -46,10 +46,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onPrimary,
                 borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                border: Border.all(
-                  color: context.colors.mediumGreyColor
-                      .withValues(alpha: isDark ? 0.35 : 1.0),
-                ),
+                
               ),
               child: Row(
                 children: [
