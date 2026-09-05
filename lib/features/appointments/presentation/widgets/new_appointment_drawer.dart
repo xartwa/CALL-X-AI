@@ -238,6 +238,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                         controller: _emailCtrl,
                         hintText: 'e.g. client@company.com',
                         textInputType: TextInputType.emailAddress,
+                        bo
                         prefixIcon: Icon(
                           CupertinoIcons.mail,
                           size: 16,
@@ -283,8 +284,11 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                         Wrap(
                           spacing: 6,
                           runSpacing: 6,
-                          children: availableSlots.take(4).map((slot) {
-                            final isSel = _selectedStart != null && _selectedStart == slot.startAt;
+                          children: availableSlots.take(6).map((slot) {
+                            final isSel = _selectedStart != null &&
+                                (_selectedStart == slot.startAt ||
+                                 _selectedStart == slot.startAt.toLocal() ||
+                                 _selectedStart!.isAtSameMomentAs(slot.startAt));
                             return InkWell(
                               onTap: () {
                                 setState(() {
@@ -292,25 +296,49 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                                   _selectedEnd = slot.endAt.toLocal();
                                 });
                               },
-                              borderRadius: BorderRadius.circular(6),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                              borderRadius: BorderRadius.circular(8),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 180),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: isSel
-                                      ? primary.withValues(alpha: 0.2)
-                                      : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9)),
-                                  borderRadius: BorderRadius.circular(6),
+                                      ? primary
+                                      : primary.withValues(alpha: isDark ? 0.16 : 0.08),
+                                  borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isSel ? primary : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+                                    color: isSel
+                                        ? primary
+                                        : primary.withValues(alpha: isDark ? 0.55 : 0.40),
+                                    width: isSel ? 1.5 : 1.0,
                                   ),
+                                  boxShadow: isSel
+                                      ? [
+                                          BoxShadow(
+                                            color: primary.withValues(alpha: 0.35),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
                                 ),
-                                child: Text(
-                                  '${slot.weekdayName.substring(0, 3)} ${slot.dateStr.split(',')[0]} • ${slot.localStart}',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                                    color: isSel ? (isDark ? Colors.white : primary) : (isDark ? Colors.white70 : const Color(0xFF475569)),
-                                  ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isSel ? CupertinoIcons.checkmark_alt : CupertinoIcons.sparkles,
+                                      size: 11,
+                                      color: isSel ? Colors.white : primary,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '${slot.weekdayName.substring(0, 3)} ${slot.dateStr.split(',')[0]} • ${slot.localStart}',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
+                                        color: isSel ? Colors.white : primary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
