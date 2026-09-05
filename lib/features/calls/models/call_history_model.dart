@@ -21,15 +21,21 @@ class CallTranscriptMessage {
         'timestamp': timestamp,
       };
 
-  factory CallTranscriptMessage.fromJson(Map<String, dynamic> json) =>
-      CallTranscriptMessage(
-        speaker: (json['speaker'] as String? ?? 'ai').toLowerCase(),
-        speakerName: json['speakerName'] as String? ??
-            (json['speaker_name'] as String? ?? 'AI Assistant'),
-        text: json['text'] as String? ?? (json['content'] as String? ?? ''),
-        timestamp: json['timestamp'] as String? ??
-            (json['time'] as String? ?? '00:00'),
-      );
+  factory CallTranscriptMessage.fromJson(Map<String, dynamic> json) {
+    final rawSpeaker = (json['speaker'] as String? ?? 'ai').toLowerCase();
+    final isAi = rawSpeaker == 'ai' || rawSpeaker == 'assistant' || rawSpeaker == 'agent';
+    final defaultSpeakerName = isAi ? 'AI Assistant' : 'Customer';
+    final speakerName = json['speakerName'] as String? ??
+        (json['speaker_name'] as String? ?? defaultSpeakerName);
+
+    return CallTranscriptMessage(
+      speaker: isAi ? 'ai' : 'customer',
+      speakerName: speakerName,
+      text: json['text'] as String? ?? (json['content'] as String? ?? ''),
+      timestamp: json['timestamp'] as String? ??
+          (json['time'] as String? ?? '00:00'),
+    );
+  }
 }
 
 class CallHistoryModel {
