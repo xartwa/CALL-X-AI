@@ -566,18 +566,21 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => cubit.setActiveTab(2),
-              icon: const Icon(CupertinoIcons.link, size: 15, color: Colors.white),
-              label: const Text(
-                'CONNECT GOOGLE CALENDAR',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+            SizedBox(
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: () => cubit.setActiveTab(2),
+                icon: const Icon(CupertinoIcons.link, size: 15, color: Colors.white),
+                label: const Text(
+                  'CONNECT GOOGLE CALENDAR',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+                  ),
                 ),
               ),
             ),

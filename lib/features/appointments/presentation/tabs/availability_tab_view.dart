@@ -845,7 +845,7 @@ class AvailabilityTabView extends StatelessWidget {
                   Row(
                     children: [
                       SizedBox(
-                        height: 36,
+                        height: 44,
                         child: ElevatedButton.icon(
                           onPressed: state.isActionLoading
                               ? null
