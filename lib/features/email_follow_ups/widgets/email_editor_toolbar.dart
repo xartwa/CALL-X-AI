@@ -243,11 +243,7 @@ class EmailEditorToolbarState extends State<EmailEditorToolbar> {
           backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-            side: BorderSide(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : context.colors.mediumGreyColor.withValues(alpha: 0.5),
-            ),
+           
           ),
           elevation: 12,
           child: Container(
@@ -263,22 +259,7 @@ class EmailEditorToolbarState extends State<EmailEditorToolbar> {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            CupertinoIcons.link,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
+                       
                         const Text(
                           'INSERT HYPERLINK',
                           style: TextStyle(
