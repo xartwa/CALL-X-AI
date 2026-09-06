@@ -274,7 +274,7 @@ class AvailabilityTabView extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Booking Settings & Buffers',
+                'Booking Settings & Buffers'.toUpperCase(),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
