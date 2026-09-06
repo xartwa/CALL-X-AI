@@ -150,7 +150,13 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : context.colors.mediumGreyColor.withValues(alpha: 0.5),
+        ),
       ),
+      elevation: 12,
       backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       child: Container(
         width: 1040,

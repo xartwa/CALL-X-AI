@@ -18,6 +18,7 @@ void main() {
       final convertedHtml = EmailHtmlConverter.deltaToHtml(controller.document);
       expect(convertedHtml, contains('<strong>{name}</strong>'));
       expect(convertedHtml, contains('<em>{company}</em>'));
+
     });
 
     test('handles empty or whitespace html gracefully', () {
@@ -61,6 +62,80 @@ void main() {
       // Verify that raw HTML tags like <p> are NOT displayed in the UI
       expect(find.textContaining('<p>'), findsNothing);
       expect(find.textContaining('<strong>'), findsNothing);
+    });
+
+    testWidgets('applying H1 to selected text isolates only that text as heading', (tester) async {
+      final controller = QuillController(
+        document: Document()..insert(0, 'Hello world and welcome\n'),
+        selection: const TextSelection(baseOffset: 0, extentOffset: 5), // "Hello"
+      );
+
+      final toolbarKey = GlobalKey<EmailEditorToolbarState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EmailEditorToolbar(
+              key: toolbarKey,
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Trigger H1 formatting on the selected "Hello"
+      toolbarKey.currentState!.applyBlockAttribute(Attribute.h1);
+      await tester.pumpAndSettle();
+
+      // The document should now have "Hello" as its own line with header: 1
+      // and "world and welcome" as regular paragraph text
+      final delta = controller.document.toDelta().toJson();
+      expect(delta[0]['insert'], 'Hello');
+      expect(delta[1]['insert'], '\n');
+      expect(delta[1]['attributes'], {'header': 1});
+
+      // The rest of the text must NOT have header attribute
+      final remainingInsert = delta[2]['insert'] as String;
+      expect(remainingInsert, contains('world and welcome'));
+      expect(delta[2]['attributes'], isNull);
+    });
+
+    testWidgets('opens unified INSERT HYPERLINK dialog with matching styling', (tester) async {
+      final controller = QuillController(
+        document: Document()..insert(0, 'Visit Google today\n'),
+        selection: const TextSelection(baseOffset: 6, extentOffset: 12), // "Google"
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: EmailEditorToolbar(controller: controller),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap link button in toolbar
+      final linkBtn = find.byTooltip('Insert Link');
+      expect(linkBtn, findsOneWidget);
+      await tester.tap(linkBtn);
+      await tester.pumpAndSettle();
+
+      // Ensure unified dialog elements are present
+      expect(find.text('INSERT HYPERLINK'), findsOneWidget);
+      expect(find.text('LINK TEXT'), findsOneWidget);
+      expect(find.text('DESTINATION URL'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Insert Link'), findsOneWidget);
+
+      // Verify prefilled link text
+      expect(find.text('Google'), findsOneWidget);
+
+      // Close dialog
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('INSERT HYPERLINK'), findsNothing);
     });
   });
 }

@@ -9,9 +9,23 @@ import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 
 /// Helper to convert back and forth between HTML and Quill Delta/Document.
 class EmailHtmlConverter {
+  /// Normalizes HTML before passing to HtmlToDelta so that block paragraphs and line breaks
+  /// are preserved as distinct blocks with newlines in Quill.
+  static String normalizeHtml(String html) {
+    var cleaned = html.trim();
+    if (cleaned.isEmpty) return cleaned;
+    // Replace <p>...</p> with <div>...</div> to ensure HtmlToDelta creates separate lines for each paragraph
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(r'<p(\s[^>]*)?>', caseSensitive: false),
+      (m) => '<div${m[1] ?? ''}>',
+    );
+    cleaned = cleaned.replaceAll(RegExp(r'</p>', caseSensitive: false), '</div>');
+    return cleaned;
+  }
+
   /// Converts an HTML string to a Quill Delta.
   static Delta htmlToDelta(String html) {
-    final trimmed = html.trim();
+    final trimmed = normalizeHtml(html);
     if (trimmed.isEmpty) {
       return Delta()..insert('\n');
     }
@@ -57,10 +71,10 @@ class EmailEditorToolbar extends StatefulWidget {
   const EmailEditorToolbar({super.key, required this.controller});
 
   @override
-  State<EmailEditorToolbar> createState() => _EmailEditorToolbarState();
+  State<EmailEditorToolbar> createState() => EmailEditorToolbarState();
 }
 
-class _EmailEditorToolbarState extends State<EmailEditorToolbar> {
+class EmailEditorToolbarState extends State<EmailEditorToolbar> {
   @override
   void initState() {
     super.initState();
@@ -95,34 +109,95 @@ class _EmailEditorToolbarState extends State<EmailEditorToolbar> {
     }
   }
 
-  void _toggleHeader(Attribute headerAttr) {
+  /// Formats a block-level attribute (e.g. H1, H2, List, Quote) specifically on the
+  /// selected text. If only a portion of a line is selected, isolates that portion into its
+  /// own block so that unselected text is never unintentionally formatted.
+  void applyBlockAttribute(Attribute attribute, {bool isToggle = true}) {
+    final selection = widget.controller.selection;
+    final doc = widget.controller.document;
+    final plainText = doc.toPlainText();
+
+    if (selection.isCollapsed) {
+      final attrs = widget.controller.getSelectionStyle().attributes;
+      final current = attrs[attribute.key];
+      if (isToggle && current != null && current.value == attribute.value) {
+        widget.controller.formatSelection(Attribute.clone(attribute, null));
+      } else {
+        widget.controller.formatSelection(attribute);
+      }
+      return;
+    }
+
+    var start = selection.start;
+    var end = selection.end;
+    if (start > end) {
+      final tmp = start;
+      start = end;
+      end = tmp;
+    }
+
+    if (start < 0) start = 0;
+    if (end > plainText.length) end = plainText.length;
+    if (start >= end) return;
+
+    // Find line boundaries
+    final prevNewline = start > 0 ? plainText.lastIndexOf('\n', start - 1) : -1;
+    final lineStart = prevNewline == -1 ? 0 : prevNewline + 1;
+
+    var nextNewline = plainText.indexOf('\n', end);
+    if (nextNewline == -1) nextNewline = plainText.length;
+    final lineEnd = nextNewline;
+
+    final startsAtLineStart = start == lineStart;
+    final endsAtLineEnd = end >= lineEnd;
+
+    var adjustedStart = start;
+    var adjustedEnd = end;
+
+    // If selection does not start at line start, isolate with a newline before
+    if (!startsAtLineStart) {
+      doc.insert(start, '\n');
+      adjustedStart += 1;
+      adjustedEnd += 1;
+    }
+
+    // If selection does not end at line end, isolate with a newline after
+    if (!endsAtLineEnd) {
+      doc.insert(adjustedEnd, '\n');
+    }
+
+    // Update selection to cover the isolated text exactly
+    widget.controller.updateSelection(
+      TextSelection(baseOffset: adjustedStart, extentOffset: adjustedEnd),
+      ChangeSource.local,
+    );
+
     final attrs = widget.controller.getSelectionStyle().attributes;
-    final current = attrs[Attribute.header.key];
-    if (current != null && current.value == headerAttr.value) {
-      widget.controller.formatSelection(Attribute.header);
+    final current = attrs[attribute.key];
+    if (isToggle && current != null && current.value == attribute.value) {
+      widget.controller.formatSelection(Attribute.clone(attribute, null));
     } else {
-      widget.controller.formatSelection(headerAttr);
+      widget.controller.formatSelection(attribute);
+    }
+  }
+
+  void _toggleHeader(Attribute headerAttr) {
+    applyBlockAttribute(headerAttr);
+  }
+
+  void _setParagraph() {
+    final attrs = widget.controller.getSelectionStyle().attributes;
+    if (attrs.containsKey(Attribute.header.key)) {
+      applyBlockAttribute(Attribute.header, isToggle: false);
     }
   }
 
   void _toggleList(Attribute listAttr) {
-    final attrs = widget.controller.getSelectionStyle().attributes;
-    final current = attrs[Attribute.list.key];
-    if (current != null && current.value == listAttr.value) {
-      widget.controller.formatSelection(Attribute.clone(Attribute.list, null));
-    } else {
-      widget.controller.formatSelection(listAttr);
-    }
+    applyBlockAttribute(listAttr);
   }
 
   void _toggleBlockQuote() {
-    final attrs = widget.controller.getSelectionStyle().attributes;
-    if (attrs.containsKey(Attribute.blockQuote.key)) {
-      widget.controller
-          .formatSelection(Attribute.clone(Attribute.blockQuote, null));
-    } else {
-      widget.controller.formatSelection(Attribute.blockQuote);
-    }
+    applyBlockAttribute(Attribute.blockQuote);
   }
 
   void _clearFormatting() {
@@ -131,6 +206,9 @@ class _EmailEditorToolbarState extends State<EmailEditorToolbar> {
     final attrs = widget.controller.getSelectionStyle().attributes;
     for (final attr in attrs.values) {
       widget.controller.formatSelection(Attribute.clone(attr, null));
+    }
+    if (attrs.containsKey(Attribute.header.key)) {
+      widget.controller.formatSelection(Attribute.header);
     }
   }
 
@@ -165,128 +243,252 @@ class _EmailEditorToolbarState extends State<EmailEditorToolbar> {
           backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+            side: BorderSide(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : context.colors.mediumGreyColor.withValues(alpha: 0.5),
+            ),
           ),
+          elevation: 12,
           child: Container(
-            width: 400,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+            width: 440,
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header: Icon badge, Title & Close Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'INSERT HYPERLINK',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.6,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            CupertinoIcons.link,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'INSERT HYPERLINK',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ],
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(dialogCtx),
-                      icon: const Icon(CupertinoIcons.clear, size: 16),
+                      splashRadius: 18,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
+                      icon: const Icon(CupertinoIcons.clear, size: 16),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 22),
+
+                // Link Text Field
                 Text(
                   'LINK TEXT',
                   style: TextStyle(
-                    fontSize: 10.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: textCtrl,
-                  style: const TextStyle(fontSize: 13),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: 'e.g. Click Here / View Proposal',
-                    hintStyle: TextStyle(
-                        fontSize: 12, color: context.colors.darkGreyColor),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                const SizedBox(height: 8),
+                Container(
+                  height: 46,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white12
+                          : context.colors.lightGreyColor,
+                    ),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : Colors.black.withValues(alpha: 0.02),
+                  ),
+                  child: Center(
+                    child: TextField(
+                      controller: textCtrl,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        hintText: 'e.g. Click Here / View Proposal',
+                        hintStyle: TextStyle(
+                          fontSize: 12.5,
+                          color: context.colors.darkGreyColor,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
+
+                // Destination URL Field
                 Text(
                   'DESTINATION URL',
                   style: TextStyle(
-                    fontSize: 10.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
                     color: isDark ? Colors.grey[400] : Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: urlCtrl,
-                  style: const TextStyle(fontSize: 13),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: 'https://example.com',
-                    hintStyle: TextStyle(
-                        fontSize: 12, color: context.colors.darkGreyColor),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                const SizedBox(height: 8),
+                Container(
+                  height: 46,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white12
+                          : context.colors.lightGreyColor,
+                    ),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.03)
+                        : Colors.black.withValues(alpha: 0.02),
+                  ),
+                  child: Center(
+                    child: TextField(
+                      controller: urlCtrl,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        hintText: 'https://example.com',
+                        hintStyle: TextStyle(
+                          fontSize: 12.5,
+                          color: context.colors.darkGreyColor,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 26),
+
+                // Action Buttons
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogCtx),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        final text = textCtrl.text.trim();
-                        final rawUrl = urlCtrl.text.trim();
-                        if (rawUrl.isEmpty) return;
-
-                        final url = (rawUrl.startsWith('http://') ||
-                                rawUrl.startsWith('https://') ||
-                                rawUrl.startsWith('mailto:'))
-                            ? rawUrl
-                            : 'https://$rawUrl';
-
-                        if (selection.isCollapsed && text.isNotEmpty) {
-                          final offset = selection.baseOffset;
-                          widget.controller.document.insert(offset, text);
-                          widget.controller.updateSelection(
-                            TextSelection(
-                                baseOffset: offset,
-                                extentOffset: offset + text.length),
-                            ChangeSource.local,
-                          );
-                        }
-                        widget.controller.formatSelection(LinkAttribute(url));
-                        Navigator.pop(dialogCtx);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(dialogCtx),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFCBD5E1),
+                            ),
+                            foregroundColor:
+                                isDark ? Colors.white : Colors.black87,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius,
+                              ),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
-                      child: const Text('Insert Link'),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                ThemeConstants.buttonRadius,
+                              ),
+                            ),
+                          ),
+                          onPressed: () {
+                            final text = textCtrl.text.trim();
+                            final rawUrl = urlCtrl.text.trim();
+                            if (rawUrl.isEmpty) return;
+
+                            final url = (rawUrl.startsWith('http://') ||
+                                    rawUrl.startsWith('https://') ||
+                                    rawUrl.startsWith('mailto:'))
+                                ? rawUrl
+                                : 'https://$rawUrl';
+
+                            if (selection.isCollapsed && text.isNotEmpty) {
+                              final offset = selection.baseOffset;
+                              widget.controller.document.insert(offset, text);
+                              widget.controller.updateSelection(
+                                TextSelection(
+                                    baseOffset: offset,
+                                    extentOffset: offset + text.length),
+                                ChangeSource.local,
+                              );
+                            }
+                            widget.controller.formatSelection(LinkAttribute(url));
+                            Navigator.pop(dialogCtx);
+                          },
+                          child: const Text(
+                            'Insert Link',
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -480,7 +682,7 @@ class _EmailEditorToolbarState extends State<EmailEditorToolbar> {
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
             tooltip: 'Paragraph',
             isActive: headerVal == null || headerVal == 0,
-            onTap: () => widget.controller.formatSelection(Attribute.header),
+            onTap: _setParagraph,
           ),
 
           const SizedBox(
