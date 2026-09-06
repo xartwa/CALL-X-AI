@@ -180,6 +180,33 @@ class CallsCubit extends Cubit<CallsState> {
     }
   }
 
+  Future<void> selectCallById(String callId) async {
+    // If call is already cached in state.calls, show it immediately for zero lag
+    CallHistoryModel? matched;
+    for (final c in state.calls) {
+      if (c.id == callId) {
+        matched = c;
+        break;
+      }
+    }
+
+    emit(state.copyWith(
+      selectedCall: matched,
+      isLoadingDetail: true,
+    ));
+
+    try {
+      final detailedCall = await repository.getCallDetail(callId);
+      if (!isClosed) {
+        emit(state.copyWith(selectedCall: detailedCall, isLoadingDetail: false));
+      }
+    } catch (_) {
+      if (!isClosed) {
+        emit(state.copyWith(isLoadingDetail: false));
+      }
+    }
+  }
+
   Future<void> scheduleFollowUp(String callId, String followUpDate) async {
     emit(state.copyWith(isUpdatingFollowUp: true));
 

@@ -66,6 +66,8 @@ class DashboardTodayCall {
     required this.timelineState,
     required this.availableActions,
     required this.isOverdue,
+    this.outcome = '',
+    this.duration = '',
   });
 
   final String id;
@@ -84,10 +86,36 @@ class DashboardTodayCall {
   final DashboardTimelineState timelineState;
   final List<DashboardCallAction> availableActions;
   final bool isOverdue;
+  final String outcome;
+  final String duration;
 
   bool get isPriority => leadPriority.toLowerCase() == 'hot';
   bool get isDone => timelineState == DashboardTimelineState.completed;
   bool get isCurrent => timelineState == DashboardTimelineState.current;
+  bool get isAppointmentBooked =>
+      outcome.toLowerCase() == 'appointment_booked';
+  bool get isInterested => outcome.toLowerCase() == 'interested';
+  bool get isNoAnswer => outcome.toLowerCase() == 'no_answer';
+
+  String get cleanPurpose {
+    final p = purpose.trim();
+    if (p.isEmpty) return 'Consultation';
+    if (p.toLowerCase().contains('b2b')) return 'B2B Outreach';
+    if (p.toLowerCase().contains('dynamica')) return 'Brand & Design';
+    if (p.length > 25) return '${p.substring(0, 22)}...';
+    return p;
+  }
+
+  String get outcomeLabel {
+    final o = outcome.toLowerCase();
+    if (o == 'appointment_booked') return 'Appointment Booked';
+    if (o == 'interested') return 'Interested';
+    if (o == 'not_interested') return 'Not Interested';
+    if (o == 'no_answer') return 'No Answer';
+    if (o == 'callback_requested') return 'Callback Requested';
+    if (status.isNotEmpty && status.toLowerCase() != 'completed') return status;
+    return 'Completed';
+  }
 }
 
 class DashboardCallReports {

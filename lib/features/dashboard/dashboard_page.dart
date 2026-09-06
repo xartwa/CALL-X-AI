@@ -5,6 +5,7 @@ import 'cubit/todo_cubit.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/dashboard_kpi_section.dart';
 import 'widgets/today_scheduled_calls_section.dart';
+import 'widgets/dashboard_appointments_card.dart';
 import 'widgets/quick_operations_hub.dart';
 import 'widgets/call_reports_card.dart';
 import 'widgets/todo_list_card.dart';
@@ -16,6 +17,7 @@ import 'package:callx_ai/core/routes/app_routes_path.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'domain/usecases/get_dashboard_snapshot.dart';
+import 'package:callx_ai/features/appointments/cubit/appointments_cubit.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -62,6 +64,7 @@ class _DashboardView extends StatelessWidget {
       scrollableChild: true,
       onRefresh: () async {
         context.read<TodoCubit>().loadTodos();
+        context.read<AppointmentsCubit>().refresh();
         await context.read<DashboardCubit>().load(refresh: true);
       },
     );
@@ -88,6 +91,8 @@ class _DashboardContent extends StatelessWidget {
               children: [
                 TodayScheduledCallsSection(),
                 SizedBox(height: 24),
+                DashboardAppointmentsCard(),
+                SizedBox(height: 24),
                 sidePanel,
               ],
             );
@@ -95,7 +100,16 @@ class _DashboardContent extends StatelessWidget {
           return const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(flex: 62, child: TodayScheduledCallsSection()),
+              Expanded(
+                flex: 62,
+                child: Column(
+                  children: [
+                    TodayScheduledCallsSection(),
+                    SizedBox(height: 24),
+                    DashboardAppointmentsCard(),
+                  ],
+                ),
+              ),
               SizedBox(width: 24),
               Expanded(flex: 38, child: sidePanel),
             ],

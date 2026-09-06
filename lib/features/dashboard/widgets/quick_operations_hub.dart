@@ -181,14 +181,16 @@ class _MinimalActionCardState extends State<_MinimalActionCard> {
                 color: _isHovered
                     ? widget.accentColor.withValues(alpha: 0.4)
                     : (isDark
-                        ? Colors.white10
+                        ? const Color(0xFF1E293B)
                         : context.colors.mediumGreyColor
                             .withValues(alpha: 0.35)),
               ),
               color: _isHovered
-                  ? widget.accentColor.withValues(alpha: 0.05)
+                  ? (isDark
+                      ? const Color(0xFF162032)
+                      : widget.accentColor.withValues(alpha: 0.05))
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.02)
+                      ? const Color(0xFF0F172A)
                       : context.colors.milkyColor.withValues(alpha: 0.6)),
             ),
             child: Row(

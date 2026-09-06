@@ -6,9 +6,8 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/routes/app_routes_path.dart';
 import '../domain/entities/dashboard_snapshot.dart';
 import 'package:callx_ai/features/calls/widgets/call_action_dialog.dart';
-import 'package:callx_ai/features/email_follow_ups/widgets/send_email_dialog.dart';
+import 'package:callx_ai/features/calls/cubit/calls_cubit.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
-import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.dart';
 
 class TodayScheduledCallTile extends StatefulWidget {
   final DashboardTodayCall call;
@@ -43,54 +42,32 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
     );
   }
 
-  void _openEmail(BuildContext context) {
-    final emailCubit = context.read<EmailFollowUpsCubit>();
-    final templates = emailCubit.state.templates
-        .map((template) => template.toViewMap())
-        .toList(growable: false);
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => SendEmailDialog(
-        allTemplates: templates,
-        onSendEmail: emailCubit.send,
-      ),
-    );
+  void _openDetails(BuildContext context) {
+    context.read<CallsCubit>().selectCallById(widget.call.id);
+    context.go(AppRoutesPath.calls);
   }
 
-  Color _tagColor(String label) {
-    final l = label.toLowerCase();
-    if (l.contains('hot') || l.contains('lost') || l.contains('failed')) {
-      return const Color(0xFFEF4444);
+  void _onTileTap(BuildContext context) {
+    if (!widget.isDone) {
+      _openCall(context);
+    } else {
+      _openDetails(context);
     }
-    if (l.contains('warm') || l.contains('pending') || l.contains('queued')) {
-      return const Color(0xFFF59E0B);
-    }
-    if (l.contains('qualified') ||
-        l.contains('won') ||
-        l.contains('completed')) {
-      return const Color(0xFF10B981);
-    }
-    if (l.contains('developer') ||
-        l.contains('agency') ||
-        l.contains('startup')) {
-      return const Color(0xFF8B5CF6);
-    }
-    return const Color(0xFF3B82F6);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final canCall =
-        widget.call.availableActions.contains(DashboardCallAction.call) ||
-            widget.call.availableActions.contains(DashboardCallAction.callNow);
-    final canEmail =
-        widget.call.availableActions.contains(DashboardCallAction.email);
-    final canView =
-        widget.call.availableActions.contains(DashboardCallAction.view);
 
-    // — Computed values —
+    // Formatted time (e.g. 19:00 or 07:00 PM)
+    final legacyTime =
+        '${widget.call.timeLabel} ${widget.call.meridiem}'.trim();
+    final timeDisplay = AppDateTime.displayTime(
+      widget.call.scheduledFor ?? legacyTime,
+      fallback: widget.call.timeLabel.isNotEmpty ? widget.call.timeLabel : '--:--',
+    );
+
+    // Two-letter initials for contact avatar
     final initials = widget.call.fullName
         .trim()
         .split(' ')
@@ -100,246 +77,125 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
         .join()
         .toUpperCase();
 
-    final legacyTime =
-        '${widget.call.timeLabel} ${widget.call.meridiem}'.trim();
-    final timeHour = AppDateTime.displayTime(
-      widget.call.scheduledFor ?? legacyTime,
-      fallback: '--:--',
-    );
+    // Priority
+    final isHot = widget.isPriority || widget.call.leadPriority.toLowerCase() == 'hot';
+    final isWarm = widget.call.leadPriority.toLowerCase() == 'warm';
 
-    // Tag logic
-    String? displayTag;
-    Color? tagColor;
-    if (widget.isPriority || widget.call.leadPriority.toLowerCase() == 'hot') {
-      displayTag = 'Hot';
-      tagColor = const Color(0xFFEF4444);
-    } else if (widget.call.leadPriority.toLowerCase() == 'warm') {
-      displayTag = 'Warm';
-      tagColor = const Color(0xFFF59E0B);
-    } else if (widget.call.companyName.isNotEmpty) {
-      displayTag = widget.call.companyName;
-      tagColor = _tagColor(displayTag);
-    }
+    // Outcome / Status determination
+    final isBooked = widget.call.isAppointmentBooked;
+    final isNoAnswer = widget.call.isNoAnswer;
+    final isInterested = widget.call.isInterested;
 
-    // Call objective
-    final objective = widget.call.purpose.isNotEmpty
-        ? widget.call.purpose
-        : 'Pipeline consultation';
+    // Unified card background & border
+    final cardBg = _isHovered
+        ? (isDark
+            ? const Color(0xFF162032)
+            : context.colors.milkyColor)
+        : (isDark
+            ? const Color(0xFF0F172A)
+            : context.colors.milkyColor.withValues(alpha: 0.35));
 
-    // — Colors & States —
-    final accentColor = widget.isNext
-        ? context.colors.primaryLightColor
-        : widget.isDone
-            ? context.colors.successColor
-            : context.colors.blackColor;
-
-    Color cardBg;
-    Color cardBorder;
-    if (widget.isNext) {
-      cardBg = context.colors.primaryLightColor
-          .withValues(alpha: isDark ? 0.06 : 0.04);
-      cardBorder = context.colors.primaryLightColor.withValues(alpha: 0.35);
-    } else if (widget.isDone) {
-      cardBg = Colors.transparent;
-      cardBorder = Colors.transparent;
-    } else if (_isHovered) {
-      cardBg = isDark
-          ? Colors.white.withValues(alpha: 0.04)
-          : context.colors.milkyColor;
-      cardBorder = isDark
-          ? Colors.white.withValues(alpha: 0.08)
-          : context.colors.mediumGreyColor.withValues(alpha: 0.7);
-    } else {
-      cardBg = isDark
-          ? Colors.white.withValues(alpha: 0.02)
-          : context.colors.milkyColor.withValues(alpha: 0.4);
-      cardBorder = isDark
-          ? Colors.white.withValues(alpha: 0.04)
-          : context.colors.mediumGreyColor.withValues(alpha: 0.35);
-    }
+    final cardBorder = _isHovered
+        ? (isDark
+            ? const Color(0xFF334155)
+            : context.colors.mediumGreyColor.withValues(alpha: 0.7))
+        : (isDark
+            ? const Color(0xFF1E293B)
+            : context.colors.mediumGreyColor.withValues(alpha: 0.3));
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: cardBorder),
-        ),
-        child: Opacity(
-          opacity: widget.isDone ? 0.55 : 1.0,
+      child: InkWell(
+        onTap: () => _onTileTap(context),
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: cardBorder),
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── 1. Time ──────────────────────────────────────
+              // ── 1. Time (Clean, fixed width) ──────────────────────────────
               SizedBox(
-                width: 56,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      timeHour,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w800,
-                        color: accentColor,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        if (widget.isNext) ...[
-                          Container(
-                            width: 5,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: context.colors.primaryLightColor,
-                            ),
-                          ),
-                        ],
-                        if (widget.isDone) ...[
-                          const SizedBox(width: 4),
-                          Icon(
-                            CupertinoIcons.checkmark_circle_fill,
-                            size: 10,
-                            color: context.colors.successColor,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
+                width: 52,
+                child: Text(
+                  timeDisplay,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: widget.isNext
+                        ? context.colors.primaryLightColor
+                        : context.colors.blackColor,
+                    letterSpacing: -0.2,
+                  ),
                 ),
               ),
 
-              // Vertical separator
+              const SizedBox(width: 8),
+
+              // ── 2. Avatar ─────────────────────────────────────────────────
               Container(
-                width: 1,
-                height: 40,
-                margin: const EdgeInsets.symmetric(horizontal: 12),
-                color: widget.isNext
-                    ? context.colors.primaryLightColor.withValues(alpha: 0.3)
-                    : context.colors.mediumGreyColor.withValues(alpha: 0.5),
-              ),
-
-              // ── 2. Avatar ─────────────────────────────────────
-              Stack(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: context.colors.primaryLightColor
-                          .withValues(alpha: 0.1),
-                      border: widget.isNext
-                          ? Border.all(
-                              color: context.colors.primaryLightColor
-                                  .withValues(alpha: 0.35),
-                              width: 1.5,
-                            )
-                          : null,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      initials,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: context.colors.primaryLightColor,
-                      ),
-                    ),
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: context.colors.primaryLightColor.withValues(alpha: 0.1),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initials.isEmpty ? 'U' : initials,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    color: context.colors.primaryLightColor,
                   ),
-                  // Hot lead indicator dot
-                  if (widget.isPriority)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        width: 9,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFEF4444),
-                          border: Border.all(
-                            color: context.colors.whiteColor,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                ),
               ),
-              const SizedBox(width: 13),
 
-              // ── 3. Contact Info ──────────────────────────────────
+              const SizedBox(width: 12),
+
+              // ── 3. Contact Details (Name + Company & Phone) ───────────────
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Name + tag
+                    // Line 1: Name + Priority Pill
                     Row(
                       children: [
                         Flexible(
                           child: Text(
-                            widget.call.fullName,
+                            widget.call.fullName.isEmpty
+                                ? 'Unknown Contact'
+                                : widget.call.fullName,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: context.colors.blackColor,
-                              decoration: widget.isDone
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              decorationColor: context.colors.darkGreyColor
-                                  .withValues(alpha: 0.6),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (displayTag != null && tagColor != null) ...[
-                          const SizedBox(width: 7),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: tagColor.withValues(alpha: 0.09),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: tagColor.withValues(alpha: 0.22),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Text(
-                              displayTag,
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                color: tagColor,
-                                letterSpacing: 0.1,
-                              ),
-                            ),
-                          ),
+                        if (isHot) ...[
+                          const SizedBox(width: 6),
+                          _buildPill('Hot', const Color(0xFFEF4444)),
+                        ] else if (isWarm) ...[
+                          const SizedBox(width: 6),
+                          _buildPill('Warm', const Color(0xFFF59E0B)),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 3.5),
-                    // Company + objective (subtitle)
+                    const SizedBox(height: 3),
+                    // Line 2: Company • Phone
                     Row(
                       children: [
                         if (widget.call.companyName.isNotEmpty) ...[
-                          Icon(
-                            CupertinoIcons.building_2_fill,
-                            size: 10,
-                            color: context.colors.darkGreyColor
-                                .withValues(alpha: 0.7),
-                          ),
-                          const SizedBox(width: 4),
                           Flexible(
                             child: Text(
                               widget.call.companyName,
@@ -352,29 +208,29 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: Text(
-                              '·',
-                              style: TextStyle(
-                                color: context.colors.darkGreyColor
-                                    .withValues(alpha: 0.5),
+                          if (widget.call.phone.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                              child: Text(
+                                '•',
+                                style: TextStyle(
+                                  color: context.colors.darkGreyColor
+                                      .withValues(alpha: 0.4),
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
-                          ),
                         ],
-                        Expanded(
-                          child: Text(
-                            objective,
+                        if (widget.call.phone.isNotEmpty)
+                          Text(
+                            widget.call.phone,
                             style: TextStyle(
                               fontSize: 11,
+                              fontWeight: FontWeight.w500,
                               color: context.colors.darkGreyColor
                                   .withValues(alpha: 0.8),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -383,41 +239,50 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
 
               const SizedBox(width: 12),
 
-              // ── 4. Actions ───────────────────────────────────────
-              if (!widget.isDone && (canCall || canEmail))
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Call button — same green style for both next & upcoming
-                    if (canCall)
-                      InkWell(
+              // ── 4. Unified Status Badge ───────────────────────────────────
+              _buildStatusBadge(
+                isBooked: isBooked,
+                isInterested: isInterested,
+                isNoAnswer: isNoAnswer,
+                isDone: widget.isDone,
+                isNext: widget.isNext,
+                status: widget.call.status,
+              ),
+
+              const SizedBox(width: 10),
+
+              // ── 5. Unified Action Button (Same dimensions on all cards) ───
+              SizedBox(
+                width: 68,
+                height: 28,
+                child: !widget.isDone
+                    ? InkWell(
                         onTap: () => _openCall(context),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 7),
                           decoration: BoxDecoration(
                             color: context.colors.successColor
                                 .withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: context.colors.successColor
-                                  .withValues(alpha: 0.25),
+                                  .withValues(alpha: 0.3),
                             ),
                           ),
+                          alignment: Alignment.center,
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 CupertinoIcons.phone_fill,
-                                size: 12,
+                                size: 10.5,
                                 color: context.colors.successColor,
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 4),
                               Text(
-                                widget.isNext ? "Call Now" : "Call",
+                                "Call",
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: context.colors.successColor,
                                 ),
@@ -425,81 +290,122 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                             ],
                           ),
                         ),
-                      ),
-                    if (canCall && canEmail) const SizedBox(width: 7),
-                    // Email icon button
-                    if (canEmail)
-                      Tooltip(
-                        message: 'Send Email',
-                        child: InkWell(
-                          onTap: () => _openEmail(context),
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF8B5CF6)
-                                  .withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: const Color(0xFF8B5CF6)
+                      )
+                    : InkWell(
+                        onTap: () => _openDetails(context),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF1E293B)
+                                : context.colors.mediumGreyColor
                                     .withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : context.colors.mediumGreyColor
+                                      .withValues(alpha: 0.35),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "View",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: context.colors.darkGreyColor,
+                                ),
                               ),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              CupertinoIcons.mail_solid,
-                              size: 13.5,
-                              color: Color(0xFF8B5CF6),
-                            ),
+                              const SizedBox(width: 2),
+                              Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 9.5,
+                                color: context.colors.darkGreyColor,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                  ],
-                )
-              else if (canView)
-                Tooltip(
-                  message: 'View calls',
-                  child: InkWell(
-                    onTap: () => context.go(AppRoutesPath.calls),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: context.colors.primaryLightColor
-                            .withValues(alpha: 0.07),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: context.colors.primaryLightColor
-                              .withValues(alpha: 0.18),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            CupertinoIcons.person_fill,
-                            size: 12,
-                            color: context.colors.primaryLightColor,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            "View",
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: context.colors.primaryLightColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPill(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge({
+    required bool isBooked,
+    required bool isInterested,
+    required bool isNoAnswer,
+    required bool isDone,
+    required bool isNext,
+    required String status,
+  }) {
+    final String label;
+    final Color color;
+
+    if (isBooked) {
+      label = 'Booked 📅';
+      color = const Color(0xFF10B981);
+    } else if (isInterested) {
+      label = 'Interested';
+      color = const Color(0xFF6366F1);
+    } else if (isNoAnswer) {
+      label = 'No Answer';
+      color = const Color(0xFFEF4444);
+    } else if (isDone) {
+      label = 'Completed';
+      color = const Color(0xFF10B981);
+    } else if (isNext) {
+      label = 'Due Now';
+      color = const Color(0xFF6366F1);
+    } else {
+      label = 'Scheduled';
+      color = const Color(0xFF64748B);
+    }
+
+    return Container(
+      width: 78,
+      height: 22,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withValues(alpha: 0.22), width: 0.8),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

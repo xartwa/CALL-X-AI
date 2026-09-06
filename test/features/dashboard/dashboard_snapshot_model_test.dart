@@ -36,6 +36,8 @@ void main() {
             'timelineState': 'current',
             'availableActions': ['call_now', 'email'],
             'isOverdue': false,
+            'outcome': 'appointment_booked',
+            'duration': '03:45',
           },
         ],
       },
@@ -59,6 +61,9 @@ void main() {
         DashboardTimelineState.current);
     expect(snapshot.todayCalls.items.single.availableActions,
         contains(DashboardCallAction.callNow));
+    expect(snapshot.todayCalls.items.single.outcome, 'appointment_booked');
+    expect(snapshot.todayCalls.items.single.duration, '03:45');
+    expect(snapshot.todayCalls.items.single.isAppointmentBooked, isTrue);
   });
 
   test('rejects invalid dashboard percentages', () {

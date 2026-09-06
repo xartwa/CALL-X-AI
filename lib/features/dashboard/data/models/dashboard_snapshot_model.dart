@@ -74,6 +74,8 @@ class DashboardTodayCallModel {
       availableActions:
           _list(json['availableActions']).map(_action).toList(growable: false),
       isOverdue: json['isOverdue'] == true,
+      outcome: _string(json['outcome']),
+      duration: _string(json['duration']),
     ));
   }
 }

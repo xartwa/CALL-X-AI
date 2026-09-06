@@ -106,12 +106,13 @@ class _TodoListCardState extends State<TodoListCard> {
                   height: 45,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.white.withValues(alpha: 0.04)
+                        ? const Color(0xFF0F172A)
                         : context.colors.mediumGreyColor.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color:
-                          context.colors.mediumGreyColor.withValues(alpha: 0.4),
+                      color: isDark
+                          ? const Color(0xFF1E293B)
+                          : context.colors.mediumGreyColor.withValues(alpha: 0.4),
                     ),
                   ),
                   child: TextField(
@@ -201,7 +202,7 @@ class _TodoListCardState extends State<TodoListCard> {
   }
 }
 
-class _TodoItemTile extends StatelessWidget {
+class _TodoItemTile extends StatefulWidget {
   final TodoItemModel todo;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
@@ -213,74 +214,98 @@ class _TodoItemTile extends StatelessWidget {
   });
 
   @override
+  State<_TodoItemTile> createState() => _TodoItemTileState();
+}
+
+class _TodoItemTileState extends State<_TodoItemTile> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      constraints: const BoxConstraints(minHeight: 64),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.02)
-            : context.colors.milkyColor.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: context.colors.mediumGreyColor.withValues(alpha: 0.3),
+    final cardBg = _isHovered
+        ? (isDark
+            ? const Color(0xFF162032)
+            : context.colors.milkyColor)
+        : (isDark
+            ? const Color(0xFF0F172A)
+            : context.colors.milkyColor.withValues(alpha: 0.5));
+
+    final cardBorder = _isHovered
+        ? (isDark
+            ? const Color(0xFF334155)
+            : context.colors.mediumGreyColor.withValues(alpha: 0.6))
+        : (isDark
+            ? const Color(0xFF1E293B)
+            : context.colors.mediumGreyColor.withValues(alpha: 0.3));
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        margin: const EdgeInsets.only(bottom: 8),
+        constraints: const BoxConstraints(minHeight: 56),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: cardBorder),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: onToggle,
-            borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Icon(
-                todo.isCompleted
-                    ? CupertinoIcons.checkmark_square_fill
-                    : CupertinoIcons.square,
-                size: 19,
-                color: todo.isCompleted
-                    ? context.colors.successColor
-                    : context.colors.darkGreyColor,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            InkWell(
+              onTap: widget.onToggle,
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Icon(
+                  widget.todo.isCompleted
+                      ? CupertinoIcons.checkmark_square_fill
+                      : CupertinoIcons.square,
+                  size: 19,
+                  color: widget.todo.isCompleted
+                      ? context.colors.successColor
+                      : context.colors.darkGreyColor,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              todo.text,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight:
-                    todo.isCompleted ? FontWeight.normal : FontWeight.w500,
-                color: todo.isCompleted
-                    ? context.colors.darkGreyColor
-                    : context.colors.blackColor,
-                decoration: todo.isCompleted
-                    ? TextDecoration.lineThrough
-                    : TextDecoration.none,
-                decorationColor: context.colors.darkGreyColor,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                widget.todo.text,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight:
+                      widget.todo.isCompleted ? FontWeight.normal : FontWeight.w500,
+                  color: widget.todo.isCompleted
+                      ? context.colors.darkGreyColor
+                      : context.colors.blackColor,
+                  decoration: widget.todo.isCompleted
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
+                  decorationColor: context.colors.darkGreyColor,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          InkWell(
-            onTap: onDelete,
-            borderRadius: BorderRadius.circular(6),
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Icon(
-                CupertinoIcons.trash,
-                color: context.colors.errorColor.withValues(alpha: 0.7),
-                size: 15,
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: widget.onDelete,
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  CupertinoIcons.trash,
+                  color: context.colors.errorColor.withValues(alpha: 0.7),
+                  size: 15,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
