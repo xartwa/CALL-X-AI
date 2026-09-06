@@ -72,6 +72,30 @@ class _RequestsTabViewState extends State<RequestsTabView> {
         final appointments = state.filteredAppointments;
         final requests = state.filteredRequests;
 
+        final appointmentsTotalPages = (appointments.length / _pageSize).ceil();
+        final safeAppointmentsPage = appointmentsTotalPages > 0
+            ? _appointmentsPage.clamp(1, appointmentsTotalPages)
+            : 1;
+        final apptStart = (safeAppointmentsPage - 1) * _pageSize;
+        final apptEnd = (apptStart + _pageSize < appointments.length)
+            ? apptStart + _pageSize
+            : appointments.length;
+        final pagedAppointments = apptStart < appointments.length
+            ? appointments.sublist(apptStart, apptEnd)
+            : <AppointmentEntity>[];
+
+        final requestsTotalPages = (requests.length / _pageSize).ceil();
+        final safeRequestsPage = requestsTotalPages > 0
+            ? _requestsPage.clamp(1, requestsTotalPages)
+            : 1;
+        final reqStart = (safeRequestsPage - 1) * _pageSize;
+        final reqEnd = (reqStart + _pageSize < requests.length)
+            ? reqStart + _pageSize
+            : requests.length;
+        final pagedRequests = reqStart < requests.length
+            ? requests.sublist(reqStart, reqEnd)
+            : <AppointmentRequestEntity>[];
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -101,7 +125,10 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                           label: 'All Appointments (${state.appointments.length})',
                           selected: _listMode == 0,
                           isDark: isDark,
-                          onTap: () => setState(() => _listMode = 0),
+                          onTap: () => setState(() {
+                            _listMode = 0;
+                            _appointmentsPage = 1;
+                          }),
                         ),
                         const SizedBox(width: 4),
                         _buildModePill(
@@ -109,7 +136,10 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                           label: 'Lead Requests (${state.requests.length})',
                           selected: _listMode == 1,
                           isDark: isDark,
-                          onTap: () => setState(() => _listMode = 1),
+                          onTap: () => setState(() {
+                            _listMode = 1;
+                            _requestsPage = 1;
+                          }),
                         ),
                       ],
                     ),
@@ -164,8 +194,13 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                                           const EdgeInsets.symmetric(
                                               vertical: 8),
                                     ),
-                                    onChanged: (val) =>
-                                        cubit.setSearchQuery(val),
+                                    onChanged: (val) {
+                                      cubit.setSearchQuery(val);
+                                      setState(() {
+                                        _appointmentsPage = 1;
+                                        _requestsPage = 1;
+                                      });
+                                    },
                                   ),
                                 ),
                                 GestureDetector(
@@ -175,6 +210,8 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                                     cubit.setSearchQuery('');
                                     setState(() {
                                       _isSearchExpanded = false;
+                                      _appointmentsPage = 1;
+                                      _requestsPage = 1;
                                     });
                                   },
                                   child: Padding(
@@ -223,7 +260,13 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   // Status Dropdown Filter (Matches Calls, Customers & Calendar)
                   PopupMenuButton<String>(
                     tooltip: 'Filter by Status',
-                    onSelected: (val) => cubit.setStatusFilter(val),
+                    onSelected: (val) {
+                      cubit.setStatusFilter(val);
+                      setState(() {
+                        _appointmentsPage = 1;
+                        _requestsPage = 1;
+                      });
+                    },
                     offset: const Offset(0, 40),
                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     shape: RoundedRectangleBorder(
@@ -314,28 +357,40 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   ),
                   const SizedBox(width: 8),
 
-                  // Refresh Button (Matches Calls & Customers)
-                  InkWell(
-                    onTap: state.isActionLoading
-                        ? null
-                        : () => cubit.refresh(),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      height: 36,
-                      width: 36,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white10
-                              : context.colors.lightGreyColor,
+                  // Refresh Button (matches Calls, Customers & AI Settings)
+                  Tooltip(
+                    message: 'Refresh',
+                    child: InkWell(
+                      onTap: state.isActionLoading
+                          ? null
+                          : () => cubit.refresh(),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        height: 36,
+                        width: 36,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white10
+                                : context.colors.lightGreyColor,
+                          ),
                         ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          CupertinoIcons.arrow_2_circlepath,
-                          size: 15,
-                          color: context.colors.darkGreyColor,
+                        child: Center(
+                          child: state.isActionLoading
+                              ? SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                )
+                              : Icon(
+                                  CupertinoIcons.refresh,
+                                  size: 15,
+                                  color: context.colors.darkGreyColor,
+                                ),
                         ),
                       ),
                     ),
@@ -362,12 +417,64 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   child: _listMode == 0
                       ? (appointments.isEmpty
                           ? _buildEmptyAppointmentsState(context, isDark)
-                          : _buildAppointmentsTable(
-                              context, appointments, isDark, cubit))
+                          : Column(
+                              children: [
+                                Expanded(
+                                  child: _buildAppointmentsTable(
+                                      context, pagedAppointments, isDark, cubit),
+                                ),
+                                if (appointmentsTotalPages > 1) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24.0),
+                                    child: Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: isDark
+                                          ? Colors.white10
+                                          : context.colors.lightGreyColor,
+                                    ),
+                                  ),
+                                  AppPaginationWidget(
+                                    currentPage: safeAppointmentsPage,
+                                    totalPages: appointmentsTotalPages,
+                                    onPageChanged: (page) => setState(() {
+                                      _appointmentsPage = page;
+                                    }),
+                                  ),
+                                ],
+                              ],
+                            ))
                       : (requests.isEmpty
                           ? _buildEmptyRequestsState(context, isDark)
-                          : _buildRequestsTable(
-                              context, requests, isDark, cubit)),
+                          : Column(
+                              children: [
+                                Expanded(
+                                  child: _buildRequestsTable(
+                                      context, pagedRequests, isDark, cubit),
+                                ),
+                                if (requestsTotalPages > 1) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24.0),
+                                    child: Divider(
+                                      height: 1,
+                                      thickness: 1,
+                                      color: isDark
+                                          ? Colors.white10
+                                          : context.colors.lightGreyColor,
+                                    ),
+                                  ),
+                                  AppPaginationWidget(
+                                    currentPage: safeRequestsPage,
+                                    totalPages: requestsTotalPages,
+                                    onPageChanged: (page) => setState(() {
+                                      _requestsPage = page;
+                                    }),
+                                  ),
+                                ],
+                              ],
+                            )),
                 ),
               ),
             ),
