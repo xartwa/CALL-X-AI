@@ -41,6 +41,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
     Color(0xFF6366F1), // Indigo
     Color(0xFF8B5CF6), // Violet
     Color(0xFFEC4899), // Pink
+    Color(0xFF64748B), // Slate
   ];
 
   @override
@@ -197,6 +198,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
               children: colors.map((color) {
                 final isSelected = _selectedColor == color;
                 return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () => setState(() => _selectedColor = color),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),

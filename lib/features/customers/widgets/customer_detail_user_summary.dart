@@ -27,6 +27,11 @@ class CustomerDetailUserSummary extends StatelessWidget {
   });
 
   Color _getTagColor(BuildContext context, String text) {
+    final directColor = user.getTagColor(text);
+    if (directColor != null) {
+      return directColor;
+    }
+
     final state = context.read<WorkspaceSettingsCubit>().state;
     final lower = text.toLowerCase().trim();
 
@@ -216,18 +221,28 @@ class CustomerDetailUserSummary extends StatelessWidget {
                           existingTags: user.tags,
                         );
                         if (tagModel != null && context.mounted) {
+                          context
+                              .read<WorkspaceSettingsCubit>()
+                              .addOrUpdateTagLocally(tagModel);
+
                           final numericId = int.tryParse(tagModel.id);
                           if (numericId != null && numericId > 0) {
-                            context.read<CustomersCubit>().addTag(
+                            await context.read<CustomersCubit>().addTag(
                                   user.id,
                                   tagId: numericId,
                                 );
                           } else {
-                            context.read<CustomersCubit>().addTag(
+                            await context.read<CustomersCubit>().addTag(
                                   user.id,
                                   label: tagModel.label,
                                   color: tagModel.colorHex,
                                 );
+                          }
+
+                          if (context.mounted) {
+                            context
+                                .read<WorkspaceSettingsCubit>()
+                                .loadConfiguration();
                           }
                         }
                       },

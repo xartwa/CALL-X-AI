@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import '../../../../core/models/tag_model.dart';
 import '../../../../core/utils/app_date_time.dart';
 
 class Customer {
@@ -28,6 +30,7 @@ class Customer {
     this.reasonForContact = '',
     this.status = 'Active',
     this.tags = const [],
+    this.tagItems = const [],
     this.notesCount = 0,
     this.documentsCount = 0,
     Object? createdAt,
@@ -66,6 +69,7 @@ class Customer {
   final String reasonForContact;
   final String status;
   final List<String> tags;
+  final List<TagModel> tagItems;
   final int notesCount;
   final int documentsCount;
   final DateTime? createdAt;
@@ -78,6 +82,16 @@ class Customer {
   String get phone => phoneNumber;
   String get address => streetAddress;
   String get state => provinceState;
+
+  Color? getTagColor(String tagLabel, {Color? fallback}) {
+    final lower = tagLabel.toLowerCase().trim();
+    for (final item in tagItems) {
+      if (item.label.toLowerCase().trim() == lower) {
+        return item.color;
+      }
+    }
+    return fallback;
+  }
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
         id: json['id'] ?? '',
@@ -102,6 +116,7 @@ class Customer {
         reasonForContact: '${json['reasonForContact'] ?? ''}',
         status: '${json['status'] ?? 'Active'}',
         tags: _stringList(json['tags']),
+        tagItems: _tagItems(json['tagItems'] ?? json['tag_items']),
         notesCount: _intValue(json['notesCount']),
         documentsCount: _intValue(json['documentsCount']),
         createdAt: AppDateTime.tryParseApiDateTime(json['createdAt']),
@@ -173,6 +188,7 @@ class Customer {
     String? reasonForContact,
     String? status,
     List<String>? tags,
+    List<TagModel>? tagItems,
     int? notesCount,
     int? documentsCount,
     Object? createdAt,
@@ -206,6 +222,7 @@ class Customer {
         reasonForContact: reasonForContact ?? this.reasonForContact,
         status: status ?? this.status,
         tags: tags ?? this.tags,
+        tagItems: tagItems ?? this.tagItems,
         notesCount: notesCount ?? this.notesCount,
         documentsCount: documentsCount ?? this.documentsCount,
         createdAt: createdAt ?? this.createdAt,
@@ -409,5 +426,12 @@ List<CustomerCallHistory> _calls(Object? value) => value is List
                 : const [],
             notes: e['notes']?.toString(),
             createdAt: _date(e['createdAt'] ?? e['created_at'])))
+        .toList()
+    : const [];
+
+List<TagModel> _tagItems(Object? value) => value is List
+    ? value
+        .whereType<Map>()
+        .map((e) => TagModel.fromJson(Map<String, dynamic>.from(e)))
         .toList()
     : const [];

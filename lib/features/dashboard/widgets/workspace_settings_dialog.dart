@@ -501,6 +501,7 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
       Color(0xFF6366F1), // Indigo
       Color(0xFF8B5CF6), // Violet
       Color(0xFFEC4899), // Pink
+      Color(0xFF64748B), // Slate
     ];
     final colors = serverColors.isNotEmpty ? serverColors : defaultColors;
     Color selectedColor = colors.first;

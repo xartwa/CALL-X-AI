@@ -110,7 +110,14 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
     });
   }
 
-  Color _getSemanticColor(BuildContext context, String value) {
+  Color _getSemanticColor(BuildContext context, String value, [Customer? user]) {
+    if (user != null) {
+      final directColor = user.getTagColor(value);
+      if (directColor != null) {
+        return directColor;
+      }
+    }
+
     final state = context.read<WorkspaceSettingsCubit>().state;
     final lower = value.toLowerCase().trim();
 
@@ -275,7 +282,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
                   ? const Text(tableDash)
                   : CustomTagWidget(
                       label: user.tags.first,
-                      color: _getSemanticColor(context, user.tags.first),
+                      color: _getSemanticColor(context, user.tags.first, user),
                     ),
             ),
 

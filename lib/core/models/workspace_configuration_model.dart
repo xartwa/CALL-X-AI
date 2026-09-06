@@ -18,8 +18,8 @@ class WorkspaceConfigurationModel {
     // Pipeline stages
     final rawStages = json['pipelineStages'] ?? json['pipeline_stages'] ?? [];
     final stagesList = (rawStages is List ? rawStages : [])
-        .map((e) => e is Map<String, dynamic>
-            ? TagModel.fromJson(e)
+        .map((e) => e is Map
+            ? TagModel.fromJson(Map<String, dynamic>.from(e))
             : TagModel(
                 id: e.toString(),
                 label: e.toString(),
@@ -29,8 +29,8 @@ class WorkspaceConfigurationModel {
     // Custom tags
     final rawTags = json['customTags'] ?? json['custom_tags'] ?? [];
     final tagsList = (rawTags is List ? rawTags : [])
-        .map((e) => e is Map<String, dynamic>
-            ? TagModel.fromJson(e)
+        .map((e) => e is Map
+            ? TagModel.fromJson(Map<String, dynamic>.from(e))
             : TagModel(
                 id: e.toString(),
                 label: e.toString(),
@@ -44,7 +44,16 @@ class WorkspaceConfigurationModel {
 
     if (rawColors is List) {
       for (final item in rawColors) {
-        if (item is String) {
+        if (item is Map) {
+          final hex = item['value']?.toString() ??
+              item['color']?.toString() ??
+              item['hex']?.toString() ??
+              '';
+          if (hex.isNotEmpty) {
+            hexStrings.add(hex);
+            colorsList.add(TagModel.hexToColor(hex));
+          }
+        } else if (item is String) {
           hexStrings.add(item);
           colorsList.add(TagModel.hexToColor(item));
         } else if (item is int) {

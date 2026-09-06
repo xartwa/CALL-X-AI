@@ -131,6 +131,19 @@ class WorkspaceSettingsCubit extends Cubit<WorkspaceSettingsState> {
     }
   }
 
+  void addOrUpdateTagLocally(TagModel tag) {
+    final cleanLabel = tag.label.trim().toLowerCase();
+    final updated = [...state.customTags];
+    final index =
+        updated.indexWhere((t) => t.label.trim().toLowerCase() == cleanLabel);
+    if (index >= 0) {
+      updated[index] = tag;
+    } else {
+      updated.add(tag);
+    }
+    emit(state.copyWith(customTags: updated));
+  }
+
   Future<bool> saveCustomTags(List<TagModel> tags) async {
     emit(state.copyWith(
       status: WorkspaceSettingsStatus.saving,
