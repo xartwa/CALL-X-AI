@@ -1,57 +1,160 @@
-import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/constants/theme_constants.dart';
+import 'package:callx_ai/theme/app_colors.dart';
+import 'package:dart_quill_delta/dart_quill_delta.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill_delta_from_html/flutter_quill_delta_from_html.dart';
+import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 
-class EmailEditorToolbar extends StatelessWidget {
-  final TextEditingController controller;
-
-  const EmailEditorToolbar({super.key, required this.controller});
-
-  void _insertTag(
-      TextEditingController controller, String openTag, String closeTag) {
-    final text = controller.text;
-    final selection = controller.selection;
-
-    if (selection.isValid) {
-      final start = selection.start;
-      final end = selection.end;
-      final selectedText = text.substring(start, end);
-      final newText =
-          text.replaceRange(start, end, '$openTag$selectedText$closeTag');
-      controller.text = newText;
-      final offset =
-          start + openTag.length + selectedText.length + closeTag.length;
-      controller.selection = TextSelection.collapsed(offset: offset);
-    } else {
-      final newText = '$text$openTag$closeTag';
-      controller.text = newText;
-      controller.selection =
-          TextSelection.collapsed(offset: newText.length - closeTag.length);
+/// Helper to convert back and forth between HTML and Quill Delta/Document.
+class EmailHtmlConverter {
+  /// Converts an HTML string to a Quill Delta.
+  static Delta htmlToDelta(String html) {
+    final trimmed = html.trim();
+    if (trimmed.isEmpty) {
+      return Delta()..insert('\n');
+    }
+    try {
+      final delta = HtmlToDelta().convert(trimmed);
+      if (delta.isEmpty) {
+        return Delta()..insert('\n');
+      }
+      return delta;
+    } catch (_) {
+      return Delta()..insert('$trimmed\n');
     }
   }
 
-  void _insertText(TextEditingController controller, String textToInsert) {
-    final text = controller.text;
-    final selection = controller.selection;
-
-    if (selection.isValid) {
-      final start = selection.start;
-      final end = selection.end;
-      final newText = text.replaceRange(start, end, textToInsert);
-      controller.text = newText;
-      controller.selection =
-          TextSelection.collapsed(offset: start + textToInsert.length);
-    } else {
-      final newText = '$text$textToInsert';
-      controller.text = newText;
-      controller.selection = TextSelection.collapsed(offset: newText.length);
+  /// Converts a Quill Document to clean HTML.
+  static String deltaToHtml(Document document) {
+    try {
+      final jsonList = document.toDelta().toJson();
+      final ops = List<Map<String, dynamic>>.from(
+        jsonList.map((e) => Map<String, dynamic>.from(e as Map)),
+      );
+      final html = QuillDeltaToHtmlConverter(ops).convert();
+      return html;
+    } catch (_) {
+      return document.toPlainText();
     }
+  }
+
+  /// Creates a ready-to-use QuillController initialized with the given HTML.
+  static QuillController createController(String initialHtml) {
+    final delta = htmlToDelta(initialHtml);
+    return QuillController(
+      document: Document.fromDelta(delta),
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+  }
+}
+
+/// Custom styled toolbar for the email editor that preserves CallX AI branding.
+class EmailEditorToolbar extends StatefulWidget {
+  final QuillController controller;
+
+  const EmailEditorToolbar({super.key, required this.controller});
+
+  @override
+  State<EmailEditorToolbar> createState() => _EmailEditorToolbarState();
+}
+
+class _EmailEditorToolbarState extends State<EmailEditorToolbar> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onControllerChange);
+  }
+
+  @override
+  void didUpdateWidget(EmailEditorToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerChange);
+      widget.controller.addListener(_onControllerChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChange);
+    super.dispose();
+  }
+
+  void _onControllerChange() {
+    if (mounted) setState(() {});
+  }
+
+  void _toggleAttribute(Attribute attribute) {
+    final attrs = widget.controller.getSelectionStyle().attributes;
+    if (attrs.containsKey(attribute.key)) {
+      widget.controller.formatSelection(Attribute.clone(attribute, null));
+    } else {
+      widget.controller.formatSelection(attribute);
+    }
+  }
+
+  void _toggleHeader(Attribute headerAttr) {
+    final attrs = widget.controller.getSelectionStyle().attributes;
+    final current = attrs[Attribute.header.key];
+    if (current != null && current.value == headerAttr.value) {
+      widget.controller.formatSelection(Attribute.header);
+    } else {
+      widget.controller.formatSelection(headerAttr);
+    }
+  }
+
+  void _toggleList(Attribute listAttr) {
+    final attrs = widget.controller.getSelectionStyle().attributes;
+    final current = attrs[Attribute.list.key];
+    if (current != null && current.value == listAttr.value) {
+      widget.controller.formatSelection(Attribute.clone(Attribute.list, null));
+    } else {
+      widget.controller.formatSelection(listAttr);
+    }
+  }
+
+  void _toggleBlockQuote() {
+    final attrs = widget.controller.getSelectionStyle().attributes;
+    if (attrs.containsKey(Attribute.blockQuote.key)) {
+      widget.controller
+          .formatSelection(Attribute.clone(Attribute.blockQuote, null));
+    } else {
+      widget.controller.formatSelection(Attribute.blockQuote);
+    }
+  }
+
+  void _clearFormatting() {
+    final selection = widget.controller.selection;
+    if (selection.isCollapsed) return;
+    final attrs = widget.controller.getSelectionStyle().attributes;
+    for (final attr in attrs.values) {
+      widget.controller.formatSelection(Attribute.clone(attr, null));
+    }
+  }
+
+  void _insertVariable(String variable) {
+    final offset = widget.controller.selection.baseOffset;
+    widget.controller.document.insert(offset, variable);
+    widget.controller.updateSelection(
+      TextSelection.collapsed(offset: offset + variable.length),
+      ChangeSource.local,
+    );
   }
 
   void _showInsertLinkDialog(BuildContext context) {
     final textCtrl = TextEditingController();
     final urlCtrl = TextEditingController();
+
+    final selection = widget.controller.selection;
+    if (!selection.isCollapsed) {
+      final selectedText = widget.controller.document.getPlainText(
+        selection.start,
+        selection.end - selection.start,
+      );
+      textCtrl.text = selectedText;
+    }
 
     showDialog(
       context: context,
@@ -130,7 +233,7 @@ class EmailEditorToolbar extends StatelessWidget {
                   style: const TextStyle(fontSize: 13),
                   decoration: InputDecoration(
                     isDense: true,
-                    hintText: 'https://example.com/document',
+                    hintText: 'https://example.com',
                     hintStyle: TextStyle(
                         fontSize: 12, color: context.colors.darkGreyColor),
                     contentPadding: const EdgeInsets.symmetric(
@@ -141,38 +244,51 @@ class EmailEditorToolbar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 22),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final linkText = textCtrl.text.trim();
-                      final url = urlCtrl.text.trim();
-                      if (url.isNotEmpty) {
-                        final display = linkText.isNotEmpty ? linkText : url;
-                        _insertText(controller, '<a href="$url">$display</a>');
-                      }
-                      Navigator.pop(dialogCtx);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(dialogCtx).colorScheme.primary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(ThemeConstants.buttonRadius),
-                      ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(dialogCtx),
+                      child: const Text('Cancel'),
                     ),
-                    child: const Text(
-                      'INSERT LINK',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0.6,
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        final text = textCtrl.text.trim();
+                        final rawUrl = urlCtrl.text.trim();
+                        if (rawUrl.isEmpty) return;
+
+                        final url = (rawUrl.startsWith('http://') ||
+                                rawUrl.startsWith('https://') ||
+                                rawUrl.startsWith('mailto:'))
+                            ? rawUrl
+                            : 'https://$rawUrl';
+
+                        if (selection.isCollapsed && text.isNotEmpty) {
+                          final offset = selection.baseOffset;
+                          widget.controller.document.insert(offset, text);
+                          widget.controller.updateSelection(
+                            TextSelection(
+                                baseOffset: offset,
+                                extentOffset: offset + text.length),
+                            ChangeSource.local,
+                          );
+                        }
+                        widget.controller.formatSelection(LinkAttribute(url));
+                        Navigator.pop(dialogCtx);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius),
+                        ),
                       ),
+                      child: const Text('Insert Link'),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -187,20 +303,48 @@ class EmailEditorToolbar extends StatelessWidget {
     required Widget child,
     required String tooltip,
     required VoidCallback onTap,
+    bool isActive = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Tooltip(
       message: tooltip,
-      child: InkWell(
-        onTap: onTap,
+      child: Material(
+        color: isActive
+            ? primaryColor.withValues(alpha: 0.16)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(6),
-        child: Container(
-          width: 32,
-          height: 32,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              border: isActive
+                  ? Border.all(color: primaryColor.withValues(alpha: 0.35))
+                  : null,
+            ),
+            child: DefaultTextStyle.merge(
+              style: TextStyle(
+                color: isActive
+                    ? primaryColor
+                    : (isDark ? Colors.grey[300] : Colors.grey[700]),
+              ),
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  color: isActive
+                      ? primaryColor
+                      : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                  size: 15,
+                ),
+                child: child,
+              ),
+            ),
           ),
-          child: child,
         ),
       ),
     );
@@ -235,6 +379,16 @@ class EmailEditorToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final attrs = widget.controller.getSelectionStyle().attributes;
+
+    final isBold = attrs.containsKey(Attribute.bold.key);
+    final isItalic = attrs.containsKey(Attribute.italic.key);
+    final isUnderline = attrs.containsKey(Attribute.underline.key);
+    final isStrike = attrs.containsKey(Attribute.strikeThrough.key);
+
+    final headerVal = attrs[Attribute.header.key]?.value;
+    final listVal = attrs[Attribute.list.key]?.value;
+    final isBlockQuote = attrs.containsKey(Attribute.blockQuote.key);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -255,8 +409,9 @@ class EmailEditorToolbar extends StatelessWidget {
             context,
             child: const Text('B',
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
-            tooltip: 'Bold (<b>)',
-            onTap: () => _insertTag(controller, '<b>', '</b>'),
+            tooltip: 'Bold',
+            isActive: isBold,
+            onTap: () => _toggleAttribute(Attribute.bold),
           ),
           // Italic
           _buildToolbarButton(
@@ -266,8 +421,9 @@ class EmailEditorToolbar extends StatelessWidget {
                     fontSize: 13,
                     fontStyle: FontStyle.italic,
                     fontWeight: FontWeight.bold)),
-            tooltip: 'Italic (<i>)',
-            onTap: () => _insertTag(controller, '<i>', '</i>'),
+            tooltip: 'Italic',
+            isActive: isItalic,
+            onTap: () => _toggleAttribute(Attribute.italic),
           ),
           // Underline
           _buildToolbarButton(
@@ -277,8 +433,9 @@ class EmailEditorToolbar extends StatelessWidget {
                     fontSize: 13,
                     decoration: TextDecoration.underline,
                     fontWeight: FontWeight.bold)),
-            tooltip: 'Underline (<u>)',
-            onTap: () => _insertTag(controller, '<u>', '</u>'),
+            tooltip: 'Underline',
+            isActive: isUnderline,
+            onTap: () => _toggleAttribute(Attribute.underline),
           ),
           // Strikethrough
           _buildToolbarButton(
@@ -288,8 +445,9 @@ class EmailEditorToolbar extends StatelessWidget {
                     fontSize: 13,
                     decoration: TextDecoration.lineThrough,
                     fontWeight: FontWeight.bold)),
-            tooltip: 'Strikethrough (<s>)',
-            onTap: () => _insertTag(controller, '<s>', '</s>'),
+            tooltip: 'Strikethrough',
+            isActive: isStrike,
+            onTap: () => _toggleAttribute(Attribute.strikeThrough),
           ),
 
           const SizedBox(
@@ -302,24 +460,27 @@ class EmailEditorToolbar extends StatelessWidget {
             context,
             child: const Text('H1',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-            tooltip: 'Heading 1 (<h1>)',
-            onTap: () => _insertTag(controller, '<h1>', '</h1>'),
+            tooltip: 'Heading 1',
+            isActive: headerVal == 1,
+            onTap: () => _toggleHeader(Attribute.h1),
           ),
           // Heading 2
           _buildToolbarButton(
             context,
             child: const Text('H2',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-            tooltip: 'Heading 2 (<h2>)',
-            onTap: () => _insertTag(controller, '<h2>', '</h2>'),
+            tooltip: 'Heading 2',
+            isActive: headerVal == 2,
+            onTap: () => _toggleHeader(Attribute.h2),
           ),
           // Paragraph
           _buildToolbarButton(
             context,
             child: const Text('P',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-            tooltip: 'Paragraph (<p>)',
-            onTap: () => _insertTag(controller, '<p>', '</p>'),
+            tooltip: 'Paragraph',
+            isActive: headerVal == null || headerVal == 0,
+            onTap: () => widget.controller.formatSelection(Attribute.header),
           ),
 
           const SizedBox(
@@ -331,28 +492,38 @@ class EmailEditorToolbar extends StatelessWidget {
           _buildToolbarButton(
             context,
             child: const Icon(CupertinoIcons.list_bullet, size: 16),
-            tooltip: 'Bullet List (<ul><li>)',
-            onTap: () => _insertTag(controller, '<ul>\n  <li>', '</li>\n</ul>'),
+            tooltip: 'Bullet List',
+            isActive: listVal == Attribute.ul.value,
+            onTap: () => _toggleList(Attribute.ul),
           ),
           // Numbered List
           _buildToolbarButton(
             context,
             child: const Icon(CupertinoIcons.list_number, size: 16),
-            tooltip: 'Numbered List (<ol><li>)',
-            onTap: () => _insertTag(controller, '<ol>\n  <li>', '</li>\n</ol>'),
+            tooltip: 'Numbered List',
+            isActive: listVal == Attribute.ol.value,
+            onTap: () => _toggleList(Attribute.ol),
           ),
-          // Quote
+          // Blockquote
           _buildToolbarButton(
             context,
             child: const Icon(CupertinoIcons.quote_bubble, size: 15),
             tooltip: 'Blockquote',
-            onTap: () =>
-                _insertTag(controller, '<blockquote>', '</blockquote>'),
+            isActive: isBlockQuote,
+            onTap: () => _toggleBlockQuote(),
           ),
 
           const SizedBox(
             height: 18,
             child: VerticalDivider(width: 12, thickness: 1),
+          ),
+
+          // Clear formatting
+          _buildToolbarButton(
+            context,
+            child: const Icon(CupertinoIcons.paintbrush, size: 15),
+            tooltip: 'Clear Formatting',
+            onTap: _clearFormatting,
           ),
 
           // Color Palette Popup
@@ -363,8 +534,7 @@ class EmailEditorToolbar extends StatelessWidget {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             color: isDark ? const Color(0xFF1E293B) : Colors.white,
             onSelected: (colorHex) {
-              _insertTag(
-                  controller, '<span style="color: $colorHex;">', '</span>');
+              widget.controller.formatSelection(ColorAttribute(colorHex));
             },
             itemBuilder: (context) => [
               _buildColorItem(
@@ -398,14 +568,14 @@ class EmailEditorToolbar extends StatelessWidget {
             child: VerticalDivider(width: 12, thickness: 1),
           ),
 
-          // Variable Tags Pill
+          // Dynamic Variable Tags Pill
           PopupMenuButton<String>(
             tooltip: 'Insert Dynamic Variable',
             offset: const Offset(0, 36),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             color: isDark ? const Color(0xFF1E293B) : Colors.white,
-            onSelected: (variable) => _insertText(controller, variable),
+            onSelected: _insertVariable,
             itemBuilder: (context) => const [
               PopupMenuItem(
                 value: '{name}',
@@ -480,6 +650,98 @@ class EmailEditorToolbar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A beautifully styled Quill editor container that integrates with CallX AI design system.
+class EmailQuillEditor extends StatelessWidget {
+  final QuillController controller;
+  final FocusNode? focusNode;
+  final ScrollController? scrollController;
+  final double minHeight;
+  final double? maxHeight;
+  final String placeholder;
+
+  const EmailQuillEditor({
+    super.key,
+    required this.controller,
+    this.focusNode,
+    this.scrollController,
+    this.minHeight = 160,
+    this.maxHeight = 280,
+    this.placeholder = 'Write your follow-up email...',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      constraints: BoxConstraints(
+        minHeight: minHeight,
+        maxHeight: maxHeight ?? double.infinity,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.03)
+            : Colors.black.withValues(alpha: 0.02),
+        borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+        border: Border.all(
+          color: isDark ? Colors.white12 : context.colors.lightGreyColor,
+        ),
+      ),
+      child: QuillEditor.basic(
+        controller: controller,
+        focusNode: focusNode,
+        scrollController: scrollController,
+        config: QuillEditorConfig(
+          placeholder: placeholder,
+          scrollable: true,
+          autoFocus: false,
+          expands: false,
+          padding: EdgeInsets.zero,
+          customStyles: DefaultStyles(
+            paragraph: DefaultTextBlockStyle(
+              TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
+                height: 1.5,
+              ),
+              const HorizontalSpacing(0, 0),
+              const VerticalSpacing(2, 2),
+              const VerticalSpacing(0, 0),
+              null,
+            ),
+            h1: DefaultTextBlockStyle(
+              TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : Colors.black,
+                height: 1.4,
+              ),
+              const HorizontalSpacing(0, 0),
+              const VerticalSpacing(6, 4),
+              const VerticalSpacing(0, 0),
+              null,
+            ),
+            h2: DefaultTextBlockStyle(
+              TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black87,
+                height: 1.4,
+              ),
+              const HorizontalSpacing(0, 0),
+              const VerticalSpacing(4, 2),
+              const VerticalSpacing(0, 0),
+              null,
+            ),
+          ),
+        ),
       ),
     );
   }

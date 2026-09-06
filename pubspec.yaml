@@ -26,6 +26,10 @@ dependencies:
   web: ^1.1.1
   audioplayers: ^6.1.0
   path_provider: ^2.1.5
+  flutter_quill: ^11.5.0
+  vsc_quill_delta_to_html: ^1.0.5
+  flutter_quill_delta_from_html: ^1.5.3
+  dart_quill_delta: ^10.8.3
 
 dev_dependencies:
   flutter_test:

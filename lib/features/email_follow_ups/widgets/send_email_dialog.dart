@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Style;
 import '../cubit/email_follow_ups_cubit.dart';
 import '../data/email_models.dart';
 import 'email_editor_toolbar.dart';
@@ -74,7 +75,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
   // Controllers
   late TextEditingController _subjectCtrl;
-  late TextEditingController _bodyCtrl;
+  late QuillController _quillController;
+  final FocusNode _editorFocusNode = FocusNode();
+  final ScrollController _editorScrollController = ScrollController();
 
   // Attachments
   final List<PlatformFile> _attachments = [];
@@ -135,18 +138,19 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
               : ''),
     );
 
-    _bodyCtrl = TextEditingController(
-      text: widget.preloadedTemplate != null && _selectedUser != null
-          ? widget.preloadedTemplate!['body']
-              .replaceAll('{name}', _selectedUser!.fullName)
-              .replaceAll('{company}', _selectedUser!.companyName)
-          : (widget.preloadedTemplate != null
-              ? widget.preloadedTemplate!['body']
-              : '<p>Hi <b>{name}</b>,</p><p>Thank you for speaking with our team today. We would love to share our project proposal and outline the next steps for {company}.</p><p>Please let us know if you have any questions.</p><p>Best regards,<br><b>CallX AI Team</b></p>'),
-    );
+    final initialBodyHtml = widget.preloadedTemplate != null &&
+            _selectedUser != null
+        ? widget.preloadedTemplate!['body']
+            .replaceAll('{name}', _selectedUser!.fullName)
+            .replaceAll('{company}', _selectedUser!.companyName)
+        : (widget.preloadedTemplate != null
+            ? widget.preloadedTemplate!['body']
+            : '<p>Hi <b>{name}</b>,</p><p>Thank you for speaking with our team today. We would love to share our project proposal and outline the next steps for {company}.</p><p>Please let us know if you have any questions.</p><p>Best regards,<br><b>CallX AI Team</b></p>');
+
+    _quillController = EmailHtmlConverter.createController(initialBodyHtml);
 
     _subjectCtrl.addListener(_updateState);
-    _bodyCtrl.addListener(_updateState);
+    _quillController.addListener(_updateState);
     _customRecipientCtrl.addListener(_updateState);
     _customRecipientNameCtrl.addListener(_updateState);
   }
@@ -158,11 +162,13 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   @override
   void dispose() {
     _subjectCtrl.removeListener(_updateState);
-    _bodyCtrl.removeListener(_updateState);
+    _quillController.removeListener(_updateState);
     _customRecipientCtrl.removeListener(_updateState);
     _customRecipientNameCtrl.removeListener(_updateState);
     _subjectCtrl.dispose();
-    _bodyCtrl.dispose();
+    _quillController.dispose();
+    _editorFocusNode.dispose();
+    _editorScrollController.dispose();
     _customRecipientCtrl.dispose();
     _customRecipientNameCtrl.dispose();
     _searchCustomerCtrl.dispose();
@@ -257,22 +263,33 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   void _applyTemplate(Map<String, dynamic> temp) {
     setState(() {
       _selectedTemplate = temp;
-      final name = _selectedUser?.fullName ?? '{name}';
-      final company = _selectedUser?.companyName ?? '{company}';
+      final name = _isDirectRecipient
+          ? (_customRecipientNameCtrl.text.trim().isNotEmpty
+              ? _customRecipientNameCtrl.text.trim()
+              : '{name}')
+          : (_selectedUser?.fullName ?? '{name}');
+      final company = _isDirectRecipient
+          ? 'Client Company'
+          : (_selectedUser?.companyName ?? '{company}');
       _subjectCtrl.text = (temp['subject'] ?? '')
           .replaceAll('{name}', name)
           .replaceAll('{company}', company);
-      _bodyCtrl.text = (temp['body'] ?? '')
+      final rawBody = (temp['body'] ?? '')
           .replaceAll('{name}', name)
           .replaceAll('{company}', company);
+      _quillController.document =
+          Document.fromDelta(EmailHtmlConverter.htmlToDelta(rawBody));
     });
   }
 
   void _onSend() async {
     final subject = _subjectCtrl.text.trim();
-    final body = _bodyCtrl.text.trim();
+    final body =
+        EmailHtmlConverter.deltaToHtml(_quillController.document).trim();
 
-    if (subject.isEmpty || body.isEmpty) {
+    if (subject.isEmpty ||
+        body.isEmpty ||
+        _quillController.document.toPlainText().trim().isEmpty) {
       AppUtils.showSnackBar(
         context: context,
         extraMessage: 'Please fill in both Subject and Email Body',
@@ -455,7 +472,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     final targetCount = _getBatchTargetCount(customers);
 
 
-    final previewBody = _bodyCtrl.text
+    final currentBodyHtml =
+        EmailHtmlConverter.deltaToHtml(_quillController.document);
+    final previewBody = currentBodyHtml
         .replaceAll('{name}', _selectedUser?.fullName ?? 'Valued Customer')
         .replaceAll('{company}', _selectedUser?.companyName ?? 'Your Company')
         .replaceAll('{phone}', _selectedUser?.phone ?? '+1 (555) 000-0000')
@@ -1364,7 +1383,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
                           // RICH TOOLBAR + BODY EDITOR
                           Text(
-                            'EMAIL BODY (RICH HTML)',
+                            'EMAIL BODY',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -1374,47 +1393,15 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          EmailEditorToolbar(controller: _bodyCtrl),
+                          EmailEditorToolbar(controller: _quillController),
                           const SizedBox(height: 8),
-                          TextField(
-                            controller: _bodyCtrl,
-                            maxLines: 7,
-                            style: const TextStyle(fontSize: 13, height: 1.5),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              hintText:
-                                  'Type your email message or HTML body...',
-                              hintStyle: TextStyle(
-                                  fontSize: 12.5,
-                                  color: context.colors.darkGreyColor),
-                              contentPadding: const EdgeInsets.all(16),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                borderSide: BorderSide(
-                                    color: isDark
-                                        ? Colors.white12
-                                        : context.colors.lightGreyColor),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                borderSide: BorderSide(
-                                    color: isDark
-                                        ? Colors.white12
-                                        : context.colors.lightGreyColor),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                borderSide: BorderSide(
-                                    color: context.colors.primaryLightColor),
-                              ),
-                              filled: true,
-                              fillColor: isDark
-                                  ? Colors.white.withValues(alpha: 0.03)
-                                  : Colors.black.withValues(alpha: 0.02),
-                            ),
+                          EmailQuillEditor(
+                            controller: _quillController,
+                            focusNode: _editorFocusNode,
+                            scrollController: _editorScrollController,
+                            minHeight: 180,
+                            maxHeight: 280,
+                            placeholder: 'Write your follow-up email...',
                           ),
                           const SizedBox(height: 20),
 

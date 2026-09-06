@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Style;
 import 'email_editor_toolbar.dart';
 
 class ManageTemplateDialog extends StatefulWidget {
@@ -27,7 +28,9 @@ class ManageTemplateDialog extends StatefulWidget {
 class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
   late TextEditingController nameController;
   late TextEditingController subjectController;
-  late TextEditingController bodyController;
+  late QuillController bodyQuillController;
+  final FocusNode bodyFocusNode = FocusNode();
+  final ScrollController bodyScrollController = ScrollController();
   String _selectedCategory = 'Sales & Outreach';
 
   final List<String> _categories = const [
@@ -48,11 +51,10 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
           ? widget.templateToEdit!['subject']
           : '',
     );
-    bodyController = TextEditingController(
-      text: widget.templateToEdit != null
-          ? widget.templateToEdit!['body']
-          : '<p>Hi <b>{name}</b>,</p><p>Thank you for connecting with {company} today.</p><p>Best regards,<br><b>{agent}</b></p>',
-    );
+    final initialBody = widget.templateToEdit != null
+        ? widget.templateToEdit!['body']
+        : '<p>Hi <b>{name}</b>,</p><p>Thank you for connecting with {company} today.</p><p>Best regards,<br><b>{agent}</b></p>';
+    bodyQuillController = EmailHtmlConverter.createController(initialBody);
 
     if (widget.templateToEdit != null &&
         widget.templateToEdit!['category'] != null) {
@@ -61,7 +63,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
 
     nameController.addListener(_updateState);
     subjectController.addListener(_updateState);
-    bodyController.addListener(_updateState);
+    bodyQuillController.addListener(_updateState);
   }
 
   void _updateState() {
@@ -72,19 +74,24 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
   void dispose() {
     nameController.removeListener(_updateState);
     subjectController.removeListener(_updateState);
-    bodyController.removeListener(_updateState);
+    bodyQuillController.removeListener(_updateState);
     nameController.dispose();
     subjectController.dispose();
-    bodyController.dispose();
+    bodyQuillController.dispose();
+    bodyFocusNode.dispose();
+    bodyScrollController.dispose();
     super.dispose();
   }
 
   Future<void> _onSave() async {
     final name = nameController.text.trim();
     final subject = subjectController.text.trim();
-    final body = bodyController.text.trim();
+    final body = EmailHtmlConverter.deltaToHtml(bodyQuillController.document).trim();
 
-    if (name.isEmpty || subject.isEmpty || body.isEmpty) {
+    if (name.isEmpty ||
+        subject.isEmpty ||
+        body.isEmpty ||
+        bodyQuillController.document.toPlainText().trim().isEmpty) {
       AppUtils.showSnackBar(
         context: context,
         extraMessage: 'Please fill in all template fields',
@@ -131,7 +138,9 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final previewBody = bodyController.text
+    final currentBodyHtml =
+        EmailHtmlConverter.deltaToHtml(bodyQuillController.document);
+    final previewBody = currentBodyHtml
         .replaceAll('{name}', 'John Doe')
         .replaceAll('{company}', 'Acme Corporation')
         .replaceAll('{phone}', '+1 (555) 234-5678')
@@ -342,7 +351,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
 
                           // Rich Toolbar & Body
                           Text(
-                            'TEMPLATE BODY (HTML)',
+                            'TEMPLATE BODY',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
@@ -352,47 +361,16 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          EmailEditorToolbar(controller: bodyController),
+                          EmailEditorToolbar(controller: bodyQuillController),
                           const SizedBox(height: 8),
-                          TextField(
-                            controller: bodyController,
-                            maxLines: 9,
-                            style: const TextStyle(fontSize: 13, height: 1.5),
-                            decoration: InputDecoration(
-                              isDense: true,
-                              hintText:
-                                  'Write template message with {name}, {company}, etc...',
-                              hintStyle: TextStyle(
-                                  fontSize: 12.5,
-                                  color: context.colors.darkGreyColor),
-                              contentPadding: const EdgeInsets.all(16),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                borderSide: BorderSide(
-                                    color: isDark
-                                        ? Colors.white12
-                                        : context.colors.lightGreyColor),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                borderSide: BorderSide(
-                                    color: isDark
-                                        ? Colors.white12
-                                        : context.colors.lightGreyColor),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                borderSide: BorderSide(
-                                    color: context.colors.primaryLightColor),
-                              ),
-                              filled: true,
-                              fillColor: isDark
-                                  ? Colors.white.withValues(alpha: 0.03)
-                                  : Colors.black.withValues(alpha: 0.02),
-                            ),
+                          EmailQuillEditor(
+                            controller: bodyQuillController,
+                            focusNode: bodyFocusNode,
+                            scrollController: bodyScrollController,
+                            minHeight: 180,
+                            maxHeight: 280,
+                            placeholder:
+                                'Write template message with {name}, {company}, etc...',
                           ),
                         ],
                       ),
