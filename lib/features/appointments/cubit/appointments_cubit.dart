@@ -441,6 +441,22 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
   // --- Calendar Integration Actions ---
 
+  Future<String?> getGoogleCalendarOAuthUrl() async {
+    try {
+      return await _repository.getGoogleCalendarOAuthUrl();
+    } catch (e) {
+      emit(state.copyWith(errorMessage: _extractErrorMessage(e)));
+      return null;
+    }
+  }
+
+  Future<void> refreshCalendarStatus() async {
+    try {
+      final conn = await _repository.getCalendarConnection();
+      emit(state.copyWith(calendarConnection: conn));
+    } catch (_) {}
+  }
+
   Future<bool> syncCalendar() async {
     emit(state.copyWith(isActionLoading: true, clearError: true));
     try {

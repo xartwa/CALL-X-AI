@@ -164,6 +164,12 @@ class AppointmentsRemoteDataSource {
     return Map<String, dynamic>.from(response.data as Map);
   }
 
+  Future<String> getGoogleCalendarOAuthUrl() async {
+    final response = await _client.http.get('/calendar/oauth/init/');
+    final data = response.data as Map;
+    return (data['authorization_url'] ?? data['url'] ?? '').toString();
+  }
+
   Future<Map<String, dynamic>> syncCalendar() async {
     final response = await _client.http.post('/calendar/sync/');
     return Map<String, dynamic>.from(response.data as Map);

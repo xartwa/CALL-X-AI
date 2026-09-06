@@ -171,6 +171,9 @@ class _FakeAppointmentsRepository implements AppointmentsRepository {
   Future<CalendarConnectionEntity> getCalendarConnection() async => conn;
 
   @override
+  Future<String> getGoogleCalendarOAuthUrl() async => 'https://accounts.google.com/o/oauth2/v2/auth?mock=true';
+
+  @override
   Future<CalendarConnectionEntity> syncCalendar() async => conn;
 
   @override
@@ -320,6 +323,19 @@ void main() {
 
       await cubit.deleteException(cubit.state.exceptions.first.id);
       expect(cubit.state.exceptions.isEmpty, true);
+    });
+
+    test('getGoogleCalendarOAuthUrl and refreshCalendarStatus flow', () async {
+      await cubit.loadInitial();
+      final url = await cubit.getGoogleCalendarOAuthUrl();
+      expect(url, contains('accounts.google.com'));
+
+      await cubit.disconnectCalendar();
+      expect(cubit.state.calendarConnection.connected, false);
+
+      await cubit.syncCalendar();
+      expect(cubit.state.calendarConnection.connected, true);
+      expect(cubit.state.calendarConnection.accountEmail, 'admin@callx.ai');
     });
   });
 }

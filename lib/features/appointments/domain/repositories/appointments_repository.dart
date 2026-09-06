@@ -97,6 +97,8 @@ abstract class AppointmentsRepository {
   // Calendar Integration
   Future<CalendarConnectionEntity> getCalendarConnection();
 
+  Future<String> getGoogleCalendarOAuthUrl();
+
   Future<CalendarConnectionEntity> syncCalendar();
 
   Future<CalendarConnectionEntity> disconnectCalendar();

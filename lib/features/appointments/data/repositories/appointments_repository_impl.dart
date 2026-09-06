@@ -274,6 +274,11 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
   }
 
   @override
+  Future<String> getGoogleCalendarOAuthUrl() async {
+    return _dataSource.getGoogleCalendarOAuthUrl();
+  }
+
+  @override
   Future<CalendarConnectionEntity> syncCalendar() async {
     final raw = await _dataSource.syncCalendar();
     return CalendarConnectionEntity(

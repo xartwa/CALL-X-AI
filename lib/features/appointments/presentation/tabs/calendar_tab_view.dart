@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/web.dart' as web;
 
 import '../../../../core/constants/theme_constants.dart';
 import '../../../../theme/app_colors.dart';
@@ -268,9 +270,11 @@ class CalendarTabView extends StatelessWidget {
             ],
           ),
 
-          // Right: Status / Filter Options
+          // Right: Google Calendar + Status / Filter Options
           Row(
             children: [
+              _buildGoogleCalendarToolbarBadge(context, state, cubit, isDark),
+              const SizedBox(width: 10),
               PopupMenuButton<String>(
                 tooltip: 'Filter by Status',
                 onSelected: (val) => cubit.setStatusFilter(val),
@@ -398,5 +402,110 @@ class CalendarTabView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildGoogleCalendarToolbarBadge(
+    BuildContext context,
+    AppointmentsState state,
+    AppointmentsCubit cubit,
+    bool isDark,
+  ) {
+    final isConnected = state.calendarConnection.connected;
+    if (isConnected) {
+      return Tooltip(
+        message:
+            'Google Calendar Connected (${state.calendarConnection.accountEmail}). Click to sync now.',
+        child: InkWell(
+          onTap: state.isActionLoading ? null : () => cubit.syncCalendar(),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFF10B981).withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  state.calendarConnection.accountEmail.isNotEmpty
+                      ? state.calendarConnection.accountEmail
+                      : 'Google Sync',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF10B981),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Icon(
+                  CupertinoIcons.arrow_2_circlepath,
+                  size: 13,
+                  color: const Color(0xFF10B981)
+                      .withValues(alpha: state.isActionLoading ? 0.4 : 1.0),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      return Tooltip(
+        message: 'Connect your Google Calendar to sync appointments',
+        child: InkWell(
+          onTap: () async {
+            final url = await cubit.getGoogleCalendarOAuthUrl();
+            if (url != null && url.isNotEmpty) {
+              if (kIsWeb) {
+                web.window.open(url, '_blank');
+              }
+              await cubit.refreshCalendarStatus();
+            }
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4285F4).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFF4285F4).withValues(alpha: 0.35),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  CupertinoIcons.calendar,
+                  size: 14,
+                  color: Color(0xFF4285F4),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Connect Google Calendar',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4285F4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
