@@ -217,11 +217,14 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
     final timeStr = DateFormat('HH:mm').format(localStart);
     final isOnline = appt.isOnline;
     final isPending = appt.isPending;
+    final isRescheduled = appt.isRescheduled;
 
-    // Accent color: amber for pending, emerald for online, violet for in-person
+    // Accent color: amber for pending, cyan for rescheduled, emerald for online, violet for in-person
     final Color accentColor = isPending
         ? const Color(0xFFF59E0B)
-        : (isOnline ? const Color(0xFF10B981) : const Color(0xFF8B5CF6));
+        : (isRescheduled
+            ? const Color(0xFF06B6D4)
+            : (isOnline ? const Color(0xFF10B981) : const Color(0xFF8B5CF6)));
 
     final cardBg = isDark
         ? const Color(0xFF0F172A).withValues(alpha: 0.5)
@@ -333,6 +336,25 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFFF59E0B),
+                              ),
+                            ),
+                          ),
+                        ] else if (isRescheduled) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF06B6D4)
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Rescheduled',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF06B6D4),
                               ),
                             ),
                           ),

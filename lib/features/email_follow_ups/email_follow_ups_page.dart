@@ -409,7 +409,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
     return DataTable2(
       columnSpacing: 16,
       horizontalMargin: 18,
-      minWidth: 1200,
+      minWidth: 1280,
       headingRowHeight: 52,
       dataRowHeight: 70,
       showCheckboxColumn: false,
@@ -434,7 +434,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
         DataColumn2(label: Text('RECIPIENT CONTACT'), size: ColumnSize.L),
         DataColumn2(label: Text('SENDER'), size: ColumnSize.M),
         DataColumn2(label: Text('SUBJECT LINE'), size: ColumnSize.L),
-        DataColumn2(label: Text('TEMPLATE USED'), size: ColumnSize.M),
+        DataColumn2(label: Text('TEMPLATE USED'), size: ColumnSize.L),
         DataColumn2(label: Text('DATE & TIME'), size: ColumnSize.M),
         DataColumn2(label: Text('STATUS'), size: ColumnSize.S),
         DataColumn2(
@@ -501,9 +501,15 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
 
             // Template Used Tag
             DataCell(
-              CustomTagWidget(
-                label: email['templateName'] ?? '-',
-                color: Theme.of(context).colorScheme.primary,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 240),
+                  child: CustomTagWidget(
+                    label: email['templateName'] ?? '-',
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ),
             ),
 
@@ -591,8 +597,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
             ? 3
             : (constraints.maxWidth > 700 ? 2 : 1);
         final childAspectRatio = constraints.maxWidth > 1100
-            ? 2.1
-            : (constraints.maxWidth > 700 ? 2.3 : 1.85);
+            ? 1.8
+            : (constraints.maxWidth > 700 ? 1.9 : 1.7);
 
         return GridView.builder(
           padding: const EdgeInsets.only(top: 2, bottom: 20),

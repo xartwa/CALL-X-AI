@@ -494,7 +494,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       child: Container(
         width: 1100,
-        height: 760,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
         child: Column(
           children: [

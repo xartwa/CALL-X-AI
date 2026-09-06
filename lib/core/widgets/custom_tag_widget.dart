@@ -43,16 +43,18 @@ class CustomTagWidget extends StatelessWidget {
             ),
             const SizedBox(width: 4.5),
           ],
-          Text(
-            label.trim().toUpperCase(),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: color,
-              letterSpacing: 0.4,
+          Flexible(
+            child: Text(
+              label.trim().toUpperCase(),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: color,
+                letterSpacing: 0.4,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

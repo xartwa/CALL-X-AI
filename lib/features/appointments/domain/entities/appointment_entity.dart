@@ -57,10 +57,12 @@ class AppointmentEntity extends Equatable {
   bool get isPending => status.toLowerCase() == 'pending';
   bool get isCancelled => status.toLowerCase() == 'cancelled';
   bool get isCompleted => status.toLowerCase() == 'completed';
+  bool get isRescheduled => status.toLowerCase() == 'rescheduled';
+  bool get isNoShow => status.toLowerCase() == 'no_show';
 
   bool get isUpcoming {
     final now = DateTime.now();
-    return endAt.isAfter(now) && (isConfirmed || isPending);
+    return endAt.isAfter(now) && (isConfirmed || isPending || isRescheduled);
   }
 
   bool get isToday {

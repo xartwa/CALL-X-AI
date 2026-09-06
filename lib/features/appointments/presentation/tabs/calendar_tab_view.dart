@@ -288,6 +288,7 @@ class CalendarTabView extends StatelessWidget {
                 itemBuilder: (ctx) => [
                   'All',
                   'Confirmed',
+                  'Rescheduled',
                   'Pending',
                   'Completed',
                   'Cancelled',

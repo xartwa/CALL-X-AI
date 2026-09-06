@@ -97,12 +97,12 @@ class _CalendarWeekGridState extends State<CalendarWeekGrid> {
         }
       }
       if (!inThisWeek) continue;
-      final endH = localEnd.minute > 0 ? localEnd.hour : (localEnd.hour - 1);
+      final endH = localEnd.hour + (localEnd.minute > 0 ? 1 : 0);
       if (endH > endHour) {
         endHour = endH.clamp(startHour, 23);
       }
     }
-    return endHour.clamp(20, 23);
+    return endHour.clamp(21, 23);
   }
 
   double _calculateScrollOffset() {
@@ -486,6 +486,7 @@ class _CalendarWeekGridState extends State<CalendarWeekGrid> {
           // Card style colors
           final isOnline = appt.isOnline;
           final isPending = appt.isPending;
+          final isRescheduled = appt.isRescheduled;
 
           Color bg;
           Color border;
@@ -495,6 +496,12 @@ class _CalendarWeekGridState extends State<CalendarWeekGrid> {
             bg = isDark ? const Color(0xFF332A15) : const Color(0xFFFEF3C7);
             border = const Color(0xFFF59E0B);
             textAccent = const Color(0xFFF59E0B);
+          } else if (isRescheduled) {
+            bg = isDark
+                ? const Color(0xFF083344).withValues(alpha: 0.6)
+                : const Color(0xFFCFFAFE);
+            border = const Color(0xFF06B6D4);
+            textAccent = const Color(0xFF06B6D4);
           } else if (isOnline) {
             bg = isDark
                 ? const Color(0xFF064E3B).withValues(alpha: 0.6)

@@ -41,6 +41,9 @@ class EmailPreviewDialog extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surface,
       child: Container(
         width: 580,
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -63,67 +66,76 @@ class EmailPreviewDialog extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            _buildPreviewField(
-                context,
-                AppStrings.current.emailFollowUpsRecipient,
-                '${email['recipientName']} (${email['recipientEmail']})'),
-            const Divider(height: 24),
-            _buildPreviewField(context,
-                AppStrings.current.emailFollowUpsSubject, email['subject']),
-            const Divider(height: 24),
-            _buildPreviewField(
-                context,
-                AppStrings.current.emailFollowUpsTemplateUsed,
-                email['templateName']),
-            const Divider(height: 24),
-            _buildPreviewField(
-                context,
-                AppStrings.current.emailFollowUpsSentDateTime,
-                AppDateTime.displayDateTime(
-                  AppDateTime.tryParse(
-                        email['sentAt'] ??
-                            email['sent_at'] ??
-                            email['createdAt'],
-                      ) ??
-                      AppDateTime.combine(
-                        email['sentDate'],
-                        email['sentTime'],
+            const SizedBox(height: 16),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPreviewField(
+                        context,
+                        AppStrings.current.emailFollowUpsRecipient,
+                        '${email['recipientName']} (${email['recipientEmail']})'),
+                    const Divider(height: 24),
+                    _buildPreviewField(context,
+                        AppStrings.current.emailFollowUpsSubject, email['subject']),
+                    const Divider(height: 24),
+                    _buildPreviewField(
+                        context,
+                        AppStrings.current.emailFollowUpsTemplateUsed,
+                        email['templateName']),
+                    const Divider(height: 24),
+                    _buildPreviewField(
+                        context,
+                        AppStrings.current.emailFollowUpsSentDateTime,
+                        AppDateTime.displayDateTime(
+                          AppDateTime.tryParse(
+                                email['sentAt'] ??
+                                    email['sent_at'] ??
+                                    email['createdAt'],
+                              ) ??
+                              AppDateTime.combine(
+                                email['sentDate'],
+                                email['sentTime'],
+                              ),
+                        )),
+                    const Divider(height: 24),
+                    Text(
+                      AppStrings.current.emailFollowUpsEmailBody,
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: context.colors.darkGreyColor),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+                        border: Border.all(
+                            color: context.colors.mediumGreyColor.withAlpha(50)),
                       ),
-                )),
-            const Divider(height: 24),
-            Text(
-              AppStrings.current.emailFollowUpsEmailBody,
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: context.colors.darkGreyColor),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-                border: Border.all(
-                    color: context.colors.mediumGreyColor.withAlpha(50)),
-              ),
-              child: Html(
-                data: email['body'],
-                style: {
-                  "body": Style(
-                    margin: Margins.zero,
-                    padding: HtmlPaddings.zero,
-                    fontSize: FontSize(13),
-                    fontFamily: 'SFProText',
-                    color: isDark ? Colors.grey[300] : Colors.black87,
-                  ),
-                },
+                      child: Html(
+                        data: email['body'],
+                        style: {
+                          "body": Style(
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                            fontSize: FontSize(13),
+                            fontFamily: 'SFProText',
+                            color: isDark ? Colors.grey[300] : Colors.black87,
+                          ),
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

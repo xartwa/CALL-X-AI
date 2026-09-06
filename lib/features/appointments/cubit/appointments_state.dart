@@ -75,9 +75,13 @@ class AppointmentsState extends Equatable {
 
   List<AppointmentEntity> get filteredAppointments {
     return appointments.where((a) {
-      if (selectedStatusFilter != 'All' &&
-          a.status.toLowerCase() != selectedStatusFilter.toLowerCase()) {
-        return false;
+      if (selectedStatusFilter != 'All') {
+        final filterLower = selectedStatusFilter.toLowerCase();
+        if (filterLower == 'confirmed') {
+          if (!a.isConfirmed && !a.isRescheduled) return false;
+        } else if (a.status.toLowerCase() != filterLower) {
+          return false;
+        }
       }
       if (selectedTypeFilter != 'All' &&
           a.meetingType.toLowerCase() != selectedTypeFilter.toLowerCase()) {
