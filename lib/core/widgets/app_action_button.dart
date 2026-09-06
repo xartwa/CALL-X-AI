@@ -2,7 +2,7 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum AppActionType { call, view, edit, delete, email, message, download }
+enum AppActionType { call, view, edit, delete, email, message, download, video }
 
 class AppActionButton extends StatefulWidget {
   final AppActionType type;
@@ -39,6 +39,8 @@ class _AppActionButtonState extends State<AppActionButton> {
         return CupertinoIcons.chat_bubble_fill;
       case AppActionType.download:
         return CupertinoIcons.cloud_download_fill;
+      case AppActionType.video:
+        return CupertinoIcons.videocam_fill;
     }
   }
 
@@ -58,6 +60,8 @@ class _AppActionButtonState extends State<AppActionButton> {
         return context.colors.queuedColor;
       case AppActionType.download:
         return context.colors.darkGreyColor;
+      case AppActionType.video:
+        return context.colors.successColor;
     }
   }
 
@@ -77,6 +81,8 @@ class _AppActionButtonState extends State<AppActionButton> {
         return 'Send Message';
       case AppActionType.download:
         return 'Download';
+      case AppActionType.video:
+        return 'Join Meeting';
     }
   }
 

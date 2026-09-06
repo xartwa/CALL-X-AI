@@ -887,6 +887,7 @@ class AvailabilityTabView extends StatelessWidget {
       BuildContext context, AppointmentsCubit cubit) async {
     final url = await cubit.getGoogleCalendarOAuthUrl();
     if (url != null && url.isNotEmpty) {
+      cubit.startOAuthPolling();
       if (kIsWeb) {
         web.window.open(url, '_blank');
       }
@@ -902,17 +903,24 @@ class AvailabilityTabView extends StatelessWidget {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogCtx) => Dialog(
-        backgroundColor: isDark ? const Color(0xFF151B26) : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-          side: BorderSide(
-            color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+      builder: (dialogCtx) =>
+          BlocListener<AppointmentsCubit, AppointmentsState>(
+        listener: (context, state) {
+          if (state.calendarConnection.connected) {
+            Navigator.of(dialogCtx).pop();
+          }
+        },
+        child: Dialog(
+          backgroundColor: isDark ? const Color(0xFF151B26) : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+            side: BorderSide(
+              color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+            ),
           ),
-        ),
-        elevation: 12,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
+          elevation: 12,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -1127,8 +1135,9 @@ class AvailabilityTabView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStepCard(
     BuildContext context, {

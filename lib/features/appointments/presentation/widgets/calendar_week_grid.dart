@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../theme/app_colors.dart';
 import '../../domain/entities/appointment_entity.dart';
 
-class CalendarWeekGrid extends StatelessWidget {
+class CalendarWeekGrid extends StatefulWidget {
   final List<DateTime> weekDays;
   final List<AppointmentEntity> appointments;
   final ValueChanged<AppointmentEntity> onAppointmentTapped;
@@ -16,24 +16,56 @@ class CalendarWeekGrid extends StatelessWidget {
     required this.onAppointmentTapped,
   });
 
-  static const double _hourHeight = 60.0;
+  static const double hourHeight = 60.0;
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final now = DateTime.now();
+  State<CalendarWeekGrid> createState() => _CalendarWeekGridState();
+}
 
-    // Dynamically calculate startHour and endHour based on appointments this week
+class _CalendarWeekGridState extends State<CalendarWeekGrid> {
+  late final ScrollController _scrollController;
+
+  static const double _hourHeight = CalendarWeekGrid.hourHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialOffset = _calculateScrollOffset();
+    _scrollController = ScrollController(initialScrollOffset: initialOffset);
+  }
+
+  @override
+  void didUpdateWidget(covariant CalendarWeekGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.weekDays != widget.weekDays ||
+        oldWidget.appointments != widget.appointments) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          final targetOffset = _calculateScrollOffset();
+          _scrollController.animateTo(
+            targetOffset.clamp(
+                0.0, _scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  int _calculateStartHour() {
     int startHour = 8;
-    int endHour = 21;
-
-    for (final appt in appointments) {
+    for (final appt in widget.appointments) {
       if (appt.isCancelled) continue;
       final localStart = appt.startAt.toLocal();
-      final localEnd = appt.endAt.toLocal();
-
       bool inThisWeek = false;
-      for (final d in weekDays) {
+      for (final d in widget.weekDays) {
         if (d.year == localStart.year &&
             d.month == localStart.month &&
             d.day == localStart.day) {
@@ -42,17 +74,100 @@ class CalendarWeekGrid extends StatelessWidget {
         }
       }
       if (!inThisWeek) continue;
-
       if (localStart.hour < startHour) {
         startHour = localStart.hour;
       }
+    }
+    return startHour.clamp(0, 8);
+  }
+
+  int _calculateEndHour(int startHour) {
+    int endHour = 21;
+    for (final appt in widget.appointments) {
+      if (appt.isCancelled) continue;
+      final localStart = appt.startAt.toLocal();
+      final localEnd = appt.endAt.toLocal();
+      bool inThisWeek = false;
+      for (final d in widget.weekDays) {
+        if (d.year == localStart.year &&
+            d.month == localStart.month &&
+            d.day == localStart.day) {
+          inThisWeek = true;
+          break;
+        }
+      }
+      if (!inThisWeek) continue;
       final endH = localEnd.minute > 0 ? localEnd.hour : (localEnd.hour - 1);
       if (endH > endHour) {
         endHour = endH.clamp(startHour, 23);
       }
     }
-    startHour = startHour.clamp(0, 8);
-    endHour = endHour.clamp(20, 23);
+    return endHour.clamp(20, 23);
+  }
+
+  double _calculateScrollOffset() {
+    final startHour = _calculateStartHour();
+    final endHour = _calculateEndHour(startHour);
+    final now = DateTime.now();
+
+    final weekAppts = widget.appointments.where((appt) {
+      if (appt.isCancelled) return false;
+      final local = appt.startAt.toLocal();
+      return widget.weekDays.any((d) =>
+          d.year == local.year && d.month == local.month && d.day == local.day);
+    }).toList();
+
+    int targetHour = 8;
+
+    if (weekAppts.isNotEmpty) {
+      final todayAppts = weekAppts.where((appt) {
+        final local = appt.startAt.toLocal();
+        return local.year == now.year &&
+            local.month == now.month &&
+            local.day == now.day;
+      }).toList();
+
+      if (todayAppts.isNotEmpty) {
+        todayAppts.sort((a, b) => a.startAt.compareTo(b.startAt));
+        final upcomingToday =
+            todayAppts.where((a) => a.endAt.toLocal().isAfter(now)).toList();
+        if (upcomingToday.isNotEmpty) {
+          targetHour = upcomingToday.first.startAt.toLocal().hour;
+        } else {
+          targetHour = todayAppts.first.startAt.toLocal().hour;
+        }
+      } else {
+        final futureAppts =
+            weekAppts.where((a) => a.endAt.toLocal().isAfter(now)).toList();
+        if (futureAppts.isNotEmpty) {
+          futureAppts.sort((a, b) => a.startAt.compareTo(b.startAt));
+          targetHour = futureAppts.first.startAt.toLocal().hour;
+        } else {
+          weekAppts.sort((a, b) => a.startAt.compareTo(b.startAt));
+          targetHour = weekAppts.first.startAt.toLocal().hour;
+        }
+      }
+    } else {
+      final todayInWeek = widget.weekDays.any((d) =>
+          d.year == now.year && d.month == now.month && d.day == now.day);
+      if (todayInWeek) {
+        targetHour = now.hour;
+      } else {
+        targetHour = 9;
+      }
+    }
+
+    final clampedHour = (targetHour - 1).clamp(startHour, endHour);
+    return ((clampedHour - startHour) * _hourHeight).toDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final now = DateTime.now();
+
+    final startHour = _calculateStartHour();
+    final endHour = _calculateEndHour(startHour);
 
     final borderColor =
         context.colors.mediumGreyColor.withValues(alpha: isDark ? 0.35 : 1.0);
@@ -77,7 +192,8 @@ class CalendarWeekGrid extends StatelessWidget {
                   for (int i = 0; i < 7; i++) ...[
                     SizedBox(
                       width: colWidth,
-                      child: _buildDayHeader(weekDays[i], now, isDark, context),
+                      child: _buildDayHeader(
+                          widget.weekDays[i], now, isDark, context),
                     ),
                   ],
                 ],
@@ -87,6 +203,7 @@ class CalendarWeekGrid extends StatelessWidget {
             // Hours Grid Body (Scrollable inside available height)
             Expanded(
               child: SingleChildScrollView(
+                controller: _scrollController,
                 padding: const EdgeInsets.only(bottom: 60),
                 child: SizedBox(
                   height: (endHour - startHour + 1) * _hourHeight,
@@ -174,7 +291,7 @@ class CalendarWeekGrid extends StatelessWidget {
   ) {
     int todayIndex = -1;
     for (int i = 0; i < 7; i++) {
-      final d = weekDays[i];
+      final d = widget.weekDays[i];
       if (d.year == now.year && d.month == now.month && d.day == now.day) {
         todayIndex = i;
         break;
@@ -268,10 +385,10 @@ class CalendarWeekGrid extends StatelessWidget {
 
     // Process each day column independently
     for (int dayIndex = 0; dayIndex < 7; dayIndex++) {
-      final dayDate = weekDays[dayIndex];
+      final dayDate = widget.weekDays[dayIndex];
 
       // 1. Gather all active appointments for this day
-      final dayAppts = appointments.where((appt) {
+      final dayAppts = widget.appointments.where((appt) {
         if (appt.isCancelled) return false;
         final local = appt.startAt.toLocal();
         return local.year == dayDate.year &&
@@ -403,7 +520,7 @@ class CalendarWeekGrid extends StatelessWidget {
               width: itemWidth,
               height: height - 3.0,
               child: InkWell(
-                onTap: () => onAppointmentTapped(appt),
+                onTap: () => widget.onAppointmentTapped(appt),
                 borderRadius: BorderRadius.circular(6),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),

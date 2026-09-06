@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../domain/entities/appointment_entity.dart';
@@ -444,6 +445,8 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
   // --- Calendar Integration Actions ---
 
+  Timer? _oauthPollingTimer;
+
   Future<String?> getGoogleCalendarOAuthUrl() async {
     try {
       return await _repository.getGoogleCalendarOAuthUrl();
@@ -453,10 +456,43 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     }
   }
 
+  void startOAuthPolling({Duration timeout = const Duration(minutes: 2)}) {
+    _oauthPollingTimer?.cancel();
+    final startTime = DateTime.now();
+
+    _oauthPollingTimer =
+        Timer.periodic(const Duration(milliseconds: 1500), (timer) async {
+      if (DateTime.now().difference(startTime) > timeout) {
+        timer.cancel();
+        return;
+      }
+
+      try {
+        final conn = await _repository.getCalendarConnection();
+        if (conn.connected) {
+          timer.cancel();
+          emit(state.copyWith(
+            calendarConnection: conn,
+            successMessage: 'Google Calendar connected successfully!',
+          ));
+          await refresh();
+        }
+      } catch (_) {}
+    });
+  }
+
+  void stopOAuthPolling() {
+    _oauthPollingTimer?.cancel();
+    _oauthPollingTimer = null;
+  }
+
   Future<void> refreshCalendarStatus() async {
     try {
       final conn = await _repository.getCalendarConnection();
       emit(state.copyWith(calendarConnection: conn));
+      if (conn.connected) {
+        await refresh();
+      }
     } catch (_) {}
   }
 
@@ -511,5 +547,11 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       );
       emit(state.copyWith(availableSlots: slots));
     } catch (_) {}
+  }
+
+  @override
+  Future<void> close() {
+    stopOAuthPolling();
+    return super.close();
   }
 }

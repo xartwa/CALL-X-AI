@@ -8,7 +8,6 @@ import 'package:web/web.dart' as web;
 
 import '../../../../core/constants/theme_constants.dart';
 import '../../../../core/widgets/app_action_button.dart';
-import '../../../../core/widgets/app_text_field_widget.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
@@ -17,6 +16,22 @@ import '../../cubit/appointments_state.dart';
 import '../../domain/entities/appointment_entity.dart';
 import '../widgets/appointment_details_drawer.dart';
 import '../widgets/schedule_request_drawer.dart';
+
+String _stripHtml(String? input) {
+  if (input == null || input.isEmpty) return 'No notes provided';
+  var text = input
+      .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'</p>', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'<[^>]*>'), ' ')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'");
+  text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+  return text.isNotEmpty ? text : 'No notes provided';
+}
 
 class RequestsTabView extends StatefulWidget {
   const RequestsTabView({super.key});
@@ -27,11 +42,14 @@ class RequestsTabView extends StatefulWidget {
 
 class _RequestsTabViewState extends State<RequestsTabView> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   int _listMode = 0; // 0 = All Appointments, 1 = Lead Requests
+  bool _isSearchExpanded = false;
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -53,6 +71,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Unified Top Toolbar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
@@ -61,27 +80,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
               child: Row(
                 children: [
-                  // Search Input
-                  SizedBox(
-                    width: 280,
-                    height: 38,
-                    child: AppTextFieldWidget(
-                      padding: EdgeInsets.zero,
-                      controller: _searchCtrl,
-                      hintText: _listMode == 0
-                          ? 'Search appointments by name, notes...'
-                          : 'Search requests by prospect, notes...',
-                      prefixIcon: Icon(
-                        CupertinoIcons.search,
-                        size: 16,
-                        color: context.colors.darkGreyColor,
-                      ),
-                      onChanged: (val) => cubit.setSearchQuery(val),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-
-                  // Mode Toggle Pills (All Appointments vs Lead Requests)
+                  // Left: Segmented Tabs (Identical to Calendar Week/Month)
                   Container(
                     height: 38,
                     padding: const EdgeInsets.all(3),
@@ -94,14 +93,16 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                     child: Row(
                       children: [
                         _buildModePill(
-                          label: 'All Appointments (${appointments.length})',
+                          context: context,
+                          label: 'All Appointments (${state.appointments.length})',
                           selected: _listMode == 0,
                           isDark: isDark,
                           onTap: () => setState(() => _listMode = 0),
                         ),
                         const SizedBox(width: 4),
                         _buildModePill(
-                          label: 'Lead Requests (${requests.length})',
+                          context: context,
+                          label: 'Lead Requests (${state.requests.length})',
                           selected: _listMode == 1,
                           isDark: isDark,
                           onTap: () => setState(() => _listMode = 1),
@@ -111,20 +112,118 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                   ),
 
                   const Spacer(),
-                  const SizedBox(width: 14),
 
-                  // Filter Menu
+                  // Right: Expandable Search (Matches Customers & Email Follow-ups)
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    width: (_isSearchExpanded || _searchCtrl.text.isNotEmpty)
+                        ? 220
+                        : 36,
+                    height: 36,
+                    child: (_isSearchExpanded || _searchCtrl.text.isNotEmpty)
+                        ? Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white10
+                                    : context.colors.lightGreyColor,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 8),
+                                Icon(CupertinoIcons.search,
+                                    size: 15,
+                                    color: context.colors.darkGreyColor),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _searchCtrl,
+                                    focusNode: _searchFocusNode,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'Search...',
+                                      hintStyle: TextStyle(
+                                        fontSize: 12,
+                                        color: context.colors.darkGreyColor,
+                                      ),
+                                      border: InputBorder.none,
+                                      isDense: true,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 8),
+                                    ),
+                                    onChanged: (val) =>
+                                        cubit.setSearchQuery(val),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    _searchCtrl.clear();
+                                    _searchFocusNode.unfocus();
+                                    cubit.setSearchQuery('');
+                                    setState(() {
+                                      _isSearchExpanded = false;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: Icon(CupertinoIcons.clear_thick,
+                                        size: 12,
+                                        color: context.colors.darkGreyColor),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : InkWell(
+                            onTap: () {
+                              setState(() {
+                                _isSearchExpanded = true;
+                              });
+                              Future.delayed(
+                                  const Duration(milliseconds: 50), () {
+                                _searchFocusNode.requestFocus();
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white10
+                                      : context.colors.lightGreyColor,
+                                ),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  CupertinoIcons.search,
+                                  size: 15,
+                                  color: context.colors.darkGreyColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Status Dropdown Filter (Matches Calls, Customers & Calendar)
                   PopupMenuButton<String>(
-                    tooltip: 'Filter Status',
+                    tooltip: 'Filter by Status',
                     onSelected: (val) => cubit.setStatusFilter(val),
+                    offset: const Offset(0, 40),
                     color: isDark ? const Color(0xFF1E293B) : Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(
-                        color: isDark
-                            ? const Color(0xFF334155)
-                            : const Color(0xFFE2E8F0),
-                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     itemBuilder: (ctx) {
                       final options = _listMode == 0
@@ -143,14 +242,30 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                               'Closed',
                               'Cancelled'
                             ];
-                      return options
-                          .map((opt) =>
-                              _buildMenuItem(opt, state.selectedStatusFilter))
-                          .toList();
+                      return options.map((status) {
+                        final isSelected =
+                            state.selectedStatusFilter.toLowerCase() ==
+                                status.toLowerCase();
+                        return PopupMenuItem<String>(
+                          value: status,
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : (isDark ? Colors.white : Colors.black87),
+                            ),
+                          ),
+                        );
+                      }).toList();
                     },
                     child: Container(
-                      height: 38,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
                         color: state.selectedStatusFilter != 'All'
                             ? Theme.of(context)
@@ -158,15 +273,14 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                                 .primary
                                 .withValues(alpha: 0.08)
                             : Colors.transparent,
-                        borderRadius:
-                            BorderRadius.circular(ThemeConstants.buttonRadius),
                         border: Border.all(
                           color: state.selectedStatusFilter != 'All'
                               ? Theme.of(context).colorScheme.primary
                               : (isDark
-                                  ? const Color(0xFF334155)
-                                  : const Color(0xFFE2E8F0)),
+                                  ? Colors.white10
+                                  : context.colors.lightGreyColor),
                         ),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
@@ -177,28 +291,48 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                                 ? Theme.of(context).colorScheme.primary
                                 : context.colors.darkGreyColor,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Text(
                             state.selectedStatusFilter == 'All'
                                 ? 'Status'
                                 : state.selectedStatusFilter,
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
                               color: state.selectedStatusFilter != 'All'
                                   ? Theme.of(context).colorScheme.primary
-                                  : context.colors.blackColor,
+                                  : (isDark ? Colors.white70 : Colors.black87),
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            CupertinoIcons.chevron_down,
-                            size: 12,
-                            color: state.selectedStatusFilter != 'All'
-                                ? Theme.of(context).colorScheme.primary
-                                : context.colors.darkGreyColor,
-                          ),
                         ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Refresh Button (Matches Calls & Customers)
+                  InkWell(
+                    onTap: state.isActionLoading
+                        ? null
+                        : () => cubit.refresh(),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      height: 36,
+                      width: 36,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white10
+                              : context.colors.lightGreyColor,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          CupertinoIcons.arrow_2_circlepath,
+                          size: 15,
+                          color: context.colors.darkGreyColor,
+                        ),
                       ),
                     ),
                   ),
@@ -240,6 +374,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
   }
 
   Widget _buildModePill({
+    required BuildContext context,
     required String label,
     required bool selected,
     required bool isDark,
@@ -249,10 +384,10 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? (isDark ? const Color(0xFF1E293B) : Colors.white)
+              ? context.colors.whiteColor
               : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           boxShadow: selected
@@ -269,10 +404,10 @@ class _RequestsTabViewState extends State<RequestsTabView> {
           label,
           style: TextStyle(
             fontSize: 12,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
             color: selected
-                ? (isDark ? Colors.white : const Color(0xFF0F172A))
-                : const Color(0xFF94A3B8),
+                ? (isDark ? Colors.white : Colors.black87)
+                : context.colors.darkGreyColor,
           ),
         ),
       ),
@@ -461,11 +596,11 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       columns: const [
         DataColumn2(label: Text('PROSPECT / CUSTOMER'), size: ColumnSize.L),
         DataColumn2(label: Text('DATE & TIME'), size: ColumnSize.M),
-        DataColumn2(label: Text('TYPE'), size: ColumnSize.S, fixedWidth: 140),
+        DataColumn2(label: Text('TYPE'), size: ColumnSize.S, fixedWidth: 120),
         DataColumn2(label: Text('STATUS'), size: ColumnSize.S, fixedWidth: 130),
-        DataColumn2(label: Text('NOTES / SUMMARY'), size: ColumnSize.L),
+        DataColumn2(label: Text('NOTES / AGENDA'), size: ColumnSize.L),
         DataColumn2(
-            label: Text('ACTIONS'), size: ColumnSize.M, fixedWidth: 160),
+            label: Text('ACTIONS'), size: ColumnSize.M, fixedWidth: 140),
       ],
       rows: appointments.map((appt) {
         final localStart = appt.startAt.toLocal();
@@ -473,6 +608,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
         final dateStr = DateFormat('EEE, MMM d, yyyy').format(localStart);
         final timeStr =
             '${DateFormat('HH:mm').format(localStart)} - ${DateFormat('HH:mm').format(localEnd)}';
+        final cleanNotes = _stripHtml(appt.notes?.isNotEmpty == true ? appt.notes : appt.title);
 
         return DataRow2(
           color: WidgetStateProperty.resolveWith<Color?>((s) {
@@ -505,7 +641,9 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                         ? appt.companyName
                         : (appt.customerEmail.isNotEmpty
                             ? appt.customerEmail
-                            : appt.customerPhone),
+                            : (appt.customerPhone.isNotEmpty
+                                ? appt.customerPhone
+                                : 'Google Calendar Sync')),
                     style: TextStyle(
                       fontSize: 11.5,
                       color: context.colors.darkGreyColor,
@@ -542,29 +680,13 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
             ),
 
-            // Type
+            // Type (Clean CustomTagWidget - Matches UI Standards)
             DataCell(
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CustomTagWidget(
-                    label: appt.isOnline ? 'Online' : 'In-Person',
-                    color: appt.isOnline
-                        ? context.colors.infoColor
-                        : context.colors.successColor,
-                  ),
-                  if (appt.isOnline && appt.meetingUrl != null && !appt.isCancelled) ...[
-                    const SizedBox(width: 4),
-                    Tooltip(
-                      message: 'Google Meet ready',
-                      child: Icon(
-                        CupertinoIcons.videocam_fill,
-                        size: 15,
-                        color: context.colors.infoColor,
-                      ),
-                    ),
-                  ],
-                ],
+              CustomTagWidget(
+                label: appt.isOnline ? 'Online' : 'In-Person',
+                color: appt.isOnline
+                    ? context.colors.infoColor
+                    : context.colors.successColor,
               ),
             ),
 
@@ -576,62 +698,59 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
             ),
 
-            // Notes / Summary
+            // Notes / Agenda (Clean plain text, single line with ellipsis)
             DataCell(
-              Text(
-                (appt.notes?.isNotEmpty == true)
-                    ? appt.notes!
-                    : (appt.title.isNotEmpty ? appt.title : 'Consultation'),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.colors.darkGreyColor,
+              Tooltip(
+                message: cleanNotes,
+                child: Text(
+                  cleanNotes,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.colors.darkGreyColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
 
-            // Actions
+            // Actions (Standardized AppActionButton - Exact match with Customers & Calls)
             DataCell(
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (appt.isOnline && appt.meetingUrl != null && !appt.isCancelled)
-                    IconButton(
+                  if (appt.isOnline &&
+                      appt.meetingUrl != null &&
+                      appt.meetingUrl!.isNotEmpty &&
+                      !appt.isCancelled) ...[
+                    AppActionButton(
+                      type: AppActionType.video,
                       tooltip: 'Join Google Meet',
-                      icon: const Icon(CupertinoIcons.video_camera, size: 16),
-                      color: const Color(0xFF10B981),
-                      onPressed: () {
+                      onTap: () {
                         if (kIsWeb) {
                           web.window.open(appt.meetingUrl!, '_blank');
                         }
                       },
                     ),
-                  IconButton(
+                    const SizedBox(width: 8),
+                  ],
+                  AppActionButton(
+                    type: AppActionType.view,
                     tooltip: 'View Details',
-                    icon: const Icon(CupertinoIcons.eye, size: 16),
-                    color: context.colors.darkGreyColor,
-                    onPressed: () {
+                    onTap: () {
                       AppointmentDetailsDrawer.show(context, appt);
                     },
                   ),
-                  if (!appt.isCancelled)
+                  if (!appt.isCancelled) ...[
+                    const SizedBox(width: 8),
                     AppActionButton(
                       type: AppActionType.delete,
-                      tooltip: 'Cancel / Delete Appointment',
+                      tooltip: 'Cancel Appointment',
                       onTap: () {
-                        ConfirmationDialog.show(
-                          context,
-                          title: 'Delete Appointment',
-                          message:
-                              'Are you sure you want to cancel the appointment with "${appt.customerName}"?',
-                          confirmLabel: 'DELETE',
-                          onConfirm: () async {
-                            await cubit.cancelAppointment(appt.id);
-                          },
-                        );
+                        _confirmCancelAppointment(context, cubit, appt);
                       },
                     ),
+                  ],
                 ],
               ),
             ),
@@ -764,12 +883,12 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             ),
             DataCell(
               Text(
-                req.notes ?? 'Requested via AI Cold Call',
+                _stripHtml(req.notes),
                 style: TextStyle(
                   fontSize: 12,
                   color: context.colors.darkGreyColor,
                 ),
-                maxLines: 2,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -834,28 +953,6 @@ class _RequestsTabViewState extends State<RequestsTabView> {
     );
   }
 
-  PopupMenuItem<String> _buildMenuItem(String value, String selected) {
-    final isSelected = value.toLowerCase() == selected.toLowerCase();
-    return PopupMenuItem<String>(
-      value: value,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-          if (isSelected)
-            const Icon(CupertinoIcons.checkmark,
-                size: 14, color: Color(0xFF8B5CF6)),
-        ],
-      ),
-    );
-  }
-
   Color _getApptStatusColor(BuildContext context, String status) {
     final s = status.toLowerCase();
     if (s == 'confirmed') {
@@ -882,6 +979,23 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       return context.colors.errorColor;
     }
     return context.colors.darkGreyColor;
+  }
+
+  void _confirmCancelAppointment(
+    BuildContext context,
+    AppointmentsCubit cubit,
+    AppointmentEntity appt,
+  ) {
+    ConfirmationDialog.show(
+      context,
+      title: 'Delete Appointment',
+      message:
+          'Are you sure you want to cancel the appointment with "${appt.customerName}"?',
+      confirmLabel: 'DELETE',
+      onConfirm: () async {
+        await cubit.cancelAppointment(appt.id);
+      },
+    );
   }
 
   void _confirmCancelRequest(

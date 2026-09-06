@@ -492,10 +492,10 @@ class CalendarTabView extends StatelessWidget {
           onTap: () async {
             final url = await cubit.getGoogleCalendarOAuthUrl();
             if (url != null && url.isNotEmpty) {
+              cubit.startOAuthPolling();
               if (kIsWeb) {
                 web.window.open(url, '_blank');
               }
-              await cubit.refreshCalendarStatus();
             }
           },
           borderRadius: BorderRadius.circular(8),
