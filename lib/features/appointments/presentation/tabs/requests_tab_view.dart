@@ -29,7 +29,8 @@ String _stripHtml(String? input) {
       .replaceAll('&lt;', '<')
       .replaceAll('&gt;', '>')
       .replaceAll('&quot;', '"')
-      .replaceAll('&#39;', "'");
+      .replaceAll('&#39;', "'")
+      .replaceAll(RegExp(r'#CALLX', caseSensitive: false), '');
   text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
   return text.isNotEmpty ? text : 'No notes provided';
 }

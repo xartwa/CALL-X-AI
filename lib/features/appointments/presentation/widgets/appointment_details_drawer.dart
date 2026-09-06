@@ -246,7 +246,9 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                           ),
                         ),
                         child: Html(
-                          data: appointment.notes!,
+                          data: appointment.notes!
+                              .replaceAll(RegExp(r'#CALLX', caseSensitive: false), '')
+                              .trim(),
                           style: {
                             "body": Style(
                               margin: Margins.zero,

@@ -450,7 +450,10 @@ class CalendarTabView extends StatelessWidget {
     if (isConnected) {
       return Tooltip(
         message:
-            'Google Calendar Connected (${state.calendarConnection.accountEmail}). Click to sync now.',
+            'Google Calendar Connected (${state.calendarConnection.accountEmail})\n'
+            '• Auto-syncs events created in CallX\n'
+            '• To sync an event from Google Calendar, include #CALLX in its title or notes\n'
+            'Click to sync now',
         child: InkWell(
           onTap: state.isActionLoading ? null : () => cubit.syncCalendar(),
           borderRadius: BorderRadius.circular(8),
