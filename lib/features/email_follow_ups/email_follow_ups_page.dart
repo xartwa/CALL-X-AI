@@ -177,13 +177,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
         return name.contains(q) || subject.contains(q) || body.contains(q);
       }).toList();
     }
-    if (_selectedCategory != 'All') {
-      final c = _selectedCategory.toLowerCase();
-      list = list.where((template) {
-        final cat = (template['category'] ?? '').toString().toLowerCase();
-        return cat.contains(c);
-      }).toList();
-    }
     if (_selectedSort == 'Name (A-Z)') {
       list = List<Map<String, dynamic>>.from(list)
         ..sort((a, b) => (a['name'] ?? '')
@@ -687,7 +680,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
 
   Widget _buildMinimalTemplateCard(Map<String, dynamic> temp, bool isDark) {
     final primary = Theme.of(context).colorScheme.primary;
-    final category = (temp['category'] ?? 'Outreach').toString();
     final subject = (temp['subject'] ?? '').toString();
     final rawBody = (temp['body'] ?? '').toString();
     final cleanBody = rawBody
@@ -703,25 +695,6 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
         .toSet()
         .toList();
 
-    Color categoryColor;
-    switch (category.toLowerCase()) {
-      case 'follow-up & closing':
-      case 'follow-up':
-        categoryColor = const Color(0xFF10B981); // Emerald
-        break;
-      case 'outreach':
-      case 'sales':
-      case 'sales & outreach':
-        categoryColor = const Color(0xFF818CF8); // Indigo
-        break;
-      case 'meeting':
-      case 'consultation':
-        categoryColor = const Color(0xFFF59E0B); // Amber
-        break;
-      default:
-        categoryColor = const Color(0xFF38BDF8); // Cyan
-    }
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -734,43 +707,22 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Category Tag + Action Icons
+          // Row 1: Template Name + Action Icons
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Category Tag
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: categoryColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 5,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: categoryColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      category.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                        color: categoryColor,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ],
+              Expanded(
+                child: Text(
+                  temp['name'] ?? 'Untitled Template',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14.5,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-
-              // Action Buttons: Edit & Delete
+              const SizedBox(width: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -799,20 +751,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-
-          // Row 2: Template Name
-          Text(
-            temp['name'] ?? 'Untitled Template',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 14.5,
-              color: isDark ? Colors.white : const Color(0xFF0F172A),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 8),
 
           // Row 3: Subject line preview
           Row(

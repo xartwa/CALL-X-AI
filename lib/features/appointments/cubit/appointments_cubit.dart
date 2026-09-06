@@ -90,6 +90,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
   Future<void> refresh() async {
     try {
+      final now = state.selectedDate;
       final results = await Future.wait([
         _repository.getAppointments().catchError((_) => <AppointmentEntity>[]),
         _repository.getUpcomingAppointments().catchError((_) => <AppointmentEntity>[]),
@@ -99,6 +100,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         _repository.getSettings().catchError((_) => const AppointmentSettingsEntity()),
         _repository.getCalendarConnection().catchError((_) => const CalendarConnectionEntity()),
         _repository.getKPIStats().catchError((_) => const AppointmentKPIStats()),
+        _repository.getCalendarAppointments(year: now.year, month: now.month).catchError((_) => <AppointmentEntity>[]),
       ]);
 
       emit(state.copyWith(
@@ -110,6 +112,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         settings: results[5] as AppointmentSettingsEntity,
         calendarConnection: results[6] as CalendarConnectionEntity,
         kpi: results[7] as AppointmentKPIStats,
+        calendarAppointments: results[8] as List<AppointmentEntity>,
       ));
     } catch (_) {}
   }

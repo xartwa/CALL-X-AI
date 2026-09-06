@@ -270,94 +270,118 @@ class CalendarTabView extends StatelessWidget {
             ],
           ),
 
-          // Right: Google Calendar + Status / Filter Options
+          // Right: Google Calendar + Status / Filter Options + Refresh Button
           Row(
             children: [
               _buildGoogleCalendarToolbarBadge(context, state, cubit, isDark),
               const SizedBox(width: 10),
+
+              // Status Dropdown Filter (Without Arrow - matches Calls & Customers)
               PopupMenuButton<String>(
                 tooltip: 'Filter by Status',
                 onSelected: (val) => cubit.setStatusFilter(val),
-                color: context.colors.whiteColor,
+                offset: const Offset(0, 40),
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF334155)
-                        : const Color(0xFFE2E8F0),
-                  ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 itemBuilder: (ctx) => [
-                  _buildFilterMenuItem('All', state.selectedStatusFilter),
-                  _buildFilterMenuItem('Confirmed', state.selectedStatusFilter),
-                  _buildFilterMenuItem('Pending', state.selectedStatusFilter),
-                  _buildFilterMenuItem('Completed', state.selectedStatusFilter),
-                  _buildFilterMenuItem('Cancelled', state.selectedStatusFilter),
-                ],
-                child: Container(
-                  height: 38,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF334155)
-                          : const Color(0xFFE2E8F0),
+                  'All',
+                  'Confirmed',
+                  'Pending',
+                  'Completed',
+                  'Cancelled',
+                ].map((status) {
+                  final isSelected = state.selectedStatusFilter.toLowerCase() ==
+                      status.toLowerCase();
+                  return PopupMenuItem<String>(
+                    value: status,
+                    child: Text(
+                      status,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w800 : FontWeight.w500,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : (isDark ? Colors.white : Colors.black87),
+                      ),
                     ),
+                  );
+                }).toList(),
+                child: Container(
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: state.selectedStatusFilter != 'All'
+                        ? Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.08)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: state.selectedStatusFilter != 'All'
+                          ? Theme.of(context).colorScheme.primary
+                          : (isDark
+                              ? Colors.white10
+                              : context.colors.lightGreyColor),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        CupertinoIcons.slider_horizontal_3,
+                        CupertinoIcons.line_horizontal_3_decrease,
                         size: 14,
-                        color: context.colors.darkGreyColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        state.selectedStatusFilter == 'All'
-                            ? 'All Statuses'
-                            : state.selectedStatusFilter,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: context.colors.blackColor,
-                        ),
+                        color: state.selectedStatusFilter != 'All'
+                            ? Theme.of(context).colorScheme.primary
+                            : context.colors.darkGreyColor,
                       ),
                       const SizedBox(width: 6),
-                      Icon(
-                        CupertinoIcons.chevron_down,
-                        size: 11,
-                        color: context.colors.darkGreyColor,
+                      Text(
+                        state.selectedStatusFilter == 'All'
+                            ? 'Status'
+                            : state.selectedStatusFilter,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: state.selectedStatusFilter != 'All'
+                              ? Theme.of(context).colorScheme.primary
+                              : (isDark ? Colors.white70 : Colors.black87),
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+
+              // Refresh Button (matches Calls & Customers)
+              InkWell(
+                onTap: state.isActionLoading ? null : () => cubit.refresh(),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  height: 36,
+                  width: 36,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white10
+                          : context.colors.lightGreyColor,
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      CupertinoIcons.arrow_2_circlepath,
+                      size: 15,
+                      color: context.colors.darkGreyColor,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  PopupMenuItem<String> _buildFilterMenuItem(
-      String value, String currentSelected) {
-    final isSelected = value.toLowerCase() == currentSelected.toLowerCase();
-    return PopupMenuItem<String>(
-      value: value,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-          if (isSelected)
-            const Icon(CupertinoIcons.checkmark,
-                size: 14, color: Color(0xFF8B5CF6)),
         ],
       ),
     );

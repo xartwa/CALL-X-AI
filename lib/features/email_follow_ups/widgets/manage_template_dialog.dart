@@ -1,7 +1,6 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
-import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/core/widgets/app_feedback.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,12 +31,6 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
   final FocusNode bodyFocusNode = FocusNode();
   final ScrollController bodyScrollController = ScrollController();
   String _selectedCategory = 'Sales & Outreach';
-
-  final List<String> _categories = const [
-    'Sales & Outreach',
-    'Follow-Up & Closing',
-    'Billing & Contracts',
-  ];
   bool _isSaving = false;
 
   @override
@@ -201,103 +194,63 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Template Name & Category
-                          Row(
+                          // Template Name
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                flex: 3,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'TEMPLATE NAME',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
-                                        color: isDark
-                                            ? Colors.grey[400]
-                                            : Colors.grey[700],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      height: 46,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                            ThemeConstants.buttonRadius),
-                                        border: Border.all(
-                                          color: isDark
-                                              ? Colors.white12
-                                              : context.colors.lightGreyColor,
-                                        ),
-                                        color: isDark
-                                            ? Colors.white
-                                                .withValues(alpha: 0.03)
-                                            : Colors.black
-                                                .withValues(alpha: 0.02),
-                                      ),
-                                      child: Center(
-                                        child: TextField(
-                                          controller: nameController,
-                                          style: const TextStyle(
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w600),
-                                          textAlignVertical:
-                                              TextAlignVertical.center,
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 14,
-                                                    vertical: 12),
-                                            hintText:
-                                                'e.g. Sales Follow-Up Letter',
-                                            hintStyle: TextStyle(
-                                                fontSize: 12.5,
-                                                color: context
-                                                    .colors.darkGreyColor),
-                                            border: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              Text(
+                                'TEMPLATE NAME',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                  color: isDark
+                                      ? Colors.grey[400]
+                                      : Colors.grey[700],
                                 ),
                               ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                flex: 2,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'CATEGORY',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 0.5,
-                                        color: isDark
-                                            ? Colors.grey[400]
-                                            : Colors.grey[700],
-                                      ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      ThemeConstants.buttonRadius),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? Colors.white12
+                                        : context.colors.lightGreyColor,
+                                  ),
+                                  color: isDark
+                                      ? Colors.white
+                                          .withValues(alpha: 0.03)
+                                      : Colors.black
+                                          .withValues(alpha: 0.02),
+                                ),
+                                child: Center(
+                                  child: TextField(
+                                    controller: nameController,
+                                    style: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600),
+                                    textAlignVertical:
+                                        TextAlignVertical.center,
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 12),
+                                      hintText:
+                                          'e.g. Sales Follow-Up Letter',
+                                      hintStyle: TextStyle(
+                                          fontSize: 12.5,
+                                          color: context
+                                              .colors.darkGreyColor),
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
                                     ),
-                                    const SizedBox(height: 8),
-                                    AppDropdownWidget<String>(
-                                      value: _selectedCategory,
-                                      items: _categories,
-                                      height: 46,
-                                      itemBuilder: (c) => c,
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          setState(
-                                              () => _selectedCategory = val);
-                                        }
-                                      },
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ],

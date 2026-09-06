@@ -282,10 +282,6 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                 // Sort Dropdown
                 _buildSortDropdown(context, isDark, false),
               ] else ...[
-                // Category Filter
-                _buildCategoryDropdown(context, isDark),
-                const SizedBox(width: 8),
-
                 // Sort Dropdown for Templates
                 _buildSortDropdown(context, isDark, true),
               ],
@@ -414,96 +410,6 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                 fontSize: 11.5,
                 fontWeight: FontWeight.w700,
                 color: widget.selectedStatus != 'All'
-                    ? Theme.of(context).colorScheme.primary
-                    : (isDark ? Colors.white70 : Colors.black87),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryDropdown(BuildContext context, bool isDark) {
-    final categories = const [
-      'All',
-      'Outreach',
-      'Follow-Up & Closing',
-      'Meeting',
-      'Consultation',
-      'Sales',
-    ];
-
-    return PopupMenuButton<String>(
-      onSelected: (cat) {
-        widget.onCategoryChanged?.call(cat);
-      },
-      itemBuilder: (context) {
-        return categories.map((cat) {
-          final isSelected = widget.selectedCategory == cat;
-          return PopupMenuItem<String>(
-            value: cat,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  cat,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : (isDark ? Colors.white : Colors.black87),
-                  ),
-                ),
-                if (isSelected)
-                  Icon(
-                    CupertinoIcons.checkmark_alt,
-                    size: 14,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-              ],
-            ),
-          );
-        }).toList();
-      },
-      offset: const Offset(0, 40),
-      color: isDark ? const Color(0xFF1E293B) : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: widget.selectedCategory != 'All'
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
-              : Colors.transparent,
-          border: Border.all(
-            color: widget.selectedCategory != 'All'
-                ? Theme.of(context).colorScheme.primary
-                : (isDark
-                    ? const Color(0xFF1E293B)
-                    : context.colors.lightGreyColor),
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              CupertinoIcons.tag,
-              size: 13,
-              color: widget.selectedCategory != 'All'
-                  ? Theme.of(context).colorScheme.primary
-                  : context.colors.darkGreyColor,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              widget.selectedCategory == 'All'
-                  ? 'Category'
-                  : widget.selectedCategory,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
-                color: widget.selectedCategory != 'All'
                     ? Theme.of(context).colorScheme.primary
                     : (isDark ? Colors.white70 : Colors.black87),
               ),
