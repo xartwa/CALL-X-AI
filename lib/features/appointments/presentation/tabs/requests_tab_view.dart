@@ -8,6 +8,7 @@ import 'package:web/web.dart' as web;
 
 import '../../../../core/constants/theme_constants.dart';
 import '../../../../core/widgets/app_action_button.dart';
+import '../../../../core/widgets/app_pagination_widget.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/custom_tag_widget.dart';
 import '../../../../theme/app_colors.dart';
@@ -45,6 +46,9 @@ class _RequestsTabViewState extends State<RequestsTabView> {
   final FocusNode _searchFocusNode = FocusNode();
   int _listMode = 0; // 0 = All Appointments, 1 = Lead Requests
   bool _isSearchExpanded = false;
+  int _appointmentsPage = 1;
+  int _requestsPage = 1;
+  static const int _pageSize = 10;
 
   @override
   void dispose() {

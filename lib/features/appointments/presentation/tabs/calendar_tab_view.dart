@@ -356,26 +356,38 @@ class CalendarTabView extends StatelessWidget {
               ),
               const SizedBox(width: 8),
 
-              // Refresh Button (matches Calls & Customers)
-              InkWell(
-                onTap: state.isActionLoading ? null : () => cubit.refresh(),
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  height: 36,
-                  width: 36,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white10
-                          : context.colors.lightGreyColor,
+              // Refresh Button (matches Calls, Customers & AI Settings)
+              Tooltip(
+                message: 'Refresh',
+                child: InkWell(
+                  onTap: state.isActionLoading ? null : () => cubit.refresh(),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    height: 36,
+                    width: 36,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white10
+                            : context.colors.lightGreyColor,
+                      ),
                     ),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      CupertinoIcons.arrow_2_circlepath,
-                      size: 15,
-                      color: context.colors.darkGreyColor,
+                    child: Center(
+                      child: state.isActionLoading
+                          ? SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            )
+                          : Icon(
+                              CupertinoIcons.refresh,
+                              size: 15,
+                              color: context.colors.darkGreyColor,
+                            ),
                     ),
                   ),
                 ),
@@ -474,12 +486,20 @@ class CalendarTabView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 7),
-                Icon(
-                  CupertinoIcons.arrow_2_circlepath,
-                  size: 13,
-                  color: const Color(0xFF10B981)
-                      .withValues(alpha: state.isActionLoading ? 0.4 : 1.0),
-                ),
+                state.isActionLoading
+                    ? const SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: Color(0xFF10B981),
+                        ),
+                      )
+                    : const Icon(
+                        CupertinoIcons.refresh,
+                        size: 13,
+                        color: Color(0xFF10B981),
+                      ),
               ],
             ),
           ),

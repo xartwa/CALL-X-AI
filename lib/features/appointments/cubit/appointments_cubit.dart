@@ -90,6 +90,8 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
   }
 
   Future<void> refresh() async {
+    if (state.isActionLoading) return;
+    emit(state.copyWith(isActionLoading: true, clearError: true));
     try {
       final now = state.selectedDate;
       final results = await Future.wait([
@@ -104,18 +106,25 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         _repository.getCalendarAppointments(year: now.year, month: now.month).catchError((_) => <AppointmentEntity>[]),
       ]);
 
-      emit(state.copyWith(
-        appointments: results[0] as List<AppointmentEntity>,
-        upcomingAppointments: results[1] as List<AppointmentEntity>,
-        requests: results[2] as List<AppointmentRequestEntity>,
-        availabilityRules: results[3] as List<AvailabilityRuleEntity>,
-        exceptions: results[4] as List<AvailabilityExceptionEntity>,
-        settings: results[5] as AppointmentSettingsEntity,
-        calendarConnection: results[6] as CalendarConnectionEntity,
-        kpi: results[7] as AppointmentKPIStats,
-        calendarAppointments: results[8] as List<AppointmentEntity>,
-      ));
-    } catch (_) {}
+      if (!isClosed) {
+        emit(state.copyWith(
+          isActionLoading: false,
+          appointments: results[0] as List<AppointmentEntity>,
+          upcomingAppointments: results[1] as List<AppointmentEntity>,
+          requests: results[2] as List<AppointmentRequestEntity>,
+          availabilityRules: results[3] as List<AvailabilityRuleEntity>,
+          exceptions: results[4] as List<AvailabilityExceptionEntity>,
+          settings: results[5] as AppointmentSettingsEntity,
+          calendarConnection: results[6] as CalendarConnectionEntity,
+          kpi: results[7] as AppointmentKPIStats,
+          calendarAppointments: results[8] as List<AppointmentEntity>,
+        ));
+      }
+    } catch (_) {
+      if (!isClosed) {
+        emit(state.copyWith(isActionLoading: false));
+      }
+    }
   }
 
   void setActiveTab(int index) {

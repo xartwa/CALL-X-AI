@@ -6,6 +6,7 @@ import 'package:toastification/toastification.dart';
 import '../../../core/constants/theme_constants.dart';
 import '../../../core/utils/utils.dart';
 import '../../../core/widgets/app_feedback.dart';
+import '../../../core/widgets/app_pull_to_refresh.dart';
 import '../../../core/widgets/stat_card_widget.dart';
 import '../../../theme/app_colors.dart';
 import '../cubit/appointments_cubit.dart';
@@ -206,6 +207,8 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
             ),
             const SizedBox(height: 20),
           ],
+        ).withPullToRefresh(
+          onRefresh: () async => cubit.refresh(),
         );
       },
     );

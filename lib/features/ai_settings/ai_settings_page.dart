@@ -147,7 +147,7 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                   const SizedBox(width: 8),
                 ],
                 SizedBox(
-                  height: 38,
+                  height: 44,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,

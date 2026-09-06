@@ -105,7 +105,7 @@ class AppColors {
   const AppColors._();
 
   static const light = AppColorsExtension(
-    primaryLightColor: Color(0XFF1d4ed8),
+    primaryLightColor: Color(0XFF007acc),
     lightBlueColor: Color(0XFF818CF8), // Softer Indigo
     skyBlueColor:
         Color(0XFFF8FAFC), // Slate 50 - Very light background for contrast
