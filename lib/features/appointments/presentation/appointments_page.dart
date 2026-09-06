@@ -142,7 +142,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                               size: 16,
                               color: Colors.white,
                             ),
-                      label:  Text(
+                      label: Text(
                         'Save Changes'.toUpperCase(),
                         style: TextStyle(
                           fontSize: 13,
@@ -253,9 +253,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
         backgroundColor: isDark ? const Color(0xFF151B26) : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-          side: BorderSide(
-            color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
-          ),
+        
         ),
         elevation: 12,
         child: ConstrainedBox(
@@ -289,7 +287,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Google Calendar Required',
+                          'Google Calendar Required'.toUpperCase(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -318,39 +316,49 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(dialogCtx).pop(),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: context.colors.darkGreyColor,
-                          fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(dialogCtx).pop(),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: context.colors.darkGreyColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(dialogCtx).pop();
-                        cubit.setActiveTab(2);
-                      },
-                      icon: const Icon(CupertinoIcons.link,
-                          size: 14, color: Colors.white),
-                      label: const Text(
-                        'CONNECT CALENDAR',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(dialogCtx).pop();
+                            cubit.setActiveTab(2);
+                          },
+                          icon: const Icon(CupertinoIcons.link,
+                              size: 14, color: Colors.white),
+                          label: const Text(
+                            'CONNECT CALENDAR',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                          ),
                         ),
                       ),
                     ),
