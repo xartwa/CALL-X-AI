@@ -902,131 +902,295 @@ class AvailabilityTabView extends StatelessWidget {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogCtx) => AlertDialog(
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: isDark ? const Color(0xFF151B26) : Colors.white,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ThemeConstants.boxRadius)),
-        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-        title: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
-                ),
-              ),
-              child: SvgPicture.asset(
-                'assets/icons/google.svg',
-                width: 18,
-                height: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Connecting Google Calendar',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: context.colors.blackColor,
-              ),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+          side: BorderSide(
+            color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+          ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'A Google sign-in window has been opened in your browser.',
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.5,
-                color: context.colors.blackColor,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white12
-                      : context.colors.mediumGreyColor.withValues(alpha: 0.3),
+        elevation: 12,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white12
+                                  : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/icons/google.svg',
+                            width: 18,
+                            height: 18,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'CONNECT GOOGLE CALENDAR',
+                          style: TextStyle(
+                            color: context.colors.blackColor,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        CupertinoIcons.xmark,
+                        size: 18,
+                        color: context.colors.darkGreyColor,
+                      ),
+                      onPressed: () => Navigator.of(dialogCtx).pop(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
-              ),
-              child: Text(
-                '1. Sign in with your Google Account.\n2. Allow access to Google Calendar.\n3. Return here and click "Check Connection".',
-                style: TextStyle(
-                  fontSize: 12,
-                  height: 1.5,
-                  color: context.colors.darkGreyColor,
+                const SizedBox(height: 20),
+
+                // Browser status notice
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFFF1F5F9),
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white10
+                          : context.colors.mediumGreyColor
+                              .withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.compass,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'A secure Google authentication window has been opened in your browser.',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            height: 1.45,
+                            fontWeight: FontWeight.w500,
+                            color: context.colors.blackColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 18),
+
+                // Next steps section
+                Text(
+                  'NEXT STEPS',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: context.colors.darkGreyColor,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildStepCard(
+                  context,
+                  step: '1',
+                  title: 'Sign In to Google',
+                  description:
+                      'Choose your Gmail or Google Workspace account in the opened window.',
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 8),
+                _buildStepCard(
+                  context,
+                  step: '2',
+                  title: 'Grant Calendar Access',
+                  description:
+                      'Allow Call-X AI to sync consultations and create Google Meet video links.',
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 8),
+                _buildStepCard(
+                  context,
+                  step: '3',
+                  title: 'Confirm Connection',
+                  description:
+                      'Once authorized in Google, click "Check Connection" below to complete.',
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 24),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 42,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(dialogCtx).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: context.colors.mediumGreyColor
+                                  .withValues(alpha: 0.5),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: Text(
+                            'CANCEL',
+                            style: TextStyle(
+                              color: context.colors.blackColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.5,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 42,
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            await cubit.refreshCalendarStatus();
+                            if (dialogCtx.mounted) {
+                              Navigator.of(dialogCtx).pop();
+                            }
+                          },
+                          icon: const Icon(CupertinoIcons.arrow_2_circlepath,
+                              size: 15, color: Colors.white),
+                          label: const Text(
+                            'CHECK CONNECTION',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.5,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        actions: [
-          SizedBox(
-            height: 36,
-            child: OutlinedButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: isDark ? Colors.white24 : context.colors.lightGreyColor,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(ThemeConstants.buttonRadius),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-              child: Text(
-                'Cancel'.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
+      ),
+    );
+  }
+
+  Widget _buildStepCard(
+    BuildContext context, {
+    required String step,
+    required String title,
+    required String description,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
+        border: Border.all(
+          color: isDark
+              ? Colors.white10
+              : context.colors.mediumGreyColor.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              step,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          SizedBox(
-            height: 36,
-            child: ElevatedButton(
-              onPressed: () async {
-                await cubit.refreshCalendarStatus();
-                if (dialogCtx.mounted) {
-                  Navigator.of(dialogCtx).pop();
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(ThemeConstants.buttonRadius),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.blackColor,
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-              child: Text(
-                'Check Connection'.toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    height: 1.35,
+                    color: context.colors.darkGreyColor,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
