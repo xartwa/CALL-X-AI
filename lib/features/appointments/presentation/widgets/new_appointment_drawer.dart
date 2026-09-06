@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
 import 'package:toastification/toastification.dart';
 
@@ -11,6 +12,7 @@ import '../../../../core/widgets/app_dropdown_widget.dart';
 import '../../../../core/widgets/app_text_field_widget.dart';
 import '../../../../theme/app_colors.dart';
 import '../../../customers/cubit/customers_cubit.dart';
+import '../../../email_follow_ups/widgets/email_editor_toolbar.dart';
 import '../../cubit/appointments_cubit.dart';
 
 class NewAppointmentDrawer extends StatefulWidget {
@@ -65,7 +67,9 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
   final TextEditingController _titleCtrl =
       TextEditingController(text: 'Discovery Consultation');
   final TextEditingController _locationCtrl = TextEditingController();
-  final TextEditingController _notesCtrl = TextEditingController();
+  late final QuillController _notesQuillCtrl;
+  final FocusNode _notesFocusNode = FocusNode();
+  final ScrollController _notesScrollCtrl = ScrollController();
 
   @override
   void initState() {
@@ -75,6 +79,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
     _selectedStart =
         DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 11, 0);
     _selectedEnd = _selectedStart!.add(Duration(minutes: _durationMinutes));
+    _notesQuillCtrl = EmailHtmlConverter.createController('');
   }
 
   @override
@@ -82,7 +87,9 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
     _emailCtrl.dispose();
     _titleCtrl.dispose();
     _locationCtrl.dispose();
-    _notesCtrl.dispose();
+    _notesQuillCtrl.dispose();
+    _notesFocusNode.dispose();
+    _notesScrollCtrl.dispose();
     super.dispose();
   }
 
@@ -117,6 +124,11 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
       return;
     }
 
+    final rawNotesHtml =
+        EmailHtmlConverter.deltaToHtml(_notesQuillCtrl.document);
+    final isBlank = _notesQuillCtrl.document.toPlainText().trim().isEmpty;
+    final notes = isBlank ? '' : rawNotesHtml.trim();
+
     final cubit = context.read<AppointmentsCubit>();
     final ok = await cubit.createAppointment(
       customerId: int.tryParse(_selectedCustomer!.id) ?? 0,
@@ -130,7 +142,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
           : 'Discovery Consultation',
       durationMinutes: _durationMinutes,
       location: _meetingType == 'in_person' ? _locationCtrl.text.trim() : '',
-      notes: _notesCtrl.text.trim(),
+      notes: notes,
     );
 
     if (ok && mounted) {
@@ -447,18 +459,16 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                       // 7. Notes
                       _buildLabel('AGENDA / NOTES', isDark),
                       const SizedBox(height: 6),
-                      AppTextFieldWidget(
-                        controller: _notesCtrl,
-                        hintText:
-                            'Review project scope, architectural feasibility, etc.',
-                        maxLines: 2,
-                        showBorder: true,
-                        borderColor: isDark
-                            ? Colors.transparent
-                            : context.colors.lightGreyColor,
-                        fillColor: isDark
-                            ? const Color(0xFF0F172A)
-                            : const Color(0xFFF8FAFC),
+                      EmailEditorToolbar(controller: _notesQuillCtrl),
+                      const SizedBox(height: 6),
+                      EmailQuillEditor(
+                        controller: _notesQuillCtrl,
+                        focusNode: _notesFocusNode,
+                        scrollController: _notesScrollCtrl,
+                        minHeight: 100,
+                        maxHeight: 180,
+                        placeholder:
+                            'Review project scope, architectural feasibility, bullet points...',
                       ),
                     ],
                   ),

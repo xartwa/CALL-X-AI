@@ -680,13 +680,17 @@ class _RequestsTabViewState extends State<RequestsTabView> {
               ),
             ),
 
-            // Type (Clean CustomTagWidget - Matches UI Standards)
+            // Type (Clean CustomTagWidget with integrated Cupertino icons)
             DataCell(
               CustomTagWidget(
                 label: appt.isOnline ? 'Online' : 'In-Person',
+                icon: appt.isOnline
+                    ? CupertinoIcons.videocam_fill
+                    : CupertinoIcons.location_solid,
+                iconSize: 11.5,
                 color: appt.isOnline
                     ? context.colors.infoColor
-                    : context.colors.successColor,
+                    : const Color(0xFF8B5CF6),
               ),
             ),
 
@@ -870,9 +874,13 @@ class _RequestsTabViewState extends State<RequestsTabView> {
             DataCell(
               CustomTagWidget(
                 label: req.isOnline ? 'Online' : 'In-Person',
+                icon: req.isOnline
+                    ? CupertinoIcons.videocam_fill
+                    : CupertinoIcons.location_solid,
+                iconSize: 11.5,
                 color: req.isOnline
                     ? context.colors.infoColor
-                    : context.colors.successColor,
+                    : const Color(0xFF8B5CF6),
               ),
             ),
             DataCell(

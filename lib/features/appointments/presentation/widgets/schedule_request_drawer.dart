@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:intl/intl.dart';
 import 'package:toastification/toastification.dart';
 
@@ -9,6 +10,7 @@ import '../../../../core/utils/utils.dart';
 import '../../../../core/widgets/app_date_time_picker.dart';
 import '../../../../core/widgets/app_text_field_widget.dart';
 import '../../../../theme/app_colors.dart';
+import '../../../email_follow_ups/widgets/email_editor_toolbar.dart';
 import '../../cubit/appointments_cubit.dart';
 import '../../domain/entities/appointment_entity.dart';
 
@@ -62,14 +64,17 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
   final int _durationMinutes = 45;
   late final TextEditingController _emailCtrl;
   final TextEditingController _locationCtrl = TextEditingController();
-  final TextEditingController _notesCtrl = TextEditingController();
+  late final QuillController _notesQuillCtrl;
+  final FocusNode _notesFocusNode = FocusNode();
+  final ScrollController _notesScrollCtrl = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _meetingType = widget.request.meetingType;
     _emailCtrl = TextEditingController(text: widget.request.customerEmail);
-    _notesCtrl.text = widget.request.notes ?? '';
+    _notesQuillCtrl =
+        EmailHtmlConverter.createController(widget.request.notes ?? '');
     // Auto-select initial slot
     final now = DateTime.now();
     _selectedStart = DateTime(now.year, now.month, now.day + 1, 14, 0);
@@ -80,7 +85,9 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
   void dispose() {
     _emailCtrl.dispose();
     _locationCtrl.dispose();
-    _notesCtrl.dispose();
+    _notesQuillCtrl.dispose();
+    _notesFocusNode.dispose();
+    _notesScrollCtrl.dispose();
     super.dispose();
   }
 
@@ -107,6 +114,11 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
       return;
     }
 
+    final rawNotesHtml =
+        EmailHtmlConverter.deltaToHtml(_notesQuillCtrl.document);
+    final isBlank = _notesQuillCtrl.document.toPlainText().trim().isEmpty;
+    final notes = isBlank ? '' : rawNotesHtml.trim();
+
     final cubit = context.read<AppointmentsCubit>();
     final ok = await cubit.scheduleRequest(
       requestId: widget.request.id,
@@ -118,7 +130,7 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
       durationMinutes: _durationMinutes,
       meetingType: _meetingType,
       location: _meetingType == 'in_person' ? _locationCtrl.text.trim() : '',
-      notes: _notesCtrl.text.trim(),
+      notes: notes,
     );
 
     if (ok && mounted) {
@@ -426,17 +438,16 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
 
                     _buildLabel('AGENDA & NOTES', isDark),
                     const SizedBox(height: 6),
-                    AppTextFieldWidget(
-                      controller: _notesCtrl,
-                      hintText: 'Additional details or caller requirements...',
-                      maxLines: 2,
-                      showBorder: true,
-                      borderColor: isDark
-                          ? Colors.transparent
-                          : context.colors.lightGreyColor,
-                      fillColor: isDark
-                          ? const Color(0xFF0F172A)
-                          : const Color(0xFFF8FAFC),
+                    EmailEditorToolbar(controller: _notesQuillCtrl),
+                    const SizedBox(height: 6),
+                    EmailQuillEditor(
+                      controller: _notesQuillCtrl,
+                      focusNode: _notesFocusNode,
+                      scrollController: _notesScrollCtrl,
+                      minHeight: 100,
+                      maxHeight: 180,
+                      placeholder:
+                          'Additional details or caller requirements...',
                     ),
                   ],
                 ),

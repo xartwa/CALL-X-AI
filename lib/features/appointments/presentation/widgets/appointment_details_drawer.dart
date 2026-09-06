@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:toastification/toastification.dart';
 
@@ -244,15 +245,20 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                                 .withValues(alpha: isDark ? 0.35 : 1.0),
                           ),
                         ),
-                        child: Text(
-                          appointment.notes!,
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: isDark
-                                ? Colors.white70
-                                : const Color(0xFF334155),
-                            height: 1.4,
-                          ),
+                        child: Html(
+                          data: appointment.notes!,
+                          style: {
+                            "body": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                              fontSize: FontSize(12.5),
+                              fontFamily: 'SFProText',
+                              color: isDark
+                                  ? Colors.white70
+                                  : const Color(0xFF334155),
+                              lineHeight: const LineHeight(1.5),
+                            ),
+                          },
                         ),
                       ),
                       const SizedBox(height: 18),
