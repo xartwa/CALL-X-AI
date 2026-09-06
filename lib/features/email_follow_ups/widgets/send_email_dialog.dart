@@ -117,6 +117,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     final customers = context.read<CustomersCubit>().state.users;
     if (customers.isEmpty) {
       context.read<CustomersCubit>().loadInitial(resetFilters: false);
+      _isDirectRecipient = true;
+    } else {
+      _isDirectRecipient = false;
     }
     _selectedUser = customers.isNotEmpty ? customers.first : null;
     _selectedTemplate = widget.preloadedTemplate;
@@ -144,6 +147,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
     _subjectCtrl.addListener(_updateState);
     _bodyCtrl.addListener(_updateState);
+    _customRecipientCtrl.addListener(_updateState);
+    _customRecipientNameCtrl.addListener(_updateState);
   }
 
   void _updateState() {
@@ -154,6 +159,8 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   void dispose() {
     _subjectCtrl.removeListener(_updateState);
     _bodyCtrl.removeListener(_updateState);
+    _customRecipientCtrl.removeListener(_updateState);
+    _customRecipientNameCtrl.removeListener(_updateState);
     _subjectCtrl.dispose();
     _bodyCtrl.dispose();
     _customRecipientCtrl.dispose();
@@ -259,232 +266,6 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
           .replaceAll('{name}', name)
           .replaceAll('{company}', company);
     });
-  }
-
-  void _showAddSenderDialog() {
-    final emailCtrl = TextEditingController();
-    final nameCtrl = TextEditingController();
-    bool isSaving = false;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-              ),
-              title: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      CupertinoIcons.mail,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Add Sender Email',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              content: SizedBox(
-                width: 380,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'SENDER EMAIL ADDRESS',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.grey[400] : Colors.grey[700],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: emailCtrl,
-                      autofocus: true,
-                      keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w600),
-                      decoration: InputDecoration(
-                        hintText: 'e.g. sales@company.com or xartwa@gmail.com',
-                        hintStyle: TextStyle(
-                            fontSize: 12.5,
-                            color: context.colors.darkGreyColor),
-                        filled: true,
-                        fillColor: isDark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.black.withValues(alpha: 0.03),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          borderSide: BorderSide(
-                              color: isDark
-                                  ? Colors.white12
-                                  : context.colors.lightGreyColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          borderSide: BorderSide(
-                              color: isDark
-                                  ? Colors.white12
-                                  : context.colors.lightGreyColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
-                              width: 1.5),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'DISPLAY NAME (OPTIONAL)',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.grey[400] : Colors.grey[700],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: nameCtrl,
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w600),
-                      decoration: InputDecoration(
-                        hintText: 'Leave blank to display plain email',
-                        hintStyle: TextStyle(
-                            fontSize: 12.5,
-                            color: context.colors.darkGreyColor),
-                        filled: true,
-                        fillColor: isDark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.black.withValues(alpha: 0.03),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          borderSide: BorderSide(
-                              color: isDark
-                                  ? Colors.white12
-                                  : context.colors.lightGreyColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          borderSide: BorderSide(
-                              color: isDark
-                                  ? Colors.white12
-                                  : context.colors.lightGreyColor),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
-                              width: 1.5),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed:
-                      isSaving ? null : () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: isSaving
-                      ? null
-                      : () async {
-                          final email = emailCtrl.text.trim();
-                          final senderName = nameCtrl.text.trim();
-                          if (email.isEmpty || !email.contains('@')) {
-                            AppUtils.showSnackBar(
-                              context: context,
-                              extraMessage:
-                                  'Please enter a valid email address.',
-                              toastificationType: ToastificationType.warning,
-                            );
-                            return;
-                          }
-                          setDialogState(() => isSaving = true);
-                          final newAccount = await context
-                              .read<EmailFollowUpsCubit>()
-                              .addSenderAccount(
-                                email: email,
-                                name: email,
-                                senderName: senderName,
-                              );
-                          if (!context.mounted) return;
-                          setDialogState(() => isSaving = false);
-                          if (newAccount != null) {
-                            Navigator.pop(dialogContext);
-                            setState(() {
-                              _senderAccounts = List<EmailSenderAccountModel>.from(
-                                  context
-                                      .read<EmailFollowUpsCubit>()
-                                      .state
-                                      .senderAccounts);
-                              _selectedSenderAccount = newAccount;
-                            });
-                            AppUtils.showSnackBar(
-                              context: context,
-                              title: 'Sender Account Added',
-                              extraMessage:
-                                  'Added ${newAccount.displayName} to sender accounts.',
-                              toastificationType: ToastificationType.success,
-                            );
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          ThemeConstants.buttonRadius),
-                    ),
-                  ),
-                  child: isSaving
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Text('Save Sender'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 
   void _onSend() async {
@@ -827,54 +608,16 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'FROM (SENDER ACCOUNT)',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 0.5,
-                                            color: isDark
-                                                ? Colors.grey[400]
-                                                : Colors.grey[700],
-                                          ),
-                                        ),
-                                        InkWell(
-                                          onTap: _showAddSenderDialog,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 4, vertical: 2),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  CupertinoIcons.plus_circle,
-                                                  size: 13,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  'Add Email',
-                                                  style: TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                    Text(
+                                      'FROM (SENDER ACCOUNT)',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                        color: isDark
+                                            ? Colors.grey[400]
+                                            : Colors.grey[700],
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
                                     AppDropdownWidget<EmailSenderAccountModel>(
@@ -1020,16 +763,69 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                             ),
                             const SizedBox(height: 8),
                             if (!_isDirectRecipient)
-                              AppDropdownWidget<User>(
-                                value: _selectedUser,
-                                hint: 'Select recipient customer',
-                                items: customers,
-                                height: 46,
-                                itemBuilder: (u) =>
-                                    '${u.fullName} (${u.email.isNotEmpty ? u.email : u.companyName})',
-                                onChanged: (u) =>
-                                    setState(() => _selectedUser = u),
-                              )
+                              customers.isNotEmpty
+                                  ? AppDropdownWidget<User>(
+                                      value: _selectedUser,
+                                      hint: 'Select recipient customer',
+                                      items: customers,
+                                      height: 46,
+                                      itemBuilder: (u) =>
+                                          '${u.fullName} (${u.email.isNotEmpty ? u.email : u.companyName})',
+                                      onChanged: (u) =>
+                                          setState(() => _selectedUser = u),
+                                    )
+                                  : Container(
+                                      height: 46,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                            ThemeConstants.buttonRadius),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? Colors.white12
+                                              : context.colors.lightGreyColor,
+                                        ),
+                                        color: isDark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.03)
+                                            : Colors.black
+                                                .withValues(alpha: 0.02),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(CupertinoIcons.info_circle,
+                                              size: 15,
+                                              color: Colors.orange[400]),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              'No customers in database. Please use "DIRECT EMAIL".',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: isDark
+                                                    ? Colors.grey[400]
+                                                    : Colors.grey[600],
+                                              ),
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () => setState(
+                                                () => _isDirectRecipient = true),
+                                            child: Text(
+                                              'Switch to Direct',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
                             else
                               Row(
                                 children: [
