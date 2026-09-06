@@ -200,7 +200,7 @@ class _AiSettingsPageState extends State<AiSettingsPage>
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               border: Border.all(
                 color: isDark
-                    ? const Color(0xFF1E293B)
+                    ? AppColors.darkSlateColor
                     : context.colors.mediumGreyColor.withValues(alpha: 0.35),
               ),
             ),

@@ -368,7 +368,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
                         BorderRadius.circular(ThemeConstants.boxRadius),
                     border: Border.all(
                       color: isDark
-                          ? const Color(0xFF1E293B)
+                          ? AppColors.darkSlateColor
                           : context.colors.mediumGreyColor
                               .withValues(alpha: 0.35),
                     ),
@@ -416,7 +416,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
       dividerThickness: 0.5,
       headingRowColor: WidgetStatePropertyAll(
         isDark
-            ? const Color(0xFF1E293B).withValues(alpha: 0.5)
+            ? AppColors.darkSlateColor.withValues(alpha: 0.5)
             : const Color(0xFFF1F5F9),
       ),
       headingTextStyle: TextStyle(
@@ -634,7 +634,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
               : Colors.white.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
           border: Border.all(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+            color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
             width: 1.2,
           ),
         ),
@@ -707,7 +707,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
         color: isDark ? const Color(0xFF131C2E) : Colors.white,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
         ),
       ),
       child: Column(

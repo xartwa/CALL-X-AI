@@ -89,7 +89,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
         .toList();
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),

@@ -125,7 +125,7 @@ class _AppointmentRichNotesEditorState
       builder: (dialogCtx) {
         final isDark = Theme.of(dialogCtx).brightness == Brightness.dark;
         return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
           ),
@@ -396,7 +396,7 @@ class _AppointmentRichNotesEditorState
                 border: Border(
                   bottom: BorderSide(
                     color: isDark
-                        ? const Color(0xFF1E293B)
+                        ? AppColors.darkSlateColor
                         : context.colors.lightGreyColor.withValues(alpha: 0.7),
                     width: 0.8,
                   ),

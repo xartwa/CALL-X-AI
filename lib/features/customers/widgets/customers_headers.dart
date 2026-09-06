@@ -315,7 +315,7 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                 PopupMenuButton<String>(
                   onSelected: widget.onStatusChanged,
                   offset: const Offset(0, 40),
-                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  color: isDark ? AppColors.darkSlateColor : Colors.white,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                   itemBuilder: (context) => _statuses.map((status) {
@@ -604,7 +604,7 @@ class _CustomersHeadersState extends State<CustomersHeaders> {
                         }).toList();
                       },
                       offset: const Offset(0, 40),
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      color: isDark ? AppColors.darkSlateColor : Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
                       child: Container(

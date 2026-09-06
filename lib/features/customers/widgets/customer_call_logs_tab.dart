@@ -259,7 +259,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                       : null,
                   filled: true,
                   fillColor: isDark
-                      ? const Color(0xFF1E293B)
+                      ? AppColors.darkSlateColor
                       : const Color(0xFFF1F5F9),
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -500,7 +500,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+            color: isDark ? AppColors.darkSlateColor : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
@@ -668,7 +668,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    color: isDark ? AppColors.darkSlateColor : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isDark
@@ -735,7 +735,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    color: isDark ? AppColors.darkSlateColor : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isDark
@@ -913,7 +913,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
                   height: 1.45,
                   color: isDark
                       ? Colors.white.withValues(alpha: 0.9)
-                      : const Color(0xFF1E293B),
+                      : AppColors.darkSlateColor,
                 ),
               ),
             ],

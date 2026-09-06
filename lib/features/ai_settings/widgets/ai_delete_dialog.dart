@@ -55,7 +55,7 @@ class AiDeleteDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
           width: 1,
         ),
       ),

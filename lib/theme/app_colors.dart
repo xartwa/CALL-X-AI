@@ -104,6 +104,11 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
 class AppColors {
   const AppColors._();
 
+  /// Global slate 800 dark border and container color (0xFF1E293B).
+  /// Modifying this single constant updates all dark surfaces, cards, and borders across the app.
+  static const Color darkSlateColor = Color(0xFF202938);
+  static const Color darkSlate = darkSlateColor;
+
   static const light = AppColorsExtension(
     primaryLightColor: Color(0XFF007acc),
     lightBlueColor: Color(0XFF818CF8), // Softer Indigo
@@ -127,7 +132,7 @@ class AppColors {
   static const dark = AppColorsExtension(
     primaryLightColor: Color(0XFF1d4ed8), // Indigo 500 - Pops nicely on dark
     lightBlueColor: Color(0XFFA5B4FC), // Indigo 300
-    skyBlueColor: Color(0XFF1E293B), // Slate 800 - Good for headers
+    skyBlueColor: darkSlateColor, // Slate 800 - Good for headers
     queuedColor: Color(0XFF22D3EE), // Cyan 400
     scaffoldBackgroundColor: Color(0XFF0B0F17), // Deep midnight
     whiteColor: Color(0XFF151B26), // Soft midnight card background
@@ -136,7 +141,7 @@ class AppColors {
     errorColor: Color(0XFFF87171), // Red 400
     darkGreyColor: Color(0XFF94A3B8), // Slate 400
     mediumGreyColor: Color(0XFF334155), // Slate 700 - Borders
-    milkyColor: Color(0XFF1E293B), // Slate 800 
+    milkyColor: darkSlateColor, // Slate 800 
     lightGreyColor: Color(0XFF475569), // Slate 600
     successColor: Color(0XFF34D399), // Emerald 400
     warningColor: Color(0XFFFBBF24), // Amber 400
@@ -164,3 +169,6 @@ extension BuildContextColors on BuildContext {
   AppColorsExtension get colors =>
       Theme.of(this).extension<AppColorsExtension>() ?? AppColors.light;
 }
+
+/// Global convenience accessor for dark slate surface & border color (0xFF1E293B).
+const Color darkSlateColor = AppColors.darkSlateColor;

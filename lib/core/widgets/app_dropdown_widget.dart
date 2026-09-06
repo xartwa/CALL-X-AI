@@ -94,7 +94,7 @@ class AppDropdownWidget<T> extends StatelessWidget {
           elevation: 6,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
-            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            color: isDark ? AppColors.darkSlateColor : Colors.white,
             border: Border.all(
               color: isDark ? Colors.white12 : context.colors.lightGreyColor,
             ),

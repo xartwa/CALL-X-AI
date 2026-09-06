@@ -304,7 +304,7 @@ class _CustomersPageState extends State<CustomersPage> {
                   borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
                   side: BorderSide(
                     color: Theme.of(context).brightness == Brightness.dark
-                        ? const Color(0xFF1E293B)
+                        ? AppColors.darkSlateColor
                         : context.colors.mediumGreyColor
                             .withValues(alpha: 0.35),
                     width: 1,

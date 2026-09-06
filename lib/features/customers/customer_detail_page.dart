@@ -227,7 +227,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
             constraints: const BoxConstraints(maxWidth: 450),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              color: isDark ? AppColors.darkSlateColor : Colors.white,
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               boxShadow: [
                 BoxShadow(

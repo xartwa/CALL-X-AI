@@ -220,7 +220,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
           color: isDark
-              ? const Color(0xFF1E293B)
+              ? AppColors.darkSlateColor
               : context.colors.lightGreyColor.withValues(alpha: 0.8),
           width: 1,
         ),
@@ -244,7 +244,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
               border: Border(
                 bottom: BorderSide(
                   color: isDark
-                      ? const Color(0xFF1E293B)
+                      ? AppColors.darkSlateColor
                       : context.colors.mediumGreyColor,
                   width: 1,
                 ),
@@ -478,7 +478,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                         horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF1E293B)
+                          ? AppColors.darkSlateColor
                           : const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
@@ -642,7 +642,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      color: isDark ? AppColors.darkSlateColor : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
@@ -691,7 +691,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                             height: 1.45,
                             color: isDark
                                 ? Colors.white.withValues(alpha: 0.85)
-                                : const Color(0xFF1E293B),
+                                : AppColors.darkSlateColor,
                           ),
                         ),
                       ],
@@ -709,7 +709,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF1E293B)
+                              ? AppColors.darkSlateColor
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
@@ -774,7 +774,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF1E293B)
+                                      ? AppColors.darkSlateColor
                                       : const Color(0xFFF8FAFC),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
@@ -835,7 +835,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                                         color: isDark
                                             ? Colors.white
                                                 .withValues(alpha: 0.9)
-                                            : const Color(0xFF1E293B),
+                                            : AppColors.darkSlateColor,
                                       ),
                                     ),
                                   ],
@@ -858,7 +858,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark
-                            ? const Color(0xFF1E293B)
+                            ? AppColors.darkSlateColor
                             : const Color(0xFFE2E8F0),
                       ),
                     ),
@@ -918,7 +918,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF1E293B)
+                                    ? AppColors.darkSlateColor
                                     : context.colors.mediumGreyColor,
                               ),
                             ),

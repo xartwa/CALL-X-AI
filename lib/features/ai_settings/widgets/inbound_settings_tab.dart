@@ -33,7 +33,7 @@ class InboundSettingsTab extends StatelessWidget {
             color: isDark ? const Color(0xFF0F172A) : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
             ),
           ),
           child: Row(
@@ -233,7 +233,7 @@ class InboundSettingsTab extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF1E293B)
+                              ? AppColors.darkSlateColor
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
@@ -331,7 +331,7 @@ class InboundSettingsTab extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF1E293B)
+                              ? AppColors.darkSlateColor
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
@@ -425,7 +425,7 @@ class _InboundCard extends StatelessWidget {
         color: isDark ? const Color(0xFF0F172A) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
         ),
       ),
       child: Column(
@@ -485,7 +485,7 @@ class _AvailabilityOptionCard extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? primaryColor
-                : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+                : (isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0)),
             width: isSelected ? 1.5 : 1,
           ),
         ),

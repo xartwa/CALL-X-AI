@@ -145,7 +145,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
       sortAscending: _sortAscending,
       headingRowColor: WidgetStatePropertyAll(
         isDark
-            ? const Color(0xFF1E293B).withValues(alpha: 0.5)
+            ? AppColors.darkSlateColor.withValues(alpha: 0.5)
             : const Color(0xFFF1F5F9),
       ),
       headingTextStyle: TextStyle(

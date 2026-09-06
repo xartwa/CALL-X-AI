@@ -492,7 +492,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
                     color: context.colors.darkGreyColor,
                   ),
                   dropdownColor:
-                      isDark ? const Color(0xFF1E293B) : Colors.white,
+                      isDark ? AppColors.darkSlateColor : Colors.white,
                   borderRadius: BorderRadius.circular(8),
                   items: items.map((item) {
                     return DropdownMenuItem<String>(

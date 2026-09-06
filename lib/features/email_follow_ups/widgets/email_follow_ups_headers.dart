@@ -121,7 +121,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
                             color: isDark
-                                ? const Color(0xFF1E293B)
+                                ? AppColors.darkSlateColor
                                 : context.colors.lightGreyColor,
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -197,7 +197,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
                     color: (_isSearchExpanded || _searchCtrl.text.isNotEmpty)
                         ? Theme.of(context).colorScheme.primary
                         : (isDark
-                            ? const Color(0xFF1E293B)
+                            ? AppColors.darkSlateColor
                             : context.colors.lightGreyColor),
                   ),
                 ),
@@ -376,7 +376,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
         }).toList();
       },
       offset: const Offset(0, 40),
-      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+      color: isDark ? AppColors.darkSlateColor : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Container(
         height: 36,
@@ -389,7 +389,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
             color: widget.selectedStatus != 'All'
                 ? Theme.of(context).colorScheme.primary
                 : (isDark
-                    ? const Color(0xFF1E293B)
+                    ? AppColors.darkSlateColor
                     : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),
@@ -449,7 +449,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
             color: widget.selectedDateRange != null
                 ? Theme.of(context).colorScheme.primary
                 : (isDark
-                    ? const Color(0xFF1E293B)
+                    ? AppColors.darkSlateColor
                     : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),
@@ -550,7 +550,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
         }).toList();
       },
       offset: const Offset(0, 40),
-      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+      color: isDark ? AppColors.darkSlateColor : Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Container(
         height: 36,
@@ -563,7 +563,7 @@ class _EmailFollowUpsHeadersState extends State<EmailFollowUpsHeaders> {
             color: isSortActive
                 ? Theme.of(context).colorScheme.primary
                 : (isDark
-                    ? const Color(0xFF1E293B)
+                    ? AppColors.darkSlateColor
                     : context.colors.lightGreyColor),
           ),
           borderRadius: BorderRadius.circular(8),

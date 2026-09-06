@@ -174,7 +174,7 @@ class _AdvancedFilterDialogState extends State<AdvancedFilterDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),

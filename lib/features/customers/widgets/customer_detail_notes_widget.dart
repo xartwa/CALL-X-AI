@@ -162,7 +162,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                         : null,
                     filled: true,
                     fillColor: isDark
-                        ? const Color(0xFF1E293B)
+                        ? AppColors.darkSlateColor
                         : const Color(0xFFF1F5F9),
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -284,7 +284,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF1E293B).withAlpha(100)
+                              ? AppColors.darkSlateColor.withAlpha(100)
                               : const Color(0xFFFAFAFA),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(

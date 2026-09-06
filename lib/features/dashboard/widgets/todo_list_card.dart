@@ -111,7 +111,7 @@ class _TodoListCardState extends State<TodoListCard> {
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isDark
-                          ? const Color(0xFF1E293B)
+                          ? AppColors.darkSlateColor
                           : context.colors.mediumGreyColor.withValues(alpha: 0.4),
                     ),
                   ),
@@ -237,7 +237,7 @@ class _TodoItemTileState extends State<_TodoItemTile> {
             ? const Color(0xFF334155)
             : context.colors.mediumGreyColor.withValues(alpha: 0.6))
         : (isDark
-            ? const Color(0xFF1E293B)
+            ? AppColors.darkSlateColor
             : context.colors.mediumGreyColor.withValues(alpha: 0.3));
 
     return MouseRegion(

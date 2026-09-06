@@ -63,7 +63,7 @@ class _CreateScenarioDialogState extends State<CreateScenarioDialog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       child: Container(
         width: 480,
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),

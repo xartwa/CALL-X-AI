@@ -1,6 +1,5 @@
 import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
-import 'package:callx_ai/core/widgets/preset_chip_widget.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
@@ -16,8 +15,6 @@ import 'package:toastification/toastification.dart';
 enum _CallType { single, group }
 
 enum _TimingMode { callNow, schedule }
-
-enum _GroupTargetMode { segment, manual }
 
 class ConversationScenario {
   final String id;
@@ -77,12 +74,7 @@ class CallActionDialog extends StatefulWidget {
 class _CallActionDialogState extends State<CallActionDialog> {
   late _CallType _callType;
   _TimingMode _timingMode = _TimingMode.callNow;
-  _GroupTargetMode _groupTargetMode = _GroupTargetMode.segment;
   User? _selectedUser;
-  bool _isDirectPhone = false;
-  final TextEditingController _customPhoneCtrl = TextEditingController();
-  final TextEditingController _customNameCtrl = TextEditingController();
-
   // Manual Customer Selection
   final Set<String> _manualSelectedUserIds = {};
   final TextEditingController _searchCustomerCtrl = TextEditingController();
@@ -94,20 +86,11 @@ class _CallActionDialogState extends State<CallActionDialog> {
   ConversationScenario? _selectedScenario;
   String? _scenarioError;
 
-  // Group Call States
-  String _selectedGroupSegment = 'All Hot Leads';
-  final List<String> _groupSegments = const [
-    'All Hot Leads',
-    'All Active Customers',
-    'Recent Inquiries (7 Days)',
-  ];
-
   int _concurrencyLines = 3;
   final List<int> _concurrencyOptions = const [1, 3, 5, 10];
 
   // Scheduler States
-  String? _selectedDatePreset;
-  DateTime? _customDate;
+  DateTime? _scheduledDate;
 
   bool _isCalling = false;
 
@@ -165,28 +148,12 @@ class _CallActionDialogState extends State<CallActionDialog> {
 
   DateTime? _scheduledFor() {
     if (_timingMode != _TimingMode.schedule) return null;
-    final now = DateTime.now();
-    DateTime date;
-    if (_selectedDatePreset == 'Tomorrow') {
-      date = now.add(const Duration(days: 1));
-    } else if (_selectedDatePreset == 'Next Monday') {
-      final days = (DateTime.monday - now.weekday + 7) % 7;
-      date = now.add(Duration(days: days == 0 ? 7 : days));
-    } else if (_selectedDatePreset == 'Custom') {
-      final custom = _customDate;
-      if (custom != null) return custom; // Custom includes picked time.
-      date = now;
-    } else {
-      date = now;
-    }
-    return DateTime(date.year, date.month, date.day, 14, 30);
+    return _scheduledDate ?? DateTime.now().add(const Duration(hours: 1));
   }
 
   @override
   void dispose() {
     _searchCustomerCtrl.dispose();
-    _customPhoneCtrl.dispose();
-    _customNameCtrl.dispose();
     super.dispose();
   }
 
@@ -196,25 +163,12 @@ class _CallActionDialogState extends State<CallActionDialog> {
   }
 
   List<User> _groupTargets(List<User> customers) {
-    if (_groupTargetMode == _GroupTargetMode.manual) {
-      return customers
-          .where((user) => _manualSelectedUserIds.contains(user.id))
-          .toList(growable: false);
+    if (_manualSelectedUserIds.isEmpty) {
+      return List<User>.from(customers);
     }
-    return switch (_selectedGroupSegment) {
-      'All Hot Leads' => customers
-          .where((u) => u.leadPriority.toLowerCase() == 'hot')
-          .toList(growable: false),
-      'All Active Customers' => customers
-          .where((u) => u.status.toLowerCase() == 'active')
-          .toList(growable: false),
-      'Recent Inquiries (7 Days)' => customers.where((u) {
-          final createdAt = u.createdAt;
-          return createdAt != null &&
-              DateTime.now().difference(createdAt).inDays <= 7;
-        }).toList(growable: false),
-      _ => const <User>[],
-    };
+    return customers
+        .where((user) => _manualSelectedUserIds.contains(user.id))
+        .toList(growable: false);
   }
 
   void _triggerCall() async {
@@ -249,27 +203,19 @@ class _CallActionDialogState extends State<CallActionDialog> {
       final String name;
       final String? customerId;
 
-      if (_isDirectPhone && widget.fullName == null) {
-        phone = _customPhoneCtrl.text.trim();
-        name = _customNameCtrl.text.trim().isNotEmpty
-            ? _customNameCtrl.text.trim()
-            : 'Direct Contact';
-        customerId = null;
-      } else {
-        if (_selectedUser == null) {
-          setState(() => _isCalling = false);
-          AppUtils.showSnackBar(
-            context: context,
-            extraMessage: 'Please select a recipient customer or enter a phone number.',
-            toastificationType: ToastificationType.warning,
-          );
-          return;
-        }
-        phone = _selectedUser!.phone;
-        name = _selectedUser!.fullName;
-        customerId =
-            _selectedUser!.id != '-1' ? _selectedUser!.id.toString() : null;
+      if (_selectedUser == null) {
+        setState(() => _isCalling = false);
+        AppUtils.showSnackBar(
+          context: context,
+          extraMessage: 'Please select a recipient customer.',
+          toastificationType: ToastificationType.warning,
+        );
+        return;
       }
+      phone = _selectedUser!.phone;
+      name = _selectedUser!.fullName;
+      customerId =
+          _selectedUser!.id != '-1' ? _selectedUser!.id.toString() : null;
 
       if (phone.isEmpty || phone.length < 5) {
         setState(() => _isCalling = false);
@@ -358,7 +304,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
 
   Widget _buildCallingAnimation(bool isDark) {
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),
@@ -446,7 +392,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
     final targetCount = _getGroupTargetCount(customers);
 
     return Dialog(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),
@@ -503,7 +449,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                             decoration: BoxDecoration(
                               color: _callType == _CallType.single
                                   ? (isDark
-                                      ? const Color(0xFF1E293B)
+                                      ? AppColors.darkSlateColor
                                       : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(6),
@@ -546,7 +492,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                             decoration: BoxDecoration(
                               color: _callType == _CallType.group
                                   ? (isDark
-                                      ? const Color(0xFF1E293B)
+                                      ? AppColors.darkSlateColor
                                       : Colors.white)
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(6),
@@ -589,177 +535,29 @@ class _CallActionDialogState extends State<CallActionDialog> {
               // ----------------------------------------------------
               if (_callType == _CallType.single) ...[
                 if (widget.fullName == null) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'SELECT RECIPIENT',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.6,
-                          color: isDark ? Colors.grey[400] : Colors.grey[700],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => setState(() => _isDirectPhone = false),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: !_isDirectPhone
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withValues(alpha: 0.12)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'CUSTOMER',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: !_isDirectPhone
-                                      ? Theme.of(context).colorScheme.primary
-                                      : (isDark
-                                          ? Colors.grey[500]
-                                          : Colors.grey[600]),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () => setState(() => _isDirectPhone = true),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _isDirectPhone
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withValues(alpha: 0.12)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'DIRECT PHONE',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: _isDirectPhone
-                                      ? Theme.of(context).colorScheme.primary
-                                      : (isDark
-                                          ? Colors.grey[500]
-                                          : Colors.grey[600]),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  Text(
+                    'SELECT RECIPIENT',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  if (!_isDirectPhone)
-                    AppDropdownWidget<User>(
-                      value: _selectedUser,
-                      hint: isCustomersLoading
-                          ? 'Loading customers...'
-                          : (customers.isEmpty
-                              ? 'No customers found'
-                              : 'Choose customer'),
-                      items: customers,
-                      itemBuilder: (user) =>
-                          '${user.fullName} (${user.companyName.isNotEmpty ? user.companyName : user.phone})',
-                      onChanged: (user) =>
-                          setState(() => _selectedUser = user),
-                    )
-                  else
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            height: 46,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white12
-                                    : context.colors.lightGreyColor,
-                              ),
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.03)
-                                  : Colors.black.withValues(alpha: 0.02),
-                            ),
-                            child: TextField(
-                              controller: _customPhoneCtrl,
-                              style: const TextStyle(
-                                  fontSize: 12.5, fontWeight: FontWeight.w600),
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14),
-                                hintText:
-                                    'Phone Number (e.g. +1 604 262 2563)',
-                                hintStyle: TextStyle(
-                                    fontSize: 12.5,
-                                    color: context.colors.darkGreyColor),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          flex: 1,
-                          child: Container(
-                            height: 46,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                              border: Border.all(
-                                color: isDark
-                                    ? Colors.white12
-                                    : context.colors.lightGreyColor,
-                              ),
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.03)
-                                  : Colors.black.withValues(alpha: 0.02),
-                            ),
-                            child: TextField(
-                              controller: _customNameCtrl,
-                              style: const TextStyle(
-                                  fontSize: 12.5, fontWeight: FontWeight.w600),
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14),
-                                hintText: 'Name (optional)',
-                                hintStyle: TextStyle(
-                                    fontSize: 12.5,
-                                    color: context.colors.darkGreyColor),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  AppDropdownWidget<User>(
+                    value: _selectedUser,
+                    hint: isCustomersLoading
+                        ? 'Loading customers...'
+                        : (customers.isEmpty
+                            ? 'No customers found'
+                            : 'Choose customer'),
+                    items: customers,
+                    itemBuilder: (user) =>
+                        '${user.fullName} (${user.companyName.isNotEmpty ? user.companyName : user.phone})',
+                    onChanged: (user) =>
+                        setState(() => _selectedUser = user),
+                  ),
                   const SizedBox(height: 22),
                 ] else ...[
 
@@ -899,7 +697,13 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       child: SizedBox(
                         height: 44,
                         child: OutlinedButton(
-                          onPressed: null,
+                          onPressed: () {
+                            setState(() {
+                              _timingMode = _TimingMode.schedule;
+                              _scheduledDate ??=
+                                  DateTime.now().add(const Duration(hours: 1));
+                            });
+                          },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
                               color: _timingMode == _TimingMode.schedule
@@ -936,50 +740,91 @@ class _CallActionDialogState extends State<CallActionDialog> {
                 ),
 
                 if (_timingMode == _TimingMode.schedule) ...[
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      PresetChipWidget(
-                        label: 'Today',
-                        isSelected: _selectedDatePreset == 'Today',
-                        onTap: () =>
-                            setState(() => _selectedDatePreset = 'Today'),
+                  const SizedBox(height: 14),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await AppDateTimePicker.pickDateTime(
+                        context,
+                        initial: _scheduledDate ??
+                            DateTime.now().add(const Duration(hours: 1)),
+                        first: DateTime.now(),
+                        last: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (picked != null) {
+                        setState(() => _scheduledDate = picked);
+                      }
+                    },
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark ? const Color(0xFF0F172A) : Colors.grey[50],
+                        borderRadius:
+                            BorderRadius.circular(ThemeConstants.buttonRadius),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkSlateColor
+                              : context.colors.lightGreyColor,
+                        ),
                       ),
-                      PresetChipWidget(
-                        label: 'Tomorrow',
-                        isSelected: _selectedDatePreset == 'Tomorrow',
-                        onTap: () =>
-                            setState(() => _selectedDatePreset = 'Tomorrow'),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              CupertinoIcons.calendar_today,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'SCHEDULED DATE & TIME',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.5,
+                                    color: context.colors.darkGreyColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _scheduledDate != null
+                                      ? AppDateTime.displayDateTime(
+                                          _scheduledDate!)
+                                      : 'Select Date & Time',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            CupertinoIcons.chevron_down,
+                            size: 16,
+                            color: context.colors.darkGreyColor,
+                          ),
+                        ],
                       ),
-                      PresetChipWidget(
-                        label: 'Next Monday',
-                        isSelected: _selectedDatePreset == 'Next Monday',
-                        onTap: () =>
-                            setState(() => _selectedDatePreset = 'Next Monday'),
-                      ),
-                      PresetChipWidget(
-                        label: _customDate != null
-                            ? AppDateTime.displayDateTime(_customDate!)
-                            : 'Custom Date & Time',
-                        isSelected: _selectedDatePreset == 'Custom',
-                        onTap: () async {
-                          final picked = await AppDateTimePicker.pickDateTime(
-                            context,
-                            initial: _customDate,
-                            first: DateTime.now(),
-                            last: DateTime.now().add(const Duration(days: 365)),
-                          );
-                          if (picked != null) {
-                            setState(() {
-                              _selectedDatePreset = 'Custom';
-                              _customDate = picked;
-                            });
-                          }
-                        },
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ] else ...[
@@ -997,135 +842,21 @@ class _CallActionDialogState extends State<CallActionDialog> {
                 ),
                 const SizedBox(height: 8),
 
-                // Predefined Segment vs Manual Selection Switcher
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: OutlinedButton.icon(
-                          onPressed: () => setState(() =>
-                              _groupTargetMode = _GroupTargetMode.segment),
-                          icon: Icon(
-                            CupertinoIcons.layers_fill,
-                            size: 14,
-                            color: _groupTargetMode == _GroupTargetMode.segment
-                                ? Theme.of(context).colorScheme.primary
-                                : context.colors.darkGreyColor,
-                          ),
-                          label: Text(
-                            'PRESET SEGMENT',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: _groupTargetMode ==
-                                      _GroupTargetMode.segment
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark ? Colors.white60 : Colors.black54),
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color:
-                                  _groupTargetMode == _GroupTargetMode.segment
-                                      ? Theme.of(context).colorScheme.primary
-                                      : (isDark
-                                          ? Colors.white12
-                                          : context.colors.lightGreyColor),
-                            ),
-                            backgroundColor:
-                                _groupTargetMode == _GroupTargetMode.segment
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withValues(alpha: 0.08)
-                                    : Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SizedBox(
-                        height: 40,
-                        child: OutlinedButton.icon(
-                          onPressed: () => setState(
-                              () => _groupTargetMode = _GroupTargetMode.manual),
-                          icon: Icon(
-                            CupertinoIcons.person_crop_circle_badge_checkmark,
-                            size: 14,
-                            color: _groupTargetMode == _GroupTargetMode.manual
-                                ? Theme.of(context).colorScheme.primary
-                                : context.colors.darkGreyColor,
-                          ),
-                          label: Text(
-                            'MANUAL SELECTION',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: _groupTargetMode == _GroupTargetMode.manual
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark ? Colors.white60 : Colors.black54),
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: _groupTargetMode == _GroupTargetMode.manual
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark
-                                      ? Colors.white12
-                                      : context.colors.lightGreyColor),
-                            ),
-                            backgroundColor:
-                                _groupTargetMode == _GroupTargetMode.manual
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .primary
-                                        .withValues(alpha: 0.08)
-                                    : Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                if (_groupTargetMode == _GroupTargetMode.segment) ...[
-                  AppDropdownWidget<String>(
-                    value: _selectedGroupSegment,
-                    items: _groupSegments,
-                    itemBuilder: (seg) => seg,
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() => _selectedGroupSegment = val);
-                      }
-                    },
-                  ),
-                ] else ...[
-                  // Redesigned Pixel-Perfect Customer Selection Box
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
+                // Customer Selection Box
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0F172A)
+                        : Colors.black.withValues(alpha: 0.02),
+                    border: Border.all(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.03)
-                          : Colors.black.withValues(alpha: 0.02),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white12
-                            : context.colors.lightGreyColor,
-                      ),
-                      borderRadius:
-                          BorderRadius.circular(ThemeConstants.buttonRadius),
+                          ? AppColors.darkSlateColor
+                          : context.colors.lightGreyColor,
                     ),
+                    borderRadius:
+                        BorderRadius.circular(ThemeConstants.buttonRadius),
+                  ),
                     child: Column(
                       children: [
                         // Pixel-perfect Search Bar
@@ -1134,7 +865,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
                             color:
-                                isDark ? const Color(0xFF1E293B) : Colors.white,
+                                isDark ? AppColors.darkSlateColor : Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isDark
@@ -1346,8 +1077,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       ],
                     ),
                   ),
-                ],
-                const SizedBox(height: 22),
+                  const SizedBox(height: 22),
 
                 // Conversation Scenario for Batch
                 Text(
@@ -1446,135 +1176,41 @@ class _CallActionDialogState extends State<CallActionDialog> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: OutlinedButton(
-                          onPressed: () =>
-                              setState(() => _timingMode = _TimingMode.callNow),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: _timingMode == _TimingMode.callNow
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark
-                                      ? Colors.white12
-                                      : context.colors.lightGreyColor),
-                            ),
-                            backgroundColor: _timingMode == _TimingMode.callNow
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.08)
-                                : Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                            ),
-                          ),
-                          child: Text(
-                            'LAUNCH NOW',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: _timingMode == _TimingMode.callNow
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark ? Colors.white60 : Colors.black54),
-                            ),
-                          ),
-                        ),
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0F172A)
+                        : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(
+                        ThemeConstants.buttonRadius),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkSlateColor
+                          : context.colors.lightGreyColor,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: SizedBox(
-                        height: 44,
-                        child: OutlinedButton(
-                          onPressed: () => setState(
-                              () => _timingMode = _TimingMode.schedule),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: _timingMode == _TimingMode.schedule
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark
-                                      ? Colors.white12
-                                      : context.colors.lightGreyColor),
-                            ),
-                            backgroundColor: _timingMode == _TimingMode.schedule
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withValues(alpha: 0.08)
-                                : Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                            ),
-                          ),
-                          child: Text(
-                            'SCHEDULE UNAVAILABLE',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: _timingMode == _TimingMode.schedule
-                                  ? Theme.of(context).colorScheme.primary
-                                  : (isDark ? Colors.white60 : Colors.black54),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                if (_timingMode == _TimingMode.schedule) ...[
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
+                  ),
+                  child: Row(
                     children: [
-                      PresetChipWidget(
-                        label: 'Today',
-                        isSelected: _selectedDatePreset == 'Today',
-                        onTap: () =>
-                            setState(() => _selectedDatePreset = 'Today'),
+                      Icon(
+                        CupertinoIcons.bolt_fill,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      PresetChipWidget(
-                        label: 'Tomorrow',
-                        isSelected: _selectedDatePreset == 'Tomorrow',
-                        onTap: () =>
-                            setState(() => _selectedDatePreset = 'Tomorrow'),
-                      ),
-                      PresetChipWidget(
-                        label: 'Next Monday',
-                        isSelected: _selectedDatePreset == 'Next Monday',
-                        onTap: () =>
-                            setState(() => _selectedDatePreset = 'Next Monday'),
-                      ),
-                      PresetChipWidget(
-                        label: _customDate != null
-                            ? AppDateTime.displayDateTime(_customDate!)
-                            : 'Custom Date & Time',
-                        isSelected: _selectedDatePreset == 'Custom',
-                        onTap: () async {
-                          final picked = await AppDateTimePicker.pickDateTime(
-                            context,
-                            initial: _customDate,
-                            first: DateTime.now(),
-                            last: DateTime.now().add(const Duration(days: 365)),
-                          );
-                          if (picked != null) {
-                            setState(() {
-                              _selectedDatePreset = 'Custom';
-                              _customDate = picked;
-                            });
-                          }
-                        },
+                      const SizedBox(width: 10),
+                      Text(
+                        'Launch Immediately Upon Confirmation',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              isDark ? Colors.white70 : Colors.black87,
+                        ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ],
 
               const SizedBox(height: 32),
@@ -1606,9 +1242,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                         ? (_timingMode == _TimingMode.callNow
                             ? 'START CALL NOW'
                             : 'CONFIRM SCHEDULE')
-                        : (_timingMode == _TimingMode.callNow
-                            ? 'START BATCH CALL ($targetCount CONTACTS)'
-                            : 'SCHEDULE BATCH CAMPAIGN ($targetCount CONTACTS)'),
+                        : 'START BATCH CALL ($targetCount CONTACTS)',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,

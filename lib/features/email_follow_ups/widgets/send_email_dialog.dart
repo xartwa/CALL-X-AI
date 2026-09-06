@@ -19,8 +19,6 @@ import 'email_editor_toolbar.dart';
 
 enum _EmailSendMode { single, group }
 
-enum _BatchTargetMode { segment, manual }
-
 class SendEmailDialog extends StatefulWidget {
   final Map<String, dynamic>? preloadedTemplate;
   final List<Map<String, dynamic>> allTemplates;
@@ -44,7 +42,6 @@ class SendEmailDialog extends StatefulWidget {
 
 class _SendEmailDialogState extends State<SendEmailDialog> {
   late _EmailSendMode _mode;
-  _BatchTargetMode _batchTargetMode = _BatchTargetMode.segment;
 
   // Sender Email Account
   List<EmailSenderAccountModel> _senderAccounts = [];
@@ -62,13 +59,6 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   final Set<String> _manualSelectedUserIds = {};
   final TextEditingController _searchCustomerCtrl = TextEditingController();
   String _customerSearchQuery = '';
-  String _selectedBatchSegment = 'All Hot Leads';
-  final List<String> _batchSegments = const [
-    'All Hot Leads',
-    'All Active Customers',
-    'Pending Follow-ups',
-    'Recent Contacts (7 Days)',
-  ];
 
   // Templates
   Map<String, dynamic>? _selectedTemplate;
@@ -191,28 +181,12 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   }
 
   List<User> _batchTargets(List<User> customers) {
-    if (_batchTargetMode == _BatchTargetMode.manual) {
-      return customers
-          .where((user) => _manualSelectedUserIds.contains(user.id))
-          .toList(growable: false);
+    if (_manualSelectedUserIds.isEmpty) {
+      return List<User>.from(customers);
     }
-    return switch (_selectedBatchSegment) {
-      'All Hot Leads' => customers
-          .where((u) => u.leadPriority.toLowerCase() == 'hot')
-          .toList(growable: false),
-      'All Active Customers' => customers
-          .where((u) => u.status.toLowerCase() == 'active')
-          .toList(growable: false),
-      'Pending Follow-ups' => customers
-          .where((u) => u.nextFollowUpDate != null)
-          .toList(growable: false),
-      'Recent Contacts (7 Days)' => customers.where((u) {
-          final lastContact = u.lastContact;
-          return lastContact != null &&
-              DateTime.now().difference(lastContact).inDays <= 7;
-        }).toList(growable: false),
-      _ => List<User>.from(customers),
-    };
+    return customers
+        .where((user) => _manualSelectedUserIds.contains(user.id))
+        .toList(growable: false);
   }
 
   Future<void> _pickAttachments() async {
@@ -469,6 +443,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     if (_selectedUser == null && customers.isNotEmpty) {
       _selectedUser = customers.first;
     }
+    if (_manualSelectedUserIds.isEmpty && customers.isNotEmpty) {
+      _manualSelectedUserIds.addAll(customers.map((u) => u.id));
+    }
     final targetCount = _getBatchTargetCount(customers);
 
 
@@ -491,7 +468,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
         ),
       ),
       elevation: 12,
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       child: Container(
         width: 1100,
         constraints: BoxConstraints(
@@ -544,7 +521,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                         decoration: BoxDecoration(
                           color: _mode == _EmailSendMode.single
                               ? (isDark
-                                  ? const Color(0xFF1E293B)
+                                  ? AppColors.darkSlateColor
                                   : Colors.white)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
@@ -580,7 +557,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                         decoration: BoxDecoration(
                           color: _mode == _EmailSendMode.group
                               ? (isDark
-                                  ? const Color(0xFF1E293B)
+                                  ? AppColors.darkSlateColor
                                   : Colors.white)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(6),
@@ -949,108 +926,18 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                           ] else ...[
 
                             // BATCH TARGET SELECTION
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'BATCH TARGET AUDIENCE',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.5,
-                                    color: isDark
-                                        ? Colors.grey[400]
-                                        : Colors.grey[700],
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () => setState(() =>
-                                          _batchTargetMode =
-                                              _BatchTargetMode.segment),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: _batchTargetMode ==
-                                                  _BatchTargetMode.segment
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withValues(alpha: 0.12)
-                                              : Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          'PRESET',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                            color: _batchTargetMode ==
-                                                    _BatchTargetMode.segment
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                : context.colors.darkGreyColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    GestureDetector(
-                                      onTap: () => setState(() =>
-                                          _batchTargetMode =
-                                              _BatchTargetMode.manual),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: _batchTargetMode ==
-                                                  _BatchTargetMode.manual
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withValues(alpha: 0.12)
-                                              : Colors.transparent,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          'MANUAL PICK',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                            color: _batchTargetMode ==
-                                                    _BatchTargetMode.manual
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                : context.colors.darkGreyColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            Text(
+                              'BATCH TARGET AUDIENCE',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.5,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[700],
+                              ),
                             ),
                             const SizedBox(height: 8),
-                            if (_batchTargetMode ==
-                                _BatchTargetMode.segment) ...[
-                              AppDropdownWidget<String>(
-                                value: _selectedBatchSegment,
-                                items: _batchSegments,
-                                height: 46,
-                                itemBuilder: (item) => item,
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setState(() => _selectedBatchSegment = val);
-                                  }
-                                },
-                              ),
-                            ] else ...[
                               // Redesigned Pixel-Perfect Customer Selection Box
                               Container(
                                 padding: const EdgeInsets.all(14),
@@ -1075,7 +962,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                           horizontal: 12),
                                       decoration: BoxDecoration(
                                         color: isDark
-                                            ? const Color(0xFF1E293B)
+                                            ? AppColors.darkSlateColor
                                             : Colors.white,
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(
@@ -1336,7 +1223,6 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                   ],
                                 ),
                               ),
-                            ],
                           ],
                           const SizedBox(height: 20),
 
@@ -1668,7 +1554,7 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF1E293B)
+                                      ? AppColors.darkSlateColor
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(

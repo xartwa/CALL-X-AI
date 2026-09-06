@@ -148,7 +148,7 @@ class CallsPage extends StatelessWidget {
                             BorderRadius.circular(ThemeConstants.boxRadius),
                         side: BorderSide(
                           color: isDark
-                              ? const Color(0xFF1E293B)
+                              ? AppColors.darkSlateColor
                               : context.colors.mediumGreyColor
                                   .withValues(alpha: 0.35),
                           width: 1,

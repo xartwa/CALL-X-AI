@@ -198,7 +198,7 @@ class CustomerDetailActivityAndNotesTab extends StatelessWidget {
                       hintStyle: TextStyle(
                           color: context.colors.darkGreyColor, fontSize: 12),
                       fillColor: isDark
-                          ? const Color(0xFF1E293B).withAlpha(128)
+                          ? AppColors.darkSlateColor.withAlpha(128)
                           : const Color(0xFFF8FAFC),
                       filled: true,
                       contentPadding: const EdgeInsets.all(16),

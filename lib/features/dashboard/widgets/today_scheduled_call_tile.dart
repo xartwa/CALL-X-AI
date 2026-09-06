@@ -100,7 +100,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
             ? const Color(0xFF334155)
             : context.colors.mediumGreyColor.withValues(alpha: 0.7))
         : (isDark
-            ? const Color(0xFF1E293B)
+            ? AppColors.darkSlateColor
             : context.colors.mediumGreyColor.withValues(alpha: 0.3));
 
     return MouseRegion(
@@ -297,7 +297,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: isDark
-                                ? const Color(0xFF1E293B)
+                                ? AppColors.darkSlateColor
                                 : context.colors.mediumGreyColor
                                     .withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),

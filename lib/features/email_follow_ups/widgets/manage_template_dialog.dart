@@ -150,7 +150,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
         ),
       ),
       elevation: 12,
-      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
       child: Container(
         width: 1040,
         constraints: BoxConstraints(
@@ -403,7 +403,7 @@ class _ManageTemplateDialogState extends State<ManageTemplateDialog> {
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF1E293B)
+                                      ? AppColors.darkSlateColor
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(

@@ -281,7 +281,7 @@ class CalendarTabView extends StatelessWidget {
                 tooltip: 'Filter by Status',
                 onSelected: (val) => cubit.setStatusFilter(val),
                 offset: const Offset(0, 40),
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                color: isDark ? AppColors.darkSlateColor : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

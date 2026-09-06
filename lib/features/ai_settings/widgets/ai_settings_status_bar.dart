@@ -40,7 +40,7 @@ class AiSettingsStatusBar extends StatelessWidget {
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
         ),
       ),
       child: Row(
@@ -145,7 +145,7 @@ class AiSettingsStatusBar extends StatelessWidget {
         height: 16,
         width: 1,
         margin: const EdgeInsets.symmetric(horizontal: 14),
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+        color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
       );
 }
 

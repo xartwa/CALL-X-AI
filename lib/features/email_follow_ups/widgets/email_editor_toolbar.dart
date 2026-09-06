@@ -240,7 +240,7 @@ class EmailEditorToolbarState extends State<EmailEditorToolbar> {
       builder: (dialogCtx) {
         final isDark = Theme.of(dialogCtx).brightness == Brightness.dark;
         return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          backgroundColor: isDark ? AppColors.darkSlateColor : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
            
@@ -715,7 +715,7 @@ class EmailEditorToolbarState extends State<EmailEditorToolbar> {
             offset: const Offset(0, 36),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            color: isDark ? AppColors.darkSlateColor : Colors.white,
             onSelected: (colorHex) {
               widget.controller.formatSelection(ColorAttribute(colorHex));
             },
@@ -757,7 +757,7 @@ class EmailEditorToolbarState extends State<EmailEditorToolbar> {
             offset: const Offset(0, 36),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            color: isDark ? AppColors.darkSlateColor : Colors.white,
             onSelected: _insertVariable,
             itemBuilder: (context) => const [
               PopupMenuItem(

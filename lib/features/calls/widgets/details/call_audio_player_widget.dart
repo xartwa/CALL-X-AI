@@ -297,7 +297,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+          color: isDark ? AppColors.darkSlateColor : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
           border: Border.all(
             color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
@@ -335,7 +335,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
 
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        color: isDark ? AppColors.darkSlateColor : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
           color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
@@ -467,7 +467,7 @@ class _CallAudioPlayerWidgetState extends State<CallAudioPlayerWidget> {
               height: 28,
               decoration: BoxDecoration(
                 color:
-                    isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                    isDark ? AppColors.darkSlateColor : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isDark

@@ -349,7 +349,7 @@ class AgentKnowledgeTab extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF1E293B)
+                              ? AppColors.darkSlateColor
                               : const Color(0xFFE2E8F0),
                         ),
                       ),
@@ -455,7 +455,7 @@ class AgentKnowledgeTab extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isDark
-                                ? const Color(0xFF1E293B)
+                                ? AppColors.darkSlateColor
                                 : const Color(0xFFE2E8F0),
                           ),
                         ),
@@ -527,7 +527,7 @@ class _CardContainer extends StatelessWidget {
         color: isDark ? const Color(0xFF0F172A) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
         ),
       ),
       child: Column(
