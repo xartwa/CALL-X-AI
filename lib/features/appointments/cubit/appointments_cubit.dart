@@ -469,6 +469,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         isActionLoading: false,
         successMessage: 'Calendar synchronized.',
       ));
+      await refresh();
       return true;
     } catch (e) {
       emit(state.copyWith(isActionLoading: false, errorMessage: _extractErrorMessage(e)));
