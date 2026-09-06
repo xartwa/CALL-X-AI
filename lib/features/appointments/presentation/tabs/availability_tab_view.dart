@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:web/web.dart' as web;
 
@@ -649,188 +650,234 @@ class AvailabilityTabView extends StatelessWidget {
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
         border: Border.all(
-          color: isConnected
-              ? const Color(0xFF10B981).withValues(alpha: 0.4)
-              : context.colors.mediumGreyColor
-                  .withValues(alpha: isDark ? 0.35 : 1.0),
+          color: context.colors.mediumGreyColor
+              .withValues(alpha: isDark ? 0.35 : 1.0),
         ),
       ),
-      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4285F4).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white12
+                              : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: SvgPicture.asset(
+                        'assets/icons/google.svg',
+                        width: 18,
+                        height: 18,
+                      ),
                     ),
-                    child: const Icon(
-                      CupertinoIcons.calendar,
-                      size: 20,
-                      color: Color(0xFF4285F4),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'GOOGLE CALENDAR SYNC',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: context.colors.blackColor,
-                    ),
-                  ),
-                ],
-              ),
-              CustomTagWidget(
-                label: isConnected ? 'Connected' : 'Not Connected',
-                color: isConnected
-                    ? context.colors.successColor
-                    : context.colors.darkGreyColor,
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          if (isConnected) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFFE2E8F0),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    CupertinoIcons.mail,
-                    size: 16,
-                    color: Color(0xFF3B82F6),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      conn.accountEmail.isNotEmpty
-                          ? conn.accountEmail
-                          : 'Google Calendar Account',
+                    const SizedBox(width: 12),
+                    Text(
+                      'Google Calendar Sync'.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: context.colors.blackColor,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  if (conn.lastSyncedAt != null)
-                    Text(
-                      'Synced: ${DateFormat('MMM d, HH:mm').format(conn.lastSyncedAt!)}',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: context.colors.darkGreyColor,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Appointments are synchronized automatically to Google Calendar with Google Meet video links, and external busy slots block conflicting appointments.',
-              style: TextStyle(
-                fontSize: 12.5,
-                height: 1.45,
-                color: context.colors.darkGreyColor,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: state.isActionLoading
-                        ? null
-                        : () => cubit.syncCalendar(),
-                    icon: const Icon(CupertinoIcons.arrow_2_circlepath, size: 15),
-                    label: const Text(
-                      'Sync Now',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                OutlinedButton.icon(
-                  onPressed: state.isActionLoading
-                      ? null
-                      : () => _confirmDisconnect(context, cubit),
-                  icon: const Icon(CupertinoIcons.clear, size: 14),
-                  label: const Text(
-                    'Disconnect',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: context.colors.errorColor,
-                    side: BorderSide(
-                      color: context.colors.errorColor.withValues(alpha: 0.5),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                CustomTagWidget(
+                  label: isConnected ? 'Connected' : 'Not Connected',
+                  color: isConnected
+                      ? context.colors.successColor
+                      : context.colors.darkGreyColor,
                 ),
               ],
             ),
-          ] else ...[
-            Text(
-              'Connect your Google Calendar to automatically synchronize consultations, generate Google Meet links, and block off busy calendar hours.',
-              style: TextStyle(
-                fontSize: 12.5,
-                height: 1.45,
-                color: context.colors.darkGreyColor,
-              ),
-            ),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: state.isActionLoading
-                    ? null
-                    : () => _connectGoogleCalendar(context, cubit),
-                icon: const Icon(CupertinoIcons.link, size: 16),
-                label: const Text(
-                  'Connect Google Calendar',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4285F4),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+          ),
+          const Divider(height: 1, thickness: 0.5),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isConnected) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.03)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(
+                          ThemeConstants.buttonRadius),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white12
+                            : context.colors.mediumGreyColor
+                                .withValues(alpha: 0.4),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.mail,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            conn.accountEmail.isNotEmpty
+                                ? conn.accountEmail
+                                : 'Google Calendar Account',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: context.colors.blackColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (conn.lastSyncedAt != null)
+                          Text(
+                            'Synced: ${DateFormat('MMM d, HH:mm').format(conn.lastSyncedAt!)}',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: context.colors.darkGreyColor,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Appointments are synchronized automatically to Google Calendar with Google Meet video links, and external busy slots block conflicting appointments.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.45,
+                      color: context.colors.darkGreyColor,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 36,
+                        child: ElevatedButton.icon(
+                          onPressed: state.isActionLoading
+                              ? null
+                              : () => cubit.syncCalendar(),
+                          icon: const Icon(CupertinoIcons.arrow_2_circlepath,
+                              size: 14, color: Colors.white),
+                          label: Text(
+                            'Sync Now'.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        height: 36,
+                        child: OutlinedButton.icon(
+                          onPressed: state.isActionLoading
+                              ? null
+                              : () => _confirmDisconnect(context, cubit),
+                          icon: Icon(CupertinoIcons.clear,
+                              size: 13, color: context.colors.errorColor),
+                          label: Text(
+                            'Disconnect'.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: context.colors.errorColor,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: context.colors.errorColor
+                                  .withValues(alpha: 0.4),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Text(
+                    'Connect your Google Calendar to automatically synchronize consultations, generate Google Meet links, and block off busy calendar hours.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.45,
+                      color: context.colors.darkGreyColor,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 36,
+                        child: ElevatedButton.icon(
+                          onPressed: state.isActionLoading
+                              ? null
+                              : () => _connectGoogleCalendar(context, cubit),
+                          icon: const Icon(CupertinoIcons.link,
+                              size: 14, color: Colors.white),
+                          label: Text(
+                            'Connect Google Calendar'.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ThemeConstants.buttonRadius),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -851,64 +898,136 @@ class AvailabilityTabView extends StatelessWidget {
 
   void _showOAuthPendingDialog(
       BuildContext context, AppointmentsCubit cubit) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ThemeConstants.boxRadius)),
+        backgroundColor: Theme.of(context).colorScheme.onPrimary,
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: const Color(0xFF4285F4).withValues(alpha: 0.12),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                ),
               ),
-              child: const Icon(CupertinoIcons.arrow_2_circlepath,
-                  size: 20, color: Color(0xFF4285F4)),
+              child: SvgPicture.asset(
+                'assets/icons/google.svg',
+                width: 18,
+                height: 18,
+              ),
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Connecting Google Calendar',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: context.colors.blackColor,
+              ),
             ),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'A Google sign-in window has been opened in your browser.',
-              style: TextStyle(fontSize: 13.5, height: 1.5),
-            ),
-            SizedBox(height: 10),
-            Text(
-              '1. Sign in with your Google Account.\n2. Allow access to Google Calendar.\n3. Return here and click "Check Connection".',
               style: TextStyle(
-                  fontSize: 12.5, color: Colors.grey, height: 1.5),
+                fontSize: 13,
+                height: 1.5,
+                color: context.colors.blackColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white12
+                      : context.colors.mediumGreyColor.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                '1. Sign in with your Google Account.\n2. Allow access to Google Calendar.\n3. Return here and click "Check Connection".',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.5,
+                  color: context.colors.darkGreyColor,
+                ),
+              ),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await cubit.refreshCalendarStatus();
-              if (dialogCtx.mounted) {
-                Navigator.of(dialogCtx).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4285F4),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+          SizedBox(
+            height: 36,
+            child: OutlinedButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: isDark ? Colors.white24 : context.colors.lightGreyColor,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              child: Text(
+                'Cancel'.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
             ),
-            child: const Text('Check Connection'),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            height: 36,
+            child: ElevatedButton(
+              onPressed: () async {
+                await cubit.refreshCalendarStatus();
+                if (dialogCtx.mounted) {
+                  Navigator.of(dialogCtx).pop();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(ThemeConstants.buttonRadius),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              child: Text(
+                'Check Connection'.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
         ],
       ),
