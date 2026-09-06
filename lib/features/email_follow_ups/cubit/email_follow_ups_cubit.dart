@@ -1,4 +1,5 @@
 import 'package:callx_ai/core/errors/app_exception.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../data/email_models.dart';
@@ -8,6 +9,7 @@ class EmailFollowUpsState {
   const EmailFollowUpsState({
     this.logs = const [],
     this.templates = const [],
+    this.senderAccounts = const [],
     this.isLoading = false,
     this.isRefreshing = false,
     this.isSubmitting = false,
@@ -16,6 +18,7 @@ class EmailFollowUpsState {
 
   final List<EmailLogModel> logs;
   final List<EmailTemplateModel> templates;
+  final List<EmailSenderAccountModel> senderAccounts;
   final bool isLoading;
   final bool isRefreshing;
   final bool isSubmitting;
@@ -24,6 +27,7 @@ class EmailFollowUpsState {
   EmailFollowUpsState copyWith({
     List<EmailLogModel>? logs,
     List<EmailTemplateModel>? templates,
+    List<EmailSenderAccountModel>? senderAccounts,
     bool? isLoading,
     bool? isRefreshing,
     bool? isSubmitting,
@@ -33,6 +37,7 @@ class EmailFollowUpsState {
       EmailFollowUpsState(
         logs: logs ?? this.logs,
         templates: templates ?? this.templates,
+        senderAccounts: senderAccounts ?? this.senderAccounts,
         isLoading: isLoading ?? this.isLoading,
         isRefreshing: isRefreshing ?? this.isRefreshing,
         isSubmitting: isSubmitting ?? this.isSubmitting,
@@ -59,11 +64,13 @@ class EmailFollowUpsCubit extends Cubit<EmailFollowUpsState> {
       final results = await Future.wait([
         _repository.getLogs(),
         _repository.getTemplates(),
+        _repository.getSenderAccounts(),
       ]);
       if (isClosed) return;
       emit(state.copyWith(
         logs: results[0] as List<EmailLogModel>,
         templates: results[1] as List<EmailTemplateModel>,
+        senderAccounts: results[2] as List<EmailSenderAccountModel>,
         isLoading: false,
         isRefreshing: false,
       ));
@@ -77,10 +84,13 @@ class EmailFollowUpsCubit extends Cubit<EmailFollowUpsState> {
     }
   }
 
-  Future<bool> send(Map<String, dynamic> body) async {
+  Future<bool> send(
+    Map<String, dynamic> body, {
+    List<PlatformFile>? attachments,
+  }) async {
     emit(state.copyWith(isSubmitting: true, clearError: true));
     try {
-      final log = await _repository.send(body);
+      final log = await _repository.send(body, attachments: attachments);
       if (!isClosed) {
         emit(state.copyWith(
           logs: [log, ...state.logs],
@@ -164,6 +174,9 @@ class EmailFollowUpsCubit extends Cubit<EmailFollowUpsState> {
     if (error.fieldErrors.isNotEmpty) {
       return error.fieldErrors.values.expand((items) => items).join(' ');
     }
+    if (error.details != null && error.details!.trim().isNotEmpty) {
+      return error.details!.trim();
+    }
     return switch (error.type) {
       AppErrorType.network => 'Network error. Please check your connection.',
       AppErrorType.timeout => 'The request timed out. Please try again.',
@@ -171,7 +184,7 @@ class EmailFollowUpsCubit extends Cubit<EmailFollowUpsState> {
       AppErrorType.forbidden => 'You do not have permission for this action.',
       AppErrorType.notFound => 'The requested email record was not found.',
       AppErrorType.invalidData => 'The server returned invalid email data.',
-      _ => error.details ?? 'Unable to complete the email request.',
+      _ => 'Unable to complete the email request.',
     };
   }
 }

@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
+import '../cubit/email_follow_ups_cubit.dart';
 import 'email_editor_toolbar.dart';
 
 
@@ -22,7 +23,10 @@ enum _BatchTargetMode { segment, manual }
 class SendEmailDialog extends StatefulWidget {
   final Map<String, dynamic>? preloadedTemplate;
   final List<Map<String, dynamic>> allTemplates;
-  final Future<bool> Function(Map<String, dynamic> email) onSendEmail;
+  final Future<bool> Function(
+    Map<String, dynamic> email, {
+    List<PlatformFile>? attachments,
+  }) onSendEmail;
   final bool startInGroupMode;
 
   const SendEmailDialog({
@@ -86,8 +90,14 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
         widget.startInGroupMode ? _EmailSendMode.group : _EmailSendMode.single;
 
     try {
-      final prefs = context.read<PreferencesService>();
-      _savedSenders = prefs.loadSavedSenderEmails();
+      final emailCubit = context.read<EmailFollowUpsCubit>();
+      final serverAccounts = emailCubit.state.senderAccounts;
+      if (serverAccounts.isNotEmpty) {
+        _savedSenders = serverAccounts.map((a) => a.displayName).toList();
+      } else {
+        final prefs = context.read<PreferencesService>();
+        _savedSenders = prefs.loadSavedSenderEmails();
+      }
     } catch (_) {
       _savedSenders = [];
     }
@@ -154,6 +164,19 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       return _customSenderCtrl.text.trim();
     }
     return _selectedSender.trim();
+  }
+
+  String? get _resolvedSenderAccountId {
+    try {
+      final serverAccounts =
+          context.read<EmailFollowUpsCubit>().state.senderAccounts;
+      for (final acc in serverAccounts) {
+        if (acc.displayName == _selectedSender || acc.email == _selectedSender) {
+          return acc.id;
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
 
@@ -323,23 +346,33 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
         return;
       }
 
-      final sent = await widget.onSendEmail({
-        if (!_isDirectRecipient && _selectedUser != null)
-          'customerId': _selectedUser!.id,
-        if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
-        'senderAlias': _resolvedSender,
-        'recipientName': recipientName,
-        'recipientEmail': recipientEmail,
-        'subject': renderedSubject,
-        'body': renderedBody,
-      });
+      final sent = await widget.onSendEmail(
+        {
+          if (!_isDirectRecipient && _selectedUser != null)
+            'customerId': _selectedUser!.id,
+          if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
+          if (_resolvedSenderAccountId != null)
+            'senderAccountId': _resolvedSenderAccountId,
+          'senderAlias': _resolvedSender,
+          'recipientName': recipientName,
+          'recipientEmail': recipientEmail,
+          'subject': renderedSubject,
+          'body': renderedBody,
+        },
+        attachments: _attachments.isNotEmpty ? _attachments : null,
+      );
 
       if (!mounted) return;
       setState(() => _isSending = false);
       if (!sent) {
+        final errorMsg =
+            context.read<EmailFollowUpsCubit>().state.errorMessage;
         AppUtils.showSnackBar(
           context: context,
-          extraMessage: 'The server could not send this email.',
+          title: 'Email Delivery Failed',
+          extraMessage: (errorMsg != null && errorMsg.isNotEmpty)
+              ? errorMsg
+              : 'The server could not send this email.',
           toastificationType: ToastificationType.error,
         );
         return;
@@ -369,34 +402,44 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
 
       var sentCount = 0;
       for (final targetUser in targetList) {
-        final sent = await widget.onSendEmail({
-          'customerId': targetUser.id,
-          if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
-          'senderAlias': _resolvedSender,
-          'recipientName': targetUser.fullName,
-          'recipientEmail': targetUser.email,
-          'subject': _renderContent(
-            subject,
-            name: targetUser.fullName,
-            company: targetUser.companyName,
-            phone: targetUser.phone,
-          ),
-          'body': _renderContent(
-            body,
-            name: targetUser.fullName,
-            company: targetUser.companyName,
-            phone: targetUser.phone,
-          ),
-        });
+        final sent = await widget.onSendEmail(
+          {
+            'customerId': targetUser.id,
+            if (_selectedTemplate != null) 'templateId': _selectedTemplate!['id'],
+            if (_resolvedSenderAccountId != null)
+              'senderAccountId': _resolvedSenderAccountId,
+            'senderAlias': _resolvedSender,
+            'recipientName': targetUser.fullName,
+            'recipientEmail': targetUser.email,
+            'subject': _renderContent(
+              subject,
+              name: targetUser.fullName,
+              company: targetUser.companyName,
+              phone: targetUser.phone,
+            ),
+            'body': _renderContent(
+              body,
+              name: targetUser.fullName,
+              company: targetUser.companyName,
+              phone: targetUser.phone,
+            ),
+          },
+          attachments: _attachments.isNotEmpty ? _attachments : null,
+        );
         if (sent) sentCount++;
       }
       if (!mounted) return;
       setState(() => _isSending = false);
 
       if (sentCount == 0) {
+        final errorMsg =
+            context.read<EmailFollowUpsCubit>().state.errorMessage;
         AppUtils.showSnackBar(
           context: context,
-          extraMessage: 'The batch could not be sent.',
+          title: 'Batch Email Failed',
+          extraMessage: (errorMsg != null && errorMsg.isNotEmpty)
+              ? errorMsg
+              : 'The batch could not be sent.',
           toastificationType: ToastificationType.error,
         );
         return;

@@ -218,8 +218,8 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
           preloadedTemplate: preloadedTemplate,
           startInGroupMode: startInGroupMode,
           allTemplates: _allTemplates,
-          onSendEmail: (email) =>
-              context.read<EmailFollowUpsCubit>().send(email),
+          onSendEmail: (email, {attachments}) =>
+              context.read<EmailFollowUpsCubit>().send(email, attachments: attachments),
         );
       },
     );

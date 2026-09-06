@@ -1,5 +1,6 @@
 import 'package:callx_ai/core/errors/app_exception.dart';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../domain/email_repository.dart';
 import 'email_models.dart';
@@ -33,8 +34,18 @@ class EmailRepositoryImpl implements EmailRepository {
       (await _remote.getTemplates()).map(EmailTemplateModel.fromJson).toList());
 
   @override
-  Future<EmailLogModel> send(Map<String, dynamic> body) =>
-      _request(() async => EmailLogModel.fromJson(await _remote.send(body)));
+  Future<List<EmailSenderAccountModel>> getSenderAccounts() =>
+      _request(() async => (await _remote.getSenderAccounts())
+          .map(EmailSenderAccountModel.fromJson)
+          .toList());
+
+  @override
+  Future<EmailLogModel> send(
+    Map<String, dynamic> body, {
+    List<PlatformFile>? attachments,
+  }) =>
+      _request(() async => EmailLogModel.fromJson(
+          await _remote.send(body, attachments: attachments)));
 
   @override
   Future<EmailTemplateModel> saveTemplate(

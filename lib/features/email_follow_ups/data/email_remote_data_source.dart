@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:callx_ai/services/api_provider.dart';
 
 class EmailRemoteDataSource {
@@ -10,8 +12,37 @@ class EmailRemoteDataSource {
   Future<List<Map<String, dynamic>>> getTemplates() =>
       _getAll('/emails/templates/');
 
-  Future<Map<String, dynamic>> send(Map<String, dynamic> body) async {
-    final response = await _client.http.post('/emails/logs/send/', data: body);
+  Future<List<Map<String, dynamic>>> getSenderAccounts() =>
+      _getAll('/emails/senders/');
+
+  Future<Map<String, dynamic>> send(
+    Map<String, dynamic> body, {
+    List<PlatformFile>? attachments,
+  }) async {
+    dynamic payload;
+    if (attachments != null && attachments.isNotEmpty) {
+      final map = Map<String, dynamic>.from(body);
+      final files = <MultipartFile>[];
+      for (final file in attachments) {
+        if (file.bytes != null) {
+          files.add(MultipartFile.fromBytes(
+            file.bytes!,
+            filename: file.name,
+          ));
+        } else if (file.path != null) {
+          files.add(await MultipartFile.fromFile(
+            file.path!,
+            filename: file.name,
+          ));
+        }
+      }
+      map['attachments'] = files;
+      payload = FormData.fromMap(map);
+    } else {
+      payload = body;
+    }
+
+    final response = await _client.http.post('/emails/logs/send/', data: payload);
     final data = Map<String, dynamic>.from(response.data as Map);
     return Map<String, dynamic>.from(data['email'] as Map);
   }
