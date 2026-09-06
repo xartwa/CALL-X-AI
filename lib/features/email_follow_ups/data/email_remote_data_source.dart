@@ -15,6 +15,13 @@ class EmailRemoteDataSource {
   Future<List<Map<String, dynamic>>> getSenderAccounts() =>
       _getAll('/emails/senders/');
 
+  Future<Map<String, dynamic>> createSenderAccount(
+    Map<String, dynamic> body,
+  ) async =>
+      Map<String, dynamic>.from(
+        (await _client.http.post('/emails/senders/', data: body)).data as Map,
+      );
+
   Future<Map<String, dynamic>> send(
     Map<String, dynamic> body, {
     List<PlatformFile>? attachments,

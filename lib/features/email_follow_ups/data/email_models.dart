@@ -84,9 +84,8 @@ class EmailSenderAccountModel {
         isDefault: json['isDefault'] == true,
       );
 
-  String get displayName => senderName.isNotEmpty
-      ? '$senderName <$email>'
-      : (name.isNotEmpty ? '$name <$email>' : email);
+  String get displayName =>
+      senderName.isNotEmpty ? '$senderName <$email>' : email;
 
   @override
   bool operator ==(Object other) =>

@@ -153,6 +153,32 @@ class EmailFollowUpsCubit extends Cubit<EmailFollowUpsState> {
     }
   }
 
+  Future<EmailSenderAccountModel?> addSenderAccount({
+    required String email,
+    String name = '',
+    String senderName = '',
+    bool isDefault = false,
+  }) async {
+    try {
+      final account = await _repository.createSenderAccount(
+        email: email,
+        name: name,
+        senderName: senderName,
+        isDefault: isDefault,
+      );
+      if (!isClosed) {
+        emit(state.copyWith(
+          senderAccounts: [...state.senderAccounts, account],
+          clearError: true,
+        ));
+      }
+      return account;
+    } catch (error) {
+      if (!isClosed) emit(state.copyWith(errorMessage: _message(error)));
+      return null;
+    }
+  }
+
   Future<void> deleteLog(String id) async {
     try {
       await _repository.deleteLog(id);

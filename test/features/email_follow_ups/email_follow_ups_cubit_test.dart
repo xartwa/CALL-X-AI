@@ -36,6 +36,24 @@ class _FakeEmailRepository implements EmailRepository {
       List.of(senderAccounts);
 
   @override
+  Future<EmailSenderAccountModel> createSenderAccount({
+    required String email,
+    String name = '',
+    String senderName = '',
+    bool isDefault = false,
+  }) async {
+    final account = EmailSenderAccountModel(
+      id: 'sender-${senderAccounts.length + 1}',
+      name: name.isNotEmpty ? name : email,
+      email: email,
+      senderName: senderName,
+      isDefault: isDefault,
+    );
+    senderAccounts.add(account);
+    return account;
+  }
+
+  @override
   Future<EmailLogModel> send(
     Map<String, dynamic> body, {
     List<PlatformFile>? attachments,

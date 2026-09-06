@@ -5,6 +5,12 @@ abstract interface class EmailRepository {
   Future<List<EmailLogModel>> getLogs();
   Future<List<EmailTemplateModel>> getTemplates();
   Future<List<EmailSenderAccountModel>> getSenderAccounts();
+  Future<EmailSenderAccountModel> createSenderAccount({
+    required String email,
+    String name,
+    String senderName,
+    bool isDefault,
+  });
   Future<EmailLogModel> send(
     Map<String, dynamic> body, {
     List<PlatformFile>? attachments,

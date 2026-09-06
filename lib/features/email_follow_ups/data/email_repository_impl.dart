@@ -40,6 +40,22 @@ class EmailRepositoryImpl implements EmailRepository {
           .toList());
 
   @override
+  Future<EmailSenderAccountModel> createSenderAccount({
+    required String email,
+    String name = '',
+    String senderName = '',
+    bool isDefault = false,
+  }) =>
+      _request(() async => EmailSenderAccountModel.fromJson(
+            await _remote.createSenderAccount({
+              'email': email.trim(),
+              'name': name.trim().isNotEmpty ? name.trim() : email.trim(),
+              'senderName': senderName.trim(),
+              'isDefault': isDefault,
+            }),
+          ));
+
+  @override
   Future<EmailLogModel> send(
     Map<String, dynamic> body, {
     List<PlatformFile>? attachments,
