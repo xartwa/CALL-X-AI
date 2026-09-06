@@ -2,7 +2,6 @@ import 'package:callx_ai/core/constants/theme_constants.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/widgets/app_dropdown_widget.dart';
 import 'package:callx_ai/features/customers/cubit/customers_cubit.dart';
-import 'package:callx_ai/services/preferences_service.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:toastification/toastification.dart';
 import '../cubit/email_follow_ups_cubit.dart';
+import '../data/email_models.dart';
 import 'email_editor_toolbar.dart';
 
 
@@ -45,11 +45,9 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
   late _EmailSendMode _mode;
   _BatchTargetMode _batchTargetMode = _BatchTargetMode.segment;
 
-  // Sender Email
-  static const String _newSenderOption = '+ Enter New Sender...';
-  List<String> _savedSenders = [];
-  late String _selectedSender;
-  final TextEditingController _customSenderCtrl = TextEditingController();
+  // Sender Email Account
+  List<EmailSenderAccountModel> _senderAccounts = [];
+  EmailSenderAccountModel? _selectedSenderAccount;
 
   // Single Recipient
   User? _selectedUser;
@@ -93,19 +91,26 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       final emailCubit = context.read<EmailFollowUpsCubit>();
       final serverAccounts = emailCubit.state.senderAccounts;
       if (serverAccounts.isNotEmpty) {
-        _savedSenders = serverAccounts.map((a) => a.displayName).toList();
-      } else {
-        final prefs = context.read<PreferencesService>();
-        _savedSenders = prefs.loadSavedSenderEmails();
+        _senderAccounts = List<EmailSenderAccountModel>.from(serverAccounts);
       }
     } catch (_) {
-      _savedSenders = [];
+      _senderAccounts = [];
     }
 
-    if (_savedSenders.isNotEmpty) {
-      _selectedSender = _savedSenders.first;
+    if (_senderAccounts.isNotEmpty) {
+      _selectedSenderAccount = _senderAccounts.firstWhere(
+        (a) => a.isDefault,
+        orElse: () => _senderAccounts.first,
+      );
     } else {
-      _selectedSender = _newSenderOption;
+      _selectedSenderAccount = const EmailSenderAccountModel(
+        id: '',
+        name: 'CallX AI',
+        email: 'xartwa@gmail.com',
+        senderName: 'CallX AI',
+        isDefault: true,
+      );
+      _senderAccounts = [_selectedSenderAccount!];
     }
 
 
@@ -151,31 +156,19 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
     _bodyCtrl.removeListener(_updateState);
     _subjectCtrl.dispose();
     _bodyCtrl.dispose();
-    _customSenderCtrl.dispose();
     _customRecipientCtrl.dispose();
     _customRecipientNameCtrl.dispose();
     _searchCustomerCtrl.dispose();
     super.dispose();
-
   }
 
   String get _resolvedSender {
-    if (_selectedSender == _newSenderOption || _savedSenders.isEmpty) {
-      return _customSenderCtrl.text.trim();
-    }
-    return _selectedSender.trim();
+    return _selectedSenderAccount?.displayName ?? 'CallX AI <xartwa@gmail.com>';
   }
 
   String? get _resolvedSenderAccountId {
-    try {
-      final serverAccounts =
-          context.read<EmailFollowUpsCubit>().state.senderAccounts;
-      for (final acc in serverAccounts) {
-        if (acc.displayName == _selectedSender || acc.email == _selectedSender) {
-          return acc.id;
-        }
-      }
-    } catch (_) {}
+    final id = _selectedSenderAccount?.id;
+    if (id != null && id.isNotEmpty) return id;
     return null;
   }
 
@@ -281,31 +274,17 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
       return;
     }
 
-    if (_attachments.isNotEmpty) {
-      AppUtils.showSnackBar(
-        context: context,
-        extraMessage:
-            'The email API does not support attachments yet. Remove them before sending.',
-        toastificationType: ToastificationType.warning,
-      );
-      return;
-    }
-
     final sender = _resolvedSender;
     if (sender.isEmpty) {
       AppUtils.showSnackBar(
         context: context,
-        extraMessage: 'Please enter your sender email address or alias.',
+        extraMessage: 'Please select a sender account.',
         toastificationType: ToastificationType.warning,
       );
       return;
     }
 
     final customers = context.read<CustomersCubit>().state.users;
-    try {
-      context.read<PreferencesService>().saveSenderEmail(sender);
-    } catch (_) {}
-
     setState(() => _isSending = true);
 
 
@@ -634,118 +613,19 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                                       ),
                                     ),
                                     const SizedBox(height: 8),
-                                    if (_savedSenders.isEmpty)
-                                      Container(
-                                        height: 46,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                              ThemeConstants.buttonRadius),
-                                          border: Border.all(
-                                            color: isDark
-                                                ? Colors.white12
-                                                : context.colors.lightGreyColor,
-                                          ),
-                                          color: isDark
-                                              ? Colors.white
-                                                  .withValues(alpha: 0.03)
-                                              : Colors.black
-                                                  .withValues(alpha: 0.02),
-                                        ),
-                                        child: TextField(
-                                          controller: _customSenderCtrl,
-                                          style: const TextStyle(
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w600),
-                                          textAlignVertical:
-                                              TextAlignVertical.center,
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 14),
-                                            hintText:
-                                                'Enter sender email (e.g. you@company.com)',
-                                            hintStyle: TextStyle(
-                                                fontSize: 12.5,
-                                                color: context
-                                                    .colors.darkGreyColor),
-                                            border: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: AppDropdownWidget<String>(
-                                              value: _selectedSender,
-                                              items: [
-                                                ..._savedSenders,
-                                                _newSenderOption
-                                              ],
-                                              height: 46,
-                                              itemBuilder: (item) =>
-                                                  item == _newSenderOption
-                                                      ? '+ Enter New Sender...'
-                                                      : item,
-                                              onChanged: (val) {
-                                                if (val != null) {
-                                                  setState(() =>
-                                                      _selectedSender = val);
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                          if (_selectedSender !=
-                                              _newSenderOption) ...[
-                                            const SizedBox(width: 6),
-                                            InkWell(
-                                              onTap: () async {
-                                                final toRemove =
-                                                    _selectedSender;
-                                                await context
-                                                    .read<PreferencesService>()
-                                                    .removeSenderEmail(
-                                                        toRemove);
-                                                setState(() {
-                                                  _savedSenders = context
-                                                      .read<
-                                                          PreferencesService>()
-                                                      .loadSavedSenderEmails();
-                                                  if (_savedSenders
-                                                      .isNotEmpty) {
-                                                    _selectedSender =
-                                                        _savedSenders.first;
-                                                  } else {
-                                                    _selectedSender =
-                                                        _newSenderOption;
-                                                  }
-                                                });
-                                              },
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(8),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.redAccent
-                                                      .withValues(alpha: 0.1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: const Icon(
-                                                  CupertinoIcons.trash,
-                                                  size: 16,
-                                                  color: Colors.redAccent,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
+                                    AppDropdownWidget<EmailSenderAccountModel>(
+                                      value: _selectedSenderAccount,
+                                      items: _senderAccounts,
+                                      height: 46,
+                                      itemBuilder: (account) =>
+                                          account.displayName,
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          setState(() =>
+                                              _selectedSenderAccount = val);
+                                        }
+                                      },
+                                    ),
                                   ],
                                 ),
                               ),
@@ -784,46 +664,6 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                               ),
                             ],
                           ),
-                          if (_savedSenders.isNotEmpty &&
-                              _selectedSender == _newSenderOption) ...[
-                            const SizedBox(height: 12),
-                            Container(
-                              height: 46,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    ThemeConstants.buttonRadius),
-                                border: Border.all(
-                                  color: isDark
-                                      ? Colors.white12
-                                      : context.colors.lightGreyColor,
-                                ),
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.03)
-                                    : Colors.black.withValues(alpha: 0.02),
-                              ),
-                              child: TextField(
-                                controller: _customSenderCtrl,
-                                style: const TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w600),
-                                textAlignVertical: TextAlignVertical.center,
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 14),
-                                  hintText:
-                                      'Enter sender email or alias (e.g. Sales Team <sales@company.com>)',
-                                  hintStyle: TextStyle(
-                                      fontSize: 12.5,
-                                      color: context.colors.darkGreyColor),
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                          ],
                           const SizedBox(height: 20),
 
 
@@ -1703,8 +1543,12 @@ class _SendEmailDialogState extends State<SendEmailDialog> {
                               Expanded(
                                 child: Text(
                                   _mode == _EmailSendMode.single
-                                      ? (_selectedUser?.email ??
-                                          'client@example.com')
+                                      ? (_isDirectRecipient
+                                          ? (_customRecipientCtrl.text.trim().isNotEmpty
+                                              ? _customRecipientCtrl.text.trim()
+                                              : 'client@example.com')
+                                          : (_selectedUser?.email ??
+                                              'client@example.com'))
                                       : 'Batch Audience ($targetCount recipients)',
                                   style: const TextStyle(
                                       fontSize: 11.5,

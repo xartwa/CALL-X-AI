@@ -1,6 +1,7 @@
 import 'package:callx_ai/features/email_follow_ups/cubit/email_follow_ups_cubit.dart';
 import 'package:callx_ai/features/email_follow_ups/data/email_models.dart';
 import 'package:callx_ai/features/email_follow_ups/domain/email_repository.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeEmailRepository implements EmailRepository {
@@ -14,6 +15,14 @@ class _FakeEmailRepository implements EmailRepository {
     ),
   ];
   final logs = <EmailLogModel>[];
+  final senderAccounts = <EmailSenderAccountModel>[
+    const EmailSenderAccountModel(
+      id: 'sender-1',
+      name: 'CallX AI',
+      email: 'xartwa@gmail.com',
+      isDefault: true,
+    ),
+  ];
   bool sendCalled = false;
 
   @override
@@ -23,7 +32,14 @@ class _FakeEmailRepository implements EmailRepository {
   Future<List<EmailTemplateModel>> getTemplates() async => List.of(templates);
 
   @override
-  Future<EmailLogModel> send(Map<String, dynamic> body) async {
+  Future<List<EmailSenderAccountModel>> getSenderAccounts() async =>
+      List.of(senderAccounts);
+
+  @override
+  Future<EmailLogModel> send(
+    Map<String, dynamic> body, {
+    List<PlatformFile>? attachments,
+  }) async {
     sendCalled = true;
     return EmailLogModel(
       id: 'log-1',
