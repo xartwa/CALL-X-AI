@@ -13,6 +13,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../email_follow_ups/widgets/email_editor_toolbar.dart';
 import '../../cubit/appointments_cubit.dart';
 import '../../domain/entities/appointment_entity.dart';
+import 'appointment_rich_notes_editor.dart';
 
 class ScheduleRequestDrawer extends StatefulWidget {
   final AppointmentRequestEntity request;
@@ -438,14 +439,12 @@ class _ScheduleRequestDrawerState extends State<ScheduleRequestDrawer> {
 
                     _buildLabel('AGENDA & NOTES', isDark),
                     const SizedBox(height: 6),
-                    EmailEditorToolbar(controller: _notesQuillCtrl),
-                    const SizedBox(height: 6),
-                    EmailQuillEditor(
+                    AppointmentRichNotesEditor(
                       controller: _notesQuillCtrl,
                       focusNode: _notesFocusNode,
                       scrollController: _notesScrollCtrl,
-                      minHeight: 100,
-                      maxHeight: 180,
+                      minHeight: 90,
+                      maxHeight: 160,
                       placeholder:
                           'Additional details or caller requirements...',
                     ),

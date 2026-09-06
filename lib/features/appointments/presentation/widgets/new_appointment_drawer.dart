@@ -14,6 +14,7 @@ import '../../../../theme/app_colors.dart';
 import '../../../customers/cubit/customers_cubit.dart';
 import '../../../email_follow_ups/widgets/email_editor_toolbar.dart';
 import '../../cubit/appointments_cubit.dart';
+import 'appointment_rich_notes_editor.dart';
 
 class NewAppointmentDrawer extends StatefulWidget {
   final VoidCallback onClose;
@@ -459,14 +460,12 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                       // 7. Notes
                       _buildLabel('AGENDA / NOTES', isDark),
                       const SizedBox(height: 6),
-                      EmailEditorToolbar(controller: _notesQuillCtrl),
-                      const SizedBox(height: 6),
-                      EmailQuillEditor(
+                      AppointmentRichNotesEditor(
                         controller: _notesQuillCtrl,
                         focusNode: _notesFocusNode,
                         scrollController: _notesScrollCtrl,
-                        minHeight: 100,
-                        maxHeight: 180,
+                        minHeight: 90,
+                        maxHeight: 160,
                         placeholder:
                             'Review project scope, architectural feasibility, bullet points...',
                       ),
