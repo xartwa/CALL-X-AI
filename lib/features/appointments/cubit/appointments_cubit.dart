@@ -483,6 +483,11 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       final conn = await _repository.disconnectCalendar();
       emit(state.copyWith(
         calendarConnection: conn,
+        appointments: const [],
+        calendarAppointments: const [],
+        upcomingAppointments: const [],
+        requests: const [],
+        kpi: const AppointmentKPIStats(),
         isActionLoading: false,
         successMessage: 'Calendar disconnected.',
       ));

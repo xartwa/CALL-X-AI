@@ -165,7 +165,13 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                   SizedBox(
                     height: 44,
                     child: ElevatedButton.icon(
-                      onPressed: () => NewAppointmentDrawer.show(context),
+                      onPressed: () {
+                        if (!state.calendarConnection.connected) {
+                          _showConnectCalendarDialog(context, cubit);
+                        } else {
+                          NewAppointmentDrawer.show(context);
+                        }
+                      },
                       icon: const Icon(
                         CupertinoIcons.plus,
                         size: 16,
@@ -173,7 +179,7 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
                       ),
                       label: Text(
                         'New Appointment'.toUpperCase(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -236,5 +242,125 @@ class _AppointmentsPageState extends State<AppointmentsPage> {
       default:
         return const CalendarTabView();
     }
+  }
+
+  void _showConnectCalendarDialog(
+      BuildContext context, AppointmentsCubit cubit) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => Dialog(
+        backgroundColor: isDark ? const Color(0xFF151B26) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
+          side: BorderSide(
+            color: context.colors.mediumGreyColor.withValues(alpha: 0.4),
+          ),
+        ),
+        elevation: 12,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color:
+                                const Color(0xFFEF4444).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              CupertinoIcons.exclamationmark_triangle_fill,
+                              size: 18,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Google Calendar Required',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: context.colors.blackColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(CupertinoIcons.xmark, size: 16),
+                      color: context.colors.darkGreyColor,
+                      onPressed: () => Navigator.of(dialogCtx).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'You must connect your Google Calendar account before creating or scheduling appointments. Connecting ensures your meetings synchronize automatically and generates valid Google Meet links.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: context.colors.darkGreyColor,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogCtx).pop(),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: context.colors.darkGreyColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(dialogCtx).pop();
+                        cubit.setActiveTab(2);
+                      },
+                      icon: const Icon(CupertinoIcons.link,
+                          size: 14, color: Colors.white),
+                      label: const Text(
+                        'CONNECT CALENDAR',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              ThemeConstants.buttonRadius),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
