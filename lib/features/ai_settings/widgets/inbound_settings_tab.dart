@@ -228,7 +228,7 @@ class InboundSettingsTab extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF131C2E)
+                            ? AppColors.darkNavyHoverColor
                             : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
@@ -326,7 +326,7 @@ class InboundSettingsTab extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF131C2E)
+                            ? AppColors.darkNavyHoverColor
                             : const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
@@ -480,7 +480,7 @@ class _AvailabilityOptionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? primaryColor.withValues(alpha: 0.08)
-              : (isDark ? const Color(0xFF131C2E) : const Color(0xFFF8FAFC)),
+              : (isDark ? AppColors.darkNavyHoverColor: const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected

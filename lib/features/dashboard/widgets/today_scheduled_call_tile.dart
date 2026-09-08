@@ -89,7 +89,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
     // Unified card background & border
     final cardBg = _isHovered
         ? (isDark
-            ? const Color(0xFF162032)
+            ? AppColors.darkNavyHoverColor
             : context.colors.milkyColor)
         : (isDark
             ? AppColors.darkNavyColor

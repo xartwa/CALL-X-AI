@@ -226,7 +226,7 @@ class _TodoItemTileState extends State<_TodoItemTile> {
 
     final cardBg = _isHovered
         ? (isDark
-            ? const Color(0xFF162032)
+            ? AppColors.darkNavyHoverColor
             : context.colors.milkyColor)
         : (isDark
             ? AppColors.darkNavyColor

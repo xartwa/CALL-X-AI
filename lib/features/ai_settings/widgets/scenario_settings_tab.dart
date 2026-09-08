@@ -473,7 +473,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF131C2E)
+                          ? AppColors.darkNavyHoverColor
                           : const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
@@ -522,7 +522,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                             horizontal: 10, vertical: 8),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF131C2E)
+                              ? AppColors.darkNavyHoverColor
                               : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(

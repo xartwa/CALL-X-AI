@@ -187,7 +187,7 @@ class _MinimalActionCardState extends State<_MinimalActionCard> {
               ),
               color: _isHovered
                   ? (isDark
-                      ? const Color(0xFF162032)
+                      ? AppColors.darkNavyHoverColor
                       : widget.accentColor.withValues(alpha: 0.05))
                   : (isDark
                       ? AppColors.darkNavyColor
