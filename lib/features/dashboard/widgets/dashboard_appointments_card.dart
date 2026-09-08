@@ -308,7 +308,7 @@ class _AppointmentTileState extends State<_AppointmentTile> {
 
     final cardBg = _isHovered
         ? (isDark
-            ? AppColors.darkNavyHoverColor
+            ? AppColors.darkNavyColor
             : context.colors.milkyColor)
         : (isDark
             ? AppColors.darkNavyColor

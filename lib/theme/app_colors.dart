@@ -106,13 +106,10 @@ class AppColors {
 
   /// Global dark navy card & container background color (Slate-Midnight: 0xFF1A2333).
   /// Mathematically harmonized with scaffold (0xFF0B0F17) and cards (0xFF151B26) for seamless depth.
-  static const Color darkNavyColor = Color(0xFF1A2333);
+  static const Color darkNavyColor = Color(0xFF1B2436);
   static const Color darkNavy = darkNavyColor;
   static const Color darkCardColor = darkNavyColor;
 
-  /// Global hover state for dark navy interactive tiles & buttons.
-  static const Color darkNavyHoverColor = Color(0xFF222D40);
-  static const Color darkNavyHover = darkNavyHoverColor;
 
   /// Global slate 800 dark border and container color (0xFF1E293B).
   /// Modifying this single constant updates all dark surfaces, cards, and borders across the app.
@@ -183,7 +180,6 @@ extension BuildContextColors on BuildContext {
 /// Global convenience accessor for dark navy card & container background color.
 const Color darkNavyColor = AppColors.darkNavyColor;
 const Color darkCardColor = AppColors.darkNavyColor;
-const Color darkNavyHoverColor = AppColors.darkNavyHoverColor;
 
 /// Global convenience accessor for dark slate surface & border color.
 const Color darkSlateColor = AppColors.darkSlateColor;
