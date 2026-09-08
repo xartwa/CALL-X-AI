@@ -207,7 +207,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        color: isDark ? Colors.white : AppColors.darkNavyColor,
                       ),
                     ),
                     IconButton(
@@ -237,7 +237,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                             ? Colors.transparent
                             : context.colors.lightGreyColor,
                         backgroundColor: isDark
-                            ? const Color(0xFF0F172A)
+                            ? AppColors.darkNavyColor
                             : const Color(0xFFF8FAFC),
                         itemBuilder: (u) =>
                             '${u.fullName} (${u.companyName.isNotEmpty ? u.companyName : u.email})',
@@ -266,7 +266,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                             ? Colors.transparent
                             : context.colors.lightGreyColor,
                         fillColor: isDark
-                            ? const Color(0xFF0F172A)
+                            ? AppColors.darkNavyColor
                             : const Color(0xFFF8FAFC),
                         prefixIcon: Icon(
                           CupertinoIcons.mail,
@@ -386,7 +386,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                               horizontal: 12, vertical: 12),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? const Color(0xFF0F172A)
+                                ? AppColors.darkNavyColor
                                 : const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -410,7 +410,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                                     fontWeight: FontWeight.w600,
                                     color: isDark
                                         ? Colors.white
-                                        : const Color(0xFF0F172A),
+                                        : AppColors.darkNavyColor,
                                   ),
                                 ),
                               ),
@@ -434,7 +434,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                             ? Colors.transparent
                             : context.colors.lightGreyColor,
                         fillColor: isDark
-                            ? const Color(0xFF0F172A)
+                            ? AppColors.darkNavyColor
                             : const Color(0xFFF8FAFC),
                       ),
                       const SizedBox(height: 16),
@@ -451,7 +451,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
                               ? Colors.transparent
                               : context.colors.lightGreyColor,
                           fillColor: isDark
-                              ? const Color(0xFF0F172A)
+                              ? AppColors.darkNavyColor
                               : const Color(0xFFF8FAFC),
                         ),
                         const SizedBox(height: 16),
@@ -551,7 +551,7 @@ class _NewAppointmentDrawerState extends State<NewAppointmentDrawer> {
         decoration: BoxDecoration(
           color: isSelected
               ? primary.withValues(alpha: isDark ? 0.2 : 0.12)
-              : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+              : (isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected

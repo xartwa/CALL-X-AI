@@ -48,7 +48,7 @@ class AppUtils {
       required ToastificationType toastificationType}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final toastBgColor = isDark ? const Color(0xFF172033) : Colors.white;
-    final toastTextColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final toastTextColor = isDark ? Colors.white : AppColors.darkNavyColor;
     final toastDescColor = isDark ? Colors.white70 : const Color(0xFF64748B);
     final accent = switch (toastificationType) {
       ToastificationType.success => context.colors.successColor,

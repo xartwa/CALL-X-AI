@@ -146,7 +146,7 @@ class _AppointmentRichNotesEditorState
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.6,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        color: isDark ? Colors.white : AppColors.darkNavyColor,
                       ),
                     ),
                     IconButton(
@@ -176,7 +176,7 @@ class _AppointmentRichNotesEditorState
                     border: Border.all(
                       color: isDark ? Colors.white12 : context.colors.lightGreyColor,
                     ),
-                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
                   ),
                   child: TextField(
                     controller: textCtrl,
@@ -208,7 +208,7 @@ class _AppointmentRichNotesEditorState
                     border: Border.all(
                       color: isDark ? Colors.white12 : context.colors.lightGreyColor,
                     ),
-                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
                   ),
                   child: TextField(
                     controller: urlCtrl,
@@ -368,7 +368,7 @@ class _AppointmentRichNotesEditorState
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
         border: Border.all(
           color: _isFocused
@@ -511,7 +511,7 @@ class _AppointmentRichNotesEditorState
                         TextStyle(
                           fontSize: 13.0,
                           fontWeight: FontWeight.w400,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark ? Colors.white : AppColors.darkNavyColor,
                           height: 1.45,
                         ),
                         const HorizontalSpacing(0, 0),
@@ -535,7 +535,7 @@ class _AppointmentRichNotesEditorState
                         TextStyle(
                           fontSize: 13.0,
                           fontWeight: FontWeight.w400,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark ? Colors.white : AppColors.darkNavyColor,
                           height: 1.45,
                         ),
                         const HorizontalSpacing(0, 0),

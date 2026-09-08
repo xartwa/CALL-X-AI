@@ -190,7 +190,7 @@ class _MinimalActionCardState extends State<_MinimalActionCard> {
                       ? const Color(0xFF162032)
                       : widget.accentColor.withValues(alpha: 0.05))
                   : (isDark
-                      ? const Color(0xFF0F172A)
+                      ? AppColors.darkNavyColor
                       : context.colors.milkyColor.withValues(alpha: 0.6)),
             ),
             child: Row(

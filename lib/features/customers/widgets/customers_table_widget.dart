@@ -156,7 +156,7 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: isDark ? Colors.white : const Color(0xFF0F172A),
+        color: isDark ? Colors.white : AppColors.darkNavyColor,
         fontWeight: FontWeight.w500,
       ),
 

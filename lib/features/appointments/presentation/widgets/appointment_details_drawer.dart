@@ -110,7 +110,7 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
                             color:
-                                isDark ? Colors.white : const Color(0xFF0F172A),
+                                isDark ? Colors.white : AppColors.darkNavyColor,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -237,7 +237,7 @@ class AppointmentDetailsDrawer extends StatelessWidget {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF0F172A)
+                              ? AppColors.darkNavyColor
                               : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
@@ -513,7 +513,7 @@ class AppointmentDetailsDrawer extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: context.colors.mediumGreyColor

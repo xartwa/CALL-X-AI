@@ -148,7 +148,7 @@ class _AddTagDialogState extends State<AddTagDialog> {
                     showBorder: true,
                     borderColor: context.colors.lightGreyColor,
                     fillColor: isDark
-                        ? const Color(0xFF0F172A)
+                        ? AppColors.darkNavyColor
                         : const Color(0xFFF8FAFC),
                     onFieldSubmitted: (_) => _submitCustom(),
                   ),

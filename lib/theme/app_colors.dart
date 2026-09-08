@@ -104,6 +104,12 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
 class AppColors {
   const AppColors._();
 
+  /// Global dark navy card & container background color (Slate 900: 0xFF0F172A).
+  /// Modifying this single constant updates all dark navy cards, containers, and surfaces across the app.
+  static const Color darkNavyColor = Color(0xFF0F172A);
+  static const Color darkNavy = darkNavyColor;
+  static const Color darkCardColor = darkNavyColor;
+
   /// Global slate 800 dark border and container color (0xFF1E293B).
   /// Modifying this single constant updates all dark surfaces, cards, and borders across the app.
   static const Color darkSlateColor = Color(0xFF202938);
@@ -118,7 +124,7 @@ class AppColors {
     scaffoldBackgroundColor:
         Color(0XFFF1F5F9), // Slate 100 - Better app background
     whiteColor: Color(0XFFFFFFFF), // Crisp white
-    blackColor: Color(0XFF0F172A), // Slate 900 - Soft premium black
+    blackColor: darkNavyColor, // Slate 900 - Soft premium black
     infoColor: Color(0XFF3B82F6), // Blue 500
     errorColor: Color(0XFFEF4444), // Red 500
     darkGreyColor: Color(0XFF64748B), // Slate 500
@@ -169,6 +175,10 @@ extension BuildContextColors on BuildContext {
   AppColorsExtension get colors =>
       Theme.of(this).extension<AppColorsExtension>() ?? AppColors.light;
 }
+
+/// Global convenience accessor for dark navy card & container background color (0xFF0F172A).
+const Color darkNavyColor = AppColors.darkNavyColor;
+const Color darkCardColor = AppColors.darkNavyColor;
 
 /// Global convenience accessor for dark slate surface & border color (0xFF1E293B).
 const Color darkSlateColor = AppColors.darkSlateColor;

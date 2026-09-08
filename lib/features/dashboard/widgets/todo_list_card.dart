@@ -106,7 +106,7 @@ class _TodoListCardState extends State<TodoListCard> {
                   height: 45,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF0F172A)
+                        ? AppColors.darkNavyColor
                         : context.colors.mediumGreyColor.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
@@ -229,7 +229,7 @@ class _TodoItemTileState extends State<_TodoItemTile> {
             ? const Color(0xFF162032)
             : context.colors.milkyColor)
         : (isDark
-            ? const Color(0xFF0F172A)
+            ? AppColors.darkNavyColor
             : context.colors.milkyColor.withValues(alpha: 0.5));
 
     final cardBorder = _isHovered

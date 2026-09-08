@@ -237,7 +237,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 18, 18),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : Colors.white,
+              color: isDark ? AppColors.darkNavyColor : Colors.white,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(ThemeConstants.boxRadius),
               ),
@@ -705,7 +705,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                        color: isDark ? AppColors.darkNavyColor : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
@@ -854,7 +854,7 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      color: isDark ? AppColors.darkNavyColor : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isDark

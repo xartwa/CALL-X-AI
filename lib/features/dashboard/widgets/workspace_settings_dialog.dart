@@ -574,7 +574,7 @@ class _WorkspaceSettingsDialogState extends State<WorkspaceSettingsDialog> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: isDark
-                            ? const Color(0xFF0F172A)
+                            ? AppColors.darkNavyColor
                             : const Color(0xFFF8FAFC),
                         hintText: 'e.g. VIP Client',
                         hintStyle: TextStyle(

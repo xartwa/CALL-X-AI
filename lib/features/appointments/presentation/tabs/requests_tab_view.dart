@@ -115,7 +115,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? const Color(0xFF0F172A)
+                          ? AppColors.darkNavyColor
                           : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -705,7 +705,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 13,
-        color: isDark ? Colors.white : const Color(0xFF0F172A),
+        color: isDark ? Colors.white : AppColors.darkNavyColor,
         fontWeight: FontWeight.w500,
       ),
       columns: const [
@@ -906,7 +906,7 @@ class _RequestsTabViewState extends State<RequestsTabView> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 13,
-        color: isDark ? Colors.white : const Color(0xFF0F172A),
+        color: isDark ? Colors.white : AppColors.darkNavyColor,
         fontWeight: FontWeight.w500,
       ),
       columns: const [

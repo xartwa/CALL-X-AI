@@ -183,7 +183,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF0F172A).withAlpha(150)
+                  ? AppColors.darkNavyColor.withAlpha(150)
                   : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               border: Border.all(
@@ -404,7 +404,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: isDark
-                                      ? const Color(0xFF0F172A)
+                                      ? AppColors.darkNavyColor
                                       : Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(6),

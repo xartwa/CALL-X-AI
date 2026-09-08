@@ -761,7 +761,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                           horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
                         color:
-                            isDark ? const Color(0xFF0F172A) : Colors.grey[50],
+                            isDark ? AppColors.darkNavyColor : Colors.grey[50],
                         borderRadius:
                             BorderRadius.circular(ThemeConstants.buttonRadius),
                         border: Border.all(
@@ -847,7 +847,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF0F172A)
+                        ? AppColors.darkNavyColor
                         : Colors.black.withValues(alpha: 0.02),
                     border: Border.all(
                       color: isDark
@@ -1181,7 +1181,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                       horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF0F172A)
+                        ? AppColors.darkNavyColor
                         : Colors.grey[50],
                     borderRadius: BorderRadius.circular(
                         ThemeConstants.buttonRadius),

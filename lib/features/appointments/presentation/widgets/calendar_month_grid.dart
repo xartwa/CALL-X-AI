@@ -189,7 +189,7 @@ class CalendarMonthGrid extends StatelessWidget {
                       color: isToday
                           ? Colors.white
                           : (isCurrent
-                              ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                              ? (isDark ? Colors.white : AppColors.darkNavyColor)
                               : (isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1))),
                     ),
                   ),

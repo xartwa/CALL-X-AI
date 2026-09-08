@@ -399,7 +399,7 @@ class _CustomerCallLogsTabState extends State<CustomerCallLogsTab> {
               ? (isDark
                   ? context.colors.primaryLightColor.withValues(alpha: 0.16)
                   : const Color(0xFFEEF2FF))
-              : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+              : (isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(

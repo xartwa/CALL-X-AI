@@ -139,7 +139,7 @@ class CalendarTabView extends StatelessWidget {
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   color: isDark
-                      ? const Color(0xFF0F172A)
+                      ? AppColors.darkNavyColor
                       : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -433,7 +433,7 @@ class CalendarTabView extends StatelessWidget {
             fontSize: 12,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             color: selected
-                ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                ? (isDark ? Colors.white : AppColors.darkNavyColor)
                 : const Color(0xFF94A3B8),
           ),
         ),

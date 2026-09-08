@@ -35,7 +35,7 @@ class ScenarioSettingsTab extends StatelessWidget {
         Container(
           width: 260,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0F172A) : Colors.white,
+            color: isDark ? AppColors.darkNavyColor : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
@@ -185,7 +185,7 @@ class ScenarioSettingsTab extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : Colors.white,
+              color: isDark ? AppColors.darkNavyColor : Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color:
@@ -787,7 +787,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                   Container(
                     height: 46,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: AppColors.darkNavyColor,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.12),
@@ -945,7 +945,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                   Container(
                     height: 46,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: AppColors.darkNavyColor,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.12),

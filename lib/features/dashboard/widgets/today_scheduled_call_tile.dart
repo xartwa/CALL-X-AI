@@ -92,7 +92,7 @@ class _TodayScheduledCallTileState extends State<TodayScheduledCallTile> {
             ? const Color(0xFF162032)
             : context.colors.milkyColor)
         : (isDark
-            ? const Color(0xFF0F172A)
+            ? AppColors.darkNavyColor
             : context.colors.milkyColor.withValues(alpha: 0.35));
 
     final cardBorder = _isHovered

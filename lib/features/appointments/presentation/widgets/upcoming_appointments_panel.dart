@@ -76,7 +76,7 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        color: isDark ? Colors.white : AppColors.darkNavyColor,
                       ),
                     ),
                     if (upcomingList.isNotEmpty) ...[
@@ -227,7 +227,7 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
             : (isOnline ? const Color(0xFF10B981) : const Color(0xFF8B5CF6)));
 
     final cardBg = isDark
-        ? const Color(0xFF0F172A).withValues(alpha: 0.5)
+        ? AppColors.darkNavyColor.withValues(alpha: 0.5)
         : const Color(0xFFF8FAFC);
 
     final cardBorder = isDark
@@ -275,7 +275,7 @@ class UpcomingAppointmentsPanel extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             color: isDark
                                 ? Colors.white
-                                : const Color(0xFF0F172A),
+                                : AppColors.darkNavyColor,
                           ),
                         ),
                         const SizedBox(width: 8),

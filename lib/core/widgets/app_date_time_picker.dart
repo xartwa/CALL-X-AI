@@ -448,7 +448,7 @@ class _AppDateTimePickerDialogState extends State<_AppDateTimePickerDialog> {
   Widget _buildTimeStep(BuildContext context, bool isDark, Color onSurface) {
     final primary = context.colors.primaryLightColor;
     final bandColor =
-        isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
+        isDark ? AppColors.darkNavyColor : const Color(0xFFF1F5F9);
 
     return Container(
       height: 168,

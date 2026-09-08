@@ -986,7 +986,7 @@ class AvailabilityTabView extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF0F172A)
+                        ? AppColors.darkNavyColor
                         : const Color(0xFFF1F5F9),
                     borderRadius:
                         BorderRadius.circular(ThemeConstants.buttonRadius),
@@ -1149,7 +1149,7 @@ class AvailabilityTabView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(ThemeConstants.buttonRadius),
         border: Border.all(
           color: isDark

@@ -427,7 +427,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
       ),
       dataTextStyle: TextStyle(
         fontSize: 12.5,
-        color: isDark ? Colors.white : const Color(0xFF0F172A),
+        color: isDark ? Colors.white : AppColors.darkNavyColor,
         fontWeight: FontWeight.w500,
       ),
       columns: const [
@@ -664,7 +664,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
                 style: TextStyle(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  color: isDark ? Colors.white : AppColors.darkNavyColor,
                 ),
               ),
               const SizedBox(height: 3),
@@ -722,7 +722,7 @@ class _EmailFollowUpsPageState extends State<EmailFollowUpsPage> {
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14.5,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    color: isDark ? Colors.white : AppColors.darkNavyColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

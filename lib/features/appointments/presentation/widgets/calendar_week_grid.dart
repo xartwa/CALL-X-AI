@@ -366,7 +366,7 @@ class _CalendarWeekGridState extends State<CalendarWeekGrid> {
               fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
               color: isToday
                   ? primary
-                  : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                  : (isDark ? Colors.white : AppColors.darkNavyColor),
             ),
           ),
         ],
@@ -572,7 +572,7 @@ class _CalendarWeekGridState extends State<CalendarWeekGrid> {
                               height: 1.15,
                               fontWeight: FontWeight.w700,
                               color:
-                                  isDark ? Colors.white : const Color(0xFF0F172A),
+                                  isDark ? Colors.white : AppColors.darkNavyColor,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

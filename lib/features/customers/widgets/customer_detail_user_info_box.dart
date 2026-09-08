@@ -337,7 +337,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: isDark ? 0.22 : 0.12)
-                : (isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)),
+                : (isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC)),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected
@@ -402,7 +402,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
         Container(
           height: 44,
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+            color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -479,7 +479,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color:
-                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: DropdownButtonHideUnderline(
@@ -554,7 +554,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+              color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

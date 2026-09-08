@@ -185,7 +185,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: isDark
-                  ? const Color(0xFF0F172A).withValues(alpha: 120)
+                  ? AppColors.darkNavyColor.withValues(alpha: 120)
                   : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               border: Border.all(
