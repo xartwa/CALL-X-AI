@@ -162,7 +162,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                         : null,
                     filled: true,
                     fillColor: isDark
-                        ? AppColors.darkSlateColor
+                        ? AppColors.darkNavyColor
                         : const Color(0xFFF1F5F9),
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -182,9 +182,7 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkNavyColor.withAlpha(150)
-                  : const Color(0xFFF8FAFC),
+              color: isDark ? AppColors.darkNavyColor : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
               border: Border.all(
                 color: isDark ? Colors.white10 : const Color(0xFFE2E8F0),
@@ -284,9 +282,10 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? AppColors.darkSlateColor.withAlpha(100)
+                              ? AppColors.darkNavyColor
                               : const Color(0xFFFAFAFA),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius:
+                              BorderRadius.circular(ThemeConstants.boxRadius),
                           border: Border.all(
                             color: isDark
                                 ? Colors.white10
@@ -395,48 +394,63 @@ class _CustomerDetailNotesWidgetState extends State<CustomerDetailNotesWidget> {
                             ),
                             const SizedBox(height: 8),
 
-                            // Note Content / In-place Editor
                             if (isEditing) ...[
                               TextField(
+                                scrollPadding: EdgeInsets.zero,
                                 controller: _editNoteCtrl,
-                                maxLines: 3,
+                                maxLines: 5,
                                 style: const TextStyle(fontSize: 12),
                                 decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: isDark
-                                      ? AppColors.darkNavyColor
-                                      : Colors.white,
+                                  filled: false,
+                                  focusColor: Colors.transparent,
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  contentPadding: const EdgeInsets.all(8),
+                                      borderSide: BorderSide.none),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide.none),
+                                      contentPadding:  EdgeInsets.zero,
                                 ),
+                                
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _editingNoteId = null;
-                                      });
-                                    },
-                                    child: const Text('Cancel',
-                                        style: TextStyle(fontSize: 11)),
+                                  SizedBox(
+                                    height: 35,
+                                    width: 150,
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: AppColors.errorColor,
+                                        shadowColor: AppColors.errorColor,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _editingNoteId = null;
+                                        });
+                                      },
+                                      child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(fontSize: 11),
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(width: 6),
-                                  ElevatedButton(
-                                    onPressed: () => _saveEdit(note.id),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          context.colors.primaryLightColor,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 4),
+                                  SizedBox(
+                                    height: 35,
+                                    width: 150,
+                                    child: ElevatedButton(
+                                      onPressed: () => _saveEdit(note.id),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            context.colors.primaryLightColor,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
+                                      ),
+                                      child: const Text('Save',
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.white)),
                                     ),
-                                    child: const Text('Save',
-                                        style: TextStyle(
-                                            fontSize: 11, color: Colors.white)),
                                   ),
                                 ],
                               ),

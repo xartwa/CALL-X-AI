@@ -35,7 +35,7 @@ class ScenarioSettingsTab extends StatelessWidget {
         Container(
           width: 260,
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkNavyColor : Colors.white,
+            color: isDark ? Theme.of(context).colorScheme.onPrimary : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
@@ -51,8 +51,8 @@ class ScenarioSettingsTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Scenarios',
+                     Text(
+                      'Scenarios'.toUpperCase() ,
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -183,9 +183,9 @@ class ScenarioSettingsTab extends StatelessWidget {
         // 2. RIGHT PANEL: SCENARIO EDITOR (Expanded)
         Expanded(
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding:   EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkNavyColor : Colors.white,
+              color: isDark ? Theme.of(context).colorScheme.onPrimary : Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color:

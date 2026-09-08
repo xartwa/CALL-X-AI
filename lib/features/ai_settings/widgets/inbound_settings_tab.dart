@@ -30,7 +30,7 @@ class InboundSettingsTab extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkNavyColor : Colors.white,
+            color: isDark ? Theme.of(context).colorScheme.onPrimary : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),
@@ -422,7 +422,7 @@ class _InboundCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkNavyColor : Colors.white,
+        color: isDark ? Theme.of(context).colorScheme.onPrimary : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),

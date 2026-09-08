@@ -289,7 +289,7 @@ class AgentKnowledgeTab extends StatelessWidget {
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF131C2E)
+                            ? Theme.of(context).colorScheme.onPrimary
                             : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
@@ -344,7 +344,7 @@ class AgentKnowledgeTab extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF131C2E)
+                            ? Theme.of(context).colorScheme.onPrimary
                             : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
@@ -358,13 +358,13 @@ class AgentKnowledgeTab extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF6366F1)
+                              color: Theme.of(context).colorScheme.primary
                                   .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
+                            child:  Icon(
                               CupertinoIcons.doc_fill,
-                              color: Color(0xFF6366F1),
+                              color: Theme.of(context).colorScheme.primary,
                               size: 24,
                             ),
                           ),
@@ -450,7 +450,7 @@ class AgentKnowledgeTab extends StatelessWidget {
                             vertical: 28, horizontal: 20),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF131C2E)
+                              ? AppColors.darkCardColor
                               : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
