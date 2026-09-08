@@ -189,28 +189,8 @@ class _AiSettingsPageState extends State<AiSettingsPage>
           state: state,
           onRefresh: cubit.load,
         ),
-        const SizedBox(height: 14),
-
-        // 3. Main Content Card with Numbered Tabs
-        Expanded(
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary,
-              borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
-              border: Border.all(
-                color: isDark
-                    ? AppColors.darkSlateColor
-                    : context.colors.mediumGreyColor.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Column(
-              children: [
-                // Tab Switcher Header (Left Aligned with numbers)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
+        const SizedBox(height: 20),
+   Row(
                     children: [
                       AppPillTabBar(
                         controller: _tabs,
@@ -234,26 +214,23 @@ class _AiSettingsPageState extends State<AiSettingsPage>
                       ),
                     ],
                   ),
+                          const SizedBox(height: 20),
+
+        Expanded(
+          child: Column(
+            children: [
+          
+              Expanded(
+                child: TabBarView(
+                  controller: _tabs,
+                  children: [
+                    AgentKnowledgeTab(state: state),
+                    ScenarioSettingsTab(state: state),
+                    InboundSettingsTab(state: state),
+                  ],
                 ),
-                const Divider(height: 1),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 20,
-                    ),
-                    child: TabBarView(
-                      controller: _tabs,
-                      children: [
-                        AgentKnowledgeTab(state: state),
-                        ScenarioSettingsTab(state: state),
-                        InboundSettingsTab(state: state),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],

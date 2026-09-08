@@ -522,9 +522,9 @@ class _CardContainer extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding:  EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkNavyColor : Colors.white,
+        color: isDark ? Theme.of(context).colorScheme.onPrimary : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDark ? AppColors.darkSlateColor : const Color(0xFFE2E8F0),

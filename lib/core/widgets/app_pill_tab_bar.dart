@@ -191,9 +191,9 @@ class _AppPillTabBarState extends State<AppPillTabBar> {
               const SizedBox(width: 8),
             ],
             Text(
-              tab.label,
+              tab.label.toUpperCase(),
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 11.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 letterSpacing: 0.2,
                 color: isSelected

@@ -81,7 +81,7 @@ class _TodoListCardState extends State<TodoListCard> {
                       ),
                       child: Text(
                         done == total
-                            ? "All Done 🎉"
+                            ? "All Done"
                             : "$done / $total Completed",
                         style: TextStyle(
                           fontSize: 10.5,
