@@ -1,3 +1,4 @@
 {
-  "dart.flutterSdkPath": "/Users/arta/Documents/Development/flutter"
+  "dart.flutterSdkPath": "/Users/arta/Documents/Development/flutter",
+  "cmake.ignoreCMakeListsMissing": true
 }

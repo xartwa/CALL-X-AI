@@ -86,8 +86,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
   ConversationScenario? _selectedScenario;
   String? _scenarioError;
 
-  int _concurrencyLines = 3;
-  final List<int> _concurrencyOptions = const [1, 3, 5, 10];
+  static const int _concurrencyLines = 1;
 
   // Scheduler States
   DateTime? _scheduledDate;
@@ -294,8 +293,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
         AppUtils.showSnackBar(
           context: buildContext,
           title: 'Batch Campaign Launched (${targets.length} Leads)',
-          extraMessage:
-              'Scenario: ${scenario.title} across $_concurrencyLines concurrent lines.',
+          extraMessage: 'Scenario: ${scenario.title}',
           toastificationType: ToastificationType.success,
         );
       }
@@ -336,7 +334,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
             Text(
               _callType == _CallType.single
                   ? 'Connecting to ${_selectedUser?.fullName ?? "Contact"}...'
-                  : 'Dispatching $_concurrencyLines AI Calling Bots...',
+                  : 'Dispatching AI Campaign Calls...',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
@@ -1101,69 +1099,7 @@ class _CallActionDialogState extends State<CallActionDialog> {
                 ),
                 const SizedBox(height: 22),
 
-                // Concurrency Lines
-                Text(
-                  'CONCURRENT AI CALLING BOTS',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                    color: isDark ? Colors.grey[400] : Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: _concurrencyOptions.map((lines) {
-                    final isSelected = _concurrencyLines == lines;
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: InkWell(
-                          onTap: () =>
-                              setState(() => _concurrencyLines = lines),
-                          borderRadius: BorderRadius.circular(
-                              ThemeConstants.buttonRadius),
-                          child: Container(
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withValues(alpha: 0.1)
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : (isDark
-                                        ? Colors.white12
-                                        : context.colors.lightGreyColor),
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                  ThemeConstants.buttonRadius),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '$lines ${lines == 1 ? 'Line' : 'Lines'}',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.w800
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : (isDark
-                                        ? Colors.white70
-                                        : Colors.black87),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 22),
+
 
                 // Timing Selector for Group Call
                 Text(

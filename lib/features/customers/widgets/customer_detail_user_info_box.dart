@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/widgets/app_date_time_picker.dart';
+import 'package:callx_ai/core/utils/app_url_helper.dart';
 
 class CustomerDetailUserInfoBox extends StatefulWidget {
   final TextEditingController companyNameCtrl;
@@ -168,6 +169,7 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
 
           // Row 3: Phone Number | Website
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _buildInputField(
@@ -180,12 +182,62 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: _buildInputField(
-                  label: 'Website',
-                  controller: widget.websiteCtrl,
-                  prefixIcon: CupertinoIcons.globe,
-                  keyboardType: TextInputType.url,
-                  isDark: isDark,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildInputField(
+                      label: 'Website',
+                      controller: widget.websiteCtrl,
+                      prefixIcon: CupertinoIcons.globe,
+                      keyboardType: TextInputType.url,
+                      isDark: isDark,
+                    ),
+                    ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: widget.websiteCtrl,
+                      builder: (context, value, _) {
+                        final raw = value.text.trim();
+                        final normalized =
+                            AppUrlHelper.normalizeWebsiteUrl(raw);
+                        if (normalized.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6, left: 2),
+                          child: InkWell(
+                            onTap: () => AppUrlHelper.openUrl(normalized),
+                            borderRadius: BorderRadius.circular(4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.arrow_up_right_square,
+                                  size: 13,
+                                  color: context.colors.primaryLightColor,
+                                ),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    normalized,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: context.colors.primaryLightColor,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor:
+                                          context.colors.primaryLightColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],

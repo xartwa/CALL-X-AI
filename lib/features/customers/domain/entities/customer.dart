@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/models/tag_model.dart';
 import '../../../../core/utils/app_date_time.dart';
+import '../../../../core/utils/app_url_helper.dart';
 
 class Customer {
   static const Object _unset = Object();
@@ -82,6 +83,7 @@ class Customer {
   String get phone => phoneNumber;
   String get address => streetAddress;
   String get state => provinceState;
+  String get normalizedWebsite => AppUrlHelper.normalizeWebsiteUrl(website);
 
   Color? getTagColor(String tagLabel, {Color? fallback}) {
     final lower = tagLabel.toLowerCase().trim();
@@ -95,20 +97,20 @@ class Customer {
 
   factory Customer.fromJson(Map<String, dynamic> json) => Customer(
         id: json['id'] ?? '',
-        fullName: '${json['fullName'] ?? ''}',
-        phoneNumber: '${json['phoneNumber'] ?? ''}',
-        companyName: '${json['companyName'] ?? ''}',
-        email: '${json['email'] ?? ''}',
-        jobTitle: '${json['jobTitle'] ?? ''}',
-        website: '${json['website'] ?? ''}',
-        streetAddress: '${json['streetAddress'] ?? ''}',
-        city: '${json['city'] ?? ''}',
-        provinceState: '${json['provinceState'] ?? ''}',
-        country: '${json['country'] ?? ''}',
-        companyType: '${json['companyType'] ?? 'General'}',
-        leadStatus: '${json['leadStatus'] ?? 'New'}',
-        leadQuality: '${json['leadQuality'] ?? 'Good'}',
-        leadPriority: '${json['leadPriority'] ?? 'Warm'}',
+        fullName: _safeString(json['fullName']),
+        phoneNumber: _safeString(json['phoneNumber']),
+        companyName: _safeString(json['companyName']),
+        email: _safeString(json['email']),
+        jobTitle: _safeString(json['jobTitle']),
+        website: _safeString(json['website']),
+        streetAddress: _safeString(json['streetAddress']),
+        city: _safeString(json['city']),
+        provinceState: _safeString(json['provinceState']),
+        country: _safeString(json['country']),
+        companyType: _safeString(json['companyType'], 'General'),
+        leadStatus: _safeString(json['leadStatus'], 'New'),
+        leadQuality: _safeString(json['leadQuality'], 'Good'),
+        leadPriority: _safeString(json['leadPriority'], 'Warm'),
         nextFollowUpDate:
             AppDateTime.tryParseApiDateTime(json['nextFollowUpDate']),
         lastContact: AppDateTime.tryParseApiDateTime(json['lastContact']),
@@ -435,3 +437,12 @@ List<TagModel> _tagItems(Object? value) => value is List
         .map((e) => TagModel.fromJson(Map<String, dynamic>.from(e)))
         .toList()
     : const [];
+
+String _safeString(Object? value, [String fallback = '']) {
+  if (value == null) return fallback;
+  final s = value.toString().trim();
+  final lower = s.toLowerCase();
+  if (lower == 'null' || lower == 'undefined') return fallback;
+  return s;
+}
+

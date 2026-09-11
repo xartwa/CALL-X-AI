@@ -10,6 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/features/customers/models/customer_model.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/utils/app_validators.dart';
+import 'package:callx_ai/core/utils/app_url_helper.dart';
 
 class AddCustomerDialog extends StatefulWidget {
   const AddCustomerDialog({super.key});
@@ -100,6 +102,9 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         );
       }
 
+      final rawWebsite = _websiteCtrl.text.trim();
+      final normalizedWebsite = AppUrlHelper.normalizeWebsiteUrl(rawWebsite);
+
       final newUser = User(
         id: -1,
         fullName: _nameCtrl.text.trim(),
@@ -107,7 +112,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         email: _emailCtrl.text.trim(),
         phone: _phoneCtrl.text.trim(),
         jobTitle: _jobTitleCtrl.text.trim(),
-        website: _websiteCtrl.text.trim(),
+        website: normalizedWebsite,
         address: _addressCtrl.text.trim(),
         city: _cityCtrl.text.trim(),
         state: _stateCtrl.text.trim(),
@@ -224,12 +229,8 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                                 controller: _phoneCtrl,
                                 hintText: 'e.g. 0912 345 6789',
                                 textInputType: TextInputType.phone,
-                                validator: (val) {
-                                  if (val == null || val.trim().isEmpty) {
-                                    return 'Phone number is required';
-                                  }
-                                  return null;
-                                },
+                                validator: (val) =>
+                                    AppValidators.validatePhone(val, required: true),
                               ),
                             ),
                           ],
@@ -251,6 +252,8 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                                 controller: _emailCtrl,
                                 hintText: 'e.g. john@example.com',
                                 textInputType: TextInputType.emailAddress,
+                                validator: (val) =>
+                                    AppValidators.validateEmail(val, required: false),
                               ),
                             ),
                           ],
@@ -271,6 +274,9 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                                 label: 'WEBSITE',
                                 controller: _websiteCtrl,
                                 hintText: 'e.g. https://company.com',
+                                textInputType: TextInputType.url,
+                                validator: (val) =>
+                                    AppValidators.validateWebsite(val, required: false),
                               ),
                             ),
                           ],

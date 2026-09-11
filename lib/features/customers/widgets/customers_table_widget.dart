@@ -198,16 +198,14 @@ class _UsersTableWidgetState extends State<UsersTableWidget> {
             DataCell(InkWell(
               onTap: () => context.goNamed(AppRoutesPath.customerDetailName,
                   pathParameters: {'id': user.id.toString()}),
-              child: Flexible(
-                child: Text(
-                  user.fullName.orDash,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              child: Text(
+                user.fullName.orDash,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             )),
 

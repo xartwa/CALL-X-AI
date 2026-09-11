@@ -16,6 +16,8 @@ import 'package:callx_ai/theme/app_colors.dart';
 import 'package:callx_ai/core/widgets/confirmation_dialog.dart';
 import 'package:callx_ai/core/utils/utils.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
+import 'package:callx_ai/core/utils/app_url_helper.dart';
+import 'package:callx_ai/core/utils/app_validators.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 import 'package:callx_ai/core/widgets/app_pill_tab_bar.dart';
 
@@ -165,13 +167,62 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
     final fullName =
         "${_firstNameCtrl.text.trim()} ${_lastNameCtrl.text.trim()}".trim();
 
+    final phoneText = _phoneCtrl.text.trim();
+    final emailText = _emailCtrl.text.trim();
+    final rawWebsite = _websiteCtrl.text.trim();
+    final normalizedWebsite = AppUrlHelper.normalizeWebsiteUrl(rawWebsite);
+
+    if (phoneText.isEmpty) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'Phone number is required.',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
+
+    if (phoneText != currentUser.phone &&
+        !AppValidators.isValidPhone(phoneText)) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'Enter a valid phone number (e.g. +1 604 343 7893).',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
+
+    if (emailText.isNotEmpty && !AppValidators.isValidEmail(emailText)) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage: 'Enter a valid email address (e.g. name@example.com).',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
+
+    if (rawWebsite.isNotEmpty && !AppValidators.isValidWebsite(rawWebsite)) {
+      AppUtils.showSnackBar(
+        context: context,
+        extraMessage:
+            'Enter a valid website URL (e.g. company.com or https://company.com).',
+        toastificationType: ToastificationType.error,
+      );
+      return;
+    }
+
+    if (rawWebsite.isNotEmpty &&
+        normalizedWebsite.isNotEmpty &&
+        rawWebsite != normalizedWebsite) {
+      _websiteCtrl.text = normalizedWebsite;
+    }
+
     final updatedUser = currentUser.copyWith(
       fullName: fullName.isNotEmpty ? fullName : currentUser.fullName,
       companyName: _companyNameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
+      email: emailText,
+      phone: phoneText,
       jobTitle: _jobTitleCtrl.text.trim(),
-      website: _websiteCtrl.text.trim(),
+      website: normalizedWebsite,
       address: _addressCtrl.text.trim(),
       city: _cityCtrl.text.trim(),
       state: _stateCtrl.text.trim(),

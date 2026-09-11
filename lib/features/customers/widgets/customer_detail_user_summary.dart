@@ -14,6 +14,7 @@ import 'package:callx_ai/core/cubit/workspace_settings_cubit.dart';
 import 'package:callx_ai/core/utils/app_date_time.dart';
 import 'package:callx_ai/core/utils/app_status_helper.dart';
 import 'package:callx_ai/core/widgets/app_status_badge.dart';
+import 'package:callx_ai/core/utils/app_url_helper.dart';
 import 'package:toastification/toastification.dart';
 
 class CustomerDetailUserSummary extends StatelessWidget {
@@ -143,6 +144,38 @@ class CustomerDetailUserSummary extends StatelessWidget {
               ),
             ),
           ),
+          if (AppUrlHelper.normalizeWebsiteUrl(user.website).isNotEmpty) ...[
+            const SizedBox(height: 4),
+            InkWell(
+              onTap: () => AppUrlHelper.openUrl(user.website),
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(CupertinoIcons.globe,
+                        size: 12, color: context.colors.primaryLightColor),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        AppUrlHelper.normalizeWebsiteUrl(user.website),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.colors.primaryLightColor,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor: context.colors.primaryLightColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const Divider(height: 20),
 
           // Summary Key-Value Details
