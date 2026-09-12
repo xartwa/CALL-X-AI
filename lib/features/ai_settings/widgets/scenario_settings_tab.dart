@@ -407,7 +407,44 @@ class ScenarioSettingsTab extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // OPENING GREETING & HOOK
-                const SettingsLabel('OPENING GREETING & HOOK'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SettingsLabel('OPENING GREETING & HOOK'),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        VariableBadge(
+                          tag: '{name}',
+                          tooltip: 'Insert customer first name',
+                          onTap: () {
+                            final current = draft.openingGreeting;
+                            final updated = current.isEmpty
+                                ? 'Hi {name}, '
+                                : '$current {name}';
+                            cubit.updateDraft(
+                              (s) => s.copyWith(openingGreeting: updated),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 6),
+                        VariableBadge(
+                          tag: '{company}',
+                          tooltip: 'Insert company name',
+                          onTap: () {
+                            final current = draft.openingGreeting;
+                            final updated = current.isEmpty
+                                ? '{company}'
+                                : '$current {company}';
+                            cubit.updateDraft(
+                              (s) => s.copyWith(openingGreeting: updated),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
              
                 const SizedBox(height: 8),
                 DraftTextField(
@@ -415,7 +452,7 @@ class ScenarioSettingsTab extends StatelessWidget {
                   minLines: 3,
                   maxLines: 5,
                   hintText:
-                      'e.g. Hi there! This is Maria calling from Dynamica Design. How are you today?',
+                      'e.g. Hi {name}! This is Maria calling from Dynamica Design. How are you today?',
                   onChanged: (value) => cubit.updateDraft(
                     (current) => current.copyWith(openingGreeting: value),
                   ),
@@ -494,9 +531,11 @@ class ScenarioSettingsTab extends StatelessWidget {
                   )
                 else
                   ReorderableListView.builder(
+                    
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     buildDefaultDragHandles: false,
+                    
                     itemCount: draft.qualifyingQuestions.length,
                     onReorder: (oldIndex, newIndex) {
                       if (newIndex > oldIndex) {

@@ -163,3 +163,57 @@ class SettingsKeyValue extends StatelessWidget {
         ),
       );
 }
+
+class VariableBadge extends StatelessWidget {
+  const VariableBadge({
+    super.key,
+    required this.tag,
+    required this.onTap,
+    this.tooltip,
+  });
+
+  final String tag;
+  final VoidCallback onTap;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final badge = InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.35),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add, size: 11, color: theme.colorScheme.primary),
+            const SizedBox(width: 3),
+            Text(
+              tag,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (tooltip != null) {
+      return Tooltip(message: tooltip!, child: badge);
+    }
+    return badge;
+  }
+}
+
