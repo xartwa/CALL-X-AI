@@ -11,7 +11,8 @@ class AiSettingsRemoteDataSource {
         (await client.http.get('/cartesia/config/')).data as Map,
       );
 
-  Future<Map<String, dynamic>> agentProfile() async => Map<String, dynamic>.from(
+  Future<Map<String, dynamic>> agentProfile() async =>
+      Map<String, dynamic>.from(
         (await client.http.get('/cartesia/agent/')).data as Map,
       );
 
@@ -39,10 +40,10 @@ class AiSettingsRemoteDataSource {
   }
 
   Future<Map<String, dynamic>> removeKnowledgePdf() async {
-    final response = await client.http.delete('/cartesia/agent/');
+    final response =
+        await client.http.delete('/cartesia/agent/upload-knowledge-pdf/');
     return Map<String, dynamic>.from(response.data as Map);
   }
-
 
   Future<bool> toggleAiStatus([bool? explicit]) async {
     final response = await client.http.post(
@@ -52,7 +53,6 @@ class AiSettingsRemoteDataSource {
     final data = Map<String, dynamic>.from(response.data as Map);
     return data['isAiEnabled'] == true;
   }
-
 
   Future<List<Map<String, dynamic>>> scenarios() async {
     final response = await client.http.get(

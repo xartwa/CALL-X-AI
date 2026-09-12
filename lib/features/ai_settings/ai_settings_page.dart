@@ -97,7 +97,6 @@ class _AiSettingsPageState extends State<AiSettingsPage>
       );
 
   Widget _content(BuildContext context, AiSettingsState state) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cubit = context.read<AiSettingsCubit>();
 
     final hasChanges = state.hasUnsavedChanges || state.hasAgentUnsavedChanges;
