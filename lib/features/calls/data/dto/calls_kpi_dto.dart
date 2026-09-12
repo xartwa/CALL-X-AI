@@ -31,7 +31,9 @@ class CallsKpiDto {
           0,
       failedCalls:
           json['failed_calls'] ?? json['failedCalls'] ?? json['failed'] ?? 0,
-      pendingUpcoming: json['pending_and_upcoming'] ??
+      pendingUpcoming: json['pendingUpcomingCalls'] ??
+          json['pendingUpcoming'] ??
+          json['pending_and_upcoming'] ??
           json['pending_upcoming'] ??
           json['pendingAndUpcoming'] ??
           json['pending'] ??

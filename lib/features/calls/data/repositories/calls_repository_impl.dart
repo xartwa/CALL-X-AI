@@ -53,6 +53,8 @@ class CallsRepositoryImpl implements CallsRepository {
         final Map<String, dynamic> query = {
           'page': page,
           'page_size': pageSize,
+          'pageSize': pageSize,
+          'limit': pageSize,
         };
 
         if (search != null && search.trim().isNotEmpty) {

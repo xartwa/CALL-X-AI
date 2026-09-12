@@ -13,8 +13,19 @@ import 'package:callx_ai/core/widgets/stat_card_widget.dart';
 import 'package:callx_ai/core/constants/app_strings.dart';
 import 'package:callx_ai/core/widgets/app_pull_to_refresh.dart';
 
-class CallsPage extends StatelessWidget {
+class CallsPage extends StatefulWidget {
   const CallsPage({super.key});
+
+  @override
+  State<CallsPage> createState() => _CallsPageState();
+}
+
+class _CallsPageState extends State<CallsPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<CallsCubit>().loadInitial();
+  }
 
   @override
   Widget build(BuildContext context) {

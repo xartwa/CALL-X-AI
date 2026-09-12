@@ -12,6 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/cubit/workspace_settings_cubit.dart';
 import 'cubit/login_cubit.dart';
 import '../../core/widgets/app_feedback.dart';
+import '../calls/cubit/calls_cubit.dart';
+import '../customers/cubit/customers_cubit.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
-  bool _rememberMe = false;
+  bool _rememberMe = true;
 
   @override
   void dispose() {
@@ -444,6 +446,8 @@ class _LoginPageState extends State<LoginPage> {
       listener: (context, state) {
         if (state is LoginSuccess) {
           context.read<WorkspaceSettingsCubit>().loadConfiguration();
+          context.read<CallsCubit>().loadInitial();
+          context.read<CustomersCubit>().loadInitial(resetFilters: true);
           AppUtils.showSnackBar(
             context: context,
             title: strings.loginSuccessfulTitle,
