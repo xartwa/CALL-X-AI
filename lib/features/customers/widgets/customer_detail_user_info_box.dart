@@ -242,9 +242,61 @@ class _CustomerDetailUserInfoBoxState extends State<CustomerDetailUserInfoBox> {
               ),
             ],
           ),
+          const SizedBox(height: 14),
+
+          // Row 4: Street Address | City
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: _buildInputField(
+                  label: 'Street Address',
+                  controller: widget.addressCtrl,
+                  prefixIcon: CupertinoIcons.location,
+                  hintText: 'e.g. 123 Main St, Suite 400',
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                flex: 1,
+                child: _buildInputField(
+                  label: 'City',
+                  controller: widget.cityCtrl,
+                  hintText: 'e.g. Vancouver',
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Row 5: Province / State | Country
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputField(
+                  label: 'Province / State',
+                  controller: widget.stateCtrl,
+                  hintText: 'e.g. BC',
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: _buildInputField(
+                  label: 'Country',
+                  controller: widget.countryCtrl,
+                  prefixIcon: CupertinoIcons.globe,
+                  hintText: 'e.g. Global',
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 15),
 
-          Divider(),
+          const Divider(),
           const SizedBox(height: 15),
 
           _buildLeadStatusCard(context, isDark),

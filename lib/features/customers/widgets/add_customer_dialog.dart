@@ -52,7 +52,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
   final _addressCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
   final _stateCtrl = TextEditingController();
-  final _countryCtrl = TextEditingController(text: 'Canada');
+  final _countryCtrl = TextEditingController(text: 'Global');
   final _reasonCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
   final _nextFollowUpCtrl = TextEditingController();
@@ -116,7 +116,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
         address: _addressCtrl.text.trim(),
         city: _cityCtrl.text.trim(),
         state: _stateCtrl.text.trim(),
-        country: _countryCtrl.text.trim(),
+        country: _countryCtrl.text.trim().isEmpty ? 'Global' : _countryCtrl.text.trim(),
         companyType: _companyType,
         leadStatus: _leadStatus,
         leadPriority: _leadPriority,
@@ -311,6 +311,15 @@ class _AddCustomerDialogState extends State<AddCustomerDialog> {
                                 label: 'PROVINCE / STATE',
                                 controller: _stateCtrl,
                                 hintText: 'e.g. BC',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildFormField(
+                                label: 'COUNTRY',
+                                controller: _countryCtrl,
+                                hintText: 'e.g. Global',
+                                prefixIcon: CupertinoIcons.globe,
                               ),
                             ),
                           ],

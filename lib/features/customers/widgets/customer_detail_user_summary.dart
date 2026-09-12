@@ -49,16 +49,20 @@ class CustomerDetailUserSummary extends StatelessWidget {
     final text = AppStrings.current;
 
     return Container(
-      height: MediaQuery.sizeOf(context).height,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onPrimary,
         borderRadius: BorderRadius.circular(ThemeConstants.boxRadius),
       ),
       child: Column(
-        spacing: 10,
         children: [
-          CircleAvatar(
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                spacing: 8,
+                children: [
+                  CircleAvatar(
             radius: 38,
             backgroundColor:
                 context.colors.primaryLightColor.withValues(alpha: 0.12),
@@ -380,10 +384,14 @@ class CustomerDetailUserSummary extends StatelessWidget {
               ],
             ),
           ),
-          Spacer(),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           SizedBox(
-            height: 42,
-            width: MediaQuery.sizeOf(context).width,
+            height: 40,
+            width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {
                 CallActionDialog.show(
@@ -413,9 +421,10 @@ class CustomerDetailUserSummary extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 8),
           SizedBox(
-            height: 42,
-            width: MediaQuery.sizeOf(context).width,
+            height: 40,
+            width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
                 CallActionDialog.show(
@@ -446,7 +455,7 @@ class CustomerDetailUserSummary extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           ValueListenableBuilder<bool>(
             valueListenable: isActiveNotifier,

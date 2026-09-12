@@ -101,10 +101,12 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
             : 'Interested');
     _isActiveNotifier = ValueNotifier<bool>(user.status == 'Active');
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final loaded = await context
-          .read<CustomersCubit>()
-          .loadCustomerDetail(widget.customerId);
-      if (mounted && loaded != null) _syncControllers(loaded);
+      if (widget.customerId != '-1') {
+        final loaded = await context
+            .read<CustomersCubit>()
+            .loadCustomerDetail(widget.customerId);
+        if (mounted && loaded != null) _syncControllers(loaded);
+      }
     });
   }
 
@@ -246,6 +248,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
   }
 
   Future<void> _refreshCustomer() async {
+    if (widget.customerId == '-1') return;
     final loaded = await context
         .read<CustomersCubit>()
         .loadCustomerDetail(widget.customerId);

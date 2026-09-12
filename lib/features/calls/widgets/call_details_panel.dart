@@ -173,32 +173,56 @@ class _CallDetailsPanelState extends State<CallDetailsPanel> {
   }
 
   void _navigateToCustomerProfile() {
+    final customers = context.read<CustomersCubit>().state.users;
+    Customer? customer;
+
+    // 1. If call has a customerId, look for match in customers list
     if (widget.call.customerId != null && widget.call.customerId!.isNotEmpty) {
+      customer = customers.cast<Customer?>().firstWhere(
+        (u) => u?.id.toString() == widget.call.customerId,
+        orElse: () => null,
+      );
+    }
+
+    // 2. If not found by customerId, match by phone or fullName
+    final cleanPhone = widget.call.phone.trim();
+    final cleanName = widget.call.fullName.trim().toLowerCase();
+    if (customer == null && (cleanPhone.isNotEmpty || cleanName.isNotEmpty)) {
+      customer = customers.cast<Customer?>().firstWhere(
+        (u) {
+          if (u == null) return false;
+          final matchPhone =
+              cleanPhone.isNotEmpty && u.phone.trim() == cleanPhone;
+          final matchName = cleanName.isNotEmpty &&
+              u.fullName.trim().toLowerCase() == cleanName;
+          return matchPhone || matchName;
+        },
+        orElse: () => null,
+      );
+    }
+
+    // 3. If customer exists, navigate to their details
+    if (customer != null) {
       context.goNamed(
         AppRoutesPath.customerDetailName,
-        pathParameters: {'id': widget.call.customerId!},
+        pathParameters: {'id': customer.id.toString()},
       );
       return;
     }
 
-    final customers = context.read<CustomersCubit>().state.users;
-    final customer = customers.firstWhere(
-      (u) => u.phone == widget.call.phone || u.fullName == widget.call.fullName,
-      orElse: () => customers.isNotEmpty
-          ? customers.first
-          : Customer(
-              id: '1',
-              fullName: widget.call.fullName,
-              email: widget.call.email ?? '',
-              phone: widget.call.phone,
-              createdAt: '',
-              lastContact: '',
-              status: 'Active',
-            ),
+    // 4. Customer was deleted or does not exist
+    AppUtils.showSnackBar(
+      context: context,
+      extraMessage: 'Customer record not found or has been deleted.',
+      toastificationType: ToastificationType.error,
     );
     context.goNamed(
       AppRoutesPath.customerDetailName,
-      pathParameters: {'id': customer.id.toString()},
+      pathParameters: {
+        'id': widget.call.customerId?.isNotEmpty == true
+            ? widget.call.customerId!
+            : '-1',
+      },
     );
   }
 
